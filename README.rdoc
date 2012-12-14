@@ -1,0 +1,4 @@
+= DriDataModels
+
+This is the prototype Ruby Gem for the Digital
+Repository of Ireland's Hydra data models.
