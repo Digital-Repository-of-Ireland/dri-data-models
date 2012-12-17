@@ -16,7 +16,7 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + ["Rakefile", "README.rdoc"]
   s.test_files = Dir["{spec,test}/**/*"]
 
-  s.add_dependency "hydra-head", ">5.0.0.pre9"
+  s.add_dependency "hydra-head", ">5.0.0"
   s.add_development_dependency "rspec"
   s.add_development_dependency "mocha"
   s.add_development_dependency "rspec-rails"
