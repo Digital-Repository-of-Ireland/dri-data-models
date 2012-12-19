@@ -1,7 +1,7 @@
 # app/models/audio.rb
 # a Fedora object for the Audio hydra content type
-require 'active_fedora'
-require 'hydra'
+# require 'active_fedora'
+# require 'hydra'
 
 module DRI
   module Model
