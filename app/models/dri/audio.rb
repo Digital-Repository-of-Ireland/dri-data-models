@@ -7,6 +7,7 @@ module DRI
   module Model
   class Audio < ActiveFedora::Base
     include Hydra::ModelMethods
+    include DRI::Metadata
     #include Hydra::ModelMixins::CommonMetadata
  
     # These will need to be included to avoid deprecation warnings is later versions of HH
