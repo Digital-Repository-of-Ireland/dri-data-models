@@ -75,6 +75,10 @@ module DRI
     #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
     #end
 
+    def initialize( attrs={} )
+      super
+    end
+
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
       solr_doc.merge!(:object_type_facet => "Audio")

@@ -9,7 +9,7 @@ module DRI
     # datastream in the Audio hydra content type.
 
     class DublinCoreAudio < ActiveFedora::NokogiriDatastream
-      include Hydra::Datastream::CommonModsIndexMethods
+      # include Hydra::Datastream::CommonModsIndexMethods
 
       # OM (Opinionated Metadata) terminology mapping for Dublin Core
       set_terminology do |t|
