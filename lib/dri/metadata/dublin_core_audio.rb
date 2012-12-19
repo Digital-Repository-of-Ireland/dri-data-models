@@ -1,4 +1,3 @@
-#require 'active_fedora'
 #require 'hydra/datastream/common_mods_index_methods'
 
 module DRI
