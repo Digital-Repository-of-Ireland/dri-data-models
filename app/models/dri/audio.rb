@@ -7,7 +7,7 @@ module DRI
   module Model
   class Audio < ActiveFedora::Base
     include Hydra::ModelMethods
-    include Hydra::ModelMixins::CommonMetadata
+    #include Hydra::ModelMixins::CommonMetadata
  
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
@@ -72,7 +72,6 @@ module DRI
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
-      self.save
     end
 
     def to_solr(solr_doc=Hash.new)
