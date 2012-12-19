@@ -12,7 +12,7 @@ module DRI
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
 
-    after_create :apply_default_permissions
+    # after_create :apply_default_permissions
 
     # Set our descriptive metadata datastream
     has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCoreAudio 
@@ -67,12 +67,12 @@ module DRI
     #     super
     # end
 
-    def apply_default_permissions
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"archivist"=>"edit"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
-    end
+    #def apply_default_permissions
+    #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"archivist"=>"edit"} )
+    #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
+    #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
+    #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
+    #end
 
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
