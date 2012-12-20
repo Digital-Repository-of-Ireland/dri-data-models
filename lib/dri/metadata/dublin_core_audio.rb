@@ -14,15 +14,15 @@ module DRI
         t.root(:path=>"dc", :xmlns=>"http://www.openarchives.org/OAI/2.0/oai_dc/", :schema=>"http://www.openarchives.org/OAI/2.0/oai_dc.xsd")
         t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
         t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-        t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable, :displayable])
-        t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable, :displayable])
+        t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
+        t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.date(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-        t.person(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
-        t.source(:path=>"source", :namespace_prefix=>"dc")
+        t.person(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
+        t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
 
-        t.broadcast_date(:ref=>:date, :attributes=>{:type=>"broadcast"}, :index_as=>[:facetable, :displayable])
-        t.presenter(:ref=>:person, :attributes=>{:type=>"presenter"}, :index_as=>[:facetable, :displayable])
-        t.guest(:ref=>:person, :attributes=>{:type=>"guest"}, :index_as=>[:facetable, :displayable])      
+        t.broadcast_date(:ref=>:date, :attributes=>{:type=>"broadcast"}, :index_as=>[:facetable])
+        t.presenter(:ref=>:person, :attributes=>{:type=>"presenter"}, :index_as=>[:facetable])
+        t.guest(:ref=>:person, :attributes=>{:type=>"guest"}, :index_as=>[:facetable])      
       end # set_terminology
 
       def self.xml_template
