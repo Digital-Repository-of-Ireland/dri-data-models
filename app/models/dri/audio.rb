@@ -5,8 +5,6 @@ module DRI
   module Model
   class Audio < ActiveFedora::Base
     include Hydra::ModelMethods
-    # include DRI::Metadata
-    #include Hydra::ModelMixins::CommonMetadata
  
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
@@ -61,10 +59,10 @@ module DRI
       return file_referenced
     end
 
-    def apply_depositor_metadata(depositor_id)
-      self.depositor = depositor_id
-      super
-    end
+    #def apply_depositor_metadata(depositor_id)
+    #  self.depositor = depositor_id
+    #  super
+    #end
 
     def apply_default_permissions
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"archivist"=>"edit"} )
