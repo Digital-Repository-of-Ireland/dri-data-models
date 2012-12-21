@@ -69,6 +69,7 @@ module DRI
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
+      self.save
     end
 
     def to_solr(solr_doc=Hash.new)
