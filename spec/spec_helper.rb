@@ -8,6 +8,9 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app', 'models'))
 
+require 'simplecov'
+SimpleCov.start
+
 require 'rspec'
 require 'active_fedora'
 require 'hydra'
