@@ -1,1 +1,5 @@
 Gemfile.lock
+.DS_Store
+coverage/
+rdoc/
+test/dummy/log/test.log

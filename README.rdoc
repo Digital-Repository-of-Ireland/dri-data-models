@@ -2,3 +2,14 @@
 
 This is the prototype Ruby Gem for the Digital
 Repository of Ireland's Hydra data models.
+
+
+== Requirements
+
+* Hydra-head 5.0.0 or greater.
+
+== Usage
+
+To use this data model in your hydra application please add the following to your Gemfile
+
+	gem 'dri_data_models', :git => 'git@dev.forasfeasa.ie:dri_data_models.git'
