@@ -7,7 +7,7 @@ describe DRI::Model::Audio do
     # This gives you a test article object that can be used in any of the tests
     @audio = DRI::Model::Audio.new
   end
-  
+
   it "should have the specified datastreams" do
     # Check for descMetadata datastream with MODS in it
     @audio.datastreams.keys.should include("descMetadata")
@@ -21,7 +21,12 @@ describe DRI::Model::Audio do
     @audio.add_file_reference("masterContent", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
     @audio.datastreams.keys.should include("masterContent")
   end
-  
+
+  it "should not allow random files to be added" do
+    @audio.add_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
+    @audio.datastreams.keys.should_not include("randomfile")
+  end
+ 
   it "should have the attributes of a audio and support update_attributes" do
     attributes_hash = {
       "title" => "An Audio Title",
@@ -34,13 +39,21 @@ describe DRI::Model::Audio do
     @audio.update_attributes( attributes_hash )
     
     # These attributes have been marked "unique" in the call to delegate, which causes the results to be singular
+    @audio.title.class.to_s.should == 'String'
+    @audio.description.class.to_s.should == 'String'
+    @audio.broadcast_date.class.to_s.should == 'String'
+
     @audio.title.should == attributes_hash["title"]
     @audio.description.should == attributes_hash["description"]
     @audio.broadcast_date.should == attributes_hash["broadcast_date"]
 
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
+    @audio.presenter.class.to_s.should == 'Array'
+    @audio.guest.class.to_s.should == 'Array'
+
     @audio.presenter.should == attributes_hash["presenter"]
     @audio.guest.should == attributes_hash["guest"]    
+    
   end
   
 end
