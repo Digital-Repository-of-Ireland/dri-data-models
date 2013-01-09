@@ -64,6 +64,8 @@ module DRI
     #  super
     #end
 
+    # Applies default permissions for user types archivist, reviewer, donor and public 
+    # 
     def apply_default_permissions
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"archivist"=>"edit"} )
       self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
@@ -72,6 +74,8 @@ module DRI
       self.save
     end
 
+    # Calls the ActiveFedora to_solr method 
+    #
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
       solr_doc.merge!(:object_type_facet => "Audio")
