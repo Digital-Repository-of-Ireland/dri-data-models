@@ -33,7 +33,10 @@ describe DRI::Model::Audio do
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
     "presenter" => ["Collins, Michael"],
     "guest" => ["DeValera, Eamonn", "Connolly, James"],
-    "broadcast_date" => "1916-04-01"
+    "broadcast_date" => "1916-04-01",
+    "subject" => ["Ireland","something else"],
+    "source" => ["CD nnn nuig"],
+    "language" => "ga"
     }
     
     @audio.update_attributes( attributes_hash )
@@ -42,18 +45,41 @@ describe DRI::Model::Audio do
     @audio.title.class.to_s.should == 'String'
     @audio.description.class.to_s.should == 'String'
     @audio.broadcast_date.class.to_s.should == 'String'
+    @audio.language.class.to_s.should == 'String'
 
     @audio.title.should == attributes_hash["title"]
     @audio.description.should == attributes_hash["description"]
     @audio.broadcast_date.should == attributes_hash["broadcast_date"]
+    @audio.language.should == attributes_hash["language"]
 
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
     @audio.presenter.class.to_s.should == 'Array'
     @audio.guest.class.to_s.should == 'Array'
+    @audio.subject.class.to_s.should == 'Array'
+    @audio.source.class.to_s.should == 'Array'
 
     @audio.presenter.should == attributes_hash["presenter"]
     @audio.guest.should == attributes_hash["guest"]    
-    
+    @audio.subject.should == attributes_hash["subject"]
+    @audio.source.should == attributes_hash["source"]
+ 
   end
+
+  it "should automatically assign language=en where none is supplied" do
+    attributes_hash = {
+      "title" => "An Audio Title",
+      "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+    "presenter" => ["Collins, Michael"],
+    "guest" => ["DeValera, Eamonn", "Connolly, James"],
+    "broadcast_date" => "1916-04-01",
+    "subject" => ["Ireland","something else"],
+    "source" => ["CD nnn nuig"]
+    }
+
+    @audio.update_attributes( attributes_hash )
+
+    @audio.language.should == "en"
+
+    end
   
 end
