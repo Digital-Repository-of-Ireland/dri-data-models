@@ -10,6 +10,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app', 'models'))
 
 require 'simplecov'
 require 'rspec'
+require 'rack/test'
 require 'active_fedora'
 require 'hydra'
 require 'dri'
