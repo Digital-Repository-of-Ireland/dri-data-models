@@ -13,3 +13,12 @@ Repository of Ireland's Hydra data models.
 To use this data model in your hydra application please add the following to your Gemfile
 
 	gem 'dri_data_models', :git => 'git@dev.forasfeasa.ie:dri_data_models.git'
+
+== Running the tests
+
+To run the tests please ensure that you have the 'hydra-jetty' package
+or your own instance of Fedora-Commons or SOLR running.
+
+To run the tests, the following command is required
+
+  $ rake spec

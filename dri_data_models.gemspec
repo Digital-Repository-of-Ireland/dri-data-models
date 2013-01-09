@@ -21,6 +21,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "mocha"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "cucumber"
+  s.add_development_dependency "rdoc"
+  s.add_development_dependency "rake"
 
   s.require_paths = ["lib", "app/models"]
 end
