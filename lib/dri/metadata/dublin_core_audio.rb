@@ -16,11 +16,12 @@ module DRI
         t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
-        t.date(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
+        t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:searchable, :displayable])
+        t.broadcast_date(:path=>"", :namespace_prefix=>"dcterms", :index_as=>[:facetable])
         t.person(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
         t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
+        t.broadcast_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
 
-        t.broadcast_date(:ref=>:date, :attributes=>{:type=>"broadcast"}, :index_as=>[:facetable])
         t.presenter(:ref=>:person, :attributes=>{:type=>"presenter"}, :index_as=>[:facetable])
         t.guest(:ref=>:person, :attributes=>{:type=>"guest"}, :index_as=>[:facetable])      
       end # set_terminology
@@ -30,6 +31,7 @@ module DRI
             xml.dc(
 	       "xmlns:oai_dc"=>"http://www.openarchives.org/OAI/2.0/oai_dc/",
                "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
+               "xmlns:dcterms" => "http://purl.org/dc/terms/",
                "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd") {
                  xml.parent.namespace = xml.parent.namespace_definitions.find{|ns|ns.prefix=="oai_dc"}

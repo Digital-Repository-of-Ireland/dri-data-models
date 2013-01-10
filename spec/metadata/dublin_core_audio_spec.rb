@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe "DRI::Metadata::DublinCoreAudio" do
   before(:each) do
-    @dc = fixture("dublin_core_audio_sample.xml")
+    @dc = fixture("dublin_core_audio_sample1.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
   end
   it "should expose common metadata info for audio" do
