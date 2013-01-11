@@ -11,7 +11,6 @@ module DRI
 
       # OM (Opinionated Metadata) terminology mapping for Dublin Core
       set_terminology do |t|
-        t.root(:path=>"dc", :xmlns=>"http://www.openarchives.org/OAI/2.0/oai_dc/", :schema=>"http://www.openarchives.org/OAI/2.0/oai_dc.xsd")
         t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
         t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
@@ -21,19 +20,17 @@ module DRI
         t.person(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
         t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
 
-        t.presenter(:ref=>:person, :attributes=>{:type=>"presenter"}, :index_as=>[:facetable])
-        t.guest(:ref=>:person, :attributes=>{:type=>"guest"}, :index_as=>[:facetable])      
+        t.presenter(:ref=>:person, :attributes=>{"type" => "presenter"}, :index_as=>[:facetable])
+        t.guest(:ref=>:person, :attributes=>{"type" => "guest"}, :index_as=>[:facetable])      
       end # set_terminology
 
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
-            xml.dc(
-	       "xmlns:oai_dc"=>"http://www.openarchives.org/OAI/2.0/oai_dc/",
+            xml.qualifieddc(
                "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
                "xmlns:dcterms" => "http://purl.org/dc/terms/",
                "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
-               "xsi:schemaLocation"=>"http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd") {
-                 xml.parent.namespace = xml.parent.namespace_definitions.find{|ns|ns.prefix=="oai_dc"}
+               "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
 	         xml['dc'].type "Sound"

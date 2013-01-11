@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+  <dc:title>SAMPLE AUDIO TITLE</dc:title>
+  <dc:description>SAMPLE DESCRIPTION</dc:description>
+  <dc:subject>subject1</dc:subject>
+  <dc:subject>subject2</dc:subject>
+  <dc:subject>subject3</dc:subject>
+  <dc:coverage>SAMPLE ERA</dc:coverage>
+  <dc:coverage>SAMPLE COUNTRY</dc:coverage>
+  <dc:creator>Gallagher, Damien</dc:creator>
+  <dc:identifier>dri:1232</dc:identifier>
+  <dc:language>en</dc:language>
+  <dc:type>Sound</dc:type>
+</oai_dc:dc>

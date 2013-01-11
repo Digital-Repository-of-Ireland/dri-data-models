@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+<qualifieddc xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd">
   <dc:title>SAMPLE AUDIO TITLE</dc:title>
   <dc:description>SAMPLE DESCRIPTION</dc:description>
   <dc:subject>subject1</dc:subject>
@@ -16,4 +16,4 @@
   <dc:identifier>dri:1232</dc:identifier>
   <dc:language>en</dc:language>
   <dc:type>Sound</dc:type>
-</oai_dc:dc>
+</qualifieddc>
