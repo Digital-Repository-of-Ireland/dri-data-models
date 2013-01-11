@@ -13,16 +13,23 @@ module DRI
       set_terminology do |t|
         t.root(:path=>"dc", :xmlns=>"http://www.openarchives.org/OAI/2.0/oai_dc/", :schema=>"http://www.openarchives.org/OAI/2.0/oai_dc.xsd")
         t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
+        t.rights(:namespece_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:searchable, :displayable])
         t.broadcast_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
+        t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
         t.person(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
         t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
 
         t.presenter(:ref=>:person, :attributes=>{:type=>"presenter"}, :index_as=>[:facetable])
         t.guest(:ref=>:person, :attributes=>{:type=>"guest"}, :index_as=>[:facetable])      
+
+        t.coverage(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
+        t.geographical_coverage(:ref=>:coverage, :attributes=>{:type=>"geographical"}, :index_as=>[:searchable, :facetable, :displayable])
+        t.temporal_coverage(:ref=>:coverage, :attributes=>{:type=>"coverage"}, :index_as=>[:searchable, :facetable, :displayable])
+
       end # set_terminology
 
       def self.xml_template

@@ -30,8 +30,16 @@ module DRI
     delegate :presenter, :to=>"descMetadata"
     delegate :guest, :to=>"descMetadata"
     delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
+    delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :subject, :to=>"descMetadata"
     delegate :source, :to=>"descMetadata"
+    delegate :geographical_coverage, :to=>"descMetadata"
+    delegate :temporal_coverage, :to=>"descMetadata"
+    delegate :rights, :to=>"descMetadata", :unique=>"true"
+
+    # Validate presence of level 1 attributes title and rights (type is added automatically)
+    validates :title, :presence=>true
+#    validates :rights, :presence=>true # Rights is a required field, but our dataset at the moment doesn't include it
 
     # Add an URL reference to the master audio file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
