@@ -13,7 +13,7 @@ module DRI
       set_terminology do |t|
         t.root(:path=>"dc", :xmlns=>"http://www.openarchives.org/OAI/2.0/oai_dc/", :schema=>"http://www.openarchives.org/OAI/2.0/oai_dc.xsd")
         t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
-        t.rights(:namespece_prefix=>"dc", :index_as=>[:searchable, :displayable])
+        t.rights(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
         t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
