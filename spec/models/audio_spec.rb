@@ -30,80 +30,66 @@ describe DRI::Model::Audio do
   it "should have the attributes of a audio and support update_attributes" do
     attributes_hash = {
       "title" => "An Audio Title",
-      "sub_title" => "This is a subtitle",
       "rights" => "This is a statement about the rights associated with this object",
       "presenter" => ["Collins, Michael"],
       "guest" => ["DeValera, Eamonn", "Connolly, James"],
       "language" => "ga",
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      "relationship_link" => nil,
-      "broadcast_date" => "1916-04-01",
-      "creation_date" => "1916-01-01",
+      "broadcast_date" => ["1916-04-01"],
+      "creation_date" => ["1916-01-01"],
       "source" => ["CD nnn nuig"],
-      "geographical_coverage" => nil,
-      "temporal_coverage" => nil,
-      "subject" => ["Ireland","something else"],
-      "geo_code" => nil
+      "geographical_coverage" => ["Dublin"],
+      "temporal_coverage" => ["1900s"],
+      "subject" => ["Ireland","something else"]
     }
     
     @audio.update_attributes( attributes_hash )
     
     # These attributes have been marked "unique" in the call to delegate, which causes the results to be singular
     @audio.title.class.to_s.should == 'String'
-    @audio.sub_title.class.to_s.should == 'String'
     @audio.rights.class.to_s.should == 'String'
     @audio.description.class.to_s.should == 'String'
-    @audio.broadcast_date.class.to_s.should == 'String'
-    @audio.creation_date.class.to_s.should == 'String'
     @audio.language.class.to_s.should == 'String'
-
-    # The value should match what was set in the attributes_hash above
-    @audio.title.should == attributes_hash["title"]
-    @audio.sub_title.should == attributes_hash["sub_title"]
-    @audio.rights.should == attribbutes_hash["rights"]
-    @audio.description.should == attributes_hash["description"]
-    @audio.broadcast_date.should == attributes_hash["broadcast_date"]
-    @audio.creation_date.should == attributes_hash["creation_date"]
-    @audio.language.should == attributes_hash["language"]
 
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
     @audio.presenter.class.to_s.should == 'Array'
     @audio.guest.class.to_s.should == 'Array'
     @audio.subject.class.to_s.should == 'Array'
     @audio.source.class.to_s.should == 'Array'
-    @audio.relationship_link.class.to_s.should == 'Array'
     @audio.geographical_coverage.class.to_s.should == 'Array'
     @audio.temporal_coverage.class.to_s.should == 'Array'
-    @audio.geo_code.class.to_s.should == 'Array'
+    @audio.broadcast_date.class.to_s.should == 'Array'
+    @audio.creation_date.class.to_s.should == 'Array'
 
     # The value should match what was set in the attributes_hash above
+    @audio.title.should == attributes_hash["title"]
+    @audio.rights.should == attributes_hash["rights"]
+    @audio.description.should == attributes_hash["description"]
+    @audio.broadcast_date.should == attributes_hash["broadcast_date"]
+    @audio.creation_date.should == attributes_hash["creation_date"]
+    @audio.language.should == attributes_hash["language"]
     @audio.presenter.should == attributes_hash["presenter"]
     @audio.guest.should == attributes_hash["guest"]    
     @audio.subject.should == attributes_hash["subject"]
     @audio.source.should == attributes_hash["source"]
-    @audio.relationship_link.should == attributes_hash["relationship_link"]
     @audio.geographical_coverage.should == attributes_hash["geographical_coverage"]
     @audio.temporal_coverage.should == attributes_hash["temporal_coverage"]
-    @audio.geo_code.should == attributes_hash["geo_code"]
  
   end
 
   it "should automatically assign language=en where none is supplied" do
     attributes_hash = {
       "title" => "An Audio Title",
-      "sub_title" => "This is a subtitle",
       "rights" => "This is a statement about the rights associated with this object",
       "presenter" => ["Collins, Michael"],
       "guest" => ["DeValera, Eamonn", "Connolly, James"],
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      "relationship_link" => nil,
       "broadcast_date" => "1916-04-01",
       "creation_date" => "1916-01-01",
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => nil,
       "temporal_coverage" => nil,
-      "subject" => ["Ireland","something else"],
-      "geo_code" => nil
+      "subject" => ["Ireland","something else"]
     }
 
     @audio.update_attributes( attributes_hash )
@@ -114,47 +100,41 @@ describe DRI::Model::Audio do
 
   it "should validate the presence of the title metadata field" do
     attributes_hash = {
-      "sub_title" => "This is a subtitle",
       "rights" => "This is a statement about the rights associated with this object",
       "presenter" => ["Collins, Michael"],
       "guest" => ["DeValera, Eamonn", "Connolly, James"],
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      "relationship_link" => nil,
       "broadcast_date" => "1916-04-01",
       "creation_date" => "1916-01-01",
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => nil,
       "temporal_coverage" => nil,
-      "subject" => ["Ireland","something else"],
-      "geo_code" => nil
+      "subject" => ["Ireland","something else"]
     }
 
     @audio.update_attributes( attributes_hash )
 
-    it should_not be_valid
+    @audio.should_not be_valid
 
   end
 
   it "should validate the presence of the rights metadata field" do
     attributes_hash = {
       "title" => "An Audio Title",
-      "sub_title" => "This is a subtitle",
       "presenter" => ["Collins, Michael"],
       "guest" => ["DeValera, Eamonn", "Connolly, James"],
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      "relationship_link" => nil,
       "broadcast_date" => "1916-04-01",
       "creation_date" => "1916-01-01",
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => nil,
       "temporal_coverage" => nil,
-      "subject" => ["Ireland","something else"],
-      "geo_code" => nil
+      "subject" => ["Ireland","something else"]
     }
 
     @audio.update_attributes( attributes_hash )
 
-    it should_not be_valid
+    @audio.should_not be_valid
 
   end
 
