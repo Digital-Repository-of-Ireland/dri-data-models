@@ -40,6 +40,7 @@ module DRI
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
 #    validates :rights, :presence=>true # Rights is a required field, but our dataset at the moment doesn't include it
+    validates :language, :presence=>true # language should be set in the underlying metadata model if not passed in, so should always be present
 
     # Add an URL reference to the master audio file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
