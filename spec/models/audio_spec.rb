@@ -80,6 +80,14 @@ describe DRI::Model::Audio do
   end
 
   it "should automatically assign language=en where none is supplied" do
+    # From ingestion
+    @dc = fixture("dublin_core_audio_nolang_sample.xml")
+    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
+    @audio2 = DRI::Model::Audio.new
+    @audio2.datastreams["descMetadata"] = @ds
+    @audio2.language.should == "en"
+ 
+    # From variable assignment
     @attributes_hash.delete("language")
 
     @audio.update_attributes( @attributes_hash )
