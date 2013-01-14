@@ -24,7 +24,7 @@ module DRI
         t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
 
         t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
-        t.guest(:ref=>:person, :index_as=>[:facetable])      
+        t.guest(:ref=>:contributor, :index_as=>[:facetable])      
 
         t.coverage(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
         t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
@@ -52,7 +52,7 @@ module DRI
 
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
-        person_array = contributor | presener
+        person_array = contributor | presenter | guest
         solr_doc.merge!(:person_facet => person_array)
         solr_doc
       end
