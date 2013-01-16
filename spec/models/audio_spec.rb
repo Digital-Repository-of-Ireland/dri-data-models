@@ -43,7 +43,16 @@ describe DRI::Model::Audio do
     @audio.add_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
     @audio.datastreams.keys.should_not include("randomfile")
   end
- 
+
+  it "should create a valid audio object when valid metadata is ingested" do
+    # From ingestion
+    @dc = fixture("dublin_core_audio_sample1.xml")
+    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
+    @audio2 = DRI::Model::Audio.new
+    @audio2.datastreams["descMetadata"] = @ds
+    @audio2.should be_valid
+  end
+     
   it "should have the attributes of a audio and support update_attributes" do
     @audio.update_attributes( @attributes_hash )
     
@@ -85,6 +94,7 @@ describe DRI::Model::Audio do
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds
+    @audio2.save
     @audio2.language.should == "en"
  
     # From variable assignment
@@ -97,6 +107,14 @@ describe DRI::Model::Audio do
   end
 
   it "should validate the presence of the title metadata field" do
+    # From ingestion
+    @dc = fixture("dublin_core_audio_notitle_sample.xml")
+    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
+    @audio2 = DRI::Model::Audio.new
+    @audio2.datastreams["descMetadata"] = @ds
+    @audio2.should_not be_valid
+
+    # From variable assignment
     @attributes_hash["title"] = ""
 
     @audio.update_attributes( @attributes_hash )
@@ -106,6 +124,14 @@ describe DRI::Model::Audio do
   end
 
   it "should validate the presence of the rights metadata field" do
+    # From ingestion
+    @dc = fixture("dublin_core_audio_norights_sample.xml")
+    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
+    @audio2 = DRI::Model::Audio.new
+    @audio2.datastreams["descMetadata"] = @ds
+    @audio2.should_not be_valid
+
+    # From variable assignment
     @attributes_hash["rights"] = ""
 
     @audio.update_attributes( @attributes_hash )
@@ -113,5 +139,8 @@ describe DRI::Model::Audio do
     @audio.should_not be_valid
 
   end
+
+  it "should have type 'Sound'" do
+  end    
 
 end

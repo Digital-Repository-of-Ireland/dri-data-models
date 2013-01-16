@@ -5,7 +5,7 @@ module DRI
   module Model
   class Audio < ActiveFedora::Base
     include Hydra::ModelMethods
- 
+
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
 
@@ -39,8 +39,8 @@ module DRI
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
-#    validates :rights, :presence=>true # Rights is a required field, but our dataset at the moment doesn't include it
-    validates :language, :presence=>true # language should be set in the underlying metadata model if not passed in, so should always be present
+    validates :rights, :presence=>true
+    validates :language, :presence=>true # language should be set automatically if not passed in, so should always be present
 
     # Add an URL reference to the master audio file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
@@ -89,6 +89,13 @@ module DRI
       super(solr_doc)
       solr_doc.merge!(:object_type_facet => "Audio")
       solr_doc
+    end
+
+    # Override save to add a default language of "en" if not set in the xml file
+    #
+    def save 
+      super
+      self.language ||= "en"
     end
 
   end
