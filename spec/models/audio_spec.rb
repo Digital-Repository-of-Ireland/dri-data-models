@@ -44,6 +44,10 @@ describe DRI::Model::Audio do
     @audio.datastreams.keys.should_not include("randomfile")
   end
 
+  it "should not be vaild with no metadata" do
+    @audio.should_not be_valid
+  end
+
   it "should create a valid audio object when valid metadata is ingested" do
     # From ingestion
     @dc = fixture("dublin_core_audio_sample1.xml")

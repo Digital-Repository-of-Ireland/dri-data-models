@@ -92,6 +92,7 @@ module DRI
     end
 
     # Override save to add a default language of "en" if not set in the xml file
+    # There does not seem to be a better way to do this
     #
     def save 
       super
