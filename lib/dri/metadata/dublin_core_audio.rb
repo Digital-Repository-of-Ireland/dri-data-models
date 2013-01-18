@@ -24,6 +24,7 @@ module DRI
         t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
 
         t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
+        t.producer(:path=>"pro", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
         t.guest(:ref=>:contributor, :index_as=>[:facetable])      
 
         t.coverage(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
@@ -54,7 +55,7 @@ module DRI
         super(solr_doc)
 
         # Merging person fields and creating facet and text indexes for searching/faceting all people
-        person_array = contributor | presenter | guest
+        person_array = contributor | presenter | producer | guest
         solr_doc.merge!(:person_facet => person_array)
         solr_doc.merge!(:person_t => person_array)
         solr_doc

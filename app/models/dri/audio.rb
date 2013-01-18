@@ -32,6 +32,7 @@ module DRI
     delegate :person, :to=>"descMetadata"
     delegate :language, :to=>"descMetadata", :unique=>"true"
     delegate :presenter, :to=>"descMetadata"
+    delegate :producer, :to=>"descMetadata"
     delegate :guest, :to=>"descMetadata"
     delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
     delegate :creation_date, :to=>"descMetadata", :unique=>"true"
