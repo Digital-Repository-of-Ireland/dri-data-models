@@ -6,6 +6,10 @@ module DRI
   class Audio < ActiveFedora::Base
     include Hydra::ModelMethods
 
+    # Whitelist of allowed mime-types for audio files
+    @@wl_type = "audio"
+    @@wl_subtypes = ["mp3","mpeg"]
+
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
 
@@ -89,6 +93,16 @@ module DRI
       super(solr_doc)
       solr_doc.merge!(:object_type_facet => "Audio")
       solr_doc
+    end
+
+    # Return the whitelisted type for this class
+    def whitelist_type
+      return @@wl_type
+    end
+
+    # Return a list of whitelisted subtypes for this class
+    def whitelist_subtypes
+      return @@wl_subtypes
     end
 
     # Override save to add a default language of "en" if not set in the xml file
