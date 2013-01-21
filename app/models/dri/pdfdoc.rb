@@ -1,14 +1,14 @@
-# app/models/audio.rb
-# a Fedora object for the Audio hydra content type
+# app/models/pdfdoc.rb
+# a Fedora object for the PDF hydra content type
 
 module DRI
   module Model
-  class Audio < ActiveFedora::Base
+  class Pdfdoc < ActiveFedora::Base
     include Hydra::ModelMethods
 
     # Whitelist of allowed mime-types for audio files
-    @@wl_type = "audio"
-    @@wl_subtypes = ["mp3","mpeg","mpeg3"]
+    @@wl_type = "application"
+    @@wl_subtypes = ["pdf","x-pdf"]
 
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
@@ -16,14 +16,14 @@ module DRI
     after_create :apply_default_permissions
 
     # Set our descriptive metadata datastream
-    has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCoreAudio 
+    has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCorePdfdoc 
 
     # Stick with the default Hydra rights for now
     has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
 
-    #self.ds_specs['masterContent'] = {:type => ActiveFedora::Datastream, :label=>"Master Audio File", :control_group=>'X', :url=>"http://www.google.com/"}
+    #self.ds_specs['masterContent'] = {:type => ActiveFedora::Datastream, :label=>"Master PDF File", :control_group=>'X', :url=>"http://www.google.com/"}
 
-    # has_file_datastream :name => 'masterContent', :type => ActiveFedora::Datastream, :label=>"Master Audio File", :control_group=>'X', :url=>"http://www.google.com/"
+    # has_file_datastream :name => 'masterContent', :type => ActiveFedora::Datastream, :label=>"Master PDF File", :control_group=>'X', :url=>"http://www.google.com/"
 
     # The delegate method allows you to set up attributes on the model that are stored in datastreams
     # When you set :unique=>"true", searches will return a single value instead of an array.
@@ -31,16 +31,14 @@ module DRI
     delegate :description, :to=>"descMetadata", :unique=>"true"
     delegate :person, :to=>"descMetadata"
     delegate :language, :to=>"descMetadata", :unique=>"true"
-    delegate :presenter, :to=>"descMetadata"
-    delegate :producer, :to=>"descMetadata"
-    delegate :guest, :to=>"descMetadata"
-    delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
     delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :subject, :to=>"descMetadata"
     delegate :source, :to=>"descMetadata"
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
+    delegate :author, :to=>"descMetadata"
+    delegate :editor, :to=>"descMetadata"
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
@@ -60,7 +58,7 @@ module DRI
       file_referenced = false
 
       if opts.has_key?(:url) 
-        attrs = {:label => "Master Audio File", :controlGroup => 'R', :url => opts[:url]}
+        attrs = {:label => "Master PDF File", :controlGroup => 'R', :url => opts[:url]}
         if opts.has_key?(:mimeType)
           attrs.merge!({:mimeType=>opts[:mimeType]})
         end
@@ -92,7 +90,7 @@ module DRI
     #
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
-      solr_doc.merge!(:object_type_facet => "Audio")
+      solr_doc.merge!(:object_type_facet => "Article")
       solr_doc
     end
 
