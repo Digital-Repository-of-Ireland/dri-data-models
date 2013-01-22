@@ -4,7 +4,7 @@ require 'spec_helper'
 describe "DRI::Metadata::DublinCoreAudio" do
 
   before(:each) do
-    @dc = fixture("dublin_core_audio_sample1.xml")
+    @dc = fixture("audios/dublin_core_audio_sample1.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
   end
 
@@ -29,7 +29,7 @@ describe "DRI::Metadata::DublinCoreAudio" do
     @ds.language = "ga"
     @xml1 = Nokogiri::XML(@ds.to_xml)
 
-    @ds2 = DRI::Metadata::DublinCoreAudio.from_xml(fixture("dublin_core_audio_diff_root.xml"))
+    @ds2 = DRI::Metadata::DublinCoreAudio.from_xml(fixture("audios/dublin_core_audio_diff_root.xml"))
     @ds2.title = "MODIFIED AUDIO TITLE"
     @xml2 = Nokogiri::XML(@ds2.to_xml)
 

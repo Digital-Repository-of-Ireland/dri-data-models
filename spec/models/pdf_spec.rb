@@ -49,7 +49,7 @@ describe DRI::Model::Pdfdoc do
 
   it "should create a valid pdfdoc object when valid metadata is ingested" do
     # From ingestion
-    @dc = fixture("dublin_core_pdfdoc_sample.xml")
+    @dc = fixture("pdfs/dublin_core_pdfdoc_sample.xml")
     @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
     @pdfdoc2 = DRI::Model::Pdfdoc.new
     @pdfdoc2.datastreams["descMetadata"] = @ds
@@ -91,7 +91,7 @@ describe DRI::Model::Pdfdoc do
 
   it "should automatically assign language=en where none is supplied" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_nolang_sample.xml")
+    @dc = fixture("pdfs/dublin_core_pdfdoc_nolang_sample.xml")
     @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
     @pdfdoc2 = DRI::Model::Pdfdoc.new
     @pdfdoc2.datastreams["descMetadata"] = @ds
@@ -109,7 +109,7 @@ describe DRI::Model::Pdfdoc do
 
   it "should validate the presence of the title metadata field" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_notitle_sample.xml")
+    @dc = fixture("pdfs/dublin_core_pdfdoc_notitle_sample.xml")
     @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
     @pdfdoc2 = DRI::Model::Pdfdoc.new
     @pdfdoc2.datastreams["descMetadata"] = @ds
@@ -126,7 +126,7 @@ describe DRI::Model::Pdfdoc do
 
   it "should validate the presence of the rights metadata field" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_norights_sample.xml")
+    @dc = fixture("pdfs/dublin_core_pdfdoc_norights_sample.xml")
     @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
     @pdfdoc2 = DRI::Model::Pdfdoc.new
     @pdfdoc2.datastreams["descMetadata"] = @ds

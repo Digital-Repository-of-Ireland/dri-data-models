@@ -50,7 +50,7 @@ describe DRI::Model::Audio do
 
   it "should create a valid audio object when valid metadata is ingested" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_sample1.xml")
+    @dc = fixture("audios/dublin_core_audio_sample1.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds
@@ -94,7 +94,7 @@ describe DRI::Model::Audio do
 
   it "should automatically assign language=en where none is supplied" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_nolang_sample.xml")
+    @dc = fixture("audios/dublin_core_audio_nolang_sample.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds
@@ -112,7 +112,7 @@ describe DRI::Model::Audio do
 
   it "should validate the presence of the title metadata field" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_notitle_sample.xml")
+    @dc = fixture("audios/dublin_core_audio_notitle_sample.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds
@@ -129,7 +129,7 @@ describe DRI::Model::Audio do
 
   it "should validate the presence of the rights metadata field" do
     # From ingestion
-    @dc = fixture("dublin_core_audio_norights_sample.xml")
+    @dc = fixture("audios/dublin_core_audio_norights_sample.xml")
     @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds

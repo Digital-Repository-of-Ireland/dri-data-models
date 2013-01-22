@@ -4,7 +4,7 @@ require 'spec_helper'
 describe "DRI::Metadata::DublinCorePdfdoc" do
 
   before(:each) do
-    @dc = fixture("dublin_core_pdfdoc_sample.xml")
+    @dc = fixture("pdfs/dublin_core_pdfdoc_sample.xml")
     @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
   end
 
@@ -16,7 +16,7 @@ describe "DRI::Metadata::DublinCorePdfdoc" do
     @ds.subject(0).should == ["subject1"]
   end
 
-  it "should expose specific audio metadata" do
+  it "should expose specific document/article metadata" do
     @ds.author.should == ["Kenny, Stuart"] 
     @ds.editor.should == ["Cassidy, Kathryn"]
   end
@@ -28,7 +28,7 @@ describe "DRI::Metadata::DublinCorePdfdoc" do
     @ds.language = "ga"
     @xml1 = Nokogiri::XML(@ds.to_xml)
 
-    @ds2 = DRI::Metadata::DublinCorePdfdoc.from_xml(fixture("dublin_core_audio_diff_root.xml"))
+    @ds2 = DRI::Metadata::DublinCorePdfdoc.from_xml(fixture("pdfs/dublin_core_pdfdoc_diff_root.xml"))
     @ds2.title = "MODIFIED PDF TITLE"
     @xml2 = Nokogiri::XML(@ds2.to_xml)
 
