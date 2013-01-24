@@ -31,6 +31,7 @@ module DRI
 
       end # set_terminology
 
+      # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
             xml.qualifieddc(
@@ -49,6 +50,7 @@ module DRI
           return builder.doc
       end
 
+      # merge in special facets (e.g. person) into solr document
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
 

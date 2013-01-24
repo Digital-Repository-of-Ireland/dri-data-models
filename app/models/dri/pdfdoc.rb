@@ -6,7 +6,7 @@ module DRI
   class Pdfdoc < ActiveFedora::Base
     include Hydra::ModelMethods
 
-    # Whitelist of allowed mime-types for audio files
+    # Whitelist of allowed mime-types for pdf files
     @@wl_type = "application"
     @@wl_subtypes = ["pdf","x-pdf"]
 
@@ -45,7 +45,7 @@ module DRI
     validates :rights, :presence=>true
     validates :language, :presence=>true # language should be set automatically if not passed in, so should always be present
 
-    # Add an URL reference to the master audio file to the Fedora digital object.
+    # Add an URL reference to the master pdf file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
     #
     # @param [dsid] The id for the new datastream
