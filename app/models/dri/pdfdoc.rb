@@ -13,6 +13,8 @@ module DRI
     # These will need to be included to avoid deprecation warnings is later versions of HH
     include ActiveFedora::Relationships
 
+    belongs_to :collection, :property => :is_member_of, :class_name => 'DRI::Model::Collection'
+
     after_create :apply_default_permissions
 
     # Set our descriptive metadata datastream
