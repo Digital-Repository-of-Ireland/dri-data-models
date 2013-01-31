@@ -3,29 +3,14 @@
 
 module DRI
   module Model
-  class Audio < ActiveFedora::Base
-    include Hydra::ModelMethods
+  class Audio < DigitalObject
 
     # Whitelist of allowed mime-types for audio files
     @@wl_type = "audio"
     @@wl_subtypes = ["mp3","mpeg","mpeg3"]
 
-    # These will need to be included to avoid deprecation warnings is later versions of HH
-    include ActiveFedora::Relationships
-
-    belongs_to :collection, :property => :is_member_of, :class_name => 'DRI::Model::Collection'
-
-    after_create :apply_default_permissions
-
     # Set our descriptive metadata datastream
     has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCoreAudio 
-
-    # Stick with the default Hydra rights for now
-    has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
-
-    #self.ds_specs['masterContent'] = {:type => ActiveFedora::Datastream, :label=>"Master Audio File", :control_group=>'X', :url=>"http://www.google.com/"}
-
-    # has_file_datastream :name => 'masterContent', :type => ActiveFedora::Datastream, :label=>"Master Audio File", :control_group=>'X', :url=>"http://www.google.com/"
 
     # The delegate method allows you to set up attributes on the model that are stored in datastreams
     # When you set :unique=>"true", searches will return a single value instead of an array.
@@ -75,21 +60,6 @@ module DRI
       return file_referenced
     end
 
-    #def apply_depositor_metadata(depositor_id)
-    #  self.depositor = depositor_id
-    #  super
-    #end
-
-    # Applies default permissions for user types archivist, reviewer, donor and public 
-    # 
-    def apply_default_permissions
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"archivist"=>"edit"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"reviewer"=>"edit"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
-      self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
-      self.save
-    end
-
     # Calls the ActiveFedora to_solr method 
     #
     def to_solr(solr_doc=Hash.new)
@@ -106,14 +76,6 @@ module DRI
     # Return a list of whitelisted subtypes for this class
     def whitelist_subtypes
       return @@wl_subtypes
-    end
-
-    # Override save to add a default language of "en" if not set in the xml file
-    # There does not seem to be a better way to do this
-    #
-    def save 
-      super
-      self.language ||= "en"
     end
 
   end
