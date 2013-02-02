@@ -38,18 +38,18 @@ describe DRI::Model::DigitalObject do
   end
 
   it "should create an audio object" do
-    @class = DRI::Model::DigitalObject.construct(:Audio, @audio_hash)
+    @class = DRI::Model::DigitalObject.construct(:audio, @audio_hash)
     @class.should be_kind_of DRI::Model::Audio
   end
 
   it "should create a pdf object" do
-    @class = DRI::Model::DigitalObject.construct(:Pdf, @pdf_hash)
+    @class = DRI::Model::DigitalObject.construct(:pdfdoc, @pdf_hash)
     @class.should be_kind_of DRI::Model::Pdfdoc
   end
 
   it "should create an audio object with the correct attributes" do
     @attributes_hash = @audio_hash
-    @audio = DRI::Model::DigitalObject.construct(:Audio, @attributes_hash)
+    @audio = DRI::Model::DigitalObject.construct(:audio, @attributes_hash)
    
     # These attributes have been marked "unique" in the call to delegate, which causes the results to be singular
     @audio.title.class.to_s.should == 'String'
@@ -84,7 +84,7 @@ describe DRI::Model::DigitalObject do
 
   it "should create a pdf object with the correct attributes" do
     @attributes_hash = @pdf_hash
-    @pdfdoc = DRI::Model::DigitalObject.construct(:Pdf, @pdf_hash)
+    @pdfdoc = DRI::Model::DigitalObject.construct(:pdfdoc, @pdf_hash)
 
     # These attributes have been marked "unique" in the call to delegate, which causes the results to be singular
     @pdfdoc.title.class.to_s.should == 'String'
