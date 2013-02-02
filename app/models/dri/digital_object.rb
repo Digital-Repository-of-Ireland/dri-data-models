@@ -13,7 +13,7 @@ module DRI
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
  
       def DigitalObject.construct(type, params)
-        { :Audio => Audio, :Pdf => Pdfdoc }[type].new(params)
+        { :audio => Audio, :pdfdoc => Pdfdoc }[type].new(params)
       end
 
       # Applies default permissions for user types archivist, reviewer, donor and public 
