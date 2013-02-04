@@ -66,6 +66,12 @@ module DRI
       solr_doc
     end
 
+    # Create datastream from xml
+    #
+    def load_from_xml(xml)
+      DRI::Metadata::DublinCorePdfdoc.from_xml(@tmp_xml)
+    end
+
     # Return the whitelisted type for this class
     def whitelist_type
       return @@wl_type

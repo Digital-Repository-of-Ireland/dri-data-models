@@ -68,6 +68,12 @@ module DRI
       solr_doc
     end
 
+    # Create datastream from xml
+    #
+    def load_from_xml(xml)
+      DRI::Metadata::DublinCoreAudio.from_xml(xml)
+    end
+
     # Return the whitelisted type for this class
     def whitelist_type
       return @@wl_type
