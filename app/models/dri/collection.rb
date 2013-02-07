@@ -4,17 +4,20 @@ module DRI
       include Hydra::ModelMethods
       include ActiveFedora::Relationships
 
-      has_metadata :name => "descMetadata", :type => DRI::Metadata::CollectionMetadata
+      has_metadata :name => "descMetadata", :type => DRI::Metadata::DublinCoreCollection
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
+      has_metadata :name => "defaultRights", :type => Hydra::Datastream::InheritableRightsMetadata
 
       after_create :apply_default_permissions
 
-      has_relationship("objects", :is_member_of, :inbound=>true)
+      has_many :governed_items, :property => :is_governed_by, :inbound => true, :class_name => "ActiveFedora::Base"
+      has_many :items, :property => :is_member_of_collection, :inbound => true, :class_name => "ActiveFedora::Base"
 
       delegate :title, :to => :descMetadata, :unique=>"true"
-      delegate :creator, :to => :descMetadata, :unique=>"true"
-      delegate :part, :to => :descMetadata
       delegate :description, :to => :descMetadata, :unique=>"true"
+      delegate :publisher, :to => :descMetadata, :unique=>"true"
+
+      validates :title, :presence=>true
 
       # Applies default permissions for user types archivist, reviewer, donor and public 
       # 
@@ -24,7 +27,7 @@ module DRI
         self.datastreams["rightsMetadata"].update_permissions( "group"=>{"donor"=>"read"} )
         self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"read"} )
         self.save
-     end 
+      end 
 
     end
   end

@@ -9,6 +9,10 @@ module DRI
     @@wl_type = "audio"
     @@wl_subtypes = ["mp3","mpeg","mpeg3"]
 
+    # Set relationships rules
+    belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'DRI::Model::Collection'
+    has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Model::Collection'
+
     # Set our descriptive metadata datastream
     has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCoreAudio 
 
@@ -63,6 +67,20 @@ module DRI
     #
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
+
+      # Add title metadata from parent collections
+      collection_titles = []
+      if (governing_collection != nil)
+        collection_titles = [governing_collection.title]
+      end
+      collections.each do |coll|
+        collection_titles | coll.title
+      end
+      if (!collection_titles?empty) 
+        solr_doc.merge!(:collection_facet => collection_titles)
+        solr_doc.merge!(:collection_t => collection_titles)
+      end
+
       solr_doc.merge!(:object_type_facet => "Audio")
       solr_doc
     end
