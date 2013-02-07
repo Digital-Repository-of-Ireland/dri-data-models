@@ -1,39 +1,38 @@
-# app/models/audio.rb
-# a Fedora object for the Audio hydra content type
+# app/models/pdfdoc.rb
+# a Fedora object for the PDF hydra content type
 
 module DRI
   module Model
-  class Audio < DigitalObject
+  class Pdfdoc < DigitalObject
 
-    # Whitelist of allowed mime-types for audio files
-    @@wl_type = "audio"
-    @@wl_subtypes = ["mp3","mpeg","mpeg3"]
+    # Whitelist of allowed mime-types for pdf files
+    @@wl_type = "application"
+    @@wl_subtypes = ["pdf","x-pdf"]
 
     # Set our descriptive metadata datastream
-    has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCoreAudio 
+    has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCorePdfdoc 
 
     # The delegate method allows you to set up attributes on the model that are stored in datastreams
     # When you set :unique=>"true", searches will return a single value instead of an array.
     delegate :title, :to=>"descMetadata", :unique=>"true"
     delegate :description, :to=>"descMetadata", :unique=>"true"
+    delegate :person, :to=>"descMetadata"
     delegate :language, :to=>"descMetadata", :unique=>"true"
-    delegate :presenter, :to=>"descMetadata"
-    delegate :producer, :to=>"descMetadata"
-    delegate :guest, :to=>"descMetadata"
-    delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
     delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :subject, :to=>"descMetadata"
     delegate :source, :to=>"descMetadata"
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
+    delegate :author, :to=>"descMetadata"
+    delegate :editor, :to=>"descMetadata"
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
     validates :rights, :presence=>true
     validates :language, :presence=>true # language should be set automatically if not passed in, so should always be present
 
-    # Add an URL reference to the master audio file to the Fedora digital object.
+    # Add an URL reference to the master pdf file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
     #
     # @param [dsid] The id for the new datastream
@@ -46,7 +45,7 @@ module DRI
       file_referenced = false
 
       if opts.has_key?(:url) 
-        attrs = {:label => "Master Audio File", :controlGroup => 'R', :url => opts[:url]}
+        attrs = {:label => "Master PDF File", :controlGroup => 'R', :url => opts[:url]}
         if opts.has_key?(:mimeType)
           attrs.merge!({:mimeType=>opts[:mimeType]})
         end
@@ -63,14 +62,14 @@ module DRI
     #
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
-      solr_doc.merge!(:object_type_facet => "Audio")
+      solr_doc.merge!(:object_type_facet => "Article")
       solr_doc
     end
 
     # Create datastream from xml
     #
     def load_from_xml(xml)
-      DRI::Metadata::DublinCoreAudio.from_xml(xml)
+      DRI::Metadata::DublinCorePdfdoc.from_xml(@tmp_xml)
     end
 
     # Return the whitelisted type for this class
