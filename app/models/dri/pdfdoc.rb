@@ -9,6 +9,10 @@ module DRI
     @@wl_type = "application"
     @@wl_subtypes = ["pdf","x-pdf"]
 
+    # Set relationships rules
+    belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'DRI::Model::Collection'
+    has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Model::Collection'
+
     # Set our descriptive metadata datastream
     has_metadata :name => "descMetadata", :type=> DRI::Metadata::DublinCorePdfdoc 
 
