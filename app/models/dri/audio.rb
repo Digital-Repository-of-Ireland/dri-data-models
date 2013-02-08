@@ -76,7 +76,7 @@ module DRI
       collections.each do |coll|
         collection_titles | coll.title
       end
-      if (!collection_titles?empty) 
+      if (!collection_titles.empty?) 
         solr_doc.merge!(:collection_facet => collection_titles)
         solr_doc.merge!(:collection_t => collection_titles)
       end
