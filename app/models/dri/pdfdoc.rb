@@ -20,7 +20,6 @@ module DRI
     # When you set :unique=>"true", searches will return a single value instead of an array.
     delegate :title, :to=>"descMetadata", :unique=>"true"
     delegate :description, :to=>"descMetadata", :unique=>"true"
-    delegate :person, :to=>"descMetadata"
     delegate :language, :to=>"descMetadata", :unique=>"true"
     delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :subject, :to=>"descMetadata"
