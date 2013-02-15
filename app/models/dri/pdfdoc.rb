@@ -9,6 +9,8 @@ module DRI
     @@wl_type = "application"
     @@wl_subtypes = ["pdf","x-pdf"]
 
+    @@mime_type = "application/pdf"
+
     # Set relationships rules
     belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'DRI::Model::Collection'
     has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Model::Collection'
@@ -97,6 +99,11 @@ module DRI
     # Return a list of whitelisted subtypes for this class
     def whitelist_subtypes
       return @@wl_subtypes
+    end
+
+    #Return the mime type for this object
+    def mime_type
+      return @@mime_type
     end
 
   end
