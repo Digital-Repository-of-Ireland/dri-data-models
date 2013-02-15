@@ -2,8 +2,7 @@ module DRI
 
   module Metadata
 
-    # A Fedora Datastream object containing DC Metadata for the descMetadata 
-    # datastream in the Audio hydra content type.
+    # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
     class QualifiedDublinCore < ActiveFedora::NokogiriDatastream
 

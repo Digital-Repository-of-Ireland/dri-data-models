@@ -3,14 +3,14 @@ module DRI
   module Metadata
 
     # A Fedora Datastream object containing DC Metadata for the descMetadata 
-    # datastream in the Audio hydra content type.
+    # datastream in the PDF Document model.
 
     class DublinCorePdfdoc < DRI::Metadata::QualifiedDublinCore
 
       # Load terminology in QualifiedDublinCore
       load_inherited_terminology
 
-      # Add more mappings for Audio Object
+      # Add more mappings for PDF Object
       extend_terminology do |t|
         t.author(:path=>"aut", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
         t.editor(:path=>"edt", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])

@@ -5,7 +5,7 @@ module DRI
   module Metadata
 
     # A Fedora Datastream object containing DC Metadata for the descMetadata 
-    # datastream in the Audio hydra content type.
+    # datastream in the Audio model.
 
     class DublinCoreAudio < DRI::Metadata::QualifiedDublinCore
 
