@@ -3,17 +3,12 @@ module DRI
   module Metadata
 
     # A Fedora Datastream object containing DC Metadata for the descMetadata 
-    # datastream in the Collection hydra content type.
+    # datastream in the Audio hydra content type.
 
-    class DublinCoreCollection < ActiveFedora::NokogiriDatastream
+    class DublinCoreCollection < DRI::Metadata::QualifiedDublinCore
 
-      # OM (Opinionated Metadata) terminology mapping for Dublin Core
-      set_terminology do |t|
-        t.root(:path=>"/*") # Selects the root node of the XML document
-        t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
-        t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-	t.publisher(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-      end # set_terminology
+      # Load terminology from QualifiedDublinCore
+      load_inherited_terminology
 
       # Build the xml doc
       def self.xml_template
@@ -28,6 +23,7 @@ module DRI
                  xml['dc'].title 
                  xml['dc'].description
 	         xml['dc'].type "Collection"
+                 xml['dc'].language "en" 
             }
           end
           return builder.doc

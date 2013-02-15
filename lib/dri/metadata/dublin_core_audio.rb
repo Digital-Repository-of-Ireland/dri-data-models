@@ -9,7 +9,8 @@ module DRI
 
     class DublinCoreAudio < DRI::Metadata::QualifiedDublinCore
 
-      load_base_terminology
+      # Load terminology in QualifiedDublinCore
+      load_inherited_terminology
 
       # Add more mappings for Audio Object
       extend_terminology do |t|

@@ -8,7 +8,7 @@ module DRI
     class QualifiedDublinCore < ActiveFedora::NokogiriDatastream
 
       # Set OM (Opinionated Metadata) terminology
-      def self.load_base_terminology
+      def self.load_inherited_terminology
         set_terminology do |t|
           t.root(:path=>"/*") # Selects the root node of the XML document
           t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
@@ -60,7 +60,9 @@ module DRI
       def get_person_array()
          return contributor
       end
-      
+
+      # Load Dublin Core terminology
+      load_inherited_terminology      
     end # class
     
   end # module
