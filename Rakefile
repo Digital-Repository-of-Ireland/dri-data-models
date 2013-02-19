@@ -1,5 +1,8 @@
 #!/usr/bin/env rake
 require 'jettywrapper'
+require 'rspec/core/rake_task'
+
+APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
 begin
   require 'bundler/setup'
@@ -25,28 +28,14 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('app/models/dri/*.rb')
 end
 
-APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
-load 'rails/tasks/engine.rake'
-
-
-
 Bundler::GemHelper.install_tasks
 
-require 'rake/testtask'
 
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = false
+
+RSpec::Core::RakeTask.new(:rspec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
+  spec.pattern += FileList['spec/*_spec.rb']
 end
-
-
-require 'rspec/core/rake_task'
-
-RSpec::Core::RakeTask.new(:spec)
-
-task :default => :spec
 
 namespace :jetty do
 
@@ -64,9 +53,11 @@ task :ci => ['jetty:reset'] do
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 45
   error = Jettywrapper.wrap(jetty_params) do
-    Rake::Task['spec'].invoke
+    Rake::Task['rspec'].invoke
   end
   raise "test failures: #{error}" if error
 
   #Rake::Task["doc"].invoke
 end
+
+task :default => :rspec

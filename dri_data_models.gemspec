@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.description = "Hydra metadata and data models needed for a DRI Hydra-Head."
 
   s.files = Dir["{app,config,db,lib}/**/*"] + ["Rakefile", "README.rdoc"]
-  s.test_files = Dir["{spec,test}/**/*"]
+  s.test_files = Dir["{spec}/**/*"]
 
   s.add_dependency "hydra-head", ">=5.0.0"
   s.add_development_dependency "rspec"
