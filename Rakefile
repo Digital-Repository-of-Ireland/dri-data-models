@@ -1,4 +1,6 @@
 #!/usr/bin/env rake
+require 'jettywrapper'
+
 begin
   require 'bundler/setup'
 rescue LoadError
@@ -45,3 +47,26 @@ require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
 
 task :default => :spec
+
+namespace :jetty do
+
+  desc "return development jetty to its pristine state, as pulled from git"
+  task :reset => ['jetty:stop'] do
+    system("cd jetty && git reset --hard HEAD && git clean -dfx && cd ..")
+    sleep 2
+  end
+
+end
+
+desc "Run Continuous Integration"
+task :ci => ['jetty:reset'] do
+  ENV['environment'] = "test"
+  jetty_params = Jettywrapper.load_config
+  jetty_params[:startup_wait]= 45
+  error = Jettywrapper.wrap(jetty_params) do
+    Rake::Task['spec'].invoke
+  end
+  raise "test failures: #{error}" if error
+
+  #Rake::Task["doc"].invoke
+end
