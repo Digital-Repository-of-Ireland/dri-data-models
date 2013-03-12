@@ -1,4 +1,9 @@
 #!/usr/bin/env rake
+require 'jettywrapper'
+require 'rspec/core/rake_task'
+
+APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
+
 begin
   require 'bundler/setup'
 rescue LoadError
@@ -23,25 +28,36 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('app/models/dri/*.rb')
 end
 
-APP_RAKEFILE = File.expand_path("../test/dummy/Rakefile", __FILE__)
-load 'rails/tasks/engine.rake'
-
-
-
 Bundler::GemHelper.install_tasks
 
-require 'rake/testtask'
 
-Rake::TestTask.new(:test) do |t|
-  t.libs << 'lib'
-  t.libs << 'test'
-  t.pattern = 'test/**/*_test.rb'
-  t.verbose = false
+
+RSpec::Core::RakeTask.new(:rspec) do |spec|
+  spec.pattern = FileList['spec/**/*_spec.rb']
+  spec.pattern += FileList['spec/*_spec.rb']
 end
 
+namespace :jetty do
 
-require 'rspec/core/rake_task'
+  desc "return development jetty to its pristine state, as pulled from git"
+  task :reset => ['jetty:stop'] do
+    system("cd jetty && git reset --hard HEAD && git clean -dfx && cd ..")
+    sleep 2
+  end
 
-RSpec::Core::RakeTask.new(:spec)
+end
 
-task :default => :spec
+desc "Run Continuous Integration"
+task :ci => ['jetty:reset'] do
+  ENV['environment'] = "test"
+  jetty_params = Jettywrapper.load_config
+  jetty_params[:startup_wait]= 60
+  error = Jettywrapper.wrap(jetty_params) do
+    Rake::Task['rspec'].invoke
+  end
+  raise "test failures: #{error}" if error
+
+  #Rake::Task["doc"].invoke
+end
+
+task :default => :rspec

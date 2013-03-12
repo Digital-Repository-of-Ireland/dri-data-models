@@ -40,7 +40,7 @@ module DRI
       end
 
       def get_person_array()
-         return contributor | presenter | produce | guest
+         return contributor | presenter | producer | guest
       end
 
     end # class

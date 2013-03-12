@@ -9,6 +9,8 @@ module DRI
     @@wl_type = "audio"
     @@wl_subtypes = ["mp3","mpeg","mpeg3"]
 
+    @@mime_type = "audio/*"
+
     # Set relationships rules
     belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'DRI::Model::Collection'
     has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Model::Collection'
@@ -99,6 +101,11 @@ module DRI
     # Return a list of whitelisted subtypes for this class
     def whitelist_subtypes
       return @@wl_subtypes
+    end
+
+    #Return the mime type for this object
+    def mime_type
+      return @@mime_type
     end
 
   end
