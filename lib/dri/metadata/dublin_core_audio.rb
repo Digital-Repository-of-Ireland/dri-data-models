@@ -17,6 +17,7 @@ module DRI
         t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
         t.producer(:path=>"pro", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
         t.guest(:ref=>:contributor, :index_as=>[:facetable])
+        t.broadcast_date(:ref=>:published_date, :index_as=>[:searchable, :facetable, :displayable])
       end
 
       # Build the xml doc

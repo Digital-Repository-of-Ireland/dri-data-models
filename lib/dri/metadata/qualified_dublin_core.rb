@@ -10,21 +10,45 @@ module DRI
       def self.load_inherited_terminology
         set_terminology do |t|
           t.root(:path=>"/*") # Selects the root node of the XML document
+
+          # Simple Dublin Core Fields
           t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
           t.rights(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
           t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
           t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
           t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
           t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:searchable, :displayable])
-          t.broadcast_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
           t.coverage(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
+	  t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable])
+          t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
+          t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
+
+          # Qualified Dublin Core fields
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
+
+          # Testing MARC Relators
+          #t.agent(:path=>"*", :namespace_prefix=>"marcrel") {
+          #    t.name(:path=>"..", :namespace_prefix=>"marcrel")
+          #    t.agent_role(:path=>"*", :namespace_prefix=>"marcrel")
+          #}
         end
+
+	# Test template for generating a person nodes in Dublin Core
+        #define_template :person do |xml, name, role="contributor"|
+	#  if (role == "contributor")
+	#    xml['dc'].contributor { xml.text name }
+        #  elsif (role == "creator")
+        #    xml['dc'].creator { xml.text name }
+        #  elsif (DRI::Vocabulary:MARCRelators.has_key?role)
+        #    xml['marcrel'].send "#{role}_", name
+        #  end
+        #end
       end
 
       # Build the xml doc
