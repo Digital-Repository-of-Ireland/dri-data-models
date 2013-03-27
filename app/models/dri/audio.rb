@@ -7,7 +7,7 @@ module DRI
 
     # Whitelist of allowed mime-types for audio files
     @@wl_type = "audio"
-    @@wl_subtypes = ["mp3","mpeg","mpeg3"]
+    @@wl_subtypes = ["mp3","mpeg","mpeg3","mp2"]
 
     @@mime_type = "audio/*"
 
