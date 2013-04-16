@@ -32,11 +32,11 @@ module DRI
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
 
-          # Testing MARC Relators
-          #t.agent(:path=>"*", :namespace_prefix=>"marcrel") {
-          #    t.name(:path=>"..", :namespace_prefix=>"marcrel")
-          #    t.agent_role(:path=>"*", :namespace_prefix=>"marcrel")
-          #}
+          # Placeholder to generate MARC Relators fields
+	  #DRI::Vocabulary::MarcRelators.each do |role|
+          #  t.
+          #end
+
         end
 
 	# Test template for generating a person nodes in Dublin Core

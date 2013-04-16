@@ -31,6 +31,7 @@ module DRI
     delegate :rights, :to=>"descMetadata", :unique=>"true"
     delegate :author, :to=>"descMetadata"
     delegate :editor, :to=>"descMetadata"
+    apply_properties_delegates
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true

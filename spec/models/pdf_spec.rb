@@ -31,6 +31,9 @@ describe DRI::Model::Pdfdoc do
     # Check for rightsMetadata datastream
     @pdfdoc.datastreams.keys.should include("rightsMetadata")
     @pdfdoc.rightsMetadata.should be_kind_of Hydra::Datastream::RightsMetadata
+    # Check for properties datastream
+    @pdfdoc.datastreams.keys.should include("properties")
+    @pdfdoc.properties.should be_kind_of DRI::Metadata::Properties
   end
 
   it "should have the ability to add references to pdf files" do
@@ -54,6 +57,11 @@ describe DRI::Model::Pdfdoc do
     @pdfdoc2 = DRI::Model::Pdfdoc.new
     @pdfdoc2.datastreams["descMetadata"] = @ds
     @pdfdoc2.should be_valid
+  end
+
+  it "the status property should be set as 'draft' when a new Audio object is created" do
+    @pdfdoc = DRI::Model::Pdfdoc.new
+    @pdfdoc.status.should == "draft"
   end
      
   it "should have the attributes of a pdfdoc and support update_attributes" do

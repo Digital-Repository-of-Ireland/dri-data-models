@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<properties>
+  <status>published</status>
+  <modelVersion>0.1.0</modelVersion>
+  <resource ds="descMetadata">
+    <modelVersion>0.0.2</modelVersion>
+  </resource>
+  <resource ds="masterContent">
+     <checksum type="sha1">FAKE_CHECKSUM_SHA1</checksum>
+     <checksum type="md5">FAKE_CHECKSUM_MD5</checksum>
+  </resource>
+</properties>

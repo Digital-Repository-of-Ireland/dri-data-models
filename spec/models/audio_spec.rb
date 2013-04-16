@@ -32,6 +32,9 @@ describe DRI::Model::Audio do
     # Check for rightsMetadata datastream
     @audio.datastreams.keys.should include("rightsMetadata")
     @audio.rightsMetadata.should be_kind_of Hydra::Datastream::RightsMetadata
+    # Check for properties datastream
+    @audio.datastreams.keys.should include("properties")
+    @audio.properties.should be_kind_of DRI::Metadata::Properties
   end
 
   it "should have the ability to add references to audio files" do
@@ -44,7 +47,7 @@ describe DRI::Model::Audio do
     @audio.datastreams.keys.should_not include("randomfile")
   end
 
-  it "should not be vaild with no metadata" do
+  it "should not be valid with no metadata" do
     @audio.should_not be_valid
   end
 
@@ -55,6 +58,11 @@ describe DRI::Model::Audio do
     @audio2 = DRI::Model::Audio.new
     @audio2.datastreams["descMetadata"] = @ds
     @audio2.should be_valid
+  end
+
+  it "the status property should be set as 'draft' when a new Audio object is created" do
+    @audio = DRI::Model::Audio.new
+    @audio.status.should == "draft"
   end
      
   it "should have the attributes of a audio and support update_attributes" do
