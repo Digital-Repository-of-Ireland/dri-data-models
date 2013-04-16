@@ -7,7 +7,7 @@ module DRI
             
       #belongs_to :collection, :property => :is_member_of, :class_name => 'DRI::Model::Collection'
 
-      after_create :apply_default_permissions, :apply_delegates 
+      after_create :apply_default_permissions, :apply_properties_delegates 
 
       # Stick with the default Hydra rights for now
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
