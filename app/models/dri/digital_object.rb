@@ -6,13 +6,13 @@ module DRI
             
       #belongs_to :collection, :property => :is_member_of, :class_name => 'DRI::Model::Collection'
 
-      after_create :apply_default_permissions, :apply_properties_delegates 
+      after_create :apply_default_permissions 
 
       # Stick with the default Hydra rights for now
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
 
       has_metadata :name => "properties", :type => DRI::Metadata::Properties
- 
+
       def DigitalObject.construct(type, params)
         { :audio => Audio, :pdfdoc => Pdfdoc }[type].new(params)
       end
@@ -45,6 +45,8 @@ module DRI
 
       end
 
+      # Add default system properties
+      apply_properties_delegates
     end
 
   end
