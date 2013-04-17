@@ -2,7 +2,7 @@ module DRI
 
   module Metadata
 
-    class Properties < ActiveFedora::NokogiriDatastream
+    class Properties < ActiveFedora::OmDatastream
 
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|

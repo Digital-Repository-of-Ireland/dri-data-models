@@ -2,14 +2,14 @@ module DRI
 
   module Metadata
 
-class CollectionMetadata < ActiveFedora::NokogiriDatastream
+class CollectionMetadata < ActiveFedora::OmDatastream
 
       # OM (Opinionated Metadata) terminology mapping for Dublin Core
       set_terminology do |t|
         t.root(:path=>"/*") # Selects the root node of the XML document
-        t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
-        t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-        t.creator(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
+        t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable, :sortable])
+        t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+        t.creator(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
         t.part(:namespace_prefix=>"dc", :index_as=>[:searchable])
       end # set_terminology
 

@@ -14,10 +14,10 @@ module DRI
 
       # Add more mappings for Audio Object
       extend_terminology do |t|
-        t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
-        t.producer(:path=>"pro", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :searchable])
+        t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
+        t.producer(:path=>"pro", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
         t.guest(:ref=>:contributor, :index_as=>[:facetable])
-        t.broadcast_date(:ref=>:published_date, :index_as=>[:searchable, :facetable, :displayable])
+        t.broadcast_date(:ref=>:published_date, :index_as=>[:stored_searchable, :facetable, :displayable])
       end
 
       # Build the xml doc

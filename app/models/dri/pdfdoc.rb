@@ -78,11 +78,12 @@ module DRI
         collection_titles | coll.title
       end
       if (!collection_titles.empty?)
-        solr_doc.merge!(:collection_facet => collection_titles)
-        solr_doc.merge!(:collection_t => collection_titles)
+        solr_doc.merge!(solr_name('collection', :facetable) => collection_titles)
+        solr_doc.merge!(solr_name('collection', :stored_searchable) => collection_titles)
       end
 
-      solr_doc.merge!(:object_type_facet => "Article")
+      solr_doc.merge!(solr_name('object_type', :stored_searchable) => "Article")
+      solr_doc.merge!(solr_name('object_type', :facetable) => "Article")
       solr_doc
     end
 

@@ -2,7 +2,6 @@ module DRI
   module Model
     class Collection < ActiveFedora::Base
       include Hydra::ModelMethods
-      include ActiveFedora::Relationships
 
       has_metadata :name => "descMetadata", :type => DRI::Metadata::DublinCoreCollection
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata

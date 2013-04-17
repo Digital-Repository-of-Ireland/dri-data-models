@@ -4,7 +4,7 @@ module DRI
 
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
-    class QualifiedDublinCore < ActiveFedora::NokogiriDatastream
+    class QualifiedDublinCore < ActiveFedora::OmDatastream
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -12,25 +12,25 @@ module DRI
           t.root(:path=>"/*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable, :sortable])
-          t.rights(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-          t.description(:namespace_prefix=>"dc", :index_as=>[:searchable, :displayable])
-          t.language(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
-          t.subject(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:searchable, :displayable])
-          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable, :sortable])
+          t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+          t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+          t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
+          t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
+          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable])
+          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
-          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
-          t.coverage(:namespace_prefix=>"dc", :index_as=>[:searchable, :facetable])
+          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
+          t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
 	  t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable])
-          t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
-          t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :searchable, :displayable])
+          t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
+          t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :displayable, :facetable])
-          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
-          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:searchable, :facetable, :displayable])
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
+          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
+          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
 
           # Placeholder to generate MARC Relators fields
 	  #DRI::Vocabulary::MarcRelators.each do |role|
@@ -74,8 +74,8 @@ module DRI
         super(solr_doc)
 
         person_array = get_person_array()
-        solr_doc.merge!(:person_facet => person_array)
-        solr_doc.merge!(:person_t => person_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
 
         solr_doc
       end
