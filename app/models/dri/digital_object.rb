@@ -28,7 +28,7 @@ module DRI
         self.save
       end
 
-      def self.apply_properties_delegates
+      def apply_properties_delegates
         delegate :status, :to=>"properties", :unique=>"true"
         delegate :model_version, :to=>"properties", :unique=>"true"
         delegate :resource, :to=>"properties"
