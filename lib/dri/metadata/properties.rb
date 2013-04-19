@@ -18,6 +18,8 @@ module DRI
 	  t.md5(:path=>"checksum", :attributes=>{:type=>"md5"}, :namespace_prefix=>nil)
 	}
 	t.resource_datastream(:proxy=>[:resource, :datastream])
+        t.resource_md5(:proxy=>[:resource, :md5])
+        t.resource_sha1(:proxy=>[:resource, :sha1])
       end # set_terminology
 
       # Build the default XML document
