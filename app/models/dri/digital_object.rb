@@ -34,7 +34,7 @@ module DRI
         delegate :resource, :to=>"properties"
         delegate :resource_datastream, :to=>"properties" 
         delegate :resource_md5, :to=>"properties"
-        delegate :resource_sha1, :to=>"properties"
+        delegate :resource_sha256, :to=>"properties"
       end
 
 

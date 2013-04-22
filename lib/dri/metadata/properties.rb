@@ -13,13 +13,13 @@ module DRI
           t.datastream(:path=>{:attribute=>"ds"}, :namespace_prefix=>nil)
 	  t.model_version(:path=>"modelVersion", :namespace_prefix=>nil)
 
-          # Starting out with 'sha1' and 'md5', simply add more checksum types if needed
-	  t.sha1(:path=>"checksum", :attributes=>{:type=>"sha1"}, :namespace_prefix=>nil)
+          # Starting out with 'sha256' and 'md5', simply add more checksum types if needed
+	  t.sha256(:path=>"checksum", :attributes=>{:type=>"sha256"}, :namespace_prefix=>nil)
 	  t.md5(:path=>"checksum", :attributes=>{:type=>"md5"}, :namespace_prefix=>nil)
 	}
 	t.resource_datastream(:proxy=>[:resource, :datastream])
         t.resource_md5(:proxy=>[:resource, :md5])
-        t.resource_sha1(:proxy=>[:resource, :sha1])
+        t.resource_sha256(:proxy=>[:resource, :sha256])
       end # set_terminology
 
       # Build the default XML document
