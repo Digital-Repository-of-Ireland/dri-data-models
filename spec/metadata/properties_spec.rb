@@ -16,9 +16,9 @@ describe "DRI::Metadata::Properties" do
     @ds.resource(0).model_version.should == ["0.0.2"]
     @ds.resource(1).model_version.should == []
 
-    @ds.resource(0).sha1.should == []
+    @ds.resource(0).sha256.should == []
     @ds.resource(0).md5.should == []
-    @ds.resource(1).sha1.should == ["FAKE_CHECKSUM_SHA1"]
+    @ds.resource(1).sha256.should == ["FAKE_CHECKSUM_SHA256"]
     @ds.resource(1).md5.should == ["FAKE_CHECKSUM_MD5"]
   end
 

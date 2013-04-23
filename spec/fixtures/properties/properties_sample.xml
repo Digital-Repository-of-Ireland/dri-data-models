@@ -6,7 +6,7 @@
     <modelVersion>0.0.2</modelVersion>
   </resource>
   <resource ds="masterContent">
-     <checksum type="sha1">FAKE_CHECKSUM_SHA1</checksum>
+     <checksum type="sha256">FAKE_CHECKSUM_SHA256</checksum>
      <checksum type="md5">FAKE_CHECKSUM_MD5</checksum>
   </resource>
 </properties>
