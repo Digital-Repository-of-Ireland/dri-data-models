@@ -29,11 +29,13 @@ module DRI
 
       def self.apply_properties_delegates
         delegate :status, :to=>"properties", :unique=>"true"
+        delegate :depositor, :to=>"properties", :unique=>"true"
         delegate :model_version, :to=>"properties", :unique=>"true"
         delegate :resource, :to=>"properties"
         delegate :resource_datastream, :to=>"properties" 
         delegate :resource_md5, :to=>"properties"
         delegate :resource_sha256, :to=>"properties"
+        delegate :resource_rmd160, :to=>"properties"
       end
 
 
