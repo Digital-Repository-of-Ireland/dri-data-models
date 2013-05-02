@@ -10,6 +10,7 @@ module DRI
         t.status(:namespace_prefix=>nil, :index_as=>[:displayable, :facetable])
         t.depositor(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
         t.model_version(:path=>"properties/modelVersion", :namespace_prefix => nil)
+        t.metadata_md5(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.verified(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
 	t.resource(:namespace_prefix => nil) {
           t.datastream(:path=>{:attribute=>"ds"}, :namespace_prefix=>nil)
