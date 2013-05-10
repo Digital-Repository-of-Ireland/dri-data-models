@@ -46,7 +46,7 @@ module DRI
     # @param [dsid] The id for the new datastream
     # @param [Hash] opts options: :mimeType, :url
     def add_file_reference(dsid, opts={})
-      if dsid != "masterContent"
+      if !["masterContent","mp3Surrogate","oggSurrogate"].include?(dsid)
         return false
       end
 
