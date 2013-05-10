@@ -31,6 +31,7 @@ module DRI
         delegate :status, :to=>"properties", :unique=>"true"
         delegate :depositor, :to=>"properties", :unique=>"true"
         delegate :model_version, :to=>"properties", :unique=>"true"
+        delegate :metadata_md5, :to=>"properties", :unique=>"true"
         delegate :verified, :to=>"properties", :unique=>"true"
         delegate :resource, :to=>"properties"
         delegate :resource_datastream, :to=>"properties" 
