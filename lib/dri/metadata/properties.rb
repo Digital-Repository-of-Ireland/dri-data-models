@@ -9,6 +9,7 @@ module DRI
         t.root(:path=>"properties", :xmlns => '', :namespace_prefix => nil)  # Selects the root node of the XML document
         t.status(:namespace_prefix=>nil, :index_as=>[:displayable, :facetable])
         t.depositor(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
+        t.metadata_md5(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.model_version(:path=>"properties/modelVersion", :namespace_prefix => nil)
         t.metadata_md5(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.verified(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
