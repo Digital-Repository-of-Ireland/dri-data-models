@@ -7,6 +7,7 @@ module DRI
       has_metadata :name => "descMetadata", :type => DRI::Metadata::DublinCoreCollection
       has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata
       has_metadata :name => "defaultRights", :type => Hydra::Datastream::InheritableRightsMetadata
+      has_metadata :name => "properties", :type => DRI::Metadata::Properties
 
       after_create :apply_default_permissions
 
@@ -16,6 +17,9 @@ module DRI
       delegate :title, :to => :descMetadata, :unique=>"true"
       delegate :description, :to => :descMetadata, :unique=>"true"
       delegate :publisher, :to => :descMetadata, :unique=>"true"
+
+      delegate :depositor, :to=> :properties, :unique=>"true"
+      delegate :model_version, :to=>"properties", :unique=>"true"
 
       validates :title, :presence=>true
 
