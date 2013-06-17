@@ -25,6 +25,7 @@ module DRI
 	  t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable])
           t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
+          t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
