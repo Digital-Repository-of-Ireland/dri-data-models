@@ -51,7 +51,7 @@ desc "Run Continuous Integration"
 task :ci => ['jetty:reset'] do
   ENV['environment'] = "test"
   jetty_params = Jettywrapper.load_config
-  jetty_params[:startup_wait]= 60
+  jetty_params[:startup_wait]= 120
   error = Jettywrapper.wrap(jetty_params) do
     Rake::Task['rspec'].invoke
   end
