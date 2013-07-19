@@ -31,8 +31,8 @@ end
 Bundler::GemHelper.install_tasks
 
 
-
-RSpec::Core::RakeTask.new(:rspec) do |spec|
+require 'ci/reporter/rake/rspec'
+RSpec::Core::RakeTask.new(:rspec => ['ci:setup:rspec']) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end
