@@ -21,17 +21,19 @@ module DRI
       delegate :depositor, :to=> :properties, :unique=>"true"
       delegate :model_version, :to=>"properties", :unique=>"true"
 
+      delegate :status, :to=>"properties", :unique=>"true"
+
       validates :title, :presence=>true
 
-      # Applies default permissions for user types archivist, reviewer, donor and public 
-      # 
+      # Applies default permissions for user types archivist, reviewer, donor and public
+      #
       def apply_default_permissions
         self.datastreams["rightsMetadata"].update_permissions( "group"=>{"registered"=>"read"} )
         self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"search"} )
         self.datastreams["rightsMetadata"].private_metadata="0"
         self.datastreams["rightsMetadata"].master_file="1"
         self.save
-      end 
+      end
 
     end
   end
