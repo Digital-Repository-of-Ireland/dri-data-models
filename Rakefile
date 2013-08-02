@@ -57,7 +57,7 @@ task :ci => ['jetty:reset', 'ci:setup:rspec'] do
   end
   raise "test failures: #{error}" if error
 
-  #Rake::Task["doc"].invoke
+  Rake::Task["rdoc"].invoke
 end
 
 task :default => :rspec

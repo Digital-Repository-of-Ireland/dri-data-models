@@ -18,8 +18,8 @@ gem "jquery-rails"
 
 group :development, :test do
   gem 'rcov', :platform => :mri_18
-  gem 'simplecov', :platform => :mri_19
-  gem 'simplecov-rcov', :platform => :mri_19
+  gem 'simplecov', :platform => [:mri_19, :mri_20]
+  gem 'simplecov-rcov', :platform => [:mri_19, :mri_20]
   gem 'jettywrapper'
 
   gem 'guard'
