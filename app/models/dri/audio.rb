@@ -33,6 +33,7 @@ module DRI
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
+    delegate :type, :to=>"descMetadata", :unique=>"true"
     apply_properties_delegates
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
