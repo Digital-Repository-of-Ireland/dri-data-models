@@ -31,8 +31,8 @@ end
 Bundler::GemHelper.install_tasks
 
 
-
-RSpec::Core::RakeTask.new(:rspec) do |spec|
+require 'ci/reporter/rake/rspec'
+RSpec::Core::RakeTask.new(:rspec => ['ci:setup:rspec']) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end
@@ -48,7 +48,7 @@ namespace :jetty do
 end
 
 desc "Run Continuous Integration"
-task :ci => ['jetty:reset'] do
+task :ci => ['jetty:reset', 'ci:setup:rspec'] do
   ENV['environment'] = "test"
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 120
@@ -57,7 +57,7 @@ task :ci => ['jetty:reset'] do
   end
   raise "test failures: #{error}" if error
 
-  #Rake::Task["doc"].invoke
+  Rake::Task["rdoc"].invoke
 end
 
 task :default => :rspec

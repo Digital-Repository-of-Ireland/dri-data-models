@@ -3,3 +3,4 @@ Gemfile.lock
 coverage/
 rdoc/
 test/dummy/log/test.log
+tmp/
