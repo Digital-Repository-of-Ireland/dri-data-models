@@ -9,8 +9,6 @@ module DRI
       has_metadata :name => "defaultRights", :type => Hydra::Datastream::InheritableRightsMetadata
       has_metadata :name => "properties", :type => DRI::Metadata::Properties
 
-      after_create :apply_default_permissions
-
       has_many :governed_items, :property => :is_governed_by, :inbound => true, :class_name => "ActiveFedora::Base"
       has_many :items, :property => :is_member_of_collection, :inbound => true, :class_name => "ActiveFedora::Base"
 
@@ -25,7 +23,7 @@ module DRI
 
       validates :title, :presence=>true
 
-      # Applies default permissions for user types archivist, reviewer, donor and public
+      # Applies default permissions
       #
       def apply_default_permissions
         self.datastreams["rightsMetadata"].update_permissions( "group"=>{"registered"=>"read"} )
