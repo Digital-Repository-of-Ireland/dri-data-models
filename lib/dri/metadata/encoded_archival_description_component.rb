@@ -12,7 +12,7 @@ module DRI
         t.title(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
         t.description(:path=>"abstract", :index_as=>[:stored_searchable, :displayable])
         t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
-        t.creator(:path=>"origination", , :index_as=>[:stored_searchable, :facetable])
+        t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
         t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
         t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
         t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
@@ -30,7 +30,6 @@ module DRI
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
               xml.c
-            }
           end
 
           return builder.doc
