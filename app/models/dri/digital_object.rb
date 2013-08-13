@@ -31,6 +31,7 @@ module DRI
 
       def self.apply_properties_delegates
         delegate :status, :to=>"properties", :unique=>"true"
+        delegate :object_type, :to=>"properties", :unique=>"true"
         delegate :depositor, :to=>"properties", :unique=>"true"
         delegate :metadata_md5, :to=>"properties", :unique=>"true"
         delegate :model_version, :to=>"properties", :unique=>"true"
