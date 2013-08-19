@@ -22,7 +22,7 @@ module DRI
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
-	  t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable])
+          t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable])
           t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -36,8 +36,8 @@ module DRI
           t.geocode_box(:path=>"box",:namespace_prefix=>"dcmitype",:index_as=> [:stored_searchable, :displayable])
 
           # Placeholder to generate MARC Relators fields
-	  #DRI::Vocabulary::MarcRelators.each do |role|
-          #  t.
+          #DRI::Vocabulary::MarcRelators.each do |role|
+          #  t.send("role_"+role,)
           #end
 
         end

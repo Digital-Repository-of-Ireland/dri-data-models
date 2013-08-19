@@ -3,8 +3,7 @@ module DRI
   module Vocabulary
 
     def self.MARCRelators
-      [
-	"acp",
+        "acp",
         "act",
         "adp",
         "aft",
@@ -57,7 +56,7 @@ module DRI
         "cpl",
         "cpt",
         "cre",
-	"crp",
+        "crp",
         "crr",
         "csl",
         "csp",
