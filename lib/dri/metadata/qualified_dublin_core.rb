@@ -71,17 +71,17 @@ module DRI
       end
 
       def update_indexed_attributes(params={}, opts={})
-      # if the params are just keys, not an array, make then into an array.
-      new_params = {}
-      params.each do |key, val|
-        if key.is_a? Array
-          new_params[key] = val
-        else
-          new_params[[key.to_sym]] = val
+        # if the params are just keys, not an array, make then into an array.
+        new_params = {}
+        params.each do |key, val|
+          if key.is_a? Array
+            new_params[key] = val
+          else
+            new_params[[key.to_sym]] = val
+          end
         end
+        super(new_params, opts)
       end
-      super(new_params, opts)
-    end
 
 
       # Build the xml doc
@@ -106,11 +106,76 @@ module DRI
         super(solr_doc)
 
         person_array = get_person_array()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array | construct_full_name(person_array))
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
         solr_doc
       end
 
+      # A function to convert an array of names that have been confirmed to archiving standards into human-readable names
+      # so that double-quote searching can pick up surname prefixes eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
+      # "Valera, Éamon, De" is "Éamon De Valera"
+      def construct_full_name(names=Array.new)
+        results = []
+
+        names.each do |archived_name|
+          name_parts = archived_name.split(",")
+
+          firstname = ""
+          surname = ""
+          prefix = ""
+          misc = ""
+
+          if (name_parts.length > 0)
+            surname_parts = name_parts[0].split("(")
+            surname = surname_parts[0].strip
+            misc += surname_parts[1..-1].join("(")
+          end
+
+          if (name_parts.length > 1)
+            firstname_parts = name_parts[1].split("(")
+            firstname = firstname_parts[0].strip
+            misc += firstname_parts[1..-1].join("(")
+          end
+
+          if (name_parts.length > 2)
+            prefix_parts = name_parts[2].split("(")
+            prefix = prefix_parts[0].strip
+            misc += prefix_parts[1..-1].join("(")
+          end
+
+          result = ""
+
+          unless (firstname == "")
+            result += firstname+" "
+          end
+
+          unless (prefix == "")
+            result += prefix
+
+            unless prefix[-1,1] == "-"
+              result += " "
+            end
+          end
+
+          unless (surname == "")
+            result += surname+" "
+          end
+
+          unless (misc == "")
+            result += misc
+          end
+
+          result = result.strip
+
+          unless (result == "")
+            results |= [result]
+          end
+        end
+
+        return results
+      end
+
+      # Creates an array of all names stored in the metadata
       def get_person_array()
           people = contributor | creator
 
