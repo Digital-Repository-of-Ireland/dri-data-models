@@ -12,6 +12,8 @@
     <dc:subject>subject3</dc:subject>
     <dcterms:temporal>SAMPLE ERA</dcterms:temporal>
     <dcterms:spatial>SAMPLE COUNTRY</dcterms:spatial>
+    <dcterms:spatial xsi:type="dcterms:Point">SAMPLE POINT</dcterms:spatial>
+    <dcterms:spatial xsi:type="dcterms:Box">SAMPLE BOX</dcterms:spatial>
     <dc:creator>Gallagher, Damien</dc:creator>
     <marcrel:hst>Valera, Eamonn, de</marcrel:hst>
     <dc:contributor>Collins, Michael</dc:contributor>

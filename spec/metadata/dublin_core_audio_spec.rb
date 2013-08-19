@@ -22,6 +22,11 @@ describe "DRI::Metadata::DublinCoreAudio" do
     @ds.guest.should == ["Collins, Michael", "Connolly, James"]
   end
 
+ it "should expose speficic geocode metadata" do
+    @ds.geocode_point == ["SAMPLE POINT"]
+    @ds.geocode_box == ["SAMPLE BOX"]
+ end
+
   it "should have access to MARC Relators" do
     @ds.role_hst = ["Collins, Michael"]
     @ds.role_hst.should == ["Collins, Michael"]
