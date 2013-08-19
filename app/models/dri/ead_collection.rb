@@ -1,6 +1,6 @@
 module DRI
   module Model
-    class EADCollection < EADDigitalObject
+    class EADCollection < DigitalObject
       include Hydra::ModelMethods
 
       has_metadata :name => "descMetadata", :type => DRI::Metadata::EncodedArchivalDescription

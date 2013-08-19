@@ -3,11 +3,9 @@ require 'spec_helper'
 
 describe "DRI::Metadata::EncodedArchivalDescriptionComponent" do
 
-  describe "encoded archival description component" do
-    it "is implemented but pending" do
-      pending("updating class to NIVAL data")
-      this_should_not_get_executed
-    end
+  it "is implemented but pending" do
+    pending("updating class to NIVAL data")
+    this_should_not_get_executed
   end
 
   #before(:each) do
