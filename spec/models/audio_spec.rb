@@ -11,7 +11,8 @@ describe DRI::Model::Audio do
     @attributes_hash = {
       "title" => "An Audio Title",
       "rights" => "This is a statement about the rights associated with this object",
-      "presenter" => ["Collins, Michael"],
+      "role_hst" => ["Collins, Michael"],
+      "role_pro" => ["Collins, Michael"],
       "guest" => ["DeValera, Eamonn", "Connolly, James"],
       "language" => "ga",
       "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
@@ -77,7 +78,8 @@ describe DRI::Model::Audio do
     @audio.creation_date.class.to_s.should == 'String'
 
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
-    @audio.presenter.class.to_s.should == 'Array'
+    @audio.role_hst.class.to_s.should == 'Array'
+    @audio.role_pro.class.to_s.should == 'Array'
     @audio.guest.class.to_s.should == 'Array'
     @audio.subject.class.to_s.should == 'Array'
     @audio.source.class.to_s.should == 'Array'
@@ -91,31 +93,16 @@ describe DRI::Model::Audio do
     @audio.broadcast_date.should == @attributes_hash["broadcast_date"]
     @audio.creation_date.should == @attributes_hash["creation_date"]
     @audio.language.should == @attributes_hash["language"]
-    @audio.presenter.should == @attributes_hash["presenter"]
+    @audio.role_pro.should == @attributes_hash["role_hst"]
+    @audio.presenter.should == @attributes_hash["role_hst"]
+    @audio.role_hst.should == @attributes_hash["role_pro"]
+    @audio.producer.should == @attributes_hash["role_pro"]
     @audio.guest.should == @attributes_hash["guest"]    
     @audio.subject.should == @attributes_hash["subject"]
     @audio.source.should == @attributes_hash["source"]
     @audio.geographical_coverage.should == @attributes_hash["geographical_coverage"]
     @audio.temporal_coverage.should == @attributes_hash["temporal_coverage"]
  
-  end
-
-  it "should automatically assign language=en where none is supplied" do
-    # From ingestion
-    @dc = fixture("audios/dublin_core_audio_nolang_sample.xml")
-    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
-    @audio2 = DRI::Model::Audio.new
-    @audio2.datastreams["descMetadata"] = @ds
-    @audio2.save
-    @audio2.language.should == "en"
- 
-    # From variable assignment
-    @attributes_hash.delete("language")
-
-    @audio.update_attributes( @attributes_hash )
-
-    @audio.language.should == "en"
-
   end
 
   it "should validate the presence of the title metadata field" do
@@ -150,6 +137,12 @@ describe DRI::Model::Audio do
 
     @audio.should_not be_valid
 
+  end
+
+  after(:each) do
+    unless @audio.class != ActiveFedora::UnsavedDigitalObject
+      @audio.delete
+    end
   end
 
   it "should have type 'Sound'" do

@@ -30,7 +30,6 @@ module DRI
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
               xml.c
-            }
           end
 
           return builder.doc

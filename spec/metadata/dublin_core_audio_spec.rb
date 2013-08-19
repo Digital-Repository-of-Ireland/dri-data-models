@@ -18,8 +18,13 @@ describe "DRI::Metadata::DublinCoreAudio" do
 
   it "should expose specific audio metadata" do
     @ds.broadcast_date == ["2000-01-01"]
-    @ds.presenter.should == ["DeValera, Eamonn"]
+    @ds.role_hst.should == ["DeValera, Eamonn"]
     @ds.guest.should == ["Collins, Michael", "Connolly, James"]
+  end
+
+  it "should have access to MARC Relators" do
+    @ds.role_hst = ["Collins, Michael"]
+    @ds.role_hst.should == ["Collins, Michael"]
   end
 
   # Dublin Core does not define a parent element for it's metadata fields

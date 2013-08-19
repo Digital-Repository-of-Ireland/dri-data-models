@@ -77,6 +77,7 @@ describe DRI::Model::Pdfdoc do
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
     @pdfdoc.author.class.to_s.should == 'Array'
     @pdfdoc.editor.class.to_s.should == 'Array'
+    @pdfdoc.role_aut.class.to_s.should == 'Array'
     @pdfdoc.subject.class.to_s.should == 'Array'
     @pdfdoc.source.class.to_s.should == 'Array'
     @pdfdoc.geographical_coverage.class.to_s.should == 'Array'
@@ -89,30 +90,14 @@ describe DRI::Model::Pdfdoc do
     @pdfdoc.creation_date.should == @attributes_hash["creation_date"]
     @pdfdoc.language.should == @attributes_hash["language"]
     @pdfdoc.author.should == @attributes_hash["author"]
-    @pdfdoc.editor.should == @attributes_hash["editor"]    
+    @pdfdoc.role_aut.should == @attributes_hash["author"]
+    @pdfdoc.editor.should == @attributes_hash["editor"]
+    @pdfdoc.role_edt.should == @attributes_hash["editor"]
     @pdfdoc.subject.should == @attributes_hash["subject"]
     @pdfdoc.source.should == @attributes_hash["source"]
     @pdfdoc.geographical_coverage.should == @attributes_hash["geographical_coverage"]
     @pdfdoc.temporal_coverage.should == @attributes_hash["temporal_coverage"]
  
-  end
-
-  it "should automatically assign language=en where none is supplied" do
-    # From ingestion
-    @dc = fixture("pdfs/dublin_core_pdfdoc_nolang_sample.xml")
-    @ds = DRI::Metadata::DublinCorePdfdoc.from_xml(@dc)
-    @pdfdoc2 = DRI::Model::Pdfdoc.new
-    @pdfdoc2.datastreams["descMetadata"] = @ds
-    @pdfdoc2.save
-    @pdfdoc2.language.should == "en"
- 
-    # From variable assignment
-    @attributes_hash.delete("language")
-
-    @pdfdoc.update_attributes( @attributes_hash )
-
-    @pdfdoc.language.should == "en"
-
   end
 
   it "should validate the presence of the title metadata field" do
@@ -147,6 +132,12 @@ describe DRI::Model::Pdfdoc do
 
     @pdfdoc.should_not be_valid
 
+  end
+
+  after(:each) do
+    unless @pdfdoc.class != ActiveFedora::UnsavedDigitalObject
+      @pdfdoc.delete
+    end
   end
 
   it "should have type 'Sound'" do

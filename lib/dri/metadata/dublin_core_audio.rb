@@ -32,15 +32,10 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-	         xml['dc'].type "Sound"
-                 xml['dc'].language "en" 
+	               xml['dc'].type "Sound"
             }
           end
           return builder.doc
-      end
-
-      def get_person_array()
-         return contributor | presenter | producer | guest
       end
 
     end # class

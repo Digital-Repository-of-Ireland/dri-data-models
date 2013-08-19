@@ -32,12 +32,15 @@ module DRI
     delegate :author, :to=>"descMetadata"
     delegate :editor, :to=>"descMetadata"
     delegate :type, :to=>"descMetadata", :unique=>"true"
+
+    # Delegate MARC Relator fields
+    delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
+    
     apply_properties_delegates
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
     validates :rights, :presence=>true
-    validates :language, :presence=>true # language should be set automatically if not passed in, so should always be present
 
     # Add an URL reference to the master pdf file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)

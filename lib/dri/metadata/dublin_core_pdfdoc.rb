@@ -28,15 +28,10 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-	         xml['dc'].type "Document"
-                 xml['dc'].language "en" 
+	               xml['dc'].type "Document" 
             }
           end
           return builder.doc
-      end
-
-      def get_person_array()
-         return contributor | author | editor
       end
 
     end # class

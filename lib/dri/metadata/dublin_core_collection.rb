@@ -22,8 +22,7 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-	         xml['dc'].type "Collection"
-                 xml['dc'].language "en" 
+	               xml['dc'].type "Collection"
             }
           end
           return builder.doc

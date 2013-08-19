@@ -34,12 +34,15 @@ module DRI
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
     delegate :type, :to=>"descMetadata", :unique=>"true"
+
+    # Delegate MARC Relator fields
+    delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
+
     apply_properties_delegates
 
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
     validates :rights, :presence=>true
-    validates :language, :presence=>true # language should be set automatically if not passed in, so should always be present
 
     # Add an URL reference to the master audio file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)

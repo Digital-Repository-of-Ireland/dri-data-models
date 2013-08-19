@@ -5,6 +5,9 @@ module DRI
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
     class QualifiedDublinCore < ActiveFedora::OmDatastream
+      attr_accessor :fields
+      class_attribute :class_fields
+      self.class_fields = []
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -33,24 +36,53 @@ module DRI
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
 
-          # Placeholder to generate MARC Relators fields
-          #DRI::Vocabulary::MarcRelators.each do |role|
-          #  t.send("role_"+role,)
-          #end
-
         end
 
-	# Test template for generating a person nodes in Dublin Core
-        #define_template :person do |xml, name, role="contributor"|
-	#  if (role == "contributor")
-	#    xml['dc'].contributor { xml.text name }
-        #  elsif (role == "creator")
-        #    xml['dc'].creator { xml.text name }
-        #  elsif (DRI::Vocabulary:MARCRelators.has_key?role)
-        #    xml['marcrel'].send "#{role}_", name
-        #  end
-        #end
+        
+
       end
+
+      def initialize(digital_object=nil, dsid=nil, options={})
+        super
+        self.fields={}
+
+        # Create the MARC Relators fields from the MARC Relator terminology
+        #
+        # There isn't a practical way to do this through standard OM, so we have to bypass our usual OM methods and
+        # manually add the class fields and modify the OM terminology.
+        DRI::Vocabulary::marcRelators.each do |role|
+          field "role_"+role, :string, :multiple=>true
+        end
+      end
+
+      def field(name, tupe=nil, opts={})
+        fields ||= {}
+        @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
+        # add term to template
+        self.class.class_fields << name.to_s
+        # add term to terminology
+        unless self.class.terminology.has_term?(name.to_sym)
+          om_term_opts = {:xmlns=>"http://www.loc.gov/marc.relators/", :namespace_prefix => "marcrel", :path => name.to_s[5..-1],
+                          :index_as=>[:facetable, :stored_searchable, :displayable]}
+          term = OM::XML::Term.new(name.to_sym, om_term_opts, self.class.terminology)
+          self.class.terminology.add_term(term)
+          term.generate_xpath_queries!
+        end
+      end
+
+      def update_indexed_attributes(params={}, opts={})
+      # if the params are just keys, not an array, make then into an array.
+      new_params = {}
+      params.each do |key, val|
+        if key.is_a? Array
+          new_params[key] = val
+        else
+          new_params[[key.to_sym]] = val
+        end
+      end
+      super(new_params, opts)
+    end
+
 
       # Build the xml doc
       def self.xml_template
@@ -64,7 +96,6 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-                 xml['dc'].language "en" 
             }
           end
           return builder.doc
@@ -77,12 +108,17 @@ module DRI
         person_array = get_person_array()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-
         solr_doc
       end
 
       def get_person_array()
-         return contributor
+          people = contributor | creator
+
+          DRI::Vocabulary::marcRelators.each do |role|
+            people |= send("role_"+role)
+          end
+
+          return people
       end
 
       # Load Dublin Core terminology
