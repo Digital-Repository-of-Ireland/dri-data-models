@@ -32,6 +32,8 @@ module DRI
           t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
+          t.geocode_point(:path=>"point",:namespace_prefix=>"dcmitype",:index_as=> [:stored_searchable, :displayable])
+          t.geocode_box(:path=>"box",:namespace_prefix=>"dcmitype",:index_as=> [:stored_searchable, :displayable])
 
           # Placeholder to generate MARC Relators fields
 	  #DRI::Vocabulary::MarcRelators.each do |role|
@@ -58,6 +60,7 @@ module DRI
             xml.qualifieddc(
                "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
                "xmlns:dcterms" => "http://purl.org/dc/terms/",
+               "xmlns:dcmitype" => "http://purl.org/dc/dcmitype/",
                "xmlns:marcrel" => "http://www.loc.gov/marc.relators/",
                "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                "xsi:schemaLocation" => "http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd",
