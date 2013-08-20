@@ -15,12 +15,12 @@ module DRI
           t.root(:path=>"/*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable, :sortable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
           t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable])
+          t.date(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :dateable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -31,8 +31,8 @@ module DRI
           t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.geocode_point(:path=>"spatial", :attributes=> {"xsi:type"=>"dcterms:Point"}, :namespace_prefix=>"dcterms", :index_as=> [:stored_searchable, :displayable])
