@@ -81,17 +81,29 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
 
+        # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
 
         solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
         solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | construct_full_name(person_array))
         
+        # title_sorted - A SOLR index for sorting titles
         if (title.length > 0)
           sorted_title = transform_title_for_sort(title[0])
           if (sorted_title != "")
             solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :text) => [sorted_title])
           end
         end
+
+        # all_metadata - A SOLR index of all the text contained in the XML document
+        all_metadata = ""
+        ng_xml.xpath("//text()").each do |text_node|
+          all_metadata += text_node.text
+          all_metadata += " "
+        end
+        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+
+
         solr_doc
       end
 
