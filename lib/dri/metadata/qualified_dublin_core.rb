@@ -38,38 +38,12 @@ module DRI
           t.geocode_point(:path=>"spatial", :attributes=> {"xsi:type"=>"dcterms:Point"}, :namespace_prefix=>"dcterms", :index_as=> [:stored_searchable, :displayable])
           t.geocode_box(:path=>"spatial", :attributes=> {"xsi:type"=>"dcterms:Box"}, :namespace_prefix=>"dcterms", :index_as=> [:stored_searchable, :displayable])
 
+          # Generate MARC Relators fields from the MARC Relators vocabulary
+          DRI::Vocabulary::marcRelators.each do |role|
+            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable, :displayable]
+          end
         end
 
-        
-
-      end
-
-      def initialize(digital_object=nil, dsid=nil, options={})
-        super
-        self.fields={}
-
-        # Create the MARC Relators fields from the MARC Relator terminology
-        #
-        # There isn't a practical way to do this through standard OM, so we have to bypass our usual OM methods and
-        # manually add the class fields and modify the OM terminology.
-        DRI::Vocabulary::marcRelators.each do |role|
-          field "role_"+role, :string, :multiple=>true
-        end
-      end
-
-      def field(name, tupe=nil, opts={})
-        fields ||= {}
-        @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
-        # add term to template
-        self.class.class_fields << name.to_s
-        # add term to terminology
-        unless self.class.terminology.has_term?(name.to_sym)
-          om_term_opts = {:xmlns=>"http://www.loc.gov/marc.relators/", :namespace_prefix => "marcrel", :path => name.to_s[5..-1],
-                          :index_as=>[:facetable, :stored_searchable, :displayable]}
-          term = OM::XML::Term.new(name.to_sym, om_term_opts, self.class.terminology)
-          self.class.terminology.add_term(term)
-          term.generate_xpath_queries!
-        end
       end
 
       def update_indexed_attributes(params={}, opts={})
@@ -92,7 +66,6 @@ module DRI
             xml.qualifieddc(
                "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
                "xmlns:dcterms" => "http://purl.org/dc/terms/",
-             # "xmlns:dcmitype" => "http://purl.org/dc/dcmitype/",
                "xmlns:marcrel" => "http://www.loc.gov/marc.relators/",
                "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                "xsi:schemaLocation" => "http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd",
@@ -114,9 +87,9 @@ module DRI
         solr_doc
       end
 
-      # A function to convert an array of names that have been confirmed to archiving standards into human-readable names
-      # so that double-quote searching can pick up surname prefixes eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
-      # "Valera, Éamon, De" is "Éamon De Valera"
+      # A function to convert an array of names that conform to archiving formatting standards into human-readable names
+      # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
+      # "Valera, Éamon, de" is "Éamon de Valera"
       def construct_full_name(names=Array.new)
         results = []
 
