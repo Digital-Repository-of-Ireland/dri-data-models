@@ -7,7 +7,7 @@ describe DRI::Model::DigitalObject do
   before(:each) do
 
     @audio_hash = {
-      "title" => "An Audio Title",
+      "title" => "The Audio Title",
       "rights" => "This is a statement about the rights associated with this object",
       "presenter" => ["Collins, Michael"],
       "guest" => ["Valera, Eamon, de", "Connolly, James"],
@@ -22,7 +22,7 @@ describe DRI::Model::DigitalObject do
     }
 
     @pdf_hash = {
-      "title" => "A PDF Title",
+      "title" => "The PDF Title",
       "rights" => "This is a statement about the rights associated with this object",
       "author" => ["Collins, Michael"],
       "editor" => ["Valera, Eamon, de", "Connolly, James"],

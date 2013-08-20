@@ -82,9 +82,31 @@ module DRI
         super(solr_doc)
 
         person_array = get_person_array()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array | construct_full_name(person_array))
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
+
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | construct_full_name(person_array))
+        
+        if (title.length > 0)
+          sorted_title = transform_title_for_sort(title[0])
+          if (sorted_title != "")
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :text) => [sorted_title])
+          end
+        end
         solr_doc
+      end
+
+      def transform_title_for_sort(title_string="")
+
+        # Space out non-word and non-number characters and 'squeeze' the spaces
+        title_string = title_string.gsub(/\W|\d/, " ").squeeze(" ")
+
+        # Remove starting spaces
+        title_string = title_string.strip
+
+        # Remove leading definite articles
+        title_string = title_string.gsub(/^the /i, "")
+
+        return title_string
       end
 
       # A function to convert an array of names that conform to archiving formatting standards into human-readable names

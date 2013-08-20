@@ -9,7 +9,7 @@ describe "DRI::Metadata::DublinCoreAudio" do
   end
 
   it "should expose common metadata info for audio" do
-    @ds.title.should == ["SAMPLE AUDIO TITLE"]
+    @ds.title.should == ["THE SAMPLE AUDIO TITLE"]
     @ds.description.should == ["SAMPLE DESCRIPTION"]
     @ds.language.should == ["en"]
     @ds.subject.should == ["subject1","subject2","subject3"]

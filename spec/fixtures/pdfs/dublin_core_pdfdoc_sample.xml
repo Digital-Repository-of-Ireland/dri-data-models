@@ -5,7 +5,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd"
     xsi:noNamespaceSchemaLocation="http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd">
-    <dc:title>SAMPLE PDF TITLE</dc:title>
+    <dc:title>THE SAMPLE PDF TITLE</dc:title>
     <dc:description>SAMPLE DESCRIPTION</dc:description>
     <dc:subject>subject1</dc:subject>
     <dc:subject>subject2</dc:subject>
