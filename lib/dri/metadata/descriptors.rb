@@ -16,12 +16,12 @@ module DRI
       				# If using RFC 5646, then val will be of the
       				# format language-script-region-variant
       				#
-      				# RFC 5646 can be divided by either hyphens or
+      				# NOTE: RFC 5646 can be divided by either hyphens or
       				# underscores.
       				#
       				# We really only care about the first element in this
       				# format.
-      				clean_val = val.strip.split(/-|_/)[0].strip
+      				clean_val = val.strip.split(/-|_/)[0].strip.downcase
 
       				# Now we have either a ISO 639.1 code or ISO 639.2 code.
       				result = ISO_639.find(clean_val)
@@ -29,7 +29,7 @@ module DRI
       				# If result is nil, as a last resort check if they wrote
       				# the language name in english.
       				if result == nil
-      					result = ISO_639.find_by_english_name(clean_val)
+      					result = ISO_639.find_by_english_name(clean_val.capitalize)
       				end
 		
       				if result == nil
