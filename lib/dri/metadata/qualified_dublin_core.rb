@@ -103,6 +103,9 @@ module DRI
         end
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
+        # Split date ranges into separate indexes
+        #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
+        #solr_doc.merge!(date_ranges)
 
         solr_doc
       end
