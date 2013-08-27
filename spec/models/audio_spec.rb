@@ -9,7 +9,7 @@ describe DRI::Model::Audio do
     @audio = DRI::Model::Audio.new
 
     @attributes_hash = {
-      "title" => "An Audio Title",
+      "title" => "The Audio Title",
       "rights" => "This is a statement about the rights associated with this object",
       "role_hst" => ["Collins, Michael"],
       "role_pro" => ["Collins, Michael"],

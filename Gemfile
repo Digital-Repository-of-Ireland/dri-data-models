@@ -16,6 +16,10 @@ gem "jquery-rails"
 # To use debugger
 # gem 'debugger'
 
+# iso-639 is used to convert between different language codes
+gem 'iso-639'
+#gem 'chronic'
+
 group :development, :test do
   gem 'rcov', :platform => :mri_18
   gem 'simplecov', :platform => [:mri_19, :mri_20]

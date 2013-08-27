@@ -9,7 +9,7 @@ describe DRI::Model::Pdfdoc do
     @pdfdoc = DRI::Model::Pdfdoc.new
 
     @attributes_hash = {
-      "title" => "A PDF Title",
+      "title" => "The PDF Title",
       "rights" => "This is a statement about the rights associated with this object",
       "author" => ["Collins, Michael"],
       "editor" => ["Valera, Eamon, de", "Connolly, James"],

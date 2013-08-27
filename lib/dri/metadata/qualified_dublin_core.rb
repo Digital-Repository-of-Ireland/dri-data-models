@@ -15,12 +15,14 @@ module DRI
           t.root(:path=>"/*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable, :sortable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
+          t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, Descriptors.language_facetable])
           t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :sortable, :facetable])
+
+          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :sortable, :facetable, :dateable])
+
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -30,46 +32,21 @@ module DRI
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
+
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :facetable])
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
-          t.geocode_point(:path=>"spatial", :attributes=> {"xsi:type"=>"dcterms:Point"}, :namespace_prefix=>"dcterms", :index_as=> [:stored_searchable, :displayable])
-          t.geocode_box(:path=>"spatial", :attributes=> {"xsi:type"=>"dcterms:Box"}, :namespace_prefix=>"dcterms", :index_as=> [:stored_searchable, :displayable])
+          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
+          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
 
+          # Generate MARC Relators fields from the MARC Relators vocabulary
+          DRI::Vocabulary::marcRelators.each do |role|
+            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable, :displayable]
+          end
         end
 
-        
-
-      end
-
-      def initialize(digital_object=nil, dsid=nil, options={})
-        super
-        self.fields={}
-
-        # Create the MARC Relators fields from the MARC Relator terminology
-        #
-        # There isn't a practical way to do this through standard OM, so we have to bypass our usual OM methods and
-        # manually add the class fields and modify the OM terminology.
-        DRI::Vocabulary::marcRelators.each do |role|
-          field "role_"+role, :string, :multiple=>true
-        end
-      end
-
-      def field(name, tupe=nil, opts={})
-        fields ||= {}
-        @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
-        # add term to template
-        self.class.class_fields << name.to_s
-        # add term to terminology
-        unless self.class.terminology.has_term?(name.to_sym)
-          om_term_opts = {:xmlns=>"http://www.loc.gov/marc.relators/", :namespace_prefix => "marcrel", :path => name.to_s[5..-1],
-                          :index_as=>[:facetable, :stored_searchable, :displayable]}
-          term = OM::XML::Term.new(name.to_sym, om_term_opts, self.class.terminology)
-          self.class.terminology.add_term(term)
-          term.generate_xpath_queries!
-        end
       end
 
       def update_indexed_attributes(params={}, opts={})
@@ -92,7 +69,6 @@ module DRI
             xml.qualifieddc(
                "xmlns:dc" => "http://purl.org/dc/elements/1.1/",
                "xmlns:dcterms" => "http://purl.org/dc/terms/",
-             # "xmlns:dcmitype" => "http://purl.org/dc/dcmitype/",
                "xmlns:marcrel" => "http://www.loc.gov/marc.relators/",
                "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                "xsi:schemaLocation" => "http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd",
@@ -108,74 +84,33 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
 
+        # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array | construct_full_name(person_array))
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc
-      end
 
-      # A function to convert an array of names that have been confirmed to archiving standards into human-readable names
-      # so that double-quote searching can pick up surname prefixes eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
-      # "Valera, Éamon, De" is "Éamon De Valera"
-      def construct_full_name(names=Array.new)
-        results = []
-
-        names.each do |archived_name|
-          name_parts = archived_name.split(",")
-
-          firstname = ""
-          surname = ""
-          prefix = ""
-          misc = ""
-
-          if (name_parts.length > 0)
-            surname_parts = name_parts[0].split("(")
-            surname = surname_parts[0].strip
-            misc += surname_parts[1..-1].join("(")
-          end
-
-          if (name_parts.length > 1)
-            firstname_parts = name_parts[1].split("(")
-            firstname = firstname_parts[0].strip
-            misc += firstname_parts[1..-1].join("(")
-          end
-
-          if (name_parts.length > 2)
-            prefix_parts = name_parts[2].split("(")
-            prefix = prefix_parts[0].strip
-            misc += prefix_parts[1..-1].join("(")
-          end
-
-          result = ""
-
-          unless (firstname == "")
-            result += firstname+" "
-          end
-
-          unless (prefix == "")
-            result += prefix
-
-            unless prefix[-1,1] == "-"
-              result += " "
-            end
-          end
-
-          unless (surname == "")
-            result += surname+" "
-          end
-
-          unless (misc == "")
-            result += misc
-          end
-
-          result = result.strip
-
-          unless (result == "")
-            results |= [result]
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        
+        # title_sorted - A SOLR index for sorting titles
+        if (title.length > 0)
+          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+          if (sorted_title != "")
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :text) => [sorted_title])
           end
         end
 
-        return results
+        # all_metadata - A SOLR index of all the text contained in the XML document
+        all_metadata = ""
+        ng_xml.xpath("//text()").each do |text_node|
+          all_metadata += text_node.text
+          all_metadata += " "
+        end
+        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+
+        # Split date ranges into separate indexes
+        #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
+        #solr_doc.merge!(date_ranges)
+
+        solr_doc
       end
 
       # Creates an array of all names stored in the metadata
