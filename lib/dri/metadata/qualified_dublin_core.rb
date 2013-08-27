@@ -16,17 +16,21 @@ module DRI
 
           # Simple Dublin Core Fields
           t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+
           t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, Descriptors.language_facetable])
-          t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
-
+          t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+            t.subject_lang(:path=>{:attribute=> "xml:lang"})
+          }
+          t.subject_lang(:proxy=>[:subject, :subject_lang])
           t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :sortable, :facetable, :dateable])
-
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
-          t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable])
+          t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable]) {
+            t.coverage_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable,  :sortable])
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -36,8 +40,12 @@ module DRI
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
           t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
-          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
-          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
+          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])  {
+            t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
+          }
+          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+            t.temporal_coverage_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
           t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
 
@@ -45,6 +53,7 @@ module DRI
           DRI::Vocabulary::marcRelators.each do |role|
             t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable, :displayable]
           end
+
         end
 
       end
@@ -106,11 +115,58 @@ module DRI
         end
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
+        # Split facets into different languages based on xml:lang
+        faceted_language_indexes = Hash.new
+        faceted_language_indexes.merge! split_array_into_languages("subject")
+        faceted_language_indexes.merge! split_array_into_languages("coverage")
+        faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
+        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage") 
+
+        faceted_language_indexes.each do | key, value |
+          solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
+          solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
+        end
+
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
         #solr_doc.merge!(date_ranges)
 
         solr_doc
+      end
+
+      # Some indexes may need to be split up into different languages
+      def split_array_into_languages(index_name="")
+        results = Hash.new
+
+        if index_name == ""
+          return results
+        end
+        
+        array_values = send index_name
+
+        array_values.each_with_index do |value, i|
+          value_lang = send(index_name, i).send(index_name+"_lang")
+
+            foo = "eng"
+
+            if (value_lang.length > 0) 
+              foo = value_lang[0].strip
+            end
+
+            foo = DRI::Metadata::Descriptors.standardise_language_code foo
+
+            if foo == nil
+              foo = "eng"
+            end
+
+            if !results.has_key? index_name+"_"+foo
+              results[index_name+"_"+foo] = [value]
+            else
+              results[index_name+"_"+foo] |= [value]
+            end
+        end
+
+        return results
       end
 
       # Creates an array of all names stored in the metadata

@@ -81,6 +81,8 @@ module DRI
         return title_string
       end
 
+      def self.split_language(index=[])
+      end
       # Split date ranges into seperate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and

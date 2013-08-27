@@ -13,6 +13,9 @@ describe "DRI::Metadata::DublinCoreAudio" do
     @ds.description.should == ["SAMPLE DESCRIPTION"]
     @ds.language.should == ["en"]
     @ds.subject.should == ["subject1","subject2","subject3"]
+    @ds.subject(0).subject_lang.should == ["ga"]
+    @ds.subject(1).subject_lang.should == []
+    @ds.subject(2).subject_lang.should == ["ga"]
     @ds.subject(0).should == ["subject1"]
   end
 

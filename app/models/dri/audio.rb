@@ -29,6 +29,7 @@ module DRI
     delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
     delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :subject, :to=>"descMetadata"
+    delegate :subject_lang, :to=>"descMetadata"
     delegate :source, :to=>"descMetadata"
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"

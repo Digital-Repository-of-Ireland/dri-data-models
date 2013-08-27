@@ -21,9 +21,20 @@ describe DRI::Model::Audio do
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => ["Dublin"],
       "temporal_coverage" => ["1900s"],
-      "subject" => ["Ireland","something else"]
+      "subject" => ["Ireland","something else", "Éire"]
     }
 
+  end
+
+  it "should load and save from xml" do
+    @dc = fixture("audios/dublin_core_audio_sample1.xml")
+
+    @audio2 = DRI::Model::Audio.new
+    @ds = DRI::Metadata::DublinCoreAudio.from_xml(@dc)
+    @audio2.datastreams["descMetadata"].ng_xml = @ds.to_xml
+    @audio2.save
+    @audio2.pid.should_not == "_DO_NOT_USE_"
+    @audio2.delete
   end
 
   it "should have the specified datastreams" do
