@@ -35,8 +35,8 @@ module DRI
           t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])
-          t.geocode_point(:ref=>"geographical_coverage", :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
-          t.geocode_box(:ref=>"geographical_coverage", :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
+          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
+          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
 
           # Generate MARC Relators fields from the MARC Relators vocabulary
           DRI::Vocabulary::marcRelators.each do |role|
