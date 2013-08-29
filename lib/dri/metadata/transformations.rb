@@ -76,7 +76,7 @@ module DRI
         title_string = title_string.strip
 
         # Remove leading definite articles
-        title_string = title_string.gsub(/^the /i, "")
+        title_string = title_string.gsub(/^(the|an|na|le|la|las|los|les|der|die|das) /i, "")
 
         return title_string
       end
