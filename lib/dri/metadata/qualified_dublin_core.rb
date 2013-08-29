@@ -103,7 +103,7 @@ module DRI
         if (title.length > 0)
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :text) => [sorted_title])
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
