@@ -70,19 +70,18 @@ module DRI
       def self.transform_title_for_sort(title_string="")
 
         # Space out non-word and non-number characters and 'squeeze' the spaces
-        title_string = title_string.gsub(/\W|\d/, " ").squeeze(" ")
+        title_string = title_string.gsub(/[[:^alnum:]]/, " ").squeeze(" ")
 
         # Remove starting spaces
         title_string = title_string.strip
 
         # Remove leading definite articles
-        title_string = title_string.gsub(/^(the|an|na|le|la|las|los|les|der|die|das) /i, "")
+        title_string = title_string.gsub(/^(the|an|ná|na|a) /i, "")
 
         return title_string
       end
 
-      def self.split_language(index=[])
-      end
+
       # Split date ranges into seperate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and
