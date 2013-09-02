@@ -9,7 +9,7 @@ describe "DRI::Metadata::DublinCoreCollection" do
   end
 
   it "should expose common metadata info for collection" do
-    @ds.title.should == ["SAMPLE COLLECTION TITLE"]
+    @ds.title.should == ["THE SAMPLE COLLECTION TITLE"]
     @ds.description.should == ["SAMPLE COLLECTION DESCRIPTION"]
     @ds.publisher.should == ["SAMPLE INSTITUTION"]
   end

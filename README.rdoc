@@ -3,6 +3,18 @@
 This is the prototype Ruby Gem for the Digital
 Repository of Ireland's Hydra data models.
 
+DRI data model (which is stable to develop against) has the following features:
+
+Core Features:
+
+* Collections Object
+* Digital Object
+  - Audio Data type
+  - PDF Data type
+
+Supported metadata formats/standards
+
+* Qualified Dublin Core
 
 == Requirements
 
@@ -10,9 +22,12 @@ Repository of Ireland's Hydra data models.
 
 == Usage
 
-To use this data model in your hydra application please add the following to your Gemfile
+To use this data model in your hydra application please add the following
+to your Gemfile
 
-	gem 'dri_data_models', :git => 'git@dev.forasfeasa.ie:dri_data_models.git'
+  gem 'dri_data_models', :git => 'git@dev.forasfeasa.ie:dri_data_models.git'
+
+Note: the above repository url will be changing in the near future.
 
 == Running the tests
 
@@ -21,4 +36,4 @@ or your own instance of Fedora-Commons or SOLR running.
 
 To run the tests, the following command is required
 
-  $ rake spec
+  $ rake rspec

@@ -12,8 +12,8 @@ module DRI
 
       # Add more mappings for PDF Object
       extend_terminology do |t|
-        t.author(:path=>"aut", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
-        t.editor(:path=>"edt", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
+        t.author(:ref=>:role_aut, :index_as=>[:facetable, :stored_searchable])
+        t.editor(:ref=>:role_edt, :index_as=>[:facetable, :stored_searchable])
       end
 
       # Build the xml doc
@@ -28,15 +28,10 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-	         xml['dc'].type "Document"
-                 xml['dc'].language "en" 
+	               xml['dc'].type "Document" 
             }
           end
           return builder.doc
-      end
-
-      def get_person_array()
-         return contributor | author | editor
       end
 
     end # class

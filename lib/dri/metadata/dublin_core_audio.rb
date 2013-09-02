@@ -14,8 +14,8 @@ module DRI
 
       # Add more mappings for Audio Object
       extend_terminology do |t|
-        t.presenter(:path=>"hst", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
-        t.producer(:path=>"pro", :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable])
+        t.presenter(:ref=>:role_hst, :index_as=>[:facetable, :stored_searchable])
+        t.producer(:ref=>:role_pro, :index_as=>[:facetable, :stored_searchable])
         t.guest(:ref=>:contributor, :index_as=>[:facetable])
         t.broadcast_date(:ref=>:published_date, :index_as=>[:stored_searchable, :facetable, :displayable])
       end
@@ -32,15 +32,10 @@ module DRI
                "xsi:noNamespaceSchemaLocation"=>"http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd") {
                  xml['dc'].title 
                  xml['dc'].description
-	         xml['dc'].type "Sound"
-                 xml['dc'].language "en" 
+	               xml['dc'].type "Sound"
             }
           end
           return builder.doc
-      end
-
-      def get_person_array()
-         return contributor | presenter | producer | guest
       end
 
     end # class

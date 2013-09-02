@@ -44,17 +44,6 @@ module DRI
         delegate :resource_rmd160, :to=>"properties"
       end
 
-
-      # Override save to add a default language of "en" if not set in the xml file
-      #
-      # There does not seem to be a better way to do this
-      #
-      def save
-        super
-        self.language ||= "en"
-
-      end
-
       # Add default system properties
       apply_properties_delegates
     end
