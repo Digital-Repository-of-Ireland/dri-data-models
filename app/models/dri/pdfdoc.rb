@@ -31,6 +31,9 @@ module DRI
     delegate :rights, :to=>"descMetadata", :unique=>"true"
     delegate :author, :to=>"descMetadata"
     delegate :editor, :to=>"descMetadata"
+    delegate :creator, :to=>"descMetadata"
+    delegate :contributor, :to=>"descMetadata"
+    delegate :publisher, :to=>"descMetadata"
     delegate :type, :to=>"descMetadata", :unique=>"true"
 
     # Delegate MARC Relator fields

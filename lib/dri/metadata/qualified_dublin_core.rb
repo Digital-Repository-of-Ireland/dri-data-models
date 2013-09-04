@@ -171,7 +171,7 @@ module DRI
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
-          people = contributor | creator
+          people = contributor | creator | publisher
 
           DRI::Vocabulary::marcRelators.each do |role|
             people |= send("role_"+role)
