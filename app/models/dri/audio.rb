@@ -22,12 +22,13 @@ module DRI
     # When you set :unique=>"true", searches will return a single value instead of an array.
     delegate :title, :to=>"descMetadata", :unique=>"true"
     delegate :description, :to=>"descMetadata", :unique=>"true"
-    delegate :language, :to=>"descMetadata"
+    delegate :language, :to=>"descMetadata", :unique=>"true"
     delegate :creator, :to=>"descMetadata"
     delegate :contributor, :to=>"descMetadata"
     delegate :publisher, :to=>"descMetadata"
     delegate :published_date, :to=>"descMetadata"
-    delegate :creation_date, :to=>"descMetadata"
+    delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
+    delegate :creation_date, :to=>"descMetadata", :unique=>"true"
     delegate :relation, :to=>"descMetadata"
     delegate :subject, :to=>"descMetadata"
     delegate :subject_lang, :to=>"descMetadata"
@@ -35,12 +36,15 @@ module DRI
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
-    delegate :type, :to=>"descMetadata"
+    delegate :type, :to=>"descMetadata", :unique=>"true"
     delegate :format, :to=>"descMetadata"
     delegate :coverage, :to=>"descMetadata"
     delegate :identifier, :to=>"descMetadata"
     delegate :geocode_point, :to=>"descMetadata"
     delegate :geocode_box, :to=>"descMetadata"
+    delegate :presenter, :to=>"descMetadata"
+-   delegate :producer, :to=>"descMetadata"
+-   delegate :guest, :to=>"descMetadata"
 
     # Delegate MARC Relator fields
     delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
