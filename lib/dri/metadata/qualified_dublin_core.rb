@@ -24,7 +24,7 @@ module DRI
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :sortable, :facetable, :dateable])
+          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :dateable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -36,6 +36,8 @@ module DRI
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
+          # No need to index, but useful for editing
+          t.identifier(:namespace_prefix=>"dc")
 
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])

@@ -22,22 +22,25 @@ module DRI
     # When you set :unique=>"true", searches will return a single value instead of an array.
     delegate :title, :to=>"descMetadata", :unique=>"true"
     delegate :description, :to=>"descMetadata", :unique=>"true"
-    delegate :language, :to=>"descMetadata", :unique=>"true"
-    delegate :presenter, :to=>"descMetadata"
-    delegate :producer, :to=>"descMetadata"
-    delegate :guest, :to=>"descMetadata"
+    delegate :language, :to=>"descMetadata"
     delegate :creator, :to=>"descMetadata"
     delegate :contributor, :to=>"descMetadata"
     delegate :publisher, :to=>"descMetadata"
-    delegate :broadcast_date, :to=>"descMetadata", :unique=>"true"
-    delegate :creation_date, :to=>"descMetadata", :unique=>"true"
+    delegate :published_date, :to=>"descMetadata"
+    delegate :creation_date, :to=>"descMetadata"
+    delegate :relation, :to=>"descMetadata"
     delegate :subject, :to=>"descMetadata"
     delegate :subject_lang, :to=>"descMetadata"
     delegate :source, :to=>"descMetadata"
     delegate :geographical_coverage, :to=>"descMetadata"
     delegate :temporal_coverage, :to=>"descMetadata"
     delegate :rights, :to=>"descMetadata", :unique=>"true"
-    delegate :type, :to=>"descMetadata", :unique=>"true"
+    delegate :type, :to=>"descMetadata"
+    delegate :format, :to=>"descMetadata"
+    delegate :coverage, :to=>"descMetadata"
+    delegate :identifier, :to=>"descMetadata"
+    delegate :geocode_point, :to=>"descMetadata"
+    delegate :geocode_box, :to=>"descMetadata"
 
     # Delegate MARC Relator fields
     delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
@@ -47,6 +50,14 @@ module DRI
     # Validate presence of level 1 attributes title and rights (type is added automatically)
     validates :title, :presence=>true
     validates :rights, :presence=>true
+
+    def person_hash=(values)
+      this.flub
+    end
+
+    def person_hash
+      []
+    end
 
     # Add an URL reference to the master audio file to the Fedora digital object.
     # (this method will be reworked for inclusion with all DRI models)
@@ -81,8 +92,10 @@ module DRI
 
       # Add title metadata from parent collections
       collection_titles = []
+      collection_id = []
       if (governing_collection != nil)
         collection_titles = [governing_collection.title]
+        collection_id = [governing_collection.pid]
       end
       collections.each do |coll|
         collection_titles | coll.title
@@ -90,6 +103,7 @@ module DRI
       if (!collection_titles.empty?)
         solr_doc.merge!(solr_name('collection', :facetable) => collection_titles)
         solr_doc.merge!(solr_name('collection', :stored_searchable) => collection_titles)
+        solr_doc.merge!(solr_name('governing_id', :facetable) => collection_id)
       end
 
       solr_doc.merge!(solr_name('object_type', :stored_searchable) => "Audio")
