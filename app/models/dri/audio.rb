@@ -43,8 +43,8 @@ module DRI
     delegate :geocode_point, :to=>"descMetadata"
     delegate :geocode_box, :to=>"descMetadata"
     delegate :presenter, :to=>"descMetadata"
--   delegate :producer, :to=>"descMetadata"
--   delegate :guest, :to=>"descMetadata"
+    delegate :producer, :to=>"descMetadata"
+    delegate :guest, :to=>"descMetadata"
 
     # Delegate MARC Relator fields
     delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
