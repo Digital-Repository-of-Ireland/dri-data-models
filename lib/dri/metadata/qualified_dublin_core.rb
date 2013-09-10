@@ -24,7 +24,7 @@ module DRI
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :sortable, :facetable, :dateable])
+          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :dateable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -36,6 +36,8 @@ module DRI
           t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
 
+          # No need to index, but useful for editing
+          t.identifier(:namespace_prefix=>"dc")
 
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
@@ -103,7 +105,7 @@ module DRI
         if (title.length > 0)
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :text) => [sorted_title])
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
@@ -171,7 +173,7 @@ module DRI
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
-          people = contributor | creator
+          people = contributor | creator | publisher
 
           DRI::Vocabulary::marcRelators.each do |role|
             people |= send("role_"+role)
