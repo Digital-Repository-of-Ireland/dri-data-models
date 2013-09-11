@@ -1,8 +1,7 @@
 module DRI
   module Model
-    autoload :DigitalObject, 'dri/digital_object'
-    autoload :Audio, 'dri/audio'
-    autoload :Pdfdoc, 'dri/pdfdoc'
-    autoload :Collection, 'dri/collection'
+  	autoload :Batch, 'dri/batch'
+    autoload :GenericFile, 'dri/generic_file'
+    autoload :InterchangeableMetadata, 'dri/interchangeable_metadata'
   end
 end

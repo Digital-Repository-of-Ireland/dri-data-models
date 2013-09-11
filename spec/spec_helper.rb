@@ -8,6 +8,9 @@
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app', 'models'))
 
+#require 'rspec/rails'
+#require 'rspec/autorun'
+
 require 'simplecov'
 require 'simplecov-rcov'
 
@@ -22,9 +25,8 @@ SimpleCov.start
 
 require 'rspec'
 require 'rack/test'
-require 'active_fedora'
-require 'hydra'
-require 'dri'
+
+Rails.application.railties.all
 
 RSpec.configure do |config|
   config.treat_symbols_as_metadata_keys_with_true_values = true

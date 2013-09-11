@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "hydra-head", ">=6.1.0"
   s.add_dependency "hydra-access-controls", ">=6.1.0"
   s.add_dependency "iso-639"
+  s.add_dependency "sufia-models"
   s.add_development_dependency "rspec"
   s.add_development_dependency "mocha"
   s.add_development_dependency "rspec-rails"
