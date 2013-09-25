@@ -7,7 +7,7 @@ module DRI
       	has_metadata :name => "properties", :type => DRI::Metadata::Properties
 
         delegate :status, :to=>"properties", :unique=>"true"
-        delegate :object_type, :to=>"properties", :unique=>"true"
+        delegate :object_type, :to=>"properties"
         delegate :depositor, :to=>"properties", :unique=>"true"
         delegate :metadata_md5, :to=>"properties", :unique=>"true"
         delegate :model_version, :to=>"properties", :unique=>"true"
