@@ -66,8 +66,13 @@ module DRI
 
       def get_metadata_class_from_xml xml_text
         result = "ActiveFedora::OmDatastream"
+        xml = nil
 
-       xml = Nokogiri::XML xml_text
+        if (xml_text.is_a? Nokogiri::XML)
+          xml = xml_text
+        else
+          xml = Nokogiri::XML xml_text
+        end
 
         namespace = xml.namespaces
 
