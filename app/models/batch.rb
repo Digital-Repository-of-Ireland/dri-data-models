@@ -2,6 +2,7 @@ class Batch < ActiveFedora::Base
   include ActiveFedora::Auditable
   include Sufia::ModelMethods
   include Sufia::Noid
+  include DRI::ModelSupport::Properties
   include DRI::ModelSupport::Permissions
   include DRI::ModelSupport::InterchangeableMetadata
   include DRI::ModelSupport::Collections
