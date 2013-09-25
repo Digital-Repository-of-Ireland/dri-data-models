@@ -1,16 +1,11 @@
 # spec/modules/generic_file.rb
 require 'spec_helper'
 
-#require 'sufia/models'
-
-
-#Sufia::Models::Engine.requires
-
-describe DRI::Model::GenericFile do
+describe GenericFile do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests
-    @file_asset = DRI::Model::GenericFile.new
+    @file_asset = GenericFile.new
   end
 
   it "should have the ability to add references to audio files" do
@@ -24,7 +19,7 @@ describe DRI::Model::GenericFile do
   end
 
   after(:each) do
-    unless @file_asset.class == ActiveFedora::UnsavedDigitalObject
+    unless @file_asset.new?
       @file_asset.delete
     end
   end  

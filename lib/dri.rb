@@ -2,6 +2,6 @@ require "dri/metadata"
 
 module DRI
   autoload :Metadata, "dri/metadata"
-  autoload :Model, "dri/model"
+  autoload :ModelSupport, "dri/model_support"
   autoload :Vocabulary, "dri/vocabulary"
 end

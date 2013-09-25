@@ -4,10 +4,10 @@ module DRI
 
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
-    class QualifiedDublinCore < ActiveFedora::OmDatastream
-      attr_accessor :fields
-      class_attribute :class_fields
-      self.class_fields = []
+    class QualifiedDublinCore < DRI::Metadata::Base
+      #attr_accessor :fields
+      #class_attribute :class_fields
+      #self.class_fields = []
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -180,6 +180,39 @@ module DRI
           end
 
           return people
+      end
+
+      def set_delegates model
+        model.class.delegate :title, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :description, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :language, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :creator, :to=>"descMetadata"
+        model.class.delegate :contributor, :to=>"descMetadata"
+        model.class.delegate :publisher, :to=>"descMetadata"
+        model.class.delegate :published_date, :to=>"descMetadata"
+        model.class.delegate :creation_date, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :relation, :to=>"descMetadata"
+        model.class.delegate :subject, :to=>"descMetadata"
+        model.class.delegate :source, :to=>"descMetadata"
+        model.class.delegate :geographical_coverage, :to=>"descMetadata"
+        model.class.delegate :temporal_coverage, :to=>"descMetadata"
+        model.class.delegate :rights, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :type, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :format, :to=>"descMetadata"
+        model.class.delegate :coverage, :to=>"descMetadata"
+        model.class.delegate :identifier, :to=>"descMetadata"
+        model.class.delegate :geocode_point, :to=>"descMetadata"
+        model.class.delegate :geocode_box, :to=>"descMetadata"
+        model.class.delegate_to :descMetadata, DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}
+      end
+
+      def unset_delegates
+        delegates = [ "title", "description", "language", "creator", "contributor", "publisher", "published_date",
+          "creation_date", "relation", "subject", "source", "geographical_coverage", "temporal_coverage", "rights",
+          "type", "format", "coverage", "identifier", "geocode_point", "geocode_box"]
+        DRI::Vocabulary::marcRelators.each { |s| delegates.push(s.prepend("role_"))}
+
+        return delegates
       end
 
       # Load Dublin Core terminology

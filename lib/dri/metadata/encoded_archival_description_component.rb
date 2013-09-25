@@ -2,7 +2,7 @@ module DRI
 
   module Metadata
 
-    class EncodedArchivalDescriptionComponent < ActiveFedora::OmDatastream
+    class EncodedArchivalDescriptionComponent < DRI::Metadata::Base
 
       # OM (Opinionated Metadata) terminology mapping to an EAD Component tag
       set_terminology do |t|
@@ -50,6 +50,20 @@ module DRI
          return name_coverage | persname_coverage | corpname_coverage | creator
       end
 
+      def set_delegates model
+        model.class.delegate :title, :to => :descMetadata, :unique=>"true"
+        model.class.delegate :description, :to => :descMetadata, :unique=>"true"
+        model.class.delegate :language, :to => :descMetadata
+        model.class.delegate :creator, :to => :descMetadata
+        model.class.delegate :creation_date, :to => :descMetadata
+        model.class.delegate :name_coverage, :to => :descMetadata
+        model.class.delegate :geographical_coverage, :to => :descMetadata
+        model.class.delegate :unitid, :to => :descMetadata
+      end
+
+      def is_interchangeable?
+        false
+      end
     end
 
   end
