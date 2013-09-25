@@ -35,7 +35,7 @@ module DRI
       	# It is a collection if we set it as a collection either through the metadata
       	# or using the collection accessor and there are no generic_files attached
       	# to the object.
-        descMetadata.is_collection? && (generic_files.count == 0)
+        (descMetadata.is_collection? || properties.is_collection?) && (generic_files.count == 0)
       end
 
       def is_root_collection?
