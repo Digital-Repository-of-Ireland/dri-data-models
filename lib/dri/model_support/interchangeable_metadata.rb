@@ -34,7 +34,11 @@ module DRI
         replacing_metadata = get_metadata_class_from_xml xml_text
 
         if curr_metadata == replacing_metadata
-          descMetadata.from_xml xml_text
+          if xml_text.is_a? Nokogiri::XML::Document
+            descMetadata.ng_xml = xml_text
+          else
+            descMetadata.from_xml xml_text
+          end
           return true
         else
           ds = replacing_metadata.constantize.from_xml xml_text
