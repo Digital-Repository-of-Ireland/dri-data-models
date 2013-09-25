@@ -68,7 +68,7 @@ module DRI
         result = "ActiveFedora::OmDatastream"
         xml = nil
 
-        if (xml_text.is_a? Nokogiri::XML)
+        if (xml_text.is_a? Nokogiri::XML::Document)
           xml = xml_text
         else
           xml = Nokogiri::XML xml_text
