@@ -6,10 +6,9 @@ class GenericFile < ActiveFedora::Base
   # DRI is not storing files in Fedora (which would be too slow to be of practical use),
   # instead a datastream will link to a URL in the DRI storage system.
   def update_file_reference(dsid, opts)
-    if datastreams.has_key?(:dsid) 
-      (send dsid).dsLocation = opts[:url]
-      save
-
+    if datastreams.has_key?(dsid.to_sym) 
+      (send dsid).add_ds_location = opts[:url]
+      (send dsid).add_mime_type = opts[:mimeType]
       true
     else
       false
