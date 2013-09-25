@@ -8,7 +8,7 @@ class GenericFile < ActiveFedora::Base
   def update_file_reference(dsid, opts)
     if datastreams.has_key?(dsid) 
       (send dsid).dsLocation = opts[:url]
-      if opts.has_key?("mimeType")
+      if opts.has_key?(:mimeType)
         (send dsid).mimeType = opts[:mimeType]
       end
       (send dsid).controlGroup = 'R'
