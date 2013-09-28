@@ -44,6 +44,32 @@ module DRI
         (!new?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
       end
 
+      private
+
+      def collections_to_solr(solr_doc=Hash.new)
+
+        # Add title metadata from parent collections
+        collection_titles = []
+        collection_id = []
+
+        if (governing_collection != nil)
+          collection_titles = [governing_collection.title]
+          collection_id = [governing_collection.pid]
+        end
+
+        collections.each do |coll|
+          collection_titles | coll.title
+        end
+
+        if (!collection_titles.empty?)
+          solr_doc.merge!(solr_name('collection', :facetable) => collection_titles)
+          solr_doc.merge!(solr_name('collection', :stored_searchable) => collection_titles)
+          solr_doc.merge!(solr_name('governing_id', :facetable) => collection_id)
+        end
+
+        solr_doc
+      end
+
     end
   end
 end

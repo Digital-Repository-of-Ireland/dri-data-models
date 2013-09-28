@@ -9,14 +9,22 @@ describe GenericFile do
   end
 
   it "should have the ability to add references to audio files" do
-    @file_asset.update_file_reference("masterContent", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
-    @file_asset.datastreams.keys.should include("content")
+    @file_asset.update_file_reference("content", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
+    @file_asset.content.dsLocation.should == "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3"
+    @file_asset.content.mimeType.should == "audio/mpeg3"
+    @file_asset.content.controlGroup.should == "R"
   end
 
-  it "should not allow random files to be added" do
+  it "should not have the ability to create new datastreams when updating a file reference" do
     @file_asset.update_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
     @file_asset.datastreams.keys.should_not include("randomfile")
   end
+
+  #it "should validate the existence of file content" do
+  #  @file_asset.should_not be_valid
+  #  @file_asset.update_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
+  #  @file_asset.should be_valid
+  #end
 
   after(:each) do
     unless @file_asset.new?

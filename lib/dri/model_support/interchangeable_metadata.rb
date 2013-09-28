@@ -4,19 +4,29 @@ module DRI
       extend ActiveSupport::Concern
     
       included do
-        attr_accessor :metadata_class
         attr_accessor :desc_metadata_class
 
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
 
         after_initialize :load_delegates
+        after_save :reset_metadata_check
+
+        validates :title, :presence => true
+        validates :rights, :presence => true, :if => :require_rights?
       end
 
       def has_metadata_class_changed?
-        if (self.metadata_class != descMetadata.class)
+        if (@metadata_class != descMetadata.class)
           true
         else
           false
+        end
+      end
+
+      # Should only be set in a new class
+      def desc_metadata_class= desc_metadata_class
+        if self.new?
+          @desc_metadata_class = desc_metadata_class
         end
       end
 
@@ -34,11 +44,7 @@ module DRI
         replacing_metadata = get_metadata_class_from_xml xml_text
 
         if curr_metadata == replacing_metadata
-          if xml_text.is_a? Nokogiri::XML::Document
-            descMetadata.ng_xml = xml_text
-          else
-            descMetadata.from_xml xml_text
-          end
+          descMetadata.ng_xml = xml_text
           return true
         else
           ds = replacing_metadata.constantize.from_xml xml_text
@@ -47,6 +53,7 @@ module DRI
             return false
           end
 
+          # Got to delete the old delegates and their methods
           if descMetadata.class < DRI::Metadata::Base
             descMetadata.unset_delegates.each do |x|
               self.class.delegates.delete(x)
@@ -68,8 +75,21 @@ module DRI
 
       private
 
+      @metadata_class
+
+      def require_rights?
+          # An EAD component inherits the rights of the EAD collection. It can add
+          # morerights, but as long as we validate the EAD collection for
+          # the presence of rights, then the EAD component is automatically valid.
+          if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+            false
+          else
+            true
+          end
+      end
+
       def get_metadata_class_from_xml xml_text
-        result = "ActiveFedora::OmDatastream"
+        result = nil
         xml = nil
 
         if (xml_text.is_a? Nokogiri::XML::Document)
@@ -101,6 +121,10 @@ module DRI
         return result
       end
 
+      def reset_metadata_check
+        @metadata_class = descMetadata.class
+      end
+
       def load_delegates
         if datastreams.has_key?("descMetadata")
     
@@ -111,28 +135,22 @@ module DRI
           ds = nil
 
           if (desc_metadata_class != nil)
-            ds_class = desc_metadata_class.to_s
-            if ds_class == "DRI::Metadata::QualifiedDublinCore"
+            ds_class = @desc_metadata_class.to_s
+
+            if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::MODS",
+                 "DRI::Metadata::EncodedArchivalDescription", 
+                 "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
+              ds = ds_class.constantize.new
+            else
               ds = DRI::Metadata::QualifiedDublinCore.new
-            elsif ds_class == "DRI::Metadata::MODS"
-              ds = DRI::Metadata::MODS.new
-            elsif ds_class == "DRI::Metadata::EncodedArchivalDescription"
-              ds = DRI::Metadata::EncodedArchivalDescription.new
-            elsif ds_class == "DRI::Metadata::EncodedArchivalDescriptionComponent"
-              ds = DRI::Metadata::EncodedArchivalDescriptionComponent.new
             end
           else
             ds_class = get_metadata_class_from_xml descMetadata.to_xml
-            if ds_class == "ActiveFedora::OmDatastream"
+
+            unless (ds_class == nil)
+              ds = ds_class.constantize.from_xml descMetadata.to_xml
+            else
               ds = DRI::Metadata::QualifiedDublinCore.new
-            elsif ds_class == "DRI::Metadata::QualifiedDublinCore"
-              ds = DRI::Metadata::QualifiedDublinCore.from_xml descMetadata.to_xml
-            elsif ds_class == "DRI::Metadata::MODS"
-              ds = DRI::Metadata::MODS.from_xml descMetadata.to_xml
-            elsif ds_class == "DRI::Metadata::EncodedArchivalDescription"
-              ds = DRI::Metadata::EncodedArchivalDescription.from_xml descMetadata.to_xml
-            elsif ds_class == "DRI::Metadata::EncodedArchivalDescriptionComponent"
-              ds = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml descMetadata.to_xml
             end
           end
 
@@ -142,7 +160,7 @@ module DRI
           end
         end
 
-        self.metadata_class = descMetadata.class
+        @metadata_class = descMetadata.class
 
         if descMetadata.class < DRI::Metadata::Base
           descMetadata.set_delegates self

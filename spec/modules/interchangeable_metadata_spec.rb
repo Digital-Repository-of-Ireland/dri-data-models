@@ -15,6 +15,20 @@ describe Batch do
     @batch.descMetadata.class.should == DRI::Metadata::MODS
   end
 
+  it "should have the ability to test if the metadata is in a different class than what it originally loaded with" do
+    # From a new class
+    @mods = (DRI::Metadata::MODS.new).to_xml
+    @dc = (DRI::Metadata::QualifiedDublinCore.new).to_xml
+    @batch.datastreams.keys.should include("descMetadata")
+    @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore
+    @batch.update_metadata @mods
+    @batch.descMetadata.class.should == DRI::Metadata::MODS
+    @batch.has_metadata_class_changed?.should == true
+    @batch.update_metadata @dc
+    @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore
+    @batch.has_metadata_class_changed?.should == false
+  end
+
   it "should not have the ability to replace non-archivist metadata with archivist metadata" do
     @ead = (DRI::Metadata::EncodedArchivalDescription.new).to_xml
     @batch.datastreams.keys.should include("descMetadata")
@@ -32,13 +46,13 @@ describe Batch do
     @batch.descMetadata.class.should == DRI::Metadata::EncodedArchivalDescription
   end
 
-  it "should have the ability to initialize a batch class with a metadata class" do
+  it "should have the ability to initialize a batch class with a specific DRI metadata class" do
     @batch = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescription
     @batch.datastreams.keys.should include("descMetadata")
     @batch.descMetadata.class.should == DRI::Metadata::EncodedArchivalDescription
   end
 
-  it "a new batch class should default to using Qualified Dublin Core metadata" do
+  it "should default to using Qualified Dublin Core if Batch is new" do
     @batch.datastreams.keys.should include("descMetadata")
     @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore
   end

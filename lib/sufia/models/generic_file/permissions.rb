@@ -1,4 +1,4 @@
-# Overwriting this module so that Sufia's permissions don't kick in
+# Overwriting this module so that Sufia's default permissions don't kick in
 module Sufia
   module GenericFile
     module Permissions
