@@ -9,15 +9,15 @@ describe Batch do
     @audio.type = ["Sound"]
 
     @attributes_hash = {
-      "title" => "The Audio Title",
-      "rights" => "This is a statement about the rights associated with this object",
+      "title" => ["The Audio Title"],
+      "rights" => ["This is a statement about the rights associated with this object"],
       "role_hst" => ["Collins, Michael"],
       "role_pro" => ["Collins, Michael"],
       "role_aut" => ["Valera, Eamon, de", "Connolly, James"],
-      "language" => "ga",
-      "description" => "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+      "language" => ["ga"],
+      "description" => ["Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."],
       "published_date" => ["1916-04-01"],
-      "creation_date" => "1916-01-01",
+      "creation_date" => ["1916-01-01"],
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => ["Dublin"],
       "temporal_coverage" => ["1900s"],
@@ -70,14 +70,12 @@ describe Batch do
   it "should have the attributes of a audio and support update_attributes" do
     @audio.update_attributes( @attributes_hash )
     
-    # These attributes have been marked "unique" in the call to delegate, which causes the results to be singular
-    @audio.title.class.to_s.should == 'String'
-    @audio.rights.class.to_s.should == 'String'
-    @audio.description.class.to_s.should == 'String'
-    @audio.language.class.to_s.should == 'String'
-    @audio.creation_date.class.to_s.should == 'String'
-
     # These attributes have not been marked "unique" in the call to the delegate, which causes the results to be arrays
+    @audio.title.class.to_s.should == 'Array'
+    @audio.rights.class.to_s.should == 'Array'
+    @audio.description.class.to_s.should == 'Array'
+    @audio.language.class.to_s.should == 'Array'
+    @audio.creation_date.class.to_s.should == 'Array'
     @audio.role_hst.class.to_s.should == 'Array'
     @audio.role_pro.class.to_s.should == 'Array'
     @audio.role_aut.class.to_s.should == 'Array'
@@ -113,7 +111,7 @@ describe Batch do
     @audio2.should_not be_valid
 
     # From variable assignment
-    @attributes_hash["title"] = ""
+    @attributes_hash["title"] = []
 
     @audio.update_attributes( @attributes_hash )
 
@@ -130,7 +128,7 @@ describe Batch do
     @audio2.should_not be_valid
 
     # From variable assignment
-    @attributes_hash["rights"] = ""
+    @attributes_hash["rights"] = []
 
     @audio.update_attributes( @attributes_hash )
 

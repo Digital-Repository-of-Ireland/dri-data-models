@@ -19,10 +19,11 @@ class Batch < ActiveFedora::Base
 
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
-    
+
     solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
 
     solr_doc.merge!collections_to_solr
+    solr_doc.merge!object_types_to_solr
 
     return solr_doc
   end

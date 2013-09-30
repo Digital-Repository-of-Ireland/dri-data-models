@@ -26,7 +26,7 @@ module DRI
           return builder.doc
       end
 
-      def is_collection?
+      def collection?
         return object_type.include? "Collection"
       end
 

@@ -13,7 +13,6 @@ module DRI
           t.language(:path=>"archdesc/did/langmaterial", :index_as=>[:stored_searchable, :facetable])
           t.creator(:path=>"archdesc/did/origination", :index_as=>[:stored_searchable, :facetable])
           t.creation_date(:path=>"archdesc/did/unitdate", :index_as=>[:stored_searchable, :displayable, :facetable])
-          t.archdesc        
         
           t.subject(:path=>"archdesc//subject", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.persname_coverage(:path=>"archdesc//persname", :index_as=>[:displayable])
@@ -73,11 +72,11 @@ module DRI
         model.class.delegate :geographical_coverage, :to => :descMetadata
       end
 
-      def is_interchangeable?
+      def interchangeable?
         false
       end
 
-      def is_collection?
+      def collection?
         true
       end
 

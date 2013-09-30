@@ -11,11 +11,11 @@ module DRI
       end
 
       # Can this metadata type replace another metadata type
-      def is_interchangeable?
+      def interchangeable?
       	true
       end
 
-      def is_collection?
+      def collection?
       	false
       end
     end

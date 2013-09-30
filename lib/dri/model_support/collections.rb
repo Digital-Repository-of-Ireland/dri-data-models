@@ -7,16 +7,16 @@ module DRI
       	attr_accessor :collection
 
         belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'Batch'
-        has_many :governed_items, :property=>:is_governed_by, :class_name => 'Batch'
+        has_many :governed_items, :property=>:is_governed_by, :inbound => true, :class_name => 'Batch'
 
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'Batch'
-        has_many :items, :property=>:is_member_of_collection, :class_name => 'Batch'
+        has_many :items, :property=>:is_member_of_collection, :inbound => true, :class_name => 'Batch'
 
         def collection= collection
           if @collection == collection
           	@collection = collection
           elsif (collection == true) && (generic_files.count == 0)
-        	@collection = collection
+        	  @collection = collection
           elsif (collection == false) && (governed_items.count == 0) && (items.count == 0)
           	@collection = collection
           end
@@ -33,9 +33,9 @@ module DRI
 
       def is_collection?
       	# It is a collection if we set it as a collection either through the metadata
-      	# or using the collection accessor and there are no generic_files attached
+      	# or using the collection accessor and it has no GenericFiles
       	# to the object.
-        (descMetadata.is_collection? || properties.is_collection?) && (generic_files.count == 0)
+        (descMetadata.collection? || properties.collection?) && (generic_files.count == 0)
       end
 
       def is_root_collection?
@@ -66,6 +66,8 @@ module DRI
           solr_doc.merge!(solr_name('collection', :stored_searchable) => collection_titles)
           solr_doc.merge!(solr_name('governing_id', :facetable) => collection_id)
         end
+        
+        solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
 
         solr_doc
       end

@@ -20,6 +20,7 @@ module DRI
         #t.temporal_coverage(:path=>"unittitle", :index_as=>[:stored_searchable, :facetable])
         # EAD doesn't seem to have a tag that can be faceted as temporal_coverage 
         t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable], :type=>:date)
+        t.type(:path=>"physdesc/genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
 
         # We need to keep track of the unitid in order to sync this XML snippet to the correct
         # component tag in the complete EAD XML datastream in the collection object!
@@ -53,16 +54,26 @@ module DRI
       def set_delegates model
         model.class.delegate :title, :to => :descMetadata, :unique=>"true"
         model.class.delegate :description, :to => :descMetadata, :unique=>"true"
+        model.class.delegate :ead_level, :to => :descMetadata, :unique=>"true"
         model.class.delegate :language, :to => :descMetadata
         model.class.delegate :creator, :to => :descMetadata
         model.class.delegate :creation_date, :to => :descMetadata
         model.class.delegate :name_coverage, :to => :descMetadata
         model.class.delegate :geographical_coverage, :to => :descMetadata
+        model.class.delegate :type, :to => :descMetadata
         model.class.delegate :unitid, :to => :descMetadata
       end
 
-      def is_interchangeable?
+      def interchangeable?
         false
+      end
+
+      def collection?
+        if (ead_level == item)
+          false
+        else
+          true
+        end
       end
     end
 

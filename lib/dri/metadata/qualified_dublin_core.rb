@@ -183,21 +183,21 @@ module DRI
       end
 
       def set_delegates model
-        model.class.delegate :title, :to=>"descMetadata", :unique=>"true"
-        model.class.delegate :description, :to=>"descMetadata", :unique=>"true"
-        model.class.delegate :language, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :title, :to=>"descMetadata"
+        model.class.delegate :description, :to=>"descMetadata"
+        model.class.delegate :language, :to=>"descMetadata"
         model.class.delegate :creator, :to=>"descMetadata"
         model.class.delegate :contributor, :to=>"descMetadata"
         model.class.delegate :publisher, :to=>"descMetadata"
         model.class.delegate :published_date, :to=>"descMetadata"
-        model.class.delegate :creation_date, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :creation_date, :to=>"descMetadata"
         model.class.delegate :relation, :to=>"descMetadata"
         model.class.delegate :subject, :to=>"descMetadata"
         model.class.delegate :source, :to=>"descMetadata"
         model.class.delegate :geographical_coverage, :to=>"descMetadata"
         model.class.delegate :temporal_coverage, :to=>"descMetadata"
-        model.class.delegate :rights, :to=>"descMetadata", :unique=>"true"
-        model.class.delegate :type, :to=>"descMetadata", :unique=>"true"
+        model.class.delegate :rights, :to=>"descMetadata"
+        model.class.delegate :type, :to=>"descMetadata"
         model.class.delegate :format, :to=>"descMetadata"
         model.class.delegate :coverage, :to=>"descMetadata"
         model.class.delegate :identifier, :to=>"descMetadata"
@@ -213,6 +213,10 @@ module DRI
         DRI::Vocabulary::marcRelators.each { |s| delegates.push(s.prepend("role_"))}
 
         return delegates
+      end
+
+      def collection?
+        type.include? "Collection"
       end
 
       # Load Dublin Core terminology
