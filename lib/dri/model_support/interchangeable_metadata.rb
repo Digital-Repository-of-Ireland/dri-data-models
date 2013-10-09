@@ -18,6 +18,12 @@ module DRI
         validates :ead_level, :presence => true, :if => :require_ead_level?
       end
 
+      def roles= roles
+        if descMetadata.class == DRI::Metadata::QualifiedDublinCore
+          descMetadata.roles = roles
+        end
+      end
+
       def has_metadata_class_changed?
         if (@metadata_class != descMetadata.class)
           true

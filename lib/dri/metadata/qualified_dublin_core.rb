@@ -5,9 +5,6 @@ module DRI
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
     class QualifiedDublinCore < DRI::Metadata::Base
-      #attr_accessor :fields
-      #class_attribute :class_fields
-      #self.class_fields = []
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -73,6 +70,27 @@ module DRI
         super(new_params, opts)
       end
 
+
+      def roles= roles
+        if roles.is_a? Hash
+          if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
+            changed_roles = Hash.new
+            roles["type"].uniq.each do |role|
+              changed_roles[role] = []
+            end
+
+            roles["type"].each_with_index do |role, i|
+              if (roles["name"][i] != "")
+                changed_roles[role].push(roles["name"][i])
+              end
+            end
+
+            changed_roles.keys.each do |role|
+              send role+"=", changed_roles[role]
+            end
+          end
+        end
+      end
 
       # Build the xml doc
       def self.xml_template
