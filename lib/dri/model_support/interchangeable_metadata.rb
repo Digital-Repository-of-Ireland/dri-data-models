@@ -52,6 +52,7 @@ module DRI
           descMetadata.ng_xml = xml_text
           return true
         elsif replacing_metadata != nil
+          old_digital_object = descMetadata.digital_object
           ds = replacing_metadata.constantize.from_xml xml_text
 
           # Given that the original and replacing metadata are definitely
@@ -70,6 +71,7 @@ module DRI
             end              
           end
 
+          ds.digital_object = old_digital_object
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
 
@@ -164,12 +166,13 @@ module DRI
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
-
+          old_digital_object = descMetadata.digital_object
           unless (ds_class == nil)
             ds = ds_class.constantize.from_xml descMetadata.to_xml
           else
             ds = DRI::Metadata::QualifiedDublinCore.new
           end
+          ds.digital_object = old_digital_object
         end
 
         if (ds != nil)            
