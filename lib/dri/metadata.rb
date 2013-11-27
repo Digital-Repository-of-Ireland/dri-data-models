@@ -7,6 +7,7 @@ module DRI
     autoload :DublinCoreCollection, 'dri/metadata/dublin_core_collection'
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
+    autoload :FileProperties, 'dri/metadata/file_properties'
     autoload :MODS, 'dri/metadata/mods'
     autoload :Properties, 'dri/metadata/properties'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'

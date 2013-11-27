@@ -3,6 +3,12 @@ class GenericFile < ActiveFedora::Base
 
   #after_initialize :redirect_content
 
+  has_metadata :name => "properties", :type => DRI::Metadata::FileProperties
+
+  delegate :checksum_md5, :to=>"properties", :unique=>"true"
+  delegate :checksum_sha256, :to=>"properties", :unique=>"true"
+  delegate :checksum_rmd160, :to=>"properties", :unique=>"true"
+
   # DRI is not storing files in Fedora (which would be too slow to be of practical use),
   # instead a datastream will link to a URL in the DRI storage system.
   def update_file_reference(dsid, opts)
