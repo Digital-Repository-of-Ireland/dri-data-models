@@ -36,3 +36,5 @@ class GenericFile < ActiveFedora::Base
     return solr_doc
   end
 end
+
+

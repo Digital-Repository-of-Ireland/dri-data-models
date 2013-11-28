@@ -2,7 +2,7 @@ module DRI
 
   module Metadata
 
-    class EncodedArchivalDescriptionComponent < ActiveFedora::OmDatastream
+    class EncodedArchivalDescriptionComponent < DRI::Metadata::Base
 
       # OM (Opinionated Metadata) terminology mapping to an EAD Component tag
       set_terminology do |t|
@@ -20,6 +20,7 @@ module DRI
         #t.temporal_coverage(:path=>"unittitle", :index_as=>[:stored_searchable, :facetable])
         # EAD doesn't seem to have a tag that can be faceted as temporal_coverage 
         t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable], :type=>:date)
+        t.type(:path=>"physdesc/genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
 
         # We need to keep track of the unitid in order to sync this XML snippet to the correct
         # component tag in the complete EAD XML datastream in the collection object!
@@ -50,6 +51,30 @@ module DRI
          return name_coverage | persname_coverage | corpname_coverage | creator
       end
 
+      def set_attributes model
+        model.class.has_attributes :title, datastream: :descMetadata, multiple: false
+        model.class.has_attributes :description, datastream: :descMetadata, multiple: false
+        model.class.has_attributes :ead_level, datastream: :descMetadata, multiple: false
+        model.class.has_attributes :language, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :name_coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :type, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :unitid, datastream: :descMetadata, multiple: true
+      end
+
+      def interchangeable?
+        false
+      end
+
+      def collection?
+        if (ead_level == item)
+          false
+        else
+          true
+        end
+      end
     end
 
   end
