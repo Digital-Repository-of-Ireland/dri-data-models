@@ -2,7 +2,7 @@ module DRI
 
   module Metadata
 
-    class EncodedArchivalDescription < ActiveFedora::OmDatastream
+    class EncodedArchivalDescription < DRI::Metadata::Base
 
       # OM (Opinionated Metadata) terminology mapping for EAD
       set_terminology do |t|
@@ -13,7 +13,6 @@ module DRI
           t.language(:path=>"archdesc/did/langmaterial", :index_as=>[:stored_searchable, :facetable])
           t.creator(:path=>"archdesc/did/origination", :index_as=>[:stored_searchable, :facetable])
           t.creation_date(:path=>"archdesc/did/unitdate", :index_as=>[:stored_searchable, :displayable, :facetable])
-          t.archdesc        
         
           t.subject(:path=>"archdesc//subject", :index_as=>[:stored_searchable, :facetable, :displayable])
           t.persname_coverage(:path=>"archdesc//persname", :index_as=>[:displayable])
@@ -61,6 +60,24 @@ module DRI
 
       def get_person_array()
          return name_coverage | persname_coverage | corpname_coverage | creator
+      end
+
+      def set_attributes model
+        model.class.has_attributes :title, datastream: :descMetadata, multiple: false
+        model.class.has_attributes :description, datastream: :descMetadata, multiple: false
+        model.class.has_attributes :language, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :name_coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+      end
+
+      def interchangeable?
+        false
+      end
+
+      def collection?
+        true
       end
 
     end

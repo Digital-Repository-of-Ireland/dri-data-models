@@ -4,10 +4,7 @@ module DRI
 
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
-    class QualifiedDublinCore < ActiveFedora::OmDatastream
-      attr_accessor :fields
-      class_attribute :class_fields
-      self.class_fields = []
+    class QualifiedDublinCore < DRI::Metadata::Base
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -73,6 +70,27 @@ module DRI
         super(new_params, opts)
       end
 
+
+      def roles= roles
+        if roles.is_a? Hash
+          if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
+            changed_roles = Hash.new
+            roles["type"].uniq.each do |role|
+              changed_roles[role] = []
+            end
+
+            roles["type"].each_with_index do |role, i|
+              if (roles["name"][i] != "")
+                changed_roles[role].push(roles["name"][i])
+              end
+            end
+
+            changed_roles.keys.each do |role|
+              send role+"=", changed_roles[role]
+            end
+          end
+        end
+      end
 
       # Build the xml doc
       def self.xml_template
@@ -180,6 +198,44 @@ module DRI
           end
 
           return people
+      end
+
+      def set_attributes model
+        model.class.has_attributes :title, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :description, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :language, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :contributor, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :publisher, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :published_date, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :relation, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :subject, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :source, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :rights, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :type, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :format, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :coverage, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :identifier, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :geocode_point, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :geocode_box, datastream: :descMetadata, multiple: true
+        model.class.has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
+                                    multiple: true
+      end
+
+      def unset_attributes
+        delegates = [ "title", "description", "language", "creator", "contributor", "publisher", "published_date",
+          "creation_date", "relation", "subject", "source", "geographical_coverage", "temporal_coverage", "rights",
+          "type", "format", "coverage", "identifier", "geocode_point", "geocode_box"]
+        DRI::Vocabulary::marcRelators.each { |s| delegates.push(s.prepend("role_"))}
+
+        return delegates
+      end
+
+      def collection?
+        type.include? "Collection"
       end
 
       # Load Dublin Core terminology
