@@ -21,6 +21,11 @@ module DRI
           t.geographical_coverage(:path=>"archdesc//geogname", :index_as=>[:stored_searchable, :facetable])
       end # set_terminology
 
+      def initialize
+        super
+        @synchronize_metadata_on_save = true
+      end
+      
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|

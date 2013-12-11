@@ -27,6 +27,11 @@ module DRI
         t.unitid(:path=>"unitid", :index_as=>[:stored_searchable])
       end # set_terminology
 
+      def initialize
+        super
+        @synchronize_metadata_on_save = true
+      end
+
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
