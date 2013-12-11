@@ -1,4 +1,4 @@
-class SynchronizeMetadata < ActiveFedoraPidBasedJob
+class SynchronizeMetadataJob < ActiveFedoraPidBasedJob
 
   def queue_name
     :synchronize_metadata
