@@ -175,7 +175,14 @@ module DRI
           ds.digital_object = old_digital_object
         end
 
-        if (ds != nil)            
+        if (ds != nil)
+          if descMetadata.class < DRI::Metadata::Base
+            descMetadata.unset_attributes.each do |x|
+              self.class.defined_attributes.delete(x)
+              self.class.send :remove_method, x.to_sym
+              self.class.send :remove_method, "#{x}=".to_sym
+            end              
+          end            
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
         end

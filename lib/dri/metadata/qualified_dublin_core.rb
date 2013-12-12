@@ -9,7 +9,7 @@ module DRI
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
         set_terminology do |t|
-          t.root(:path=>"/*") # Selects the root node of the XML document
+          t.root(:path=>"*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
           t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])

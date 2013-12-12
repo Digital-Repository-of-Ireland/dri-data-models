@@ -6,25 +6,30 @@ module DRI
 
       # OM (Opinionated Metadata) terminology mapping to an EAD Component tag
       set_terminology do |t|
-        t.root(:path=>"/*", :namespace_prefix => nil) {
-          t.ead_level(:path => {:attribute=>"level"})
-        }
-        t.title(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
-        t.description(:path=>"abstract", :index_as=>[:stored_searchable, :displayable])
-        t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
-        t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
-        t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
-        t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
-        t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
-        t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
-        #t.temporal_coverage(:path=>"unittitle", :index_as=>[:stored_searchable, :facetable])
-        # EAD doesn't seem to have a tag that can be faceted as temporal_coverage 
-        t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable], :type=>:date)
-        t.type(:path=>"physdesc/genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+        t.root(:path=>"*", :namespace_prefix => nil)
 
-        # We need to keep track of the unitid in order to sync this XML snippet to the correct
-        # component tag in the complete EAD XML datastream in the collection object!
-        t.unitid(:path=>"unitid", :index_as=>[:stored_searchable])
+        t.c(:path=>"*", :namespace_prefix => nil) {
+          t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+          t.did(:path => "did", :namespace_prefix => nil) {
+            t.title(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
+            t.description(:path=>"abstract", :index_as=>[:stored_searchable, :displayable])
+            t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
+            t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
+            t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
+            t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
+            t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
+            t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
+            t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable], :type=>:date)
+            t.type(:path=>"physdesc/genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+
+            # We need to keep track of the unitid in order to sync this XML snippet to the correct
+            # component tag in the complete EAD XML datastream in the collection object!
+            t.unitid(:path=>"unitid", :index_as=>[:stored_searchable], :namespace_prefix => nil) {
+              t.repository_code(:path => {:attribute=>"repositorycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+              t.country_code(:path => {:attribute=>"countrycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+            }
+          }
+        }
       end # set_terminology
 
       def initialize
@@ -35,7 +40,12 @@ module DRI
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
-              xml.c
+              xml.c(:level => '') {
+                xml.did {
+                  xml.unittitle
+                  xml.unitid(:repositorycode => '', :countrycode => 'IE')
+                }
+              }
           end
 
           return builder.doc
@@ -57,16 +67,18 @@ module DRI
       end
 
       def set_attributes model
-        model.class.has_attributes :title, datastream: :descMetadata, multiple: false
-        model.class.has_attributes :description, datastream: :descMetadata, multiple: false
-        model.class.has_attributes :ead_level, datastream: :descMetadata, multiple: false
-        model.class.has_attributes :language, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :name_coverage, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :type, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :unitid, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :title, datastream: :descMetadata, at: [:c, :did, :title], multiple: false
+        model.class.has_attributes :description, datastream: :descMetadata, at: [:c, :did, :description], multiple: false
+        model.class.has_attributes :ead_level, datastream: :descMetadata, at: [:c, :ead_level], multiple: false
+        model.class.has_attributes :language, datastream: :descMetadata, at: [:c, :did, :language], multiple: true
+        model.class.has_attributes :creator, datastream: :descMetadata,  at: [:c, :did, :creator], multiple: true
+        model.class.has_attributes :creation_date, datastream: :descMetadata, at: [:c, :did, :creation_date], multiple: true
+        model.class.has_attributes :name_coverage, datastream: :descMetadata, at: [:c, :did, :name_coverage], multiple: true
+        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, at: [:c, :did, :geographical_coverage], multiple: true
+        model.class.has_attributes :type, datastream: :descMetadata, multiple: true,  at: [:c, :did, :type]
+        model.class.has_attributes :unitid, datastream: :descMetadata, at: [:c, :did, :unitid], multiple: false
+        model.class.has_attributes :repository_code, datastream: :descMetadata, at: [:c, :did, :unitid, :repository_code], multiple: false
+        model.class.has_attributes :country_code, datastream: :descMetadata, at: [:c, :did, :unitid, :country_code], multiple: false
       end
 
       def interchangeable?
@@ -80,6 +92,28 @@ module DRI
           true
         end
       end
+
+      def synchronize_metadata
+        # Exit if we have no parent to sync with
+        if governing_collection == nil
+          return
+        end
+
+        # Prevent governing_collection from automatically syncing
+        governing_collection.synchronize_if_changed = false
+
+        # Check if the component node in parent XML is different
+        parentMetadataXML = governing_collection.descMetadata.to_ng
+        childMetadataXML = descMetadata.to_ng
+
+        matchingNodes = parentMetadataXML.xpath(".//parent::unitid[@repository_code='#{repository_code}' and @countrycode='#{country_code}' and "+
+                                            " text()=#{unitid}]")
+        # Queue synchronization between parent and grandparent
+        if governing_collection.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent 
+          Sufia.queue.push(SynchronizeMetadata.new(governing_collection.pid))
+        end
+      end
+
     end
 
   end
