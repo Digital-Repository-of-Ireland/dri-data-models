@@ -10,7 +10,7 @@ module DRI
 
         after_initialize :load_attributes
         after_save :reset_metadata_check
-        around_save :synchronize_if_changed
+        #around_save :synchronize_if_changed
 
         validates :title, :presence => true
         validates :description, :presence => true
