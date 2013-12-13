@@ -10,6 +10,7 @@ module DRI
 
         after_initialize :load_attributes
         after_save :reset_metadata_check
+        around_save :synchronize_if_changed
 
         validates :title, :presence => true
         validates :description, :presence => true
@@ -81,6 +82,10 @@ module DRI
 
           return true
         end
+      end
+
+      def synchronize_metadata
+        descMetadata.synchronize_metadata governing_collection
       end
 
       private
@@ -191,6 +196,14 @@ module DRI
 
         if descMetadata.class < DRI::Metadata::Base
           descMetadata.set_attributes self
+        end
+      end
+
+      def synchronize_if_changed
+        if (self.descMetadata.synchronize_metadata_on_save == true)
+          content_changed = self.descMetadata.changed?
+          yield
+          Sufia.queue.push(SynchronizeMetadata.new(self.pid)) if content_changed
         end
       end
 

@@ -31,10 +31,34 @@ describe Batch do
 
     @audio2 = Batch.new
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2.update_metadata @ds.to_xml
+    @audio2.descMetadata.ng_xml = @ds.to_xml
+    @audio2.descMetadata.content_changed?.should == true
+    @audio2.should be_valid
+    @audio2.creator.should == ["Gallagher, Damien"]
     @audio2.save
-    @audio2.pid.should_not == "_DO_NOT_USE_"
+    @audio2.new?.should == false
     @audio2.delete
+  end
+
+  it "should load from Fedora" do
+    @audio.update_attributes( @attributes_hash )
+    @audio.save
+    @audio.new?.should == false
+    @audio3 = Batch.find(@audio.pid)
+    @audio3.title.should == @attributes_hash["title"]
+    @audio3.rights.should == @attributes_hash["rights"]
+    @audio3.description.should == @attributes_hash["description"]
+    @audio3.published_date.should == @attributes_hash["published_date"]
+    @audio3.creation_date.should == @attributes_hash["creation_date"]
+    @audio3.language.should == @attributes_hash["language"]
+    @audio3.role_pro.should == @attributes_hash["role_hst"]
+    @audio3.role_hst.should == @attributes_hash["role_pro"]
+    @audio3.role_aut.should == @attributes_hash["role_aut"]    
+    @audio3.subject.should == @attributes_hash["subject"]
+    @audio3.source.should == @attributes_hash["source"]
+    @audio3.geographical_coverage.should == @attributes_hash["geographical_coverage"]
+    @audio3.temporal_coverage.should == @attributes_hash["temporal_coverage"]
+    @audio3.should be_valid
   end
 
   it "should have the specified datastreams" do

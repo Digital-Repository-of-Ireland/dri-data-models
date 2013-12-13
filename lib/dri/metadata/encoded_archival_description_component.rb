@@ -93,24 +93,24 @@ module DRI
         end
       end
 
-      def synchronize_metadata
+      def synchronize_metadata parent
         # Exit if we have no parent to sync with
-        if governing_collection == nil
+        if parent == nil
           return
         end
 
-        # Prevent governing_collection from automatically syncing
-        governing_collection.synchronize_if_changed = false
+        # Prevent parent from automatically syncing
+        parent.synchronize_if_changed = false
 
         # Check if the component node in parent XML is different
-        parentMetadataXML = governing_collection.descMetadata.to_ng
+        parentMetadataXML = parent.descMetadata.to_ng
         childMetadataXML = descMetadata.to_ng
 
         matchingNodes = parentMetadataXML.xpath(".//parent::unitid[@repository_code='#{repository_code}' and @countrycode='#{country_code}' and "+
                                             " text()=#{unitid}]")
         # Queue synchronization between parent and grandparent
-        if governing_collection.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent 
-          Sufia.queue.push(SynchronizeMetadata.new(governing_collection.pid))
+        if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent 
+          Sufia.queue.push(SynchronizeMetadata.new(parent.pid))
         end
       end
 
