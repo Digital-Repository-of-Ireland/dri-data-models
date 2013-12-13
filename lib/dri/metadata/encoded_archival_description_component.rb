@@ -63,7 +63,7 @@ module DRI
       end
 
       def get_person_array()
-         return name_coverage | persname_coverage | corpname_coverage | creator
+         return c.did.name_coverage | c.did.persname_coverage | c.did.corpname_coverage | c.did.creator
       end
 
       def set_attributes model
@@ -86,7 +86,7 @@ module DRI
       end
 
       def collection?
-        if (ead_level == item)
+        if (c.ead_level == ["file"])
           false
         else
           true

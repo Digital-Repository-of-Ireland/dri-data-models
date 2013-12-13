@@ -20,9 +20,16 @@ describe Batch do
     @ead_file.repository_code.should == "IE-DuNCA"
   end
 
-  it "should expose the level of the component" do
+  it "should expose the level of the EAD component" do
     @ead_series.ead_level.should == "series"
     @ead_file.ead_level.should == "file"
+  end
+
+  it "should use the EAD component level to determine whether the component is a collection or not" do
+    @ead_series.is_collection?.should == true
+    @ead_series.is_root_collection?.should == false
+    @ead_file.is_collection?.should == false
+    @ead_file.is_root_collection?.should == false
   end
 
   xit "should expose metadata fields recommended by the DRI Metadata Models Taskforce for indexing" do
