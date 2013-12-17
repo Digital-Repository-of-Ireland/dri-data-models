@@ -14,6 +14,7 @@ module DRI
         t.model_version(:path=>"modelVersion",:namespace_prefix => nil)
         t.verified(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.doi(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
+        t.cover_image(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
       end # set_terminology
 
       # Build the default XML document

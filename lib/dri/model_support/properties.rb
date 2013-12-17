@@ -11,8 +11,9 @@ module DRI
         has_attributes :depositor, datastream: :properties, multiple: false
         has_attributes :metadata_md5, datastream: :properties, multiple: false
         has_attributes :model_version, datastream: :properties, multiple: false
-        has_attributes :verified, datastream: :properties, multiple: false 
+        has_attributes :verified, datastream: :properties, multiple: false
         has_attributes :doi, datastream: :properties, multiple: false
+        has_attributes :cover_image, datastream: :properties, multiple: false
       end
     end
   end
