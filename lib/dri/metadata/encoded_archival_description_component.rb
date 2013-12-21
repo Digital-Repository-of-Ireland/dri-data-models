@@ -12,7 +12,7 @@ module DRI
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
           t.did(:path => "did", :namespace_prefix => nil) {
             t.title(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
-            t.description(:path=>"abstract", :index_as=>[:stored_searchable, :displayable])
+            t.abstract(:path=>"abstract", :index_as=>[:displayable])
             t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
             t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
             t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
@@ -29,13 +29,16 @@ module DRI
               t.country_code(:path => {:attribute=>"countrycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
             }
           }
+          t.bioghist {
+
+          }
+          t.scopecontent {
+
+          }
         }
       end # set_terminology
 
-      def initialize
-        super
-        @synchronize_metadata_on_save = true
-      end
+      synchronize_metadata_on_save = true
 
       # Build the xml doc
       def self.xml_template
@@ -56,8 +59,11 @@ module DRI
 
         # EAD has several "name" tags, so we merge them together into the SOLR document
         person_array = get_person_array()
+        description_array = description
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description_array)
 
         solr_doc
       end
@@ -66,9 +72,15 @@ module DRI
          return c.did.name_coverage | c.did.persname_coverage | c.did.corpname_coverage | c.did.creator
       end
 
+      def description
+        return c.did.abstract | c.scopecontent | c.bioghist
+      end
+
       def set_attributes model
         model.class.has_attributes :title, datastream: :descMetadata, at: [:c, :did, :title], multiple: false
-        model.class.has_attributes :description, datastream: :descMetadata, at: [:c, :did, :description], multiple: false
+        model.class.has_attributes :abstract, datastream: :descMetadata, at: [:c, :did, :abstract], multiple: false
+        model.class.has_attributes :bioghist, datastream: :descMetadata, at: [:c, :bioghist], multiple: false
+        model.class.has_attributes :scope_content, datastream: :descMetadata, at: [:c, :scopecontent], multiple: false
         model.class.has_attributes :ead_level, datastream: :descMetadata, at: [:c, :ead_level], multiple: false
         model.class.has_attributes :language, datastream: :descMetadata, at: [:c, :did, :language], multiple: true
         model.class.has_attributes :creator, datastream: :descMetadata,  at: [:c, :did, :creator], multiple: true
@@ -81,12 +93,19 @@ module DRI
         model.class.has_attributes :country_code, datastream: :descMetadata, at: [:c, :did, :unitid, :country_code], multiple: false
       end
 
+      def unset_attributes
+        delegates = [ "title", "abstract", "bioghist", "scope_content", "ead_level", "language", "creator",
+          "creation_date", "name_coverage", "geographical_coverage", "type", "unitid", "repository_code", "country_code"]
+
+        return delegates
+      end
+
       def interchangeable?
         false
       end
 
       def collection?
-        if (c.ead_level == ["file"])
+        if c.ead_level == ["file"]
           false
         else
           true
@@ -112,6 +131,18 @@ module DRI
         if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent 
           Sufia.queue.push(SynchronizeMetadata.new(parent.pid))
         end
+      end
+
+      def custom_validations
+        errors = Hash.new
+        
+        errors[:abstract] = "can not be blank" if description.blank?
+        errors[:ead_level] = "can not be blank" if c.ead_level.blank? #hmm, this check is not working
+        errors[:unitid] = "can not be blank" if c.did.unitid.blank?
+        errors[:country_code] = "can not be blank" if c.did.unitid.country_code.blank?
+        errors[:repository_code] = "can not be blank" if c.did.unitid.repository_code.blank?
+
+        errors
       end
 
     end

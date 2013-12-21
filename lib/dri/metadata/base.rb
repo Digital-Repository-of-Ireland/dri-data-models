@@ -8,13 +8,6 @@ module DRI
       # to synchronize the XML between several objects
       attr_accessor :synchronize_metadata_on_save
 
-      # By default, @synchronize_metadata_on_save is disabled
-      def initialize(digital_object = nil, dsid = nil, options = {})
-        @synchronize_metadata_on_save = false
-
-        super
-      end
-
       # Overwrite this function to add synchronizing logic relevant to
       # your metadata standard
       def synchronize_metadata parent
@@ -34,6 +27,10 @@ module DRI
 
       def collection?
       	false
+      end
+
+      def custom_validations
+        Hash.new
       end
     end
   end

@@ -134,11 +134,56 @@ describe Batch do
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
-    # From variable assignment
-    @attributes_hash["title"] = []
-
+    # From update_attributes assignment
+    @audio = Batch.new
+    @attributes_hash[:title] = [""]
     @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+    @audio = Batch.new
+    @attributes_hash.delete("title")
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
 
+    # From variable assignment
+    @audio = Batch.new
+    @audio.description = ["blah"]
+    @audio.rights = ["blah"]
+    @audio.creator = ["blah"]
+    @audio.type = ["Sound"]
+    @audio.title = []
+    @audio.should_not be_valid
+
+    @audio.title = [""]
+    @audio.should_not be_valid
+  end
+
+  it "should validate the presence of the description metadata field" do
+    # From ingestion
+    @dc = fixture("audios/dublin_core_audio_nodescription_sample.xml")
+    @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
+    @audio.update_metadata @ds.to_xml
+    @audio.should_not be_valid
+
+    # From update_attributes assignment
+    @audio = Batch.new
+    @attributes_hash[:description] = [""]
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+    @audio = Batch.new
+    @attributes_hash.delete("description")
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+
+    # From variable assignment
+    @audio = Batch.new
+    @audio.title = ["blah"]
+    @audio.rights = ["blah"]
+    @audio.creator = ["blah"]
+    @audio.type = ["Sound"]
+    @audio.description = []
+    @audio.should_not be_valid
+
+    @audio.description = [""]
     @audio.should_not be_valid
 
   end
@@ -151,11 +196,57 @@ describe Batch do
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
-    # From variable assignment
-    @attributes_hash["rights"] = []
-
+    # From update_attributes assignment
+    @audio = Batch.new
+    @attributes_hash[:rights] = [""]
     @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+    @audio = Batch.new
+    @attributes_hash.delete("rights")
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
 
+    # From variable assignment
+    @audio = Batch.new
+    @audio.title = ["blah"]
+    @audio.rights = []
+    @audio.creator = ["blah"]
+    @audio.type = ["Sound"]
+    @audio.description = ["blah"]
+    @audio.should_not be_valid
+
+    @audio.rights = [""]
+    @audio.should_not be_valid
+  end
+
+  it "should validate the presence of the type metadata field" do
+    # From ingestion
+    @dc = fixture("audios/dublin_core_audio_notype_sample.xml")
+    @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
+    @audio2 = Batch.new
+    @audio2.update_metadata @ds.to_xml
+    @audio2.should_not be_valid
+
+    # From update_attributes assignment
+    @audio = Batch.new
+    @attributes_hash[:type] = [""]
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+    @audio = Batch.new
+    @attributes_hash.delete("type")
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+
+    # From variable assignment
+    @audio = Batch.new
+    @audio.title = ["blah"]
+    @audio.rights = ["blah"]
+    @audio.creator = ["blah"]
+    @audio.type = []
+    @audio.description = ["blah"]
+    @audio.should_not be_valid
+
+    @audio.type = [""]
     @audio.should_not be_valid
   end
 

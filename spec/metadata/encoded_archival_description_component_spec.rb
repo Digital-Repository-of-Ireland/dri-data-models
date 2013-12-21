@@ -35,7 +35,48 @@ describe Batch do
   xit "should expose metadata fields recommended by the DRI Metadata Models Taskforce for indexing" do
   end
 
-  xit "it should be invalid if there are incomplete mandatory fields" do
+  it "should validate the presence of the title metadata field" do
+    @ead_file.title = ""
+    @ead_file.should_not be_valid
+  end
+
+  it "should validate the presence of the description metadata fields" do
+    @ead_file.scope_content = ""
+    @ead_file.abstract = ""
+    @ead_file.bioghist = ""
+    @ead_file.should_not be_valid
+  end
+
+  it "should validate the presence of the genreform metadata field if component level is 'file'" do
+    @ead_file.ead_level.should == "file"
+    @ead_file.type = []
+    @ead_file.should_not be_valid
+  end
+
+  it "should not validate the presence of the genreform metadata field if component level is not 'file'" do
+    @ead_series.ead_level.should == "series"
+    @ead_series.type = []
+    @ead_series.should be_valid
+  end
+
+  it "should validate the presence of the level attribute" do
+    @ead_file.ead_level = ""
+    @ead_file.should_not be_valid
+  end
+
+  it "should validate the presence of an EAD unitid" do
+    @ead_file.unitid = ""
+    @ead_file.should_not be_valid
+  end
+
+  it "should validate the presence of the unitid countrycode attribute" do
+    @ead_file.country_code = ""
+    @ead_file.should_not be_valid
+  end
+
+  it "should validate the presence of the unitid repositorycode attribute" do
+    @ead_file.repository_code = ""
+    @ead_file.should_not be_valid
   end
 
   it "it should handle all variations of the EAD component node" do
