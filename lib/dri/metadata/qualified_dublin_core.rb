@@ -238,6 +238,38 @@ module DRI
         type.include? "Collection"
       end
 
+      def custom_validations
+        errors = Hash.new
+
+        title_result = false
+        description_result = false
+        rights_result = false
+        type_result = false
+
+        title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        rights.each do |curr_right|
+          rights_result = true unless curr_right.blank?
+        end
+
+        type.each do |curr_type|
+          type_result = true unless curr_type.blank?
+        end
+
+        errors[:title] = "must not be empty" if title_result == false
+        errors[:description] = "must not be empty" if description_result == false
+        errors[:rights] = "must not be empty" if rights_result == false
+        errors[:type] = "must not be empty" if type_result == false
+
+        return errors
+      end
+
       # Load Dublin Core terminology
       load_inherited_terminology      
     end # class

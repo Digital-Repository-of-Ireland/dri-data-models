@@ -21,11 +21,8 @@ module DRI
           t.geographical_coverage(:path=>"archdesc//geogname", :index_as=>[:stored_searchable, :facetable])
       end # set_terminology
 
-      def initialize
-        super
-        @synchronize_metadata_on_save = true
-      end
-      
+      synchronize_metadata_on_save = true
+
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
@@ -75,6 +72,12 @@ module DRI
         model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
         model.class.has_attributes :name_coverage, datastream: :descMetadata, multiple: true
         model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+      end
+
+      def unset_attributes
+        delegates = [ "title", "description", "language", "creator", "creation_date", "name_coverage", "geographical_coverage"]
+
+        return delegates
       end
 
       def interchangeable?

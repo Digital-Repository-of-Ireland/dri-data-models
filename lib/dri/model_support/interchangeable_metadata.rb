@@ -9,14 +9,14 @@ module DRI
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
 
         after_initialize :load_attributes
-        after_save :reset_metadata_check
-        #around_save :synchronize_if_changed
+        after_save :reset_metadata_check, :synchronize_if_changed
 
         validates :title, :presence => true
-        validates :description, :presence => true
+        validates :description, :presence => true, :if => :require_description?
         validates :rights, :presence => true, :if => :require_rights?
         validates :type, :presence => true, :if => :require_type?
         validates :ead_level, :presence => true, :if => :require_ead_level?
+        validate :custom_validations
       end
 
       def roles= roles
@@ -76,8 +76,8 @@ module DRI
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
 
-          if descMetadata.class < DRI::Metadata::Base
-            descMetadata.set_attributes self
+          if ds.class < DRI::Metadata::Base
+            ds.set_attributes self
           end
 
           return true
@@ -92,15 +92,15 @@ module DRI
 
       @metadata_class
 
+      def require_description?
+        !descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+      end
+
       def require_rights?
           # An EAD component inherits the rights of the EAD collection. It can add
           # more rights, but as long as we validate the EAD collection for
           # the presence of rights, then the EAD component is automatically valid.
-          if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-            false
-          else
-            true
-          end
+        !descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
       end
 
       def require_type?
@@ -108,7 +108,7 @@ module DRI
         if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
           false
         elsif descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-          if ead_level == "item"
+          if ead_level == "file"
             true
           else
             false
@@ -120,6 +120,27 @@ module DRI
 
       def require_ead_level?
         descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent
+      end
+
+      def require_unitid?
+        descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent
+      end
+
+      def custom_validations
+        if descMetadata.class < DRI::Metadata::Base
+          results = descMetadata.custom_validations
+
+          if results.empty?
+            return true
+          else
+            results.each do |key, value|
+              errors.add(key,value)
+            end
+            return false
+          end
+        else
+          return true
+        end
       end
 
       def get_metadata_class_from_xml xml_text
