@@ -14,6 +14,7 @@ module DRI
         has_attributes :verified, datastream: :properties, multiple: false
         has_attributes :doi, datastream: :properties, multiple: false
         has_attributes :cover_image, datastream: :properties, multiple: false
+        has_attributes :institute, datastream: :properties, multiple: true
       end
     end
   end
