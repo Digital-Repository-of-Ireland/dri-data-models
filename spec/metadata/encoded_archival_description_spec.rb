@@ -1,4 +1,3 @@
-# encoding: utf-8
 # spec/metadata/encoded_archival_description_spec.rb
 require 'spec_helper'
 

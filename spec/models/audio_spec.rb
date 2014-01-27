@@ -150,6 +150,7 @@ describe Batch do
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
     @audio.type = ["Sound"]
+    @audio.date = ["1916-04-01"]
     @audio.title = []
     @audio.should_not be_valid
 
@@ -180,6 +181,7 @@ describe Batch do
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
     @audio.type = ["Sound"]
+    @audio.date = ["1916-04-01"]
     @audio.description = []
     @audio.should_not be_valid
 
@@ -213,6 +215,7 @@ describe Batch do
     @audio.creator = ["blah"]
     @audio.type = ["Sound"]
     @audio.description = ["blah"]
+    @audio.date = ["1916-04-01"]
     @audio.should_not be_valid
 
     @audio.rights = [""]
@@ -243,10 +246,44 @@ describe Batch do
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
     @audio.type = []
+    @audio.date = ["1916-04-01"]
     @audio.description = ["blah"]
     @audio.should_not be_valid
 
     @audio.type = [""]
+    @audio.should_not be_valid
+  end
+
+  it "should validate the presence of the date metadata fields" do
+    # From ingestion
+    @dc = fixture("audios/dublin_core_audio_nodate_sample.xml")
+    @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
+    @audio2 = Batch.new
+    @audio2.update_metadata @ds.to_xml
+    @audio2.should_not be_valid
+
+    # From update_attributes assignment
+    @audio = Batch.new
+    @attributes_hash[:type] = [""]
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+    @audio = Batch.new
+    @attributes_hash.delete("creation_date")
+    @attributes_hash.delete("published_date")
+    @audio.update_attributes( @attributes_hash )
+    @audio.should_not be_valid
+
+    # From variable assignment
+    @audio = Batch.new
+    @audio.title = ["blah"]
+    @audio.rights = ["blah"]
+    @audio.creator = ["blah"]
+    @audio.date = []
+    @audio.type = ["Sound"]
+    @audio.description = ["blah"]
+    @audio.should_not be_valid
+
+    @audio.date = [""]
     @audio.should_not be_valid
   end
 
