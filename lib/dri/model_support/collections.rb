@@ -53,7 +53,7 @@ module DRI
         collection_id = []
 
         if (governing_collection != nil)
-          collection_titles = [governing_collection.title]
+          collection_titles = [governing_collection.title[0]]
           collection_id = [governing_collection.pid]
         end
 
