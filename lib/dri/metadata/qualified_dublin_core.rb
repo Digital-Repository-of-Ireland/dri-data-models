@@ -21,7 +21,7 @@ module DRI
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :dateable])
+          t.date(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
@@ -37,8 +37,8 @@ module DRI
           t.identifier(:namespace_prefix=>"dc")
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable])
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])  {
             t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
@@ -207,6 +207,7 @@ module DRI
         model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
         model.class.has_attributes :contributor, datastream: :descMetadata, multiple: true
         model.class.has_attributes :publisher, datastream: :descMetadata, multiple: true
+        model.class.has_attributes :date, datastream: :descMetadata, multiple: true
         model.class.has_attributes :published_date, datastream: :descMetadata, multiple: true
         model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
         model.class.has_attributes :relation, datastream: :descMetadata, multiple: true
@@ -245,6 +246,7 @@ module DRI
         description_result = false
         rights_result = false
         type_result = false
+        date_result = false
 
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
@@ -262,10 +264,27 @@ module DRI
           type_result = true unless curr_type.blank?
         end
 
+        date.each do |curr_date|
+          date_result = true unless curr_date.blank?
+        end
+
+        if !date_result
+          creation_date.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+
+        if !date_result
+          published_date.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+
         errors[:title] = "must not be empty" if title_result == false
         errors[:description] = "must not be empty" if description_result == false
         errors[:rights] = "must not be empty" if rights_result == false
         errors[:type] = "must not be empty" if type_result == false
+        errors[:date] = "must not be empty" if date_result == false
 
         return errors
       end
