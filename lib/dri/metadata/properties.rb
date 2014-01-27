@@ -16,6 +16,7 @@ module DRI
         t.doi(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.cover_image(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.institute(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
+        t.licence(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
       end # set_terminology
 
       # Build the default XML document
