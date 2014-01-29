@@ -8,11 +8,6 @@ module DRI
       # to synchronize the XML between several objects
       attr_accessor :synchronize_metadata_on_save
 
-      # Overwrite this function to add synchronizing logic relevant to
-      # your metadata standard
-      def synchronize_metadata parent
-      end
-
       def set_attributes model
       end
       
@@ -32,6 +27,16 @@ module DRI
       def custom_validations
         Hash.new
       end
+
+      def metadata_path field
+        # Generic check, if metadata class responds to fieldname then that's the path
+        if respond_to? field
+          [field]
+        else
+          []
+        end
+      end
+
     end
   end
 end

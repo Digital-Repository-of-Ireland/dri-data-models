@@ -12,6 +12,10 @@ module DRI
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'Batch'
         has_many :items, :property=>:is_member_of_collection, :inbound => true, :class_name => 'Batch'
 
+        # Additional relationships to keep track of sibling order, important for EAD and similar archive standards
+        belongs_to :previous_sibling, :property=>:is_after_item, :class_name => 'Batch'
+        belongs_to :next_sibling, :property=>:is_after_item, :inbound => true, :class_name => 'Batch'
+
         def collection= collection
           if @collection == collection
           	@collection = collection

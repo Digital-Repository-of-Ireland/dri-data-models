@@ -4,21 +4,54 @@ module DRI
 
     class EncodedArchivalDescription < DRI::Metadata::Base
 
-      # OM (Opinionated Metadata) terminology mapping for EAD
+      # OM (Opinionated Metadata) terminology mapping to an EAD Collection
       set_terminology do |t|
-        t.root(:path=>"ead") # Selects the root node of the XML document
-        
-          t.title(:path=>"archdesc/did/unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
-          t.description(:path=>"archdesc/did/abstract", :index_as=>[:stored_searchable, :displayable])
-          t.language(:path=>"archdesc/did/langmaterial", :index_as=>[:stored_searchable, :facetable])
-          t.creator(:path=>"archdesc/did/origination", :index_as=>[:stored_searchable, :facetable])
-          t.creation_date(:path=>"archdesc/did/unitdate", :index_as=>[:stored_searchable, :displayable, :facetable])
-        
-          t.subject(:path=>"archdesc//subject", :index_as=>[:stored_searchable, :facetable, :displayable])
-          t.persname_coverage(:path=>"archdesc//persname", :index_as=>[:displayable])
-          t.name_coverage(:path=>"archdesc//name", :index_as=>[:displayable])
-          t.corpname_coverage(:path=>"archdesc//corpname", :index_as=>[:displayable])
-          t.geographical_coverage(:path=>"archdesc//geogname", :index_as=>[:stored_searchable, :facetable])
+        t.root(:path=>"*", :namespace_prefix => nil)
+
+        t.ead(:path=>"*", :namespace_prefix => nil) {
+          t.eadheader {
+            # We need to keep track of the unitid in order to sync this XML snippet to the correct
+            # component tag in the complete EAD XML datastream in the collection object!
+            t.eadid(:path=>"eadid", :index_as=>[:stored_searchable], :namespace_prefix => nil) {
+              t.repository_code(:path => {:attribute=>"mainagencycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+              t.country_code(:path => {:attribute=>"countrycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+              t.identifier(:path => {:attribute=>"identifier"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+            }
+            t.filedesc {
+              t.titlestmt {
+                t.title(:path=>"titleproper", :index_as=>[:stored_searchable, :displayable, :sortable])
+              }
+            }
+          }  
+          t.archdesc {
+            t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+            t.did(:path => "did", :namespace_prefix => nil) {
+              t.abstract(:path=>"abstract", :index_as=>[:displayable])
+              t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
+              t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
+              t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
+              t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
+              t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
+              t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
+              t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable]) {
+                t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
+                t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
+              }
+              t.physdesc(:path=>"physdesc", :index_as=>[:stored_searchable, :displayable]) {
+                t.type(:path=>"genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+              }
+              t.dao(:path=>"dao") {
+                t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
+              }
+            }
+            t.bioghist {
+
+            }
+            t.scopecontent {
+
+            }
+          }
+        }
       end # set_terminology
 
       synchronize_metadata_on_save = true
@@ -56,28 +89,60 @@ module DRI
         person_array = get_person_array()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description_array)
 
         solr_doc
       end
 
+
       def get_person_array()
-         return name_coverage | persname_coverage | corpname_coverage | creator
+         return ead.archdesc.did.name_coverage | ead.archdesc.did.persname_coverage | ead.archdesc.did.corpname_coverage | ead.archdesc.did.creator
       end
 
-      def set_attributes model
-        model.class.has_attributes :title, datastream: :descMetadata, multiple: false
-        model.class.has_attributes :description, datastream: :descMetadata, multiple: false
-        model.class.has_attributes :language, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :creator, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :creation_date, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :name_coverage, datastream: :descMetadata, multiple: true
-        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+      def description
+        return ead.archdesc.did.abstract | ead.archdesc.scopecontent | ead.archdesc.bioghist
       end
 
-      def unset_attributes
-        delegates = [ "title", "description", "language", "creator", "creation_date", "name_coverage", "geographical_coverage"]
-
-        return delegates
+      def metadata_path field
+        case field
+        when :title
+          [:ead, :eadheader, :filedesc, :titlestmt, :title]
+        when :abstract
+          [:ead, :archdesc, :did, :abstract]
+        when :bioghist
+          [:ead, :archdesc, :bioghist]
+        when :scope_content
+          [:ead, :archdesc, :scopecontent]
+        when :ead_level
+          [:ead, :archdesc, :ead_level]
+        when :language
+          [:ead, :archdesc, :did, :language]
+        when :creator
+          [:ead, :archdesc, :did, :creator]
+        when :creation_date
+          [:ead, :archdesc, :did, :creation_date]
+        when :name_coverage
+          [:ead, :archdesc, :did, :name_coverage]
+        when :geographical_coverage
+          [:ead, :archdesc, :did, :geographical_coverage]
+        when :physdesc
+          [:ead, :archdesc, :did, :physdesc]
+        when :type
+          [:ead, :archdesc, :did, :physdesc, :type]
+        when :dao
+          [:ead, :archdesc, :did, :dao]
+        when :unitid
+          [:ead, :eadheader, :eadid]
+        when :repository_code
+          [:ead, :eadheader, :eadid, :repository_code]
+        when :country_code
+          [:ead, :eadheader, :eadid, :country_code]
+        when :identifier
+          [:ead, :eadheader, :eadid, :identifier]
+        else
+          []
+        end
       end
 
       def interchangeable?
@@ -86,6 +151,105 @@ module DRI
 
       def collection?
         true
+      end
+
+      def sync_children_to_metadata pid, depositor
+        metadata_child_marker = 0
+
+        prev_batch = nil
+        child_batch = nil
+
+        # Find all children unitids in metadata
+
+        if (children_id_nodes.length == 0)
+          # find all batch objects with pid in collection
+          # and delete them
+        end
+
+        # while metadata_child_marker < total
+
+        # check if child != nil and child matches metadata_marker
+        #   check if difference in xml
+        #     replace child xml
+        #     child previous_sibling = prev_node
+        #     save child
+        #     prev_node = child
+        #     queue up child
+        #   child = child.next_sibling
+        #   marker++
+        # else if child != nil and check if child identifier is not in metadata
+        #   child = child.next_sibling
+        #   delete node and it's children
+        # else if child != nil and check if metadata is in children
+        #   prev_later_child = later_child.prev_sibling
+        #   later_child.prev_sibling = prev_child
+        #   prev_later_child.next_sibling = late_child.next_sibling
+        #   don't sync prev_later_child
+        #   prev_later_child.save
+        #   replace later_child xml
+        #   late_child.next_sibling = nil
+        #   save later_child
+        #   marker++
+        # else
+        #   if not, create temp_child using metadata
+        #   temp_child.prev_sibling = prev_node
+        #   copy permissions
+        #   save temp_child
+        #   queue up temp_child
+        #   prev_node = temp_child
+        #   marker++
+
+        # end while
+
+        # while child_node != nil
+        #   child = child.next_sibling
+        #   delete node and it's children
+        # end whie
+
+      end
+
+      def custom_validations
+        errors = Hash.new
+
+        title_result = false
+        description_result = false
+        unitid_result = false
+        cc_result = false
+        rc_result = false
+        ead_level_result = false
+
+        ead.eadheader.filedesc.titlestmt.title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        ead.archdesc.ead_level.each do |curr_ead_level|
+          ead_level_result = true unless curr_ead_level.blank?
+        end
+
+        ead.eadheader.eadid.each do |curr_unitid|
+          unitid_result = true unless curr_unitid.blank?
+        end
+
+        ead.eadheader.eadid.country_code.each do |curr_cc|
+          cc_result = true unless curr_cc.blank?
+        end
+
+        ead.eadheader.eadid.repository_code.each do |curr_rc|
+          rc_result = true unless curr_rc.blank?
+        end
+        
+        errors[:title] = "must not be blank" if title_result == false
+        errors[:abstract] = "can not be blank" if description_result == false
+        errors[:ead_level] = "can not be blank" if ead_level_result == false
+        errors[:unitid] = "can not be blank" if unitid_result == false
+        errors[:country_code] = "can not be blank" if cc_result == false
+        errors[:repository_code] = "can not be blank" if rc_result == false
+
+        errors
       end
 
     end

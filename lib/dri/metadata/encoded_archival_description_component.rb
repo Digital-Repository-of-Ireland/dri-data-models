@@ -19,14 +19,23 @@ module DRI
             t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
             t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
             t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
-            t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable], :type=>:date)
-            t.type(:path=>"physdesc/genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+            t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable]) {
+              t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
+              t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
+            }
+            t.physdesc(:path=>"physdesc", :index_as=>[:stored_searchable, :displayable]) {
+              t.type(:path=>"genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+            }
+            t.dao(:path=>"dao") {
+              t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
+            }
 
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
             # component tag in the complete EAD XML datastream in the collection object!
             t.unitid(:path=>"unitid", :index_as=>[:stored_searchable], :namespace_prefix => nil) {
               t.repository_code(:path => {:attribute=>"repositorycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
               t.country_code(:path => {:attribute=>"countrycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+              t.identifier(:path => {:attribute=>"identifier"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
             }
           }
           t.bioghist {
@@ -76,28 +85,45 @@ module DRI
         return c.did.abstract | c.scopecontent | c.bioghist
       end
 
-      def set_attributes model
-        model.class.has_attributes :title, datastream: :descMetadata, at: [:c, :did, :title], multiple: false
-        model.class.has_attributes :abstract, datastream: :descMetadata, at: [:c, :did, :abstract], multiple: false
-        model.class.has_attributes :bioghist, datastream: :descMetadata, at: [:c, :bioghist], multiple: false
-        model.class.has_attributes :scope_content, datastream: :descMetadata, at: [:c, :scopecontent], multiple: false
-        model.class.has_attributes :ead_level, datastream: :descMetadata, at: [:c, :ead_level], multiple: false
-        model.class.has_attributes :language, datastream: :descMetadata, at: [:c, :did, :language], multiple: true
-        model.class.has_attributes :creator, datastream: :descMetadata,  at: [:c, :did, :creator], multiple: true
-        model.class.has_attributes :creation_date, datastream: :descMetadata, at: [:c, :did, :creation_date], multiple: true
-        model.class.has_attributes :name_coverage, datastream: :descMetadata, at: [:c, :did, :name_coverage], multiple: true
-        model.class.has_attributes :geographical_coverage, datastream: :descMetadata, at: [:c, :did, :geographical_coverage], multiple: true
-        model.class.has_attributes :type, datastream: :descMetadata, multiple: true,  at: [:c, :did, :type]
-        model.class.has_attributes :unitid, datastream: :descMetadata, at: [:c, :did, :unitid], multiple: false
-        model.class.has_attributes :repository_code, datastream: :descMetadata, at: [:c, :did, :unitid, :repository_code], multiple: false
-        model.class.has_attributes :country_code, datastream: :descMetadata, at: [:c, :did, :unitid, :country_code], multiple: false
-      end
-
-      def unset_attributes
-        delegates = [ "title", "abstract", "bioghist", "scope_content", "ead_level", "language", "creator",
-          "creation_date", "name_coverage", "geographical_coverage", "type", "unitid", "repository_code", "country_code"]
-
-        return delegates
+      def metadata_path field
+        case field
+        when :title
+          [:c, :did, :title]
+        when :abstract
+          [:c, :did, :abstract]
+        when :bioghist
+          [:c, :bioghist]
+        when :scope_content
+          [:c, :scopecontent]
+        when :ead_level
+          [:c, :ead_level]
+        when :language
+          [:c, :did, :language]
+        when :creator
+          [:c, :did, :creator]
+        when :creation_date
+          [:c, :did, :creation_date]
+        when :name_coverage
+          [:c, :did, :name_coverage]
+        when :geographical_coverage
+          [:c, :did, :geographical_coverage]
+        when :physdesc
+          [:c, :did, :physdesc]
+        when :type
+          [:c, :did, :physdesc, :type]
+        when :dao
+          [:c, :did, :dao]
+        when :unitid
+          [:c, :did, :unitid]
+        when :repository_code
+          [:c, :did, :unitid, :repository_code]
+        when :country_code
+          [:c, :did, :unitid, :country_code]
+        when :identifier
+          [:c, :did, :unitid, :identifier]
+        else
+          []
+        end
       end
 
       def interchangeable?
@@ -105,7 +131,7 @@ module DRI
       end
 
       def collection?
-        if c.ead_level == ["file"]
+        if c.ead_level == ["item"]
           false
         else
           true
@@ -135,12 +161,44 @@ module DRI
 
       def custom_validations
         errors = Hash.new
+
+        title_result = false
+        description_result = false
+        unitid_result = false
+        cc_result = false
+        rc_result = false
+        ead_level_result = false
+
+        c.did.title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        c.ead_level.each do |curr_ead_level|
+          ead_level_result = true unless curr_ead_level.blank?
+        end
+
+        c.did.unitid.each do |curr_unitid|
+          unitid_result = true unless curr_unitid.blank?
+        end
+
+        c.did.unitid.country_code.each do |curr_cc|
+          cc_result = true unless curr_cc.blank?
+        end
+
+        c.did.unitid.repository_code.each do |curr_rc|
+          rc_result = true unless curr_rc.blank?
+        end
         
-        errors[:abstract] = "can not be blank" if description.blank?
-        errors[:ead_level] = "can not be blank" if c.ead_level.blank? #hmm, this check is not working
-        errors[:unitid] = "can not be blank" if c.did.unitid.blank?
-        errors[:country_code] = "can not be blank" if c.did.unitid.country_code.blank?
-        errors[:repository_code] = "can not be blank" if c.did.unitid.repository_code.blank?
+        errors[:title] = "must not be blank" if title_result == false
+        errors[:abstract] = "can not be blank" if description_result == false
+        errors[:ead_level] = "can not be blank" if ead_level_result == false
+        errors[:unitid] = "can not be blank" if unitid_result == false
+        errors[:country_code] = "can not be blank" if cc_result == false
+        errors[:repository_code] = "can not be blank" if rc_result == false
 
         errors
       end

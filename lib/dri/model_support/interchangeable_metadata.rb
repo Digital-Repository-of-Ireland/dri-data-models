@@ -11,11 +11,42 @@ module DRI
         after_initialize :load_attributes
         after_save :reset_metadata_check, :synchronize_if_changed
 
-        validates :title, :presence => true
-        validates :description, :presence => true, :if => :require_description?
-        validates :rights, :presence => true, :if => :require_rights?
-        validates :type, :presence => true, :if => :require_type?
-        validates :ead_level, :presence => true, :if => :require_ead_level?
+        has_attributes :title, datastream: :descMetadata, multiple: true
+        has_attributes :description, datastream: :descMetadata, multiple: true
+        has_attributes :language, datastream: :descMetadata, multiple: true
+        has_attributes :creator, datastream: :descMetadata, multiple: true
+        has_attributes :contributor, datastream: :descMetadata, multiple: true
+        has_attributes :publisher, datastream: :descMetadata, multiple: true
+        has_attributes :date, datastream: :descMetadata, multiple: true
+        has_attributes :published_date, datastream: :descMetadata, multiple: true
+        has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        has_attributes :relation, datastream: :descMetadata, multiple: true
+        has_attributes :subject, datastream: :descMetadata, multiple: true
+        has_attributes :source, datastream: :descMetadata, multiple: true
+        has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+        has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+        has_attributes :rights, datastream: :descMetadata, multiple: true
+        has_attributes :type, datastream: :descMetadata, multiple: true
+        has_attributes :format, datastream: :descMetadata, multiple: true
+        has_attributes :coverage, datastream: :descMetadata, multiple: true
+        has_attributes :identifier, datastream: :descMetadata, multiple: true
+        has_attributes :geocode_point, datastream: :descMetadata, multiple: true
+        has_attributes :geocode_box, datastream: :descMetadata, multiple: true
+        has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
+                                    multiple: true
+
+        has_attributes :abstract, datastream: :descMetadata, multiple: false
+        has_attributes :bioghist, datastream: :descMetadata, multiple: false
+        has_attributes :scope_content, datastream: :descMetadata, multiple: false
+        has_attributes :ead_level, datastream: :descMetadata, multiple: false
+        has_attributes :name_coverage, datastream: :descMetadata, multiple: true
+        has_attributes :physdesc, datastream: :descMetadata, multiple: true
+        has_attributes :dao, datastream: :descMetadata, multiple: true
+        has_attributes :unitid, datastream: :descMetadata, multiple: false
+        has_attributes :repository_code, datastream: :descMetadata, multiple: false
+        has_attributes :country_code, datastream: :descMetadata, multiple: false
+        has_attributes :identifier, datastream: :descMetadata, multiple: false
+
         validate :custom_validations
       end
 
@@ -63,68 +94,25 @@ module DRI
             return false
           end
 
-          # Got to delete the old delegates and their methods
-          if descMetadata.class < DRI::Metadata::Base
-            descMetadata.unset_attributes.each do |x|
-              self.class.defined_attributes.delete(x)
-              self.class.send :remove_method, x.to_sym
-              self.class.send :remove_method, "#{x}=".to_sym
-            end              
-          end
-
           ds.digital_object = old_digital_object
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
-
-          if ds.class < DRI::Metadata::Base
-            ds.set_attributes self
-          end
 
           return true
         end
       end
 
       def synchronize_metadata
-        descMetadata.synchronize_metadata governing_collection
+        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
+          descMetadata.sync_children_to_metadata pid, depositor
+        end
+        #descMetadata.synchronize_metadata governing_collection
       end
 
       private
 
       @metadata_class
 
-      def require_description?
-        !descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-      end
-
-      def require_rights?
-          # An EAD component inherits the rights of the EAD collection. It can add
-          # more rights, but as long as we validate the EAD collection for
-          # the presence of rights, then the EAD component is automatically valid.
-        !descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-      end
-
-      def require_type?
-        # Only required at item level in EAD
-        if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
-          false
-        elsif descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-          if ead_level == "file"
-            true
-          else
-            false
-          end
-        else
-          true
-        end
-      end
-
-      def require_ead_level?
-        descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent
-      end
-
-      def require_unitid?
-        descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent
-      end
 
       def custom_validations
         if descMetadata.class < DRI::Metadata::Base
@@ -201,23 +189,12 @@ module DRI
           ds.digital_object = old_digital_object
         end
 
-        if (ds != nil)
-          if descMetadata.class < DRI::Metadata::Base
-            descMetadata.unset_attributes.each do |x|
-              self.class.defined_attributes.delete(x)
-              self.class.send :remove_method, x.to_sym
-              self.class.send :remove_method, "#{x}=".to_sym
-            end              
-          end            
+        if (ds != nil)       
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
         end
 
         @metadata_class = descMetadata.class
-
-        if descMetadata.class < DRI::Metadata::Base
-          descMetadata.set_attributes self
-        end
       end
 
       def synchronize_if_changed
@@ -234,7 +211,7 @@ module DRI
         # Add title metadata from parent collections
         object_types = []
 
-        if require_type?
+        if self.respond_to? type
           main_category = nil
 
           type.each do | curr_category |
