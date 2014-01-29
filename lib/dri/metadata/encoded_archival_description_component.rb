@@ -10,14 +10,15 @@ module DRI
 
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-          t.did(:path => "did", :namespace_prefix => nil) {
-            t.title(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
+          t.did(:path=>"did") {
+            t.unittitle(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
             t.abstract(:path=>"abstract", :index_as=>[:displayable])
             t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
             t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
             t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
             t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
             t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
+            t.corpname_coverage(:path=>"corpname", :index_as=>[:stored_searchable, :facetable])
             t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
             t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable]) {
               t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
@@ -45,6 +46,10 @@ module DRI
 
           }
         }
+        #}
+        #t.proxies {
+          t.title(:proxy => [:c, :did, :unittitle], :index_as=>[:stored_searchable, :displayable, :sortable])
+        #}
       end # set_terminology
 
       synchronize_metadata_on_save = true
@@ -63,6 +68,9 @@ module DRI
           return builder.doc
       end
 
+      def retrieve_xpath
+         terminology.xpath_for(:title)
+      end
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
 
@@ -87,8 +95,10 @@ module DRI
 
       def metadata_path field
         case field
+        #when :c
+        #  [:c]
         when :title
-          [:c, :did, :title]
+          [:title]
         when :abstract
           [:c, :did, :abstract]
         when :bioghist
@@ -138,7 +148,7 @@ module DRI
         end
       end
 
-      def synchronize_metadata parent
+      def synchronize_children_to_metadata parent
         # Exit if we have no parent to sync with
         if parent == nil
           return
@@ -169,7 +179,7 @@ module DRI
         rc_result = false
         ead_level_result = false
 
-        c.did.title.each do |curr_title|
+        c.did.unittitle.each do |curr_title|
           title_result = true unless curr_title.blank?
         end
 

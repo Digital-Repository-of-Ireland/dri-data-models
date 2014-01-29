@@ -19,26 +19,27 @@ module DRI
             }
             t.filedesc {
               t.titlestmt {
-                t.title(:path=>"titleproper", :index_as=>[:stored_searchable, :displayable, :sortable])
+                t.title(:path=>"titleproper", :index_as=>[:stored_searchable, :sortable])
               }
             }
           }  
           t.archdesc {
             t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
             t.did(:path => "did", :namespace_prefix => nil) {
-              t.abstract(:path=>"abstract", :index_as=>[:displayable])
+              t.abstract(:path=>"abstract")
               t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
               t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
               t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
               t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
               t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
+              t.corpname_coverage(:path=>"corpname", :index_as=>[:stored_searchable, :facetable])
               t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
-              t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :displayable, :facetable]) {
+              t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :facetable]) {
                 t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
                 t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
               }
-              t.physdesc(:path=>"physdesc", :index_as=>[:stored_searchable, :displayable]) {
-                t.type(:path=>"genreform", :index_as=>[:stored_searchable, :displayable, :facetable])
+              t.physdesc(:path=>"physdesc", :index_as=>[:stored_searchable]) {
+                t.type(:path=>"genreform", :index_as=>[:stored_searchable, :facetable])
               }
               t.dao(:path=>"dao") {
                 t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
@@ -89,8 +90,8 @@ module DRI
         person_array = get_person_array()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description)
 
         solr_doc
       end
@@ -151,61 +152,6 @@ module DRI
 
       def collection?
         true
-      end
-
-      def sync_children_to_metadata pid, depositor
-        metadata_child_marker = 0
-
-        prev_batch = nil
-        child_batch = nil
-
-        # Find all children unitids in metadata
-
-        if (children_id_nodes.length == 0)
-          # find all batch objects with pid in collection
-          # and delete them
-        end
-
-        # while metadata_child_marker < total
-
-        # check if child != nil and child matches metadata_marker
-        #   check if difference in xml
-        #     replace child xml
-        #     child previous_sibling = prev_node
-        #     save child
-        #     prev_node = child
-        #     queue up child
-        #   child = child.next_sibling
-        #   marker++
-        # else if child != nil and check if child identifier is not in metadata
-        #   child = child.next_sibling
-        #   delete node and it's children
-        # else if child != nil and check if metadata is in children
-        #   prev_later_child = later_child.prev_sibling
-        #   later_child.prev_sibling = prev_child
-        #   prev_later_child.next_sibling = late_child.next_sibling
-        #   don't sync prev_later_child
-        #   prev_later_child.save
-        #   replace later_child xml
-        #   late_child.next_sibling = nil
-        #   save later_child
-        #   marker++
-        # else
-        #   if not, create temp_child using metadata
-        #   temp_child.prev_sibling = prev_node
-        #   copy permissions
-        #   save temp_child
-        #   queue up temp_child
-        #   prev_node = temp_child
-        #   marker++
-
-        # end while
-
-        # while child_node != nil
-        #   child = child.next_sibling
-        #   delete node and it's children
-        # end whie
-
       end
 
       def custom_validations

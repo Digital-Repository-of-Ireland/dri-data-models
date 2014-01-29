@@ -43,7 +43,7 @@ describe Batch do
   it "should load from Fedora" do
     @audio.update_attributes( @attributes_hash )
     @audio.save
-    @audio.new?.should == false
+    @audio.new_record?.should == false
     @audio3 = Batch.find(@audio.pid)
     @audio3.title.should == @attributes_hash["title"]
     @audio3.rights.should == @attributes_hash["rights"]
@@ -288,7 +288,7 @@ describe Batch do
   end
 
   after(:each) do
-    unless @audio.new?
+    unless @audio.new_record?
       @audio.delete
     end
   end

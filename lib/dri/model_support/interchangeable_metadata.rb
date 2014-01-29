@@ -35,6 +35,7 @@ module DRI
         has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                                     multiple: true
 
+        has_attributes :c, datastream: :descMetadata, multiple: false
         has_attributes :abstract, datastream: :descMetadata, multiple: false
         has_attributes :bioghist, datastream: :descMetadata, multiple: false
         has_attributes :scope_content, datastream: :descMetadata, multiple: false
@@ -81,7 +82,13 @@ module DRI
         replacing_metadata = get_metadata_class_from_xml xml_text
 
         if curr_metadata == replacing_metadata
+          if replacing_metadata == "DRI::Metadata::EncodedArchivalDescription" ||
+              replacing_metadata == "DRI::Metadata::EncodedArchivalDescriptionComponent"
+            xml_text = split_ead_xml xml_text, replacing_metadata
+          end
+
           descMetadata.ng_xml = xml_text
+
           return true
         elsif replacing_metadata != nil
           old_digital_object = descMetadata.digital_object
@@ -102,11 +109,126 @@ module DRI
         end
       end
 
-      def synchronize_metadata
-        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
-          descMetadata.sync_children_to_metadata pid, depositor
+      # If this is EAD, put the full XML in fullMetadata and
+      # return XML with the component's children removed
+      def split_ead_xml xml_text, xml_type
+        if datastreams.has_key?("fullMetadata")
+          fullMetadata.ng_xml = xml_text
+        else
+          full_ds = ActiveFedora::OmDatastream.from_xml xml_text
+          full_ds.instance_variable_set :@dsid, "fullMetadata"
+          self.add_datastream full_ds
         end
-        #descMetadata.synchronize_metadata governing_collection
+
+        if (xml_text.is_a? Nokogiri::XML::Document)
+          xml = xml_text
+        else
+          xml = Nokogiri::XML xml_text
+        end
+
+        if (xml_type == "DRI::Metadata::EncodedArchivalDescription")
+          xml.xpath("/ead/archdesc/dsc/*").remove
+        else
+          xml.xpath("/*/dsc/*").remove
+        end
+
+        return xml
+      end
+
+      def synchronize_children_to_metadata
+        if self.new_record?
+          return
+        end
+        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
+          metadata_child_index = 0
+
+          prev_obj = nil
+          child_obj = nil
+
+          # Find the immediate children of this collection in the metadata
+          metadata_children = []
+
+          if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
+            metadata_children = fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
+          else
+            metadata_children = fullMetadata.ng_xml.xpath("/*/dsc/*")
+          end
+
+          if metadata_children.empty?
+            Batch.find(solr_name('ancestor_id', :stored_searchable) => pid).each do |obj|
+              blah
+              obj.generic_files.each do |file_obj|
+                file_obj.delete
+              end
+              obj.delete
+            end
+          end
+
+          while metadata_child_index < metadata_children.length do
+
+            if child_obj != nil
+            else
+              # Create a new child
+              new_child = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
+              new_child.update_metadata metadata_children[metadata_child_index].to_xml
+              new_child.previous_sibling = prev_obj
+              new_child.governing_collection = self
+              new_child.depositor = depositor
+
+              # Don't add new node if it's invalid
+              if new_child.valid?
+                new_child.save
+                # add to queue
+                prev_obj = new_child
+              end
+
+              metadata_child_index += 1
+            end
+          end
+        # check if child != nil and child matches metadata_marker
+        #   check if difference in xml
+        #     replace child xml
+        #     child previous_sibling = prev_node
+        #     save child
+        #     prev_node = child
+        #     queue up child
+        #   child = child.next_sibling
+        #   marker++
+        # else if child != nil and check if child identifier is not in metadata
+        #   child = child.next_sibling
+        #   delete node and it's children
+        # else if child != nil and check if metadata is in children
+        #   prev_later_child = later_child.prev_sibling
+        #   later_child.prev_sibling = prev_child
+        #   prev_later_child.next_sibling = late_child.next_sibling
+        #   don't sync prev_later_child
+        #   prev_later_child.save
+        #   replace later_child xml
+        #   late_child.next_sibling = nil
+        #   save later_child
+        #   marker++
+        # else
+        #   if not, create temp_child using metadata
+        #   temp_child.prev_sibling = prev_node
+        #   copy permissions
+        #   save temp_child
+        #   queue up temp_child
+        #   prev_node = temp_child
+        #   marker++
+
+        # Delete any remaining children
+          while child_obj != nil do
+            to_delete = child_obj
+            child_obj = child_obj.next_sibling
+            Batch.find(solr_name('ancestor_id', :stored_searchable) => to_delete.pid).each do |obj|
+              obj.generic_files.each do |file_obj|
+                file_obj.delete
+              end
+              obj.delete
+            end
+            to_delete.delete
+          end
+        end
       end
 
       private
@@ -201,7 +323,7 @@ module DRI
         if (self.descMetadata.synchronize_metadata_on_save == true)
           content_changed = self.descMetadata.changed?
           yield
-          Sufia.queue.push(SynchronizeMetadata.new(self.pid)) if content_changed
+          Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid)) if content_changed
         end
       end
 
@@ -211,7 +333,7 @@ module DRI
         # Add title metadata from parent collections
         object_types = []
 
-        if self.respond_to? type
+        if self.respond_to? "type"
           main_category = nil
 
           type.each do | curr_category |

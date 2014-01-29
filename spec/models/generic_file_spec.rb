@@ -27,7 +27,7 @@ describe GenericFile do
   #end
 
   after(:each) do
-    unless @file_asset.new?
+    unless @file_asset.new_record?
       @file_asset.delete
     end
   end  

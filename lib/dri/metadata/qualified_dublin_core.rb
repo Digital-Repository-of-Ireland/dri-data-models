@@ -57,6 +57,15 @@ module DRI
 
       end
 
+      def metadata_path field
+        # Generic check, if metadata class responds to fieldname then that's the path
+        #if respond_to? field
+          [field]
+        #else
+        #  []
+        #end
+      end
+
       def update_indexed_attributes(params={}, opts={})
         # if the params are just keys, not an array, make then into an array.
         new_params = {}

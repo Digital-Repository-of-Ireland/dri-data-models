@@ -13,8 +13,8 @@ module DRI
         has_many :items, :property=>:is_member_of_collection, :inbound => true, :class_name => 'Batch'
 
         # Additional relationships to keep track of sibling order, important for EAD and similar archive standards
-        belongs_to :previous_sibling, :property=>:is_after_item, :class_name => 'Batch'
-        belongs_to :next_sibling, :property=>:is_after_item, :inbound => true, :class_name => 'Batch'
+        belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'Batch'
+        belongs_to :next_sibling, :property=>:is_preceded_by, :inbound => true, :class_name => 'Batch'
 
         def collection= collection
           if @collection == collection
@@ -53,22 +53,29 @@ module DRI
       def collections_to_solr(solr_doc=Hash.new)
 
         # Add title metadata from parent collections
-        collection_titles = []
-        collection_id = []
+        ancestor_titles = []
+        ancestor_ids = []
 
-        if (governing_collection != nil)
-          collection_titles = [governing_collection.title[0]]
-          collection_id = [governing_collection.pid]
+        curr_gov_collection = governing_collection
+
+        while (curr_gov_collection != nil)
+          ancestor_titles << curr_gov_collection.title[0]
+          ancestor_ids << curr_gov_collection.pid
+          curr_gov_collection = curr_gov_collection.governing_collection
         end
 
-        collections.each do |coll|
-          collection_titles | coll.title
-        end
+        #collections.each do |coll|
+        #  collection_titles | coll.title
+        #end
 
-        if (!collection_titles.empty?)
-          solr_doc.merge!(solr_name('collection', :facetable) => collection_titles)
-          solr_doc.merge!(solr_name('collection', :stored_searchable) => collection_titles)
-          solr_doc.merge!(solr_name('governing_id', :facetable) => collection_id)
+        if (!ancestor_ids.empty?)
+          solr_doc.merge!(solr_name('ancestor_title', :facetable) => ancestor_titles)
+          solr_doc.merge!(solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
+          solr_doc.merge!(solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
+          solr_doc.merge!(solr_name('governing_id', :facetable) => ancestor_ids.first)
+          solr_doc.merge!(solr_name('governing_id', :stored_searchable) => ancestor_ids.first)
+          solr_doc.merge!(solr_name('root_collection_id', :facetable) => ancestor_ids.last)
+          solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => ancestor_ids.last)
         end
         
         solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)

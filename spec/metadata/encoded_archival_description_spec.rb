@@ -163,7 +163,7 @@ describe Batch do
     @ead_collection.should be_valid
     @ead_collection.repository_code = ""
     @ead_collection.should_not be_valid
-    
+
     @ead_series.should be_valid
     @ead_series.repository_code = ""
     @ead_series.should_not be_valid
@@ -191,18 +191,18 @@ describe Batch do
     end
   end
 
-  xit "should be able to synchronize it's metadata with it's parent's metadata" do
-  end
-
   after(:each) do
-    unless @ead_item.new?
+    unless @ead_item.new_record?
       @ead_item.delete
     end
-    unless @ead_file.new?
+    unless @ead_file.new_record?
       @ead_file.delete
     end
-    unless @ead_series.new?
+    unless @ead_series.new_record?
       @ead_series.delete
+    end
+    unless @ead_collection.new_record?
+      @ead_collection.delete
     end
   end
 end
