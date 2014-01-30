@@ -58,12 +58,21 @@ module DRI
       end
 
       def metadata_path field
-        # Generic check, if metadata class responds to fieldname then that's the path
-        #if respond_to? field
-          [field]
-        #else
-        #  []
-        #end
+          recognised_attributes = [ :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
+                                    :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
+                                    :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
+                                    :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
+          if recognised_attributes.include? field
+            [field]
+          elsif m = /^role_(.*)/.match(field.to_s)
+            if DRI::Vocabulary::marcRelators.include? m[1]
+              [field]
+            else
+              []
+            end
+          else
+            []
+          end
       end
 
       def update_indexed_attributes(params={}, opts={})

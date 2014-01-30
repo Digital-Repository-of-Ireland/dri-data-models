@@ -36,7 +36,16 @@ describe Batch do
     end
   end
 
-  xit "should not modify a child's metadata if the updated child's metadata is identical to it's previous version" do
+  it "should not modify a child's metadata if the updated child's metadata is identical to it's previous version" do
+    # compare the datestamps of children that should not change
+    @ead_collection.save
+    @ead_collection.synchronize_children_to_metadata
+    datestamp = @ead_collection.governed_items[0].modified_date
+
+    # running synchronize_children_to_metadata again should attempt to update the collection's children
+    # with the same metadata as the last time it was run.
+    @ead_collection.synchronize_children_to_metadata
+    @ead_collection.governed_items[0].modified_date.should == datestamp
   end
 
   xit "should modify the order of it's children if it's metadata specifies this" do

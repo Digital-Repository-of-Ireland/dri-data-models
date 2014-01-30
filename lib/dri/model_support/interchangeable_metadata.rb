@@ -7,6 +7,7 @@ module DRI
         attr_accessor :desc_metadata_class
 
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
+        has_metadata :name => "fullMetadata", :type => ActiveFedora::OmDatastream
 
         after_initialize :load_attributes
         after_save :reset_metadata_check, :synchronize_if_changed
@@ -35,7 +36,6 @@ module DRI
         has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                                     multiple: true
 
-        has_attributes :c, datastream: :descMetadata, multiple: false
         has_attributes :abstract, datastream: :descMetadata, multiple: false
         has_attributes :bioghist, datastream: :descMetadata, multiple: false
         has_attributes :scope_content, datastream: :descMetadata, multiple: false
@@ -84,6 +84,7 @@ module DRI
         if curr_metadata == replacing_metadata
           if replacing_metadata == "DRI::Metadata::EncodedArchivalDescription" ||
               replacing_metadata == "DRI::Metadata::EncodedArchivalDescriptionComponent"
+            fullMetadata.ng_xml = xml_text
             xml_text = split_ead_xml xml_text, replacing_metadata
           end
 
@@ -112,13 +113,6 @@ module DRI
       # If this is EAD, put the full XML in fullMetadata and
       # return XML with the component's children removed
       def split_ead_xml xml_text, xml_type
-        if datastreams.has_key?("fullMetadata")
-          fullMetadata.ng_xml = xml_text
-        else
-          full_ds = ActiveFedora::OmDatastream.from_xml xml_text
-          full_ds.instance_variable_set :@dsid, "fullMetadata"
-          self.add_datastream full_ds
-        end
 
         if (xml_text.is_a? Nokogiri::XML::Document)
           xml = xml_text
@@ -145,6 +139,15 @@ module DRI
           prev_obj = nil
           child_obj = nil
 
+          child_obj = Batch.find(solr_name('ancestor_id', :stored_searchable) => pid,
+                                         solr_name('is_first_sibling', :stored_searchable) => "1")
+
+          if child_obj == []
+            child_obj = nil
+          else
+            child_obj = child_obj[0]
+          end
+
           # Find the immediate children of this collection in the metadata
           metadata_children = []
 
@@ -165,8 +168,43 @@ module DRI
           end
 
           while metadata_child_index < metadata_children.length do
+            metadata_cc = metadata_children[metadata_child_index].xpath('did/unitid/@countrycode')[0].value
+            metadata_rc = metadata_children[metadata_child_index].xpath('did/unitid/@repositorycode')[0].value
+            metadata_id = metadata_children[metadata_child_index].xpath('did/unitid/@identifier')[0].value
 
-            if child_obj != nil
+
+            if child_obj != nil &&
+               child_obj.identifier == metadata_id &&
+               child_obj.country_code == metadata_cc &&
+               child_obj.repository_code == metadata_rc
+
+              # Metadata identifiers match current child's identifiers
+              # we can replace the child's metadata if the replacement metadata differs
+
+              # fullMetadata automatically adds an XML header to the start and an extra "\n" at the end.
+              # we have to undo these modifications in order to do the comparison
+              clean_fullMetadata = child_obj.fullMetadata.ng_xml.to_s[22..-1]
+              clean_fullMetadata = clean_fullMetadata[0..-2]
+
+              # now we can do the comparison
+              if metadata_children[metadata_child_index].to_s != clean_fullMetadata
+
+                child_obj.update_metadata metadata_children[metadata_child_index].to_s
+                child_obj.previous_sibling = prev_obj
+
+                if child_obj.valid?
+                  child_obj.save
+                  # add to queue
+                end
+
+              end
+
+              prev_obj = child_obj
+              child_obj = prev_obj.next_sibling
+              metadata_child_index += 1
+
+            elsif child_obj != nil
+              # TODO: DELETE child
             else
               # Create a new child
               new_child = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent

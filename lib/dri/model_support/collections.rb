@@ -64,10 +64,6 @@ module DRI
           curr_gov_collection = curr_gov_collection.governing_collection
         end
 
-        #collections.each do |coll|
-        #  collection_titles | coll.title
-        #end
-
         if (!ancestor_ids.empty?)
           solr_doc.merge!(solr_name('ancestor_title', :facetable) => ancestor_titles)
           solr_doc.merge!(solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
@@ -76,6 +72,10 @@ module DRI
           solr_doc.merge!(solr_name('governing_id', :stored_searchable) => ancestor_ids.first)
           solr_doc.merge!(solr_name('root_collection_id', :facetable) => ancestor_ids.last)
           solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => ancestor_ids.last)
+        end
+
+        if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
+          solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
         end
         
         solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
