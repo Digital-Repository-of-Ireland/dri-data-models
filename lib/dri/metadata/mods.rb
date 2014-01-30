@@ -26,6 +26,10 @@ module DRI
           return builder.doc
       end
 
+      def synchronize_metadata_on_save
+        false
+      end
+
       # Load terminology
       load_inherited_terminology      
     end # class

@@ -5,7 +5,7 @@ class SynchronizeChildrenToMetadataJob < ActiveFedoraPidBasedJob
   end
 
   def run
-    batch.synchronize_children_to_metadata
+    object.synchronize_children_to_metadata
   end
 
 end

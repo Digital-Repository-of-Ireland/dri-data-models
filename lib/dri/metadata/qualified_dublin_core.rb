@@ -57,6 +57,10 @@ module DRI
 
       end
 
+      def synchronize_metadata_on_save
+        false
+      end
+
       def metadata_path field
           recognised_attributes = [ :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
                                     :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,

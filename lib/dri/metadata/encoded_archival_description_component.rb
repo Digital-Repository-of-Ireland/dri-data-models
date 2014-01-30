@@ -52,7 +52,9 @@ module DRI
         #}
       end # set_terminology
 
-      synchronize_metadata_on_save = true
+      def synchronize_metadata_on_save
+        @synchronize_metadata_on_save || true
+      end
 
       # Build the xml doc
       def self.xml_template

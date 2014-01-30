@@ -10,7 +10,8 @@ module DRI
         has_metadata :name => "fullMetadata", :type => ActiveFedora::OmDatastream
 
         after_initialize :load_attributes
-        after_save :reset_metadata_check, :synchronize_if_changed
+        after_save :reset_metadata_check
+        around_save :synchronize_if_changed
 
         has_attributes :title, datastream: :descMetadata, multiple: true
         has_attributes :description, datastream: :descMetadata, multiple: true
@@ -357,11 +358,14 @@ module DRI
       end
 
       def synchronize_if_changed
+        content_changed = false
+
         if (self.descMetadata.synchronize_metadata_on_save == true)
           content_changed = self.descMetadata.changed?
-          yield
-          Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid)) if content_changed
         end
+
+        yield
+        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid)) if content_changed
       end
 
       # Indexing object types as a hierarchical tree

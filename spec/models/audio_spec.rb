@@ -28,16 +28,14 @@ describe Batch do
 
   it "should load and save from xml" do
     @dc = fixture("audios/dublin_core_audio_sample1.xml")
-
-    @audio2 = Batch.new
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2.descMetadata.ng_xml = @ds.to_xml
-    @audio2.descMetadata.content_changed?.should == true
-    @audio2.should be_valid
-    @audio2.creator.should == ["Gallagher, Damien"]
-    @audio2.save
-    @audio2.new?.should == false
-    @audio2.delete
+    audio2 = Batch.new
+    audio2.update_metadata @ds.to_xml
+    audio2.descMetadata.content_changed?.should == true
+    audio2.should be_valid
+    audio2.creator.should == ["Gallagher, Damien"]
+    audio2.save.should == true
+    audio2.delete
   end
 
   it "should load from Fedora" do
