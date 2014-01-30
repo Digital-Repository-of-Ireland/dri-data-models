@@ -263,11 +263,11 @@ module DRI
           end
         end
 
-        errors[:title] = "must not be empty" if title_result == false
-        errors[:description] = "must not be empty" if description_result == false
-        errors[:rights] = "must not be empty" if rights_result == false
-        errors[:type] = "must not be empty" if type_result == false
-        errors[:date] = "must not be empty" if date_result == false
+        errors[:title] = "can't be blank" if title_result == false
+        errors[:description] = "can't be blank" if description_result == false
+        errors[:rights] = "can't be blank" if rights_result == false
+        errors[:type] = "can't be blank" if type_result == false
+        errors[:date] = "can't be blank" if date_result == false
 
         return errors
       end

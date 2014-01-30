@@ -188,12 +188,12 @@ module DRI
           rc_result = true unless curr_rc.blank?
         end
         
-        errors[:title] = "must not be blank" if title_result == false
-        errors[:abstract] = "can not be blank" if description_result == false
-        errors[:ead_level] = "can not be blank" if ead_level_result == false
-        errors[:unitid] = "can not be blank" if unitid_result == false
-        errors[:country_code] = "can not be blank" if cc_result == false
-        errors[:repository_code] = "can not be blank" if rc_result == false
+        errors[:title] = "can't be blank" if title_result == false
+        errors[:abstract] = "can't be blank" if description_result == false
+        errors[:ead_level] = "can't be blank" if ead_level_result == false
+        errors[:unitid] = "can't be blank" if unitid_result == false
+        errors[:country_code] = "can't be blank" if cc_result == false
+        errors[:repository_code] = "can't be blank" if rc_result == false
 
         errors
       end
