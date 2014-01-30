@@ -22,22 +22,22 @@ describe Batch do
     @ead_collection.unitid.should == "IE/NIVAL KDW"
     @ead_collection.country_code.should == "IE"
     @ead_collection.repository_code.should == "IE-DuNIV"
-    @ead_collection.identifier.should == "KDW"
+    @ead_collection.identifier.should == ["KDW"]
 
     @ead_series.unitid.should == "KDW/RM"
     @ead_series.country_code.should == "IE"
     @ead_series.repository_code.should == "IE-DuNIV"
-    @ead_series.identifier.should == "RM"
+    @ead_series.identifier.should == ["RM"]
 
     @ead_file.unitid.should == "KDW/RM/02"
     @ead_file.country_code.should == "IE"
     @ead_file.repository_code.should == "IE-DuNIV"
-    @ead_file.identifier.should == "02"
+    @ead_file.identifier.should == ["02"]
 
     @ead_item.unitid.should == "KDW/RM/02/04"
     @ead_item.country_code.should == "IE"
     @ead_item.repository_code.should == "IE-DuNIV"
-    @ead_item.identifier.should == "04"
+    @ead_item.identifier.should == ["04"]
   end
 
   it "should expose the level of the EAD component" do

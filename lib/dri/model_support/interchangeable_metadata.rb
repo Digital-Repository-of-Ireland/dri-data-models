@@ -46,7 +46,6 @@ module DRI
         has_attributes :unitid, datastream: :descMetadata, multiple: false
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
-        has_attributes :identifier, datastream: :descMetadata, multiple: false
 
         validate :custom_validations
       end
@@ -174,7 +173,7 @@ module DRI
 
 
             if child_obj != nil &&
-               child_obj.identifier == metadata_id &&
+               child_obj.identifier.include?(metadata_id) &&
                child_obj.country_code == metadata_cc &&
                child_obj.repository_code == metadata_rc
 
