@@ -36,6 +36,36 @@ describe Batch do
     end
   end
 
+  it "should add new children if the batch is a EncodedArchivalDescriptionComponent" do
+    @ead_collection.save
+    @ead_collection.synchronize_children_to_metadata
+    ead_series = Batch.find(@ead_collection.governed_items[0].pid)
+    ead_series.synchronize_children_to_metadata
+
+    expected_nodes = { "KDW/RM/02" => { "prev" => nil, "next" => nil, "title" => "Ephemera", "level" => "file" }}
+
+    ead_series.governed_items.length.should == expected_nodes.length
+
+    ead_series.governed_items.each do |curr_child|
+        expected_nodes.has_key?(curr_child.unitid).should == true
+
+        if (curr_child.previous_sibling == nil)
+          expected_nodes[curr_child.unitid]["prev"].should == nil
+        else
+          expected_nodes[curr_child.unitid]["prev"].should == curr_child.previous_sibling.pid
+        end
+
+        if (curr_child.next_sibling == nil)
+          expected_nodes[curr_child.unitid]["next"].should == nil
+        else
+          expected_nodes[curr_child.unitid]["next"].should == curr_child.next_sibling.pid
+        end
+
+        curr_child.title.should == [ expected_nodes[curr_child.unitid]["title"]]
+        curr_child.ead_level.should == expected_nodes[curr_child.unitid]["level"]
+    end
+  end
+
   it "should not modify a child's metadata if the updated child's metadata is identical to it's previous version" do
     # compare the datestamps of children that should not change
     @ead_collection.save

@@ -133,13 +133,15 @@ module DRI
         if self.new_record?
           return
         end
-        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
+        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription ||
+           descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
+           
           metadata_child_index = 0
 
           prev_obj = nil
           child_obj = nil
 
-          child_obj = Batch.find(solr_name('ancestor_id', :stored_searchable) => pid,
+          child_obj = Batch.find(solr_name('collection_id', :stored_searchable) => pid,
                                          solr_name('is_first_sibling', :stored_searchable) => "1")
 
           if child_obj == []
@@ -159,7 +161,6 @@ module DRI
 
           if metadata_children.empty?
             Batch.find(solr_name('ancestor_id', :stored_searchable) => pid).each do |obj|
-              blah
               obj.generic_files.each do |file_obj|
                 file_obj.delete
               end
@@ -212,6 +213,7 @@ module DRI
               new_child.previous_sibling = prev_obj
               new_child.governing_collection = self
               new_child.depositor = depositor
+              new_child.status = status
 
               # Don't add new node if it's invalid
               if new_child.valid?
