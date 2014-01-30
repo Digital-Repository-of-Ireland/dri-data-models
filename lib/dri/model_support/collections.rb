@@ -72,6 +72,8 @@ module DRI
           solr_doc.merge!(solr_name('governing_id', :stored_searchable) => ancestor_ids.first)
           solr_doc.merge!(solr_name('root_collection_id', :facetable) => ancestor_ids.last)
           solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => ancestor_ids.last)
+          solr_doc.merge!(solr_name('root_collection', :facetable) => ancestor_titles.last)
+          solr_doc.merge!(solr_name('root_collection', :stored_searchable) => ancestor_titles.last)
         end
 
         if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
