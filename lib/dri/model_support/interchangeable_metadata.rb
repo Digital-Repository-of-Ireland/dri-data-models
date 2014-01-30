@@ -374,23 +374,25 @@ module DRI
         # Add title metadata from parent collections
         object_types = []
 
-        if self.respond_to? "type"
-          main_category = nil
+        #main_category = nil
 
-          type.each do | curr_category |
-            if DRI::Vocabulary::dcmiType.include? curr_category
-                object_types.push curr_category
-                main_category = curr_category
-            else
-              if main_category != nil
-                object_types.push main_category+":"+curr_category
-              end
-            end
-          end
-        else
+        type.each do | curr_category |
+          #if DRI::Vocabulary::dcmiType.include? curr_category
+            object_types.push curr_category.split.map(&:capitalize)*' '
+           # main_category = curr_category
+          #else
+            # Disable for now
+            #if main_category != nil
+            #  object_types.push main_category+":"+curr_category
+            #end
+          #end
+        end
+
+
+        if object_types.empty?
           case descMetadata
           when DRI::Metadata::EncodedArchivalDescriptionComponent
-            object_types.push ead_level
+            object_types.push ead_level.split.map(&:capitalize)*' '
           when DRI::Metadata::EncodedArchivalDescription
             object_types.push "Collection"
           end
@@ -398,6 +400,7 @@ module DRI
 
         if object_types.count > 0
           solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
+          solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
         end
 
         solr_doc
