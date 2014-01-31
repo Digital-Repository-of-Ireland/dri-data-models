@@ -68,6 +68,7 @@ module DRI
           solr_doc.merge!(solr_name('ancestor_title', :facetable) => ancestor_titles)
           solr_doc.merge!(solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
           solr_doc.merge!(solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
+          solr_doc.merge!(solr_name('governing_id', :facetable) => [ancestor_ids.first]) # needed for user_group gem!!!
           solr_doc.merge!(solr_name('collection_id', :facetable) => [ancestor_ids.first])
           solr_doc.merge!(solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
           solr_doc.merge!(solr_name('collection', :facetable) => [ancestor_titles.first])
