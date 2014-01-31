@@ -10,9 +10,9 @@ module DRI
 
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-          t.did(:path=>"did") {
-            t.unittitle(:path=>"unittitle", :index_as=>[:stored_searchable, :displayable, :sortable])
-            t.abstract(:path=>"abstract", :index_as=>[:displayable])
+          t.did {
+            t.unittitle
+            t.abstract
             t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
             t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
             t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
@@ -46,10 +46,10 @@ module DRI
 
           }
         }
-        #}
-        #t.proxies {
-          t.title(:proxy => [:c, :did, :unittitle], :index_as=>[:stored_searchable, :displayable, :sortable])
-        #}
+        t.title(:proxy => [:c, :did, :unittitle], :index_as=>[:stored_searchable, :displayable, :sortable])
+        t.abstract(:proxy => [:c, :did, :abstract], :index_as=>[:stored_searchable])
+        t.bioghist(:proxy => [:c, :bioghist], :index_as=>[:stored_searchable])
+        t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[:stored_searchable])
       end # set_terminology
 
       def synchronize_metadata_on_save
@@ -102,11 +102,11 @@ module DRI
         when :title
           [:title]
         when :abstract
-          [:c, :did, :abstract]
+          [:abstract]
         when :bioghist
-          [:c, :bioghist]
+          [:bioghist]
         when :scope_content
-          [:c, :scopecontent]
+          [:scope_content]
         when :ead_level
           [:c, :ead_level]
         when :language
