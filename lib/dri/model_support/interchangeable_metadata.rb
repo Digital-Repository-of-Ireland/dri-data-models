@@ -400,10 +400,11 @@ module DRI
           end
         end
 
-        if object_types.count > 0
-          solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-          solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+        if object_types.count < 1
+          object_types.push "Unknown"
         end
+        solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
+        solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
 
         solr_doc
       end
