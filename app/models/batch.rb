@@ -5,6 +5,7 @@ class Batch < ActiveFedora::Base
   include Sufia::GenericFile::Export
   include DRI::ModelSupport::Properties
   include DRI::ModelSupport::Permissions
+  include DRI::ModelSupport::Files
   include DRI::ModelSupport::InterchangeableMetadata
   include DRI::ModelSupport::Collections
       

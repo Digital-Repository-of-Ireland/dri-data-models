@@ -12,34 +12,34 @@ module DRI
           t.eadheader {
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
             # component tag in the complete EAD XML datastream in the collection object!
-            t.eadid(:path=>"eadid", :index_as=>[:stored_searchable], :namespace_prefix => nil) {
-              t.repository_code(:path => {:attribute=>"mainagencycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
-              t.country_code(:path => {:attribute=>"countrycode"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
-              t.identifier(:path => {:attribute=>"identifier"}, :index_as=>[:stored_searchable], :namespace_prefix => nil)
+            t.eadid(:path=>"eadid", :namespace_prefix => nil) {
+              t.repository_code(:path => {:attribute=>"mainagencycode"}, :namespace_prefix => nil)
+              t.country_code(:path => {:attribute=>"countrycode"}, :namespace_prefix => nil)
+              t.identifier(:path => {:attribute=>"identifier"}, :namespace_prefix => nil)
             }
             t.filedesc {
               t.titlestmt {
-                t.title(:path=>"titleproper", :index_as=>[:stored_searchable, :sortable])
+                t.title(:path=>"titleproper")
               }
             }
           }  
           t.archdesc {
             t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
             t.did(:path => "did", :namespace_prefix => nil) {
-              t.abstract(:path=>"abstract", :index_as=>[:stored_searchable])
-              t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
-              t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
-              t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
-              t.name_coverage(:path=>"name", :index_as=>[:stored_searchable, :facetable])
-              t.persname_coverage(:path=>"persname", :index_as=>[:stored_searchable, :facetable])
-              t.corpname_coverage(:path=>"corpname", :index_as=>[:stored_searchable, :facetable])
-              t.geographical_coverage(:path=>"geogname", :index_as=>[:stored_searchable, :facetable])
-              t.creation_date(:path=>"unitdate", :index_as=>[:stored_searchable, :facetable]) {
+              t.abstract()
+              t.language(:path=>"langmaterial")
+              t.creator(:path=>"origination")
+              t.subject(:path=>"subject")
+              t.name_coverage(:path=>"name")
+              t.persname_coverage(:path=>"persname")
+              t.corpname_coverage(:path=>"corpname")
+              t.geographical_coverage(:path=>"geogname")
+              t.creation_date(:path=>"unitdate") {
                 t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
                 t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
               }
-              t.physdesc(:path=>"physdesc", :index_as=>[:stored_searchable]) {
-                t.type(:path=>"genreform", :index_as=>[:stored_searchable, :facetable])
+              t.physdesc(:path=>"physdesc") {
+                t.type(:path=>"genreform")
               }
               t.dao(:path=>"dao") {
                 t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
@@ -53,21 +53,23 @@ module DRI
             }
           }
         }
-
-        t.unitid(:proxy => [:ead, :eadheader, :eadid], :index_as=>[:stored_searchable])
+        t.ead_level(:proxy => [:ead, :archdesc, :ead_level])
+        t.unitid(:proxy => [:ead, :eadheader, :eadid], :index_as=>[:stored_searchable, :facetable])
+        t.repository_code(:proxy => [:ead, :eadheader, :eadid, :repository_code], :index_as=>[:stored_searchable, :facetable])
+        t.country_code(:proxy => [:ead, :eadheader, :eadid, :country_code], :index_as=>[:stored_searchable, :facetable])
+        t.identifier(:proxy => [:ead, :eadheader, :eadid, :identifier], :index_as=>[:stored_searchable, :facetable])
         t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[:stored_searchable, :sortable])
         t.abstract(:proxy => [:ead, :archdesc, :did,  :abstract], :index_as=>[:stored_searchable])
-        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable, :facetable])
-        t.filedesc(:proxy => [:ead, :eadheader, :filedesc], :index_as=>[:stored_searchable, :sortable])
-        t.language(:proxy => [:ead, :archdesc, :did, :language], :index_as=>[:stored_searchable, :facetable])
+        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable])
+        t.language(:proxy => [:ead, :archdesc, :did, :language], :index_as=>[:stored_searchable,  Descriptors.language_facetable])
         t.creator(:proxy => [:ead, :archdesc, :did, :creator], :index_as=>[:stored_searchable, :facetable])
         t.subject(:proxy => [:ead, :archdesc, :did, :subject], :index_as=>[:stored_searchable, :facetable])
         t.name_coverage(:proxy => [:ead, :archdesc, :did, :name_coverage], :index_as=>[:stored_searchable, :facetable])
         t.persname_coverage(:proxy => [:ead, :archdesc, :did, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
         t.corpname_coverage(:proxy => [:ead, :archdesc, :did, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
         t.geographical_coverage(:proxy => [:ead, :archdesc, :did, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable, :facetable])
-        t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[:stored_searchable, :facetable])
+        t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[:stored_searchable])
+        t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[:stored_searchable, :facetable])
 
   
       end # set_terminology
@@ -126,6 +128,8 @@ module DRI
 
       def metadata_path field
         case field
+        when :ead_level
+          [:ead, :archdesc, :ead_level]
         when :title
           [:ead, :eadheader, :filedesc, :titlestmt, :title]
         when :abstract

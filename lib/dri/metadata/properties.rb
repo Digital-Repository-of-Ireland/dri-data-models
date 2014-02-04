@@ -17,6 +17,7 @@ module DRI
         t.cover_image(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.institute(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
         t.licence(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
+        t.ingest_files_from_metadata(:path=>"ingestFilesFromMetadata", :namespace_prefix => nil, :index_as=>[:facetable, :displayable])
       end # set_terminology
 
       # Build the default XML document
