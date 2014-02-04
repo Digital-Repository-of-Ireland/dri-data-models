@@ -87,7 +87,7 @@ module DRI
               ""
               )
             xml.ead {
-              xml.eadheaderxml {
+              xml.eadheader {
                 xml.eadid
                 xml.filedesc {
                   xml.titlestmt {
@@ -111,8 +111,7 @@ module DRI
         person_array = get_person_array()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :searchable) => description)
 
         solr_doc
       end

@@ -100,8 +100,7 @@ module DRI
         description_array = description
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable) => description_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :facetable) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :searchable) => description_array)
 
         solr_doc
       end
