@@ -26,7 +26,7 @@ module DRI
           t.archdesc {
             t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
             t.did(:path => "did", :namespace_prefix => nil) {
-              t.abstract(:path=>"abstract")
+              t.abstract(:path=>"abstract", :index_as=>[:stored_searchable])
               t.language(:path=>"langmaterial", :index_as=>[:stored_searchable, :facetable])
               t.creator(:path=>"origination", :index_as=>[:stored_searchable, :facetable])
               t.subject(:path=>"subject", :index_as=>[:stored_searchable, :facetable])
@@ -53,6 +53,23 @@ module DRI
             }
           }
         }
+
+        t.unitid(:proxy => [:ead, :eadheader, :eadid], :index_as=>[:stored_searchable])
+        t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[:stored_searchable, :sortable])
+        t.abstract(:proxy => [:ead, :archdesc, :did,  :abstract], :index_as=>[:stored_searchable])
+        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable, :facetable])
+        t.filedesc(:proxy => [:ead, :eadheader, :filedesc], :index_as=>[:stored_searchable, :sortable])
+        t.language(:proxy => [:ead, :archdesc, :did, :language], :index_as=>[:stored_searchable, :facetable])
+        t.creator(:proxy => [:ead, :archdesc, :did, :creator], :index_as=>[:stored_searchable, :facetable])
+        t.subject(:proxy => [:ead, :archdesc, :did, :subject], :index_as=>[:stored_searchable, :facetable])
+        t.name_coverage(:proxy => [:ead, :archdesc, :did, :name_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.persname_coverage(:proxy => [:ead, :archdesc, :did, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.corpname_coverage(:proxy => [:ead, :archdesc, :did, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.geographical_coverage(:proxy => [:ead, :archdesc, :did, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable, :facetable])
+        t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[:stored_searchable, :facetable])
+
+  
       end # set_terminology
 
       def synchronize_metadata_on_save

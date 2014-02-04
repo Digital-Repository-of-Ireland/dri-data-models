@@ -46,10 +46,22 @@ module DRI
 
           }
         }
-        t.title(:proxy => [:c, :did, :unittitle], :index_as=>[:stored_searchable, :displayable, :sortable])
+       t.title(:proxy => [:c, :did, :unittitle], :index_as=>[:stored_searchable, :displayable, :sortable])
         t.abstract(:proxy => [:c, :did, :abstract], :index_as=>[:stored_searchable])
         t.bioghist(:proxy => [:c, :bioghist], :index_as=>[:stored_searchable])
         t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[:stored_searchable])
+        t.language(:proxy => [:c, :did, :language], :index_as=>[:stored_searchable, :facetable])
+        t.creator(:proxy => [:c, :did, :creator], :index_as=>[:stored_searchable, :facetable])
+        t.subject(:proxy => [:c, :did, :subject], :index_as=>[:stored_searchable, :facetable])
+        t.name_coverage(:proxy => [:c, :did, :name_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.persname_coverage(:proxy => [:c, :did, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.corpname_coverage(:proxy => [:c, :did, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.geographical_coverage(:proxy => [:c, :did, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.creation_date(:proxy => [:c, :did, :creation_date], :index_as=>[:stored_searchable, :displayable, :facetable])
+        t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[:stored_searchable, :displayable])
+       t.unitid(:proxy => [:c, :did, :unitid], :index_as=>[:stored_searchable])
+
+
       end # set_terminology
 
       def synchronize_metadata_on_save
