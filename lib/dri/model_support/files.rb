@@ -60,7 +60,7 @@ module DRI
           file_type.push "collection"
 
           if !is_root_collection? && !ead_level.blank?
-            file_type_display.push ead_level.strip.capitalise
+            file_type_display.push ead_level.strip.capitalize
           else
             file_type_display.push "Collection"
           end
