@@ -146,6 +146,9 @@ module DRI
           solr_doc.merge!(solr_name('file_size', :facetable, type: :integer) => file_size)
         end
 
+        solr_doc.merge!(solr_name('file_type_display', :stored_searchable) => file_type)
+        solr_doc.merge!(solr_name('file_type_display', :facetable) => file_type)
+
         solr_doc.merge!(solr_name('file_type_display', :stored_searchable) => file_type_display)
         solr_doc.merge!(solr_name('file_type_display', :facetable) => file_type_display)
 

@@ -19,10 +19,6 @@ class Batch < ActiveFedora::Base
     end
   end
 
-  def blah
-    return "blah"
-  end
-
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
 
