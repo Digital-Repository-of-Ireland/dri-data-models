@@ -38,6 +38,45 @@ module DRI
         end
       end
 
+      def file_metadata_to_solr(solr_doc=Hash.new)
+        file_type = []
+        file_type_display = []
+
+        if is_collection?
+          file_type.push "collection"
+
+          if !is_root_collection? && !ead_level.blank?
+            file_type_display.push ead_level.strip.capitalise
+          else
+            file_type_display.push "Collection"
+          end
+        end
+
+        solr_query = "is_part_of_ssim:info:fedora/#{id}"
+        results = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+
+        if results != nil
+          results.each do |gf|
+            if !is_collection? && gf.key?(solr_name('file_type', :stored_searchable))
+              file_type = file_type | gf[solr_name('file_type', :stored_searchable)[0]]
+              file_type_display = file_type_display | gf[solr_name('file_type', :stored_searchable)[0]].capitalise
+            end
+          end
+        end
+
+        if file_type.empty?
+          file_type.push "unknown"
+          file_type_display.push "Unknown"
+        end
+
+        solr_doc.merge!(solr_name('file_type', :stored_searchable) => file_type)
+        solr_doc.merge!(solr_name('file_type', :facetable) => file_type)
+        solr_doc.merge!(solr_name('file_type_display', :stored_searchable) => file_type_display)
+        solr_doc.merge!(solr_name('file_type_display', :facetable) => file_type_display)
+
+        solr_doc
+      end
+
       # Ingest a file into a GenericFile and add it to the Batch object
       def add_file file, dsid="content",file_name
       end

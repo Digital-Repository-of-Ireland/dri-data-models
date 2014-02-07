@@ -19,6 +19,10 @@ class Batch < ActiveFedora::Base
     end
   end
 
+  def blah
+    return "blah"
+  end
+
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
 
@@ -26,6 +30,7 @@ class Batch < ActiveFedora::Base
 
     solr_doc.merge!collections_to_solr
     solr_doc.merge!object_types_to_solr
+    solr_doc.merge!file_metadata_to_solr
 
     return solr_doc
   end

@@ -24,16 +24,42 @@ class GenericFile < ActiveFedora::Base
     end
   end
 
-  #def redirect_content
-  #  if content.controlGroup == 'M'
-  #    content.controlGroup = 'R'
-  #  end
-  #end
+  def blah
+    return 'blah'
+  end
 
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
     solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
+
+    solr_doc.merge!(solr_name('file_size', :stored_sortable, type: :integer) => file_size)
+    solr_doc.merge!(solr_name('width', :stored_sortable, type: :integer) => width)
+    solr_doc.merge!(solr_name('height', :stored_sortable, type: :integer) => height)
+    if (!width.empty? && !height.empty?)
+      solr_doc.merge!(solr_name('image_area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
+    end
+    solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => duration)
+    solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
+    solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
+    solr_doc.merge!(solr_name('bit_depth', :stored_sortable, type: :integer) => bit_depth)
+
+    file_type = []
+    file_type.push "audio" if audio?
+    file_type.push "video" if video?
+    file_type.push "image" if image?
+    file_type.push "text" if text?
+    solr_doc.merge!(solr_name('file_type', :stored_searchable) => file_type)
+    solr_doc.merge!(solr_name('file_type', :facetable) => file_type)
+
     return solr_doc
+  end
+
+  def update_index
+    super
+
+    if batch != nil
+      Sufia.queue.push(UpdateIndexJob.new(batch.pid))
+    end
   end
 end
 
