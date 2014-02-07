@@ -177,7 +177,7 @@ describe Batch do
     @ead_item.should_not be_valid
   end
 
-  it "it should handle all variations of the EAD component node" do
+  it "should handle all variations of the EAD component node" do
     variations = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12']
     variations.each do | curr_node_name |
       file_xml2 = fixture("ead/component_file.xml")
@@ -193,6 +193,9 @@ describe Batch do
 
   after(:each) do
     unless @ead_item.new_record?
+      @ead_item.generic_files.each do |file_obj|
+          file_obj.delete
+      end
       @ead_item.delete
     end
     unless @ead_file.new_record?
