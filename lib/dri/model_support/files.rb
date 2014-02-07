@@ -10,21 +10,6 @@ module DRI
         around_save :ingest_files_if_changed
       end
 
-      def ingest_files_if_changed
-
-        content_changed = false
-
-        if (self.ingest_files_from_metadata == "true")
-          content_changed = self.descMetadata.changed?
-        end
-
-        yield
-
-        if content_changed && self.generic_files.empty? &&
-            !self.dao_href.empty? && !new_record?
-          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
-        end
-      end
 
       def process_ingest_of_file_urls
         self.dao_href.each do |url|
@@ -55,6 +40,25 @@ module DRI
 
       # Ingest a file into a GenericFile and add it to the Batch object
       def add_file file, dsid="content",file_name
+      end
+
+      private
+
+
+      def ingest_files_if_changed
+
+        content_changed = false
+
+        if (self.ingest_files_from_metadata == "true")
+          content_changed = self.descMetadata.changed?
+        end
+
+        yield
+
+        if content_changed && self.generic_files.empty? &&
+            !self.dao_href.empty? && !new_record?
+          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
+        end
       end
     end
   end
