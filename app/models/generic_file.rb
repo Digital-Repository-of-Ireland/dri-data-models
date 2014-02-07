@@ -24,10 +24,6 @@ class GenericFile < ActiveFedora::Base
     end
   end
 
-  def blah
-    return 'blah'
-  end
-
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
     solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
@@ -54,13 +50,6 @@ class GenericFile < ActiveFedora::Base
     return solr_doc
   end
 
-  def update_index
-    super
-
-    if batch != nil
-      Sufia.queue.push(UpdateIndexJob.new(batch.pid))
-    end
-  end
 end
 
 
