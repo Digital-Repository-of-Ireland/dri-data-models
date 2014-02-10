@@ -39,7 +39,6 @@ class GenericFile < ActiveFedora::Base
       solr_doc.merge!(solr_name('image_area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
     end
 
-    if ()
     solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => milliseconds)
     solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
     solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
