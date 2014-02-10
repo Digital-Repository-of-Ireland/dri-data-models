@@ -44,6 +44,7 @@ module DRI
         has_attributes :name_coverage, datastream: :descMetadata, multiple: true
         has_attributes :physdesc, datastream: :descMetadata, multiple: true
         has_attributes :dao, datastream: :descMetadata, multiple: true
+        has_attributes :dao_href, datastream: :descMetadata, multiple: true
         has_attributes :unitid, datastream: :descMetadata, multiple: false
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
@@ -214,10 +215,14 @@ module DRI
               new_child.governing_collection = self
               new_child.depositor = depositor
               new_child.status = status
+              new_child.ingest_files_from_metadata = ingest_files_from_metadata
+              new_child.private_metadata="0"
+              new_child.master_file="1"
 
               # Don't add new node if it's invalid
               if new_child.valid?
                 new_child.save
+
                 # add to queue
                 prev_obj = new_child
               end
@@ -367,7 +372,9 @@ module DRI
         end
 
         yield
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid)) if content_changed
+        if content_changed && !new_record?
+          Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
+        end
       end
 
       # Indexing object types as a hierarchical tree
@@ -405,6 +412,9 @@ module DRI
         end
         solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
         solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+        if rights.empty?
+          solr_doc.merge!(solr_name('rights', :stored_searchable) => ['No rights statement'])
+        end
 
         solr_doc
       end
