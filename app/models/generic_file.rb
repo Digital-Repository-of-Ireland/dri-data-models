@@ -42,7 +42,6 @@ class GenericFile < ActiveFedora::Base
     solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => milliseconds)
     solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
     solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
-    solr_doc.merge!(solr_name('bit_rate', :stored_sortable, type: :string) => bit_rate)
     #solr_doc.merge!(solr_name('bit_depth', :stored_sortable, type: :integer) => bit_depth)
 
     file_type = []
