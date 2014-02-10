@@ -34,10 +34,10 @@ class GenericFile < ActiveFedora::Base
     if (!width.empty? && !height.empty?)
       solr_doc.merge!(solr_name('image_area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
     end
-    solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => duration)
-    solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
-    solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
-    solr_doc.merge!(solr_name('bit_depth', :stored_sortable, type: :integer) => bit_depth)
+    #solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => duration)
+    #solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
+    #solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
+    #solr_doc.merge!(solr_name('bit_depth', :stored_sortable, type: :integer) => bit_depth)
 
     file_type = []
     file_type.push "audio" if audio?
