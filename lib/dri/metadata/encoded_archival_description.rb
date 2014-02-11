@@ -24,16 +24,17 @@ module DRI
             }
           }  
           t.archdesc {
+             t.subject(:path=>"subject")
+              t.name_coverage(:path=>"name")
+              t.persname_coverage(:path=>"persname")
+              t.corpname_coverage(:path=>"corpname")
+              t.geographical_coverage(:path=>"geogname")
             t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
             t.did(:path => "did", :namespace_prefix => nil) {
               t.abstract()
               t.language(:path=>"langmaterial")
               t.creator(:path=>"origination")
-              t.subject(:path=>"subject")
-              t.name_coverage(:path=>"name")
-              t.persname_coverage(:path=>"persname")
-              t.corpname_coverage(:path=>"corpname")
-              t.geographical_coverage(:path=>"geogname")
+             
               t.creation_date(:path=>"unitdate") {
                 t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
                 t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
@@ -63,11 +64,12 @@ module DRI
         t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[:stored_searchable])
         t.language(:proxy => [:ead, :archdesc, :did, :language], :index_as=>[:stored_searchable,  Descriptors.language_facetable])
         t.creator(:proxy => [:ead, :archdesc, :did, :creator], :index_as=>[:stored_searchable, :facetable])
-        t.subject(:proxy => [:ead, :archdesc, :did, :subject], :index_as=>[:stored_searchable, :facetable])
-        t.name_coverage(:proxy => [:ead, :archdesc, :did, :name_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.persname_coverage(:proxy => [:ead, :archdesc, :did, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.corpname_coverage(:proxy => [:ead, :archdesc, :did, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.geographical_coverage(:proxy => [:ead, :archdesc, :did, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.scope_content(:proxy => [:ead, :archdesc, :scopecontent], :index_as=>[:stored_searchable])
+        t.subject(:proxy => [:ead, :archdesc, :subject], :index_as=>[:stored_searchable, :facetable])
+        t.name_coverage(:proxy => [:ead, :archdesc,  :name_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.persname_coverage(:proxy => [:ead, :archdesc, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.corpname_coverage(:proxy => [:ead, :archdesc, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.geographical_coverage(:proxy => [:ead, :archdesc,  :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
         t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[:stored_searchable])
         t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[:stored_searchable, :facetable])
 
@@ -118,7 +120,7 @@ module DRI
 
 
       def get_person_array()
-         return ead.archdesc.did.name_coverage | ead.archdesc.did.persname_coverage | ead.archdesc.did.corpname_coverage | ead.archdesc.did.creator
+         return ead.archdesc.name_coverage | ead.archdesc.persname_coverage | ead.archdesc.corpname_coverage | ead.archdesc.did.creator
       end
 
       def description
@@ -146,9 +148,9 @@ module DRI
         when :creation_date
           [:ead, :archdesc, :did, :creation_date]
         when :name_coverage
-          [:ead, :archdesc, :did, :name_coverage]
+          [:ead, :archdesc,  :name_coverage]
         when :geographical_coverage
-          [:ead, :archdesc, :did, :geographical_coverage]
+          [:ead, :archdesc, :geographical_coverage]
         when :physdesc
           [:ead, :archdesc, :did, :physdesc]
         when :type

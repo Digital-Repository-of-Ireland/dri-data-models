@@ -10,16 +10,19 @@ module DRI
 
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-          t.did {
-            t.unittitle
-            t.abstract
-            t.language(:path=>"langmaterial")
-            t.creator(:path=>"origination")
+          t.archdesc{
             t.subject(:path=>"subject")
             t.name_coverage(:path=>"name")
             t.persname_coverage(:path=>"persname")
             t.corpname_coverage(:path=>"corpname")
             t.geographical_coverage(:path=>"geogname")
+          }
+          t.did {
+            t.unittitle
+            t.abstract
+            t.language(:path=>"langmaterial")
+            t.creator(:path=>"origination")
+            
             t.creation_date(:path=>"unitdate") {
               t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
               t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
@@ -53,11 +56,11 @@ module DRI
         t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[:stored_searchable])
         t.language(:proxy => [:c, :did, :language], :index_as=>[:stored_searchable, Descriptors.language_facetable])
         t.creator(:proxy => [:c, :did, :creator], :index_as=>[:stored_searchable, :facetable])
-        t.subject(:proxy => [:c, :did, :subject], :index_as=>[:stored_searchable, :facetable])
-        t.name_coverage(:proxy => [:c, :did, :name_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.persname_coverage(:proxy => [:c, :did, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.corpname_coverage(:proxy => [:c, :did, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
-        t.geographical_coverage(:proxy => [:c, :did, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.subject(:proxy => [:c, :archdesc, :subject], :index_as=>[:stored_searchable, :facetable])
+        t.name_coverage(:proxy => [:c, :archdesc, :name_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.persname_coverage(:proxy => [:c, :archdesc, :persname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.corpname_coverage(:proxy => [:c, :archdesc, :corpname_coverage], :index_as=>[:stored_searchable, :facetable])
+        t.geographical_coverage(:proxy => [:c, :archdesc, :geographical_coverage], :index_as=>[:stored_searchable, :facetable])
         t.creation_date(:proxy => [:c, :did, :creation_date], :index_as=>[:stored_searchable, :displayable, :facetable])
         t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[:stored_searchable, :displayable])
         t.type(:ref => [:c, :did, :physdesc, :type], :index_as=>[:stored_searchable, :displayable, :facetable])
@@ -132,11 +135,11 @@ module DRI
         when :creation_date
           [:c, :did, :creation_date]
         when :subject
-          [:c, :did, :subject]
+          [:c, :archdesc, :subject]
         when :name_coverage
-          [:c, :did, :name_coverage]
+          [:c, :archdesc, :name_coverage]
         when :geographical_coverage
-          [:c, :did, :geographical_coverage]
+          [:c, :archdesc, :geographical_coverage]
         when :physdesc
           [:c, :did, :physdesc]
         when :type
