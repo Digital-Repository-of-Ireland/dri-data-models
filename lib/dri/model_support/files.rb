@@ -55,6 +55,7 @@ module DRI
         channels = []
         bit_depth = []
         sample_rate = []
+        file_format = []
 
         if is_collection?
           file_type.push "collection"
@@ -111,12 +112,34 @@ module DRI
             if gf.key?(solr_name('mime_type', :stored_searchable))
               mime_type = mime_type | gf[solr_name('mime_type', :stored_searchable)]
             end
+            if gf.key?(solr_name('file_format', :stored_searchable))
+              file_format = file_format | gf[solr_name('file_format', :stored_searchable)]
+            end
           end
         end
 
         if file_type.empty?
-          file_type.push "unknown"
-          file_type_display.push "Unknown"
+          # As a last resort try to determine the file type from the
+          # DCMI vocabulary in the metadata.
+          if type.include?("Sound")
+            file_type.push "audio"
+            file_type_display.push "Audio"
+          elsif type.include?("MovingImage")
+            file_type.push "video"
+            file_type_display.push "Video"
+          elsif type.include?("Text")
+            file_type.push "text"
+            file_type_display.push "Text"
+          elsif type.include?("Image")
+            file_type.push "image"
+            file_type_display.push "Image"
+          elsif type.include?("Collection")
+            file_type.push "collection"
+            file_type_display.push "Collection"
+          else
+            file_type.push "unknown"
+            file_type_display.push "Unknown"
+          end
         end
 
         solr_doc.merge!(solr_name('width', :stored_searchable, type: :integer) => width)
@@ -146,14 +169,17 @@ module DRI
           solr_doc.merge!(solr_name('file_size', :facetable, type: :integer) => file_size)
         end
 
-        solr_doc.merge!(solr_name('file_type_display', :stored_searchable) => file_type)
-        solr_doc.merge!(solr_name('file_type_display', :facetable) => file_type)
+        solr_doc.merge!(solr_name('file_type', :stored_searchable) => file_type)
+        solr_doc.merge!(solr_name('file_type', :facetable) => file_type)
 
         solr_doc.merge!(solr_name('file_type_display', :stored_searchable) => file_type_display)
         solr_doc.merge!(solr_name('file_type_display', :facetable) => file_type_display)
 
         solr_doc.merge!(solr_name('mime_type', :stored_searchable) => mime_type)
         solr_doc.merge!(solr_name('mime_type', :facetable) => mime_type)
+
+        solr_doc.merge!(solr_name('file_format', :stored_searchable) => file_format)
+        solr_doc.merge!(solr_name('file_format', :facetable) => file_format)
 
         solr_doc.merge!(solr_name('file_count', :stored_sortable, type: :integer) => [file_count])
 
