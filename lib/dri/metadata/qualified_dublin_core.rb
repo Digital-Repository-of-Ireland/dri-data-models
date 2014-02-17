@@ -12,45 +12,45 @@ module DRI
           t.root(:path=>"*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, Descriptors.language_facetable])
-          t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+          t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.language(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
+          t.subject(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
-          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
-          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
-          t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable]) {
+          t.date(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
+          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.coverage(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
-          t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable,  :sortable])
-          t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
-          t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
+          t.relation(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.creator(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
+          t.format(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.type(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # No need to index, but useful for editing
           t.identifier(:namespace_prefix=>"dc")
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable])
-          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])  {
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])  {
             t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.temporal_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
-          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
+          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Generate MARC Relators fields from the MARC Relators vocabulary
           DRI::Vocabulary::marcRelators.each do |role|
-            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable, :displayable]
+            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
           end
 
         end
