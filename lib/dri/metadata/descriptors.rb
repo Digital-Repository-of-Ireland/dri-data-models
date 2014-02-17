@@ -10,7 +10,7 @@ module DRI
 
        # Creates a searchable index in SOLR
       def self.cleaned_searchable
-        @searchable||= Solrizer::Descriptor.new(:text_en, :indexed, :multivalued, converter: input_converter)
+        @searchable||= Solrizer::Descriptor.new(Solrizer::DefaultDescriptors.stored_searchable_field_definition, converter: input_converter, requires_type: true)
       end
 
       def self.cleaned_displayable
@@ -52,7 +52,13 @@ module DRI
         lambda do |type|
           lambda do |val|
             begin
-              val.strip
+              clean_val = val.strip
+
+              if clean_val.downcase == "n/a"
+                "N/A"
+              else
+                clean_val
+              end
             rescue
               nil
             end
@@ -61,12 +67,14 @@ module DRI
       end
 
       def standardise_facet(val="")
-        clean_val = val.strip.split(/-|_/)[0].strip.capitalize
+        clean_val = val.strip
+
+        if clean_val.blank? || clean_val.downcase == "n/a"
+          nil
+        else
+          clean_val.capitalize
+        end
       end
-
-
-
-
 
       def self.standardise_language_code(val="")
         # If using RFC 5646, then val will be of the
