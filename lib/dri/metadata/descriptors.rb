@@ -10,7 +10,7 @@ module DRI
 
        # Creates a searchable index in SOLR
       def self.cleaned_searchable
-        @searchable||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: input_converter)
+        @searchable||= Solrizer::Descriptor.new(:text_en, :indexed, :multivalued, converter: input_converter)
       end
 
       def self.cleaned_displayable
@@ -20,7 +20,7 @@ module DRI
 
        # Creates a facet index in SOLR
       def self.cleaned_facetable
-        @facetable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: input_converter)
+        @facetable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: facet_converter)
       end
 
       # Converts an RFC 5646 or ISO 639.1 language code into an ISO 639.2 code
@@ -36,11 +36,11 @@ module DRI
       	end
       end
 
-      def self.input_converter
+      def self.facet_converter
         lambda do |type|
           lambda do |val|
             begin
-              standardise_input val
+              standardise_facet val
             rescue
               nil
             end
@@ -48,10 +48,20 @@ module DRI
         end
       end
 
-      def standardise_input(val="")
+      def self.input_converter
+        lambda do |type|
+          lambda do |val|
+            begin
+              val.strip
+            rescue
+              nil
+            end
+          end
+        end
+      end
 
-        clean_val = val.strip.split(/-|_/)[0].strip.downcase
-
+      def standardise_facet(val="")
+        clean_val = val.strip.split(/-|_/)[0].strip.capitalize
       end
 
 
