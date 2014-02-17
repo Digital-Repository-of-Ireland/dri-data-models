@@ -32,16 +32,16 @@ class GenericFile < ActiveFedora::Base
     super(solr_doc, opts)
     solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
 
-    solr_doc.merge!(solr_name('file_size', :stored_sortable, type: :integer) => file_size)
-    solr_doc.merge!(solr_name('width', :stored_sortable, type: :integer) => width)
-    solr_doc.merge!(solr_name('height', :stored_sortable, type: :integer) => height)
+    solr_doc.merge!(solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
+    solr_doc.merge!(solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
+    solr_doc.merge!(solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
     if (!width.empty? && !height.empty?)
       solr_doc.merge!(solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
     end
 
-    solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => milliseconds)
-    solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => channels)
-    solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => sample_rate)
+    solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
+    solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
+    solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
     #solr_doc.merge!(solr_name('bit_depth', :stored_sortable, type: :integer) => bit_depth)
 
     file_type = []
