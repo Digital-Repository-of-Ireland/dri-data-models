@@ -9,7 +9,7 @@ module Sufia
           '%A' => [:creator],
           #'%C' => [:publication_place],
           '%D' => [:creation_date],
-          '%8' => [:publication_date],
+          '%8' => [:published_date],
           '%E' => [:contributor],
           '%I' => [:publisher],
           #'%J' => [:series_title],
@@ -99,7 +99,7 @@ module Sufia
           end
         end
         # Get Pub Date
-        text << "(" + setup_pub_date + "). " unless setup_pub_date.nil?
+        text << "(" + setup_pub_date("apa") + "). " unless setup_pub_date("apa").nil?
 
         # setup title info
         title_info = setup_title_info
@@ -112,6 +112,13 @@ module Sufia
             text += "."
           end
         end
+
+        text << setup_database_name
+
+        text << " Retrieved #{access_date_chicago}."
+
+        text << " doi: #{self.doi}" unless self.doi.nil?
+
         text.html_safe
       end
 
@@ -148,13 +155,26 @@ module Sufia
         text << "<i>" + mla_citation_title(title_info) + "</i> " unless title.blank?
 
         # Publication
-        text << setup_pub_info + ", " unless setup_pub_info.nil?
+        text << setup_pub_info unless setup_pub_info.nil?
 
         # Get Pub Date
-        text << setup_pub_date unless setup_pub_date.nil?
+        date = setup_pub_date("mla")
+        if date.nil?
+          date = "n.d"
+        end
+        text << ", " + date 
         if text[-1,1] != "."
           text << "." unless text.blank?
         end
+
+        # Set database name
+        text << setup_database_name
+
+        text << " Web. "
+        text << access_date_mla + "."
+
+        text << " <#{self.doi}>" unless self.doi.nil?
+
         text.html_safe
       end
 
@@ -208,30 +228,52 @@ module Sufia
           pub_info << place
           pub_info << ": " unless publisher.blank?
         end
+
+        published_date = setup_pub_date("chicago")
+
         unless publisher.blank?
           publisher = CGI::escapeHTML(publisher)
           pub_info << publisher
-          pub_info << ", " unless setup_pub_date.nil?
+          pub_info << ", " unless published_date.nil?
         end
-        unless setup_pub_date.nil?
-          pub_info << setup_pub_date
+        unless published_date.nil?
+          pub_info << published_date
         end
 
         citation = ""
         citation << "#{author_text} " unless author_text.blank?
         citation << "<i>#{title_info}.</i> " unless title_info.blank?
         citation << "#{pub_info}." unless pub_info.blank?
+        citation << "#{setup_database_name}"
+        citation << " Accessed #{access_date_chicago}."
+        citation << " doi: #{self.doi}." unless self.doi.nil?
         citation.html_safe
       end
 
       private
 
-      def setup_pub_date
-        first_date = self.creation_date.first
+      def setup_database_name
+        " <i>Digital Repository of Ireland</i>."
+      end
+
+      def access_date_mla
+        date = Time.now
+        date.strftime("%d %b, %Y")
+      end
+
+      def access_date_chicago
+        date = Time.now
+        date.strftime("%B %-d, %Y")
+      end
+
+      def setup_pub_date( format )
+        first_date = self.create_date
         unless first_date.blank?
           first_date = CGI::escapeHTML(first_date)
           date = Time.parse(first_date) #first_date.gsub(/[^0-9|n\.d\.]/, "")[0,4]
-          date_value = "%d" % date.year
+          date_value = date.strftime("%Y, %B %-d") if format.eql?("apa")
+          date_value = date.strftime("%d %B %Y") if format.eql?("mla")
+          date_value = date.strftime("%Y") if format.eql?("chicago")
           return nil if date_value.nil?
         end
         clean_end_punctuation(date_value) if date_value
