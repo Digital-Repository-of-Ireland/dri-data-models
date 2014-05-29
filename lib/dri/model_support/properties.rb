@@ -15,6 +15,7 @@ module DRI
         has_attributes :doi, datastream: :properties, multiple: false
         has_attributes :cover_image, datastream: :properties, multiple: false
         has_attributes :institute, datastream: :properties, multiple: true
+        has_attributes :depositing_institute, datastream: :properties, multiple: false
         has_attributes :licence, datastream: :properties, multiple: false
         has_attributes :ingest_files_from_metadata, datastream: :properties, multiple: false
       end
