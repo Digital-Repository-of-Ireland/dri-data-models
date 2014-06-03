@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rdoc"
   s.add_development_dependency "rake"
   s.add_development_dependency "rack-test"
-  s.add_development_dependency "simplecov"
+  #s.add_development_dependency "simplecov"
 
   s.require_paths = ["lib", "app/models"]
 end
