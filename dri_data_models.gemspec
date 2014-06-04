@@ -18,10 +18,12 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + ["Rakefile", "README.rdoc"]
   s.test_files = Dir["{spec}/**/*"]
 
+  s.add_dependency "blacklight", "4.5.0"
   s.add_dependency "hydra-head", "6.4.0"
   s.add_dependency "hydra-access-controls", "6.4.0"
   s.add_dependency "iso-639"
   s.add_dependency "sufia-models", "3.4.0"
+  s.add_dependency "sqlite3"
   s.add_development_dependency "rspec"
   s.add_development_dependency "mocha"
   s.add_development_dependency "rspec-rails"

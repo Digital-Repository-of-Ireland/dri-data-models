@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Batch do
+describe 'Batch' do
 
   before(:each) do
     @series_xml = fixture("ead/component_series.xml")

@@ -1,7 +1,7 @@
 # spec/modules/generic_file.rb
 require 'spec_helper'
 
-describe GenericFile do
+describe 'GenericFile' do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests

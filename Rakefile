@@ -17,6 +17,8 @@ rescue LoadError
   RDoc::Task = Rake::RDocTask
 end
 
+Bundler::GemHelper.install_tasks
+
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'DriDataModels'
@@ -27,9 +29,6 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/dri/metadata/*.rb')
   rdoc.rdoc_files.include('app/models/dri/*.rb')
 end
-
-Bundler::GemHelper.install_tasks
-
 
 require 'ci/reporter/rake/rspec'
 RSpec::Core::RakeTask.new(:rspec => ['ci:setup:rspec']) do |spec|

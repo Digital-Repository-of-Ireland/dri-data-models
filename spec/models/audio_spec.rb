@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 
-describe Batch do
+describe 'Batch' do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests
