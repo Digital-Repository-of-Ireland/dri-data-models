@@ -11,4 +11,4 @@ if [ -z "$CONTRIBUTORS" ] ; then
 fi
 
 # Display the contributors list and write it to the file
-echo "$CONTRIBUTORS" | sed 's/^/- /' | sort -k 3 | tee "$(git rev-parse --show-toplevel)/CONTRIBUTORS.rdoc"
+echo "$CONTRIBUTORS" | tee "$(git rev-parse --show-toplevel)/CONTRIBUTORS.rdoc" | sort
