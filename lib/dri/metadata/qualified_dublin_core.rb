@@ -4,60 +4,79 @@ module DRI
 
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
 
-    class QualifiedDublinCore < ActiveFedora::OmDatastream
-      attr_accessor :fields
-      class_attribute :class_fields
-      self.class_fields = []
+    class QualifiedDublinCore < DRI::Metadata::Base
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
         set_terminology do |t|
-          t.root(:path=>"/*") # Selects the root node of the XML document
+          t.root(:path=>"*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          t.rights(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.description(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :displayable])
-          t.language(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, Descriptors.language_facetable])
-          t.subject(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+          t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.language(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
+          t.subject(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :type=> :date, :index_as=>[:stored_searchable, :displayable, :dateable])
-          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable])
-          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
-          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
-          t.coverage(:namespace_prefix=>"dc", :index_as=>[:stored_searchable, :facetable]) {
+          t.date(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
+          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.coverage(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.relation(:namespace_prefix=>"dc", :index_as=>[:displayable, :facetable])
-          t.creator(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable,  :sortable])
-          t.format(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
-          t.type(:namespace_prefix=>"dc", :index_as=>[:facetable, :stored_searchable, :displayable])
+          t.relation(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.creator(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
+          t.format(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.type(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # No need to index, but useful for editing
           t.identifier(:namespace_prefix=>"dc")
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :displayable, :dateable])
-          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable])  {
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])  {
             t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[:stored_searchable, :facetable, :displayable]) {
+          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.temporal_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [:stored_searchable, :displayable])
-          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [:stored_searchable, :displayable])
+          t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Generate MARC Relators fields from the MARC Relators vocabulary
           DRI::Vocabulary::marcRelators.each do |role|
-            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[:facetable, :stored_searchable, :displayable]
+            t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
           end
 
         end
 
+      end
+
+      def synchronize_metadata_on_save
+        false
+      end
+
+      def metadata_path field
+          recognised_attributes = [ :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
+                                    :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
+                                    :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
+                                    :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
+          if recognised_attributes.include? field
+            [field]
+          elsif m = /^role_(.*)/.match(field.to_s)
+            if DRI::Vocabulary::marcRelators.include? m[1]
+              [field]
+            else
+              []
+            end
+          else
+            []
+          end
       end
 
       def update_indexed_attributes(params={}, opts={})
@@ -73,6 +92,27 @@ module DRI
         super(new_params, opts)
       end
 
+
+      def roles= roles
+        if roles.is_a? Hash
+          if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
+            changed_roles = Hash.new
+            roles["type"].uniq.each do |role|
+              changed_roles[role] = []
+            end
+
+            roles["type"].each_with_index do |role, i|
+              if (roles["name"][i] != "")
+                changed_roles[role].push(roles["name"][i])
+              end
+            end
+
+            changed_roles.keys.each do |role|
+              send role+"=", changed_roles[role]
+            end
+          end
+        end
+      end
 
       # Build the xml doc
       def self.xml_template
@@ -180,6 +220,60 @@ module DRI
           end
 
           return people
+      end
+
+      def collection?
+        type.include? "Collection"
+      end
+
+      def custom_validations
+        errors = Hash.new
+
+        title_result = false
+        description_result = false
+        rights_result = false
+        type_result = false
+        date_result = false
+
+        title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        rights.each do |curr_right|
+          rights_result = true unless curr_right.blank?
+        end
+
+        type.each do |curr_type|
+          type_result = true unless curr_type.blank?
+        end
+
+        date.each do |curr_date|
+          date_result = true unless curr_date.blank?
+        end
+
+        if !date_result
+          creation_date.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+
+        if !date_result
+          published_date.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+
+        errors[:title] = "can't be blank" if title_result == false
+        errors[:description] = "can't be blank" if description_result == false
+        errors[:rights] = "can't be blank" if rights_result == false
+        errors[:type] = "can't be blank" if type_result == false
+        errors[:date] = "can't be blank" if date_result == false
+
+        return errors
       end
 
       # Load Dublin Core terminology

@@ -1,6 +1,6 @@
-- SineadRed <sinead.redmond@nuim.ie>
-- Kathryn Cassidy <kcassidy@tchpc.tcd.ie>
-- Damien Gallagher <damien.gallagher@nuim.ie>
-- Stuart Kenny <skenny@tchpc.tcd.ie>
-- Raymond Noonan <raymond.noonan@nuim.ie>
-- Jimmy Tang <jtang@tchpc.tcd.ie>
+Damien Gallagher <damien.gallagher@nuim.ie>
+Jimmy Tang <jtang@tchpc.tcd.ie>
+Kathryn Cassidy <kcassidy@tchpc.tcd.ie>
+Raymond Noonan <raymond.noonan@nuim.ie>
+Sinead Redmond <sinead.redmond@nuim.ie>
+Stuart Kenny <skenny@tchpc.tcd.ie>

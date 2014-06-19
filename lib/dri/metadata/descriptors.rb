@@ -8,6 +8,21 @@ module DRI
       	@language ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: language_converter)
       end
 
+       # Creates a searchable index in SOLR
+      def self.cleaned_searchable
+        @searchable||= Solrizer::Descriptor.new(Solrizer::DefaultDescriptors.stored_searchable_field_definition, converter: input_converter, requires_type: true)
+      end
+
+      def self.cleaned_displayable
+        @displayable||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: input_converter)
+      end
+
+
+       # Creates a facet index in SOLR
+      def self.cleaned_facetable
+        @facetable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: facet_converter)
+      end
+
       # Converts an RFC 5646 or ISO 639.1 language code into an ISO 639.2 code
       def self.language_converter
       	lambda do |type|
@@ -19,6 +34,46 @@ module DRI
       			end
       		end
       	end
+      end
+
+      def self.facet_converter
+        lambda do |type|
+          lambda do |val|
+            begin
+              standardise_facet val
+            rescue
+              nil
+            end
+          end
+        end
+      end
+
+      def self.input_converter
+        lambda do |type|
+          lambda do |val|
+            begin
+              clean_val = val.strip
+
+              if clean_val.downcase == "n/a"
+                "N/A"
+              else
+                clean_val
+              end
+            rescue
+              nil
+            end
+          end
+        end
+      end
+
+      def standardise_facet(val="")
+        clean_val = val.strip
+
+        if clean_val.blank? || clean_val.downcase == "n/a"
+          nil
+        else
+          clean_val.capitalize
+        end
       end
 
       def self.standardise_language_code(val="")

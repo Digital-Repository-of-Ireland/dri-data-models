@@ -217,5 +217,22 @@ module DRI
         "wit"
       ]
     end
+
+    def self.dcmiType
+      [
+        "Collection",
+        "Dataset",
+        "Event",
+        "Image",
+        "InteractiveResource",
+        "MovingImage",
+        "PhysicalObject",
+        "Service",
+        "Software",
+        "Sound",
+        "StillImage",
+        "Text"
+      ]
+    end
   end
 end
