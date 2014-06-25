@@ -27,7 +27,7 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.rdoc_files.include('lib/dri/metadata/*.rb')
-  rdoc.rdoc_files.include('app/models/dri/*.rb')
+  rdoc.rdoc_files.include('app/models/*.rb')
 end
 
 require 'ci/reporter/rake/rspec'

@@ -21,7 +21,7 @@ describe 'Batch' do
       "source" => ["CD nnn nuig"],
       "geographical_coverage" => ["Dublin"],
       "temporal_coverage" => ["1900s"],
-      "subject" => ["Ireland","something else", "Éire"]
+      "subject" => ["Ireland","something else"]
     }
 
   end

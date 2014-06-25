@@ -18,6 +18,8 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + ["Rakefile", "README.rdoc"]
   s.test_files = Dir["{spec}/**/*"]
 
+  s.require_paths = ["lib", "app"]  
+
   s.add_dependency "blacklight", "4.5.0"
   s.add_dependency "hydra-head", "6.4.0"
   s.add_dependency "hydra-access-controls", "6.4.0"
@@ -32,6 +34,4 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
   s.add_development_dependency "rack-test"
   #s.add_development_dependency "simplecov"
-
-  s.require_paths = ["lib", "app/models"]
 end
