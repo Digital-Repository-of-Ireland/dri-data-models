@@ -3,6 +3,7 @@ class Batch < ActiveFedora::Base
   include Sufia::ModelMethods
   include Sufia::Noid
   include Sufia::GenericFile::Export
+  include Sufia::GenericFile::ReloadOnSave
   include DRI::ModelSupport::Properties
   include DRI::ModelSupport::Permissions
   include DRI::ModelSupport::InterchangeableMetadata
