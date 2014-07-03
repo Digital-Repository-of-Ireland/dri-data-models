@@ -20,10 +20,10 @@ Gem::Specification.new do |s|
 
   s.require_paths = ["lib", "app"]  
 
-  s.add_dependency "hydra-head", "6.4.1"
-  s.add_dependency "hydra-access-controls", "6.4.1"
+  s.add_dependency "hydra-head"
+  s.add_dependency "hydra-access-controls"
   s.add_dependency "iso-639"
-  s.add_dependency "sufia-models", "3.7.0"
+  s.add_dependency "sufia-models"
   s.add_dependency "sqlite3"
   s.add_development_dependency "rspec"
   s.add_development_dependency "mocha"
