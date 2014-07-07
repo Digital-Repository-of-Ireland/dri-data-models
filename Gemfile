@@ -7,7 +7,8 @@ gemspec
 
 # jquery-rails is used by the dummy application
 gem "jquery-rails"
-gem "protected_attributes"
+
+gem "sqlite3"
 
 # Declare any dependencies that are still in development here instead of in
 # your gemspec. These might include edge Rails or gems from your path or
@@ -25,7 +26,6 @@ group :development, :test do
   gem 'rcov', :platform => :mri_18
   gem 'simplecov', :platform => [:mri_19, :mri_20]
   gem 'simplecov-rcov', :platform => [:mri_19, :mri_20]
-  gem 'jettywrapper'
 
   gem 'guard'
   gem 'guard-rspec'
@@ -33,6 +33,11 @@ group :development, :test do
   gem 'rb-inotify', :require => false
   gem 'rb-fsevent', :require => false
   gem 'rb-fchange', :require => false
-
+  gem 'rspec-rails'
+  gem 'mocha'
+  gem 'factory_girl_rails'
+  gem 'database_cleaner'
+  gem 'faker'
   gem 'ci_reporter'
+  gem 'rspec-legacy_formatters'
 end

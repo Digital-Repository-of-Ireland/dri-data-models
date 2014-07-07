@@ -20,17 +20,10 @@ Gem::Specification.new do |s|
 
   s.require_paths = ["lib", "app"]  
 
+  s.add_dependency "rails", ">= 4.0"
+  s.add_dependency 'sass-rails', '~> 4.0.3'
   s.add_dependency "hydra-head"
   s.add_dependency "hydra-access-controls"
   s.add_dependency "iso-639"
   s.add_dependency "sufia-models"
-  s.add_dependency "sqlite3"
-  s.add_development_dependency "rspec"
-  s.add_development_dependency "mocha"
-  s.add_development_dependency "rspec-rails"
-  s.add_development_dependency "cucumber"
-  s.add_development_dependency "rdoc"
-  s.add_development_dependency "rake"
-  s.add_development_dependency "rack-test"
-  #s.add_development_dependency "simplecov"
 end
