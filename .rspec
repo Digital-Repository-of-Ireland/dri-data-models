@@ -1,1 +1,1 @@
---color
+--color --require rspec/legacy_formatters
