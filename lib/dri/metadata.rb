@@ -8,6 +8,7 @@ module DRI
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
     autoload :FileProperties, 'dri/metadata/file_properties'
+    autoload :FullMetadata, 'dri/metadata/full_metadata'
     autoload :MODS, 'dri/metadata/mods'
     autoload :Properties, 'dri/metadata/properties'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'

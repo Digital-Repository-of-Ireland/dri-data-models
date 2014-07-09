@@ -184,4 +184,8 @@ class FitsDatastream < ActiveFedora::OmDatastream
     end
     builder.doc
   end
+
+  def prefix
+    ''
+  end
 end

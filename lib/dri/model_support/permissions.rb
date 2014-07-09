@@ -4,7 +4,7 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-      	include Hydra::ModelMixins::RightsMetadata
+      	include Hydra::AccessControls::Permissions
 
         has_metadata :name => "rightsMetadata", :type => Hydra::Datastream::RightsMetadata   
       end

@@ -7,7 +7,7 @@ module DRI
         attr_accessor :desc_metadata_class
 
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
-        has_metadata :name => "fullMetadata", :type => ActiveFedora::OmDatastream
+        has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
 
         after_initialize :load_attributes
         after_save :reset_metadata_check
@@ -332,7 +332,7 @@ module DRI
         ds_class = ""
         ds = nil
 
-        if (new? && desc_metadata_class != nil)
+        if (new_record? && desc_metadata_class != nil)
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 

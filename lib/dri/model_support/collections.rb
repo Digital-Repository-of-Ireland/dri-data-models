@@ -7,14 +7,14 @@ module DRI
       	attr_accessor :collection
 
         belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'Batch'
-        has_many :governed_items, :property=>:is_governed_by, :inbound => true, :class_name => 'Batch'
+        has_many :governed_items, :property=>:is_governed_by, :class_name => 'Batch'
 
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'Batch'
-        has_many :items, :property=>:is_member_of_collection, :inbound => true, :class_name => 'Batch'
+        has_many :items, :property=>:is_member_of_collection, :class_name => 'Batch'
 
         # Additional relationships to keep track of sibling order, important for EAD and similar archive standards
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'Batch'
-        belongs_to :next_sibling, :property=>:is_preceded_by, :inbound => true, :class_name => 'Batch'
+        belongs_to :next_sibling, :property=>:is_preceded_by, :class_name => 'Batch'
 
         def collection= collection
           if @collection == collection
@@ -45,7 +45,7 @@ module DRI
       def is_root_collection?
       	# It is a root collection if it is already defined to be a collection, it has
       	# been already saved in Fedora and it has no governing collection
-        (!new?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
+        (!new_record?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
       end
 
       private

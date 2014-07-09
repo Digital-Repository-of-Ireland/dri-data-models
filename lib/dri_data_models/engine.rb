@@ -1,5 +1,7 @@
 module DriDataModels
   require 'rails'
+  require 'hydra/head'
+  require 'hydra-collections'
   require 'sufia/models'
  
   class Engine < ::Rails::Engine

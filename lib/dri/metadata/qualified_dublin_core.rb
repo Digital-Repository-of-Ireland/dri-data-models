@@ -133,7 +133,7 @@ module DRI
 
       # merge in special facets (e.g. person) into solr document
       def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+        solr_doc = super(solr_doc)
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()

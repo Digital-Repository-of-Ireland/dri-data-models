@@ -72,7 +72,7 @@ module DRI
         t.geographical_coverage(:proxy => [:ead, :archdesc,  :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable])
         t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-
+        t.bioghist(:proxy => [:ead, :archdesc, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
   
       end # set_terminology
 
@@ -107,7 +107,7 @@ module DRI
       end
 
       def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+        solr_doc = super(solr_doc)
 
         # EAD has several "name" tags, so we merge them together into the SOLR document
         person_array = get_person_array()
