@@ -20,6 +20,10 @@ describe 'GenericFile' do
     @file_asset.datastreams.keys.should_not include("randomfile")
   end
 
+  it "should have a characterize method" do
+    @file_asset.should respond_to?(:characterize)
+  end
+
   #it "should validate the existence of file content" do
   #  @file_asset.should_not be_valid
   #  @file_asset.update_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})

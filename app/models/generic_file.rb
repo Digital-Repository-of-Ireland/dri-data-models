@@ -1,7 +1,23 @@
 class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile
+  include Sufia::ModelMethods
+  include Sufia::Noid
+  include Sufia::GenericFile::MimeTypes
+  include Sufia::GenericFile::Export
+  include Sufia::GenericFile::Characterization
+  include Sufia::GenericFile::Audit
+  include Sufia::GenericFile::Permissions
+  include Sufia::GenericFile::WebForm
+  include Sufia::GenericFile::Derivatives
+  include Sufia::GenericFile::Trophies
+  include Sufia::GenericFile::Metadata
+  include Sufia::GenericFile::Versions
+  include Sufia::GenericFile::VirusCheck
+  include Sufia::GenericFile::ReloadOnSave
 
   #after_initialize :redirect_content
+
+  belongs_to :batch, property: :is_part_of
 
   has_metadata :name => "dri_properties", :type => DRI::Metadata::FileProperties
 
@@ -28,9 +44,14 @@ class GenericFile < ActiveFedora::Base
     characterization.milliseconds.blank? ? characterization.video_milliseconds : characterization.milliseconds
   end
 
+  # Unstemmed, searchable, stored
+  def noid_indexer
+    @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
+  end 
+
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
-    solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
+    solr_doc[Solrizer.solr_name('noid', noid_indexer)] = noid
 
     solr_doc.merge!(solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
     solr_doc.merge!(solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?

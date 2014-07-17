@@ -20,10 +20,15 @@ class Batch < ActiveFedora::Base
     end
   end
 
+  # Unstemmed, searchable, stored
+  def noid_indexer
+    @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
+  end
+
   def to_solr(solr_doc={}, opts={})
     solr_doc = super(solr_doc, opts)
 
-    solr_doc[Solrizer.solr_name('noid', Sufia::GenericFile.noid_indexer)] = noid
+    solr_doc[Solrizer.solr_name('noid', noid_indexer)] = noid
 
     solr_doc.merge!collections_to_solr
     solr_doc.merge!object_types_to_solr
