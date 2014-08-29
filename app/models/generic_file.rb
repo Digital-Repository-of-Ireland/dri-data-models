@@ -14,6 +14,7 @@ class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile::Versions
   include Sufia::GenericFile::VirusCheck
   include Sufia::GenericFile::ReloadOnSave
+  include Sufia::GenericFile::FullTextIndexing
 
   #after_initialize :redirect_content
 

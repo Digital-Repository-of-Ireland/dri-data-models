@@ -11,6 +11,7 @@ module DRI
     autoload :FullMetadata, 'dri/metadata/full_metadata'
     autoload :MODS, 'dri/metadata/mods'
     autoload :Properties, 'dri/metadata/properties'
+    autoload :Extracted, 'dri/metadata/extracted'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
   end

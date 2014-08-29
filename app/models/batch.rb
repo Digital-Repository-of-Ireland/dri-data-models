@@ -12,6 +12,9 @@ class Batch < ActiveFedora::Base
       
   has_many :generic_files, :property => :is_part_of
 
+  has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
+  has_attributes :full_text, datastream: :extracted, multiple: true
+
   def self.find_or_create(pid)
     begin
       Batch.find(pid)
@@ -33,6 +36,8 @@ class Batch < ActiveFedora::Base
     solr_doc.merge!collections_to_solr
     solr_doc.merge!object_types_to_solr
     solr_doc.merge!file_metadata_to_solr
+
+    solr_doc.merge!('all_text_timv' => full_text)
 
     return solr_doc
   end
