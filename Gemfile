@@ -38,6 +38,7 @@ group :development, :test do
   gem 'factory_girl_rails'
   gem 'database_cleaner'
   gem 'faker'
-  gem 'ci_reporter'
+  gem 'ci_reporter_cucumber'
+  gem 'ci_reporter_rspec'  
   gem 'rspec-legacy_formatters'
 end
