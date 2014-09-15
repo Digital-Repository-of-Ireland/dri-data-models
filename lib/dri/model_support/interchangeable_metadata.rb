@@ -49,6 +49,9 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
+        has_attributes :record, datastream: :descMetadata, multiple: true
+
+
         validate :custom_validations
       end
 

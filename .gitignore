@@ -6,3 +6,4 @@ test/dummy/log/test.log
 tmp/
 *.sqlite3
 *.log
+.idea/
