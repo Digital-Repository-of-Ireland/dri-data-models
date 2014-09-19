@@ -49,7 +49,7 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
-        has_attributes :record, datastream: :descMetadata, multiple: true
+        has_attributes :datafield_336_ind1__ind2__subfield_a, datastream: :descMetadata, multiple: true
 
 
         validate :custom_validations
@@ -344,7 +344,8 @@ module DRI
                  "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             ds = ds_class.constantize.new
           else
-            ds = DRI::Metadata::QualifiedDublinCore.new
+            # Load class from :desc_metadata_class which is set ingest_controller
+            ds = desc_metadata_class.constantize.new
           end
         else
           # When loading the object from Fedora, check what metadata

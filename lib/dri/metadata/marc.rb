@@ -2,292 +2,183 @@ module DRI
 
   module Metadata
 
-    # An ActiveFedora datastream that interacts with Qualified marc Metadata.
-
     class Marc < DRI::Metadata::Base
+      # OM (Opinionated Metadata) terminology mapping to an EAD Collection
+      set_terminology do |t|
+        t.root(:path=>"*", :namespace_prefix => nil)
 
-      # Set OM (Opinionated Metadata) terminology
-      def self.load_inherited_terminology
-        set_terminology do |t|
-          t.root(:path=>"*") # Selects the root node of the XML document
+        t.collection(:path=>"collection", :namespace_prefix => nil) {
+          t.title(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.description(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.type(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.rights(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.licence(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.creator(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.creation_date(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.record(:path=>"record", :namespace_prefix => nil) {
+            t.leader(:path=>"leader", :namespace_prefix => nil)
+            t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"})
+            t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"})
+            t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"})
+            t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
 
-          # Marc Fields
-          # t.record{
-          #   t.leader(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # }
-          t.record(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            # DRI::Vocabulary::marcDatafields.each do |datafield|
+            #   #  Create Datafield
+            #   t.send( "datafield_"+datafield[0], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => datafield[0], :ind1 => datafield[1], :ind2 => datafield[2]}){
+            #     # t.send "subfield", :path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}
+            #     # t.subfield(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
+            #     # t.subfield(:proxy => [:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym])
+            #     # t.send :proxy => [:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym]
+            #
+            #     # Format of the subfield: datafield-ind1-ind2-subfield ie:
+            #     # 650_ind1_1_ind2_0_subfield_a,
+            #     # empty attributes are replaced with underscore '_' ie:
+            #     # 650_ind1___ind2___subfield_a
+            #
+            #     datafield[3].each do |subfield|
+            #       t.send ("datafield_" + datafield[0]+"_ind1_"+ datafield[1].sub( ' ', '_') + "_ind2_" + datafield[1].sub( ' ', '_') +"_subfield_"+ subfield), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => subfield}
+            #     end
+            #   }
+            # end
 
-          # # Simple Dublin Core Fields
-          # t.title(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.datafield_336(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "336", :ind1 => " ", :ind2 => " "}) {
+              t.datafield_336_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
+            }
+
+            t.datafield_010(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "010", :ind1 => " ", :ind2 => " "}) {
+              t.datafield_010_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
+            }
+
+            # We need to keep track of the unitid in order to sync this XML snippet to the correct
+            # component tag in the complete EAD XML datastream in the collection object!
+            # t.eadid(:path=>"eadid", :namespace_prefix => nil) {
+            #   t.repository_code(:path => {:attribute=>"mainagencycode"}, :namespace_prefix => nil)
+            #   t.country_code(:path => {:attribute=>"countrycode"}, :namespace_prefix => nil)
+            #   t.identifier(:path => {:attribute=>"identifier"}, :namespace_prefix => nil)
+            # }
+            # t.filedesc {
+            #   t.titlestmt {
+            #     t.title(:path=>"titleproper")
+            #   }
+            # }
+          }
+          # t.archdesc {
+          #   t.subject(:path=>"subject")
+          #   t.name_coverage(:path=>"name")
+          #   t.persname_coverage(:path=>"persname")
+          #   t.corpname_coverage(:path=>"corpname")
+          #   t.geographical_coverage(:path=>"geogname")
+          #   t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+          #   t.did(:path => "did", :namespace_prefix => nil) {
+          #     t.abstract()
+          #     t.language(:path=>"langmaterial")
+          #     t.creator(:path=>"origination")
           #
-          # t.rights(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.description(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.language(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
-          # t.subject(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
-          #   t.subject_lang(:path=>{:attribute=> "xml:lang"})
-          # }
-          # t.subject_lang(:proxy=>[:subject, :subject_lang])
-          # t.date(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.contributor(:path=>"contributor", :namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          # t.source(:path=>"source", :namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
-          # t.publisher(:path=>"publisher", :namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.coverage(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
-          #   t.coverage_lang(:path=>{:attribute=> "xml:lang"})
-          # }
-          # t.relation(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
-          # t.creator(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
-          # t.format(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.type(:namespace_prefix=>"marc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          #     t.creation_date(:path=>"unitdate") {
+          #       t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
+          #       t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
+          #     }
+          #     t.physdesc(:path=>"physdesc") {
+          #       t.type(:path=>"genreform")
+          #     }
+          #     # t.dao(:path=>"dao") {
+          #     #   t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
+          #     # }
+          #   }
+          #   t.bioghist {
           #
-          # # No need to index, but useful for editing
-          # t.identifier(:namespace_prefix=>"marc")
+          #   }
+          #   t.scopecontent {
           #
-          # # Qualified Dublin Core fields
-          # t.published_date(:path=>"issued", :namespace_prefix=>"marcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.creation_date(:path=>"created", :namespace_prefix=>"marcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"marcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])  {
-          #   t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
+          #   }
           # }
-          # t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"marcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
-          #   t.temporal_coverage_lang(:path=>{:attribute=> "xml:lang"})
-          # }
-          # t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"marcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"marcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"marcterms:Box"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          #
-          # # Generate MARC Relators fields from the MARC Relators vocabulary
-          # DRI::Vocabulary::marcRelators.each do |role|
-          #   t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
-          # end
+        }
+        t.title(:proxy => [:collection, :title])
+        t.description(:proxy => [:collection, :description])
+        t.type(:proxy => [:collection, :type])
+        t.rights(:proxy => [:collection, :rights])
+        t.licence(:proxy => [:collection, :licence])
+        t.creator(:proxy => [:collection, :creator])
+        t.creation_date(:proxy => [:collection, :creation_date])
 
-        end
+        t.leader(:proxy => [:collection, :record, :leader])
+        t.controlfield_001(:proxy => [:collection, :record, :controlfield_001])
+        t.controlfield_003(:proxy => [:collection, :record, :controlfield_003])
+        t.controlfield_005(:proxy => [:collection, :record, :controlfield_005])
+        t.controlfield_008(:proxy => [:collection, :record, :controlfield_008])
 
-      end
-
-      def synchronize_metadata_on_save
-        false
-      end
-
-      def metadata_path field
-        recognised_attributes = [ :record
-                                  # :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
-                                  # :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
-                                  # :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
-                                  # :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box
-                                ]
-        if recognised_attributes.include? field
-          [field]
-        elsif m = /^role_(.*)/.match(field.to_s)
-          if DRI::Vocabulary::marcRelators.include? m[1]
-            [field]
-          else
-            []
-          end
-        else
-          []
-        end
-      end
-
-      def update_indexed_attributes(params={}, opts={})
-        # if the params are just keys, not an array, make then into an array.
-        new_params = {}
-        params.each do |key, val|
-          if key.is_a? Array
-            new_params[key] = val
-          else
-            new_params[[key.to_sym]] = val
-          end
-        end
-        super(new_params, opts)
-      end
+        t.datafield_336_ind1__ind2__subfield_a(:proxy=> [:collection, :record, :datafield_336, :datafield_336_ind1__ind2__subfield_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.datafield_010_ind1__ind2__subfield_a(:proxy=> [:collection, :record, :datafield_010, :datafield_010_ind1__ind2__subfield_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
 
-      def roles= roles
-        if roles.is_a? Hash
-          if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
-            changed_roles = Hash.new
-            roles["type"].uniq.each do |role|
-              changed_roles[role] = []
-            end
+        # ["020", ["0", "1"], ["0", "4"], ["a", "b"], ["021", ["0", "1"], ["0", "4"], ["a", "b"]]].each do |datafield|
+        #   t.send "datafield_"+datafield[0], :proxy=> [:collection, :record, :datafield_020]
+        # end
 
-            roles["type"].each_with_index do |role, i|
-              if (roles["name"][i] != "")
-                changed_roles[role].push(roles["name"][i])
-              end
-            end
+        # DRI::Vocabulary::marcDatafields.each do |datafield|
+        #     t.send "datafield_"+datafield[0], :proxy=> [:collection, :record, ("datafield_" + datafield[0]).to_sym]
+        #     #  Loop over Subfields from vocabulary
+        #     datafield[3].each do |subfield|
+        #       t.send ("datafield_" + datafield[0]+"_ind1_"+ datafield[1].sub( ' ', '_') + "_ind2_" + datafield[1].sub( ' ', '_') +"_subfield_"+ subfield), :proxy=>[:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym]
+        #     end
+        # end
 
-            changed_roles.keys.each do |role|
-              send role+"=", changed_roles[role]
-            end
-          end
-        end
-      end
+        # t.datafield_020(:proxy=> [:collection, :record, :datafield_020])
+        # t.datafield_021(:proxy=> [:collection, :record, :datafield_021])
+
+
+        # t.subfield(:proxy => [:collection, :record, :datafield, :subfield])
+
+        # t.ead_level(:proxy => [:ead, :archdesc, :ead_level])
+        # t.unitid(:proxy => [:ead, :eadheader, :eadid])
+        # t.repository_code(:proxy => [:ead, :eadheader, :eadid, :repository_code])
+        # t.country_code(:proxy => [:ead, :eadheader, :eadid, :country_code])
+        # t.identifier(:proxy => [:ead, :eadheader, :eadid, :identifier])
+        # t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title])
+        # t.abstract(:proxy => [:ead, :archdesc, :did,  :abstract])
+        # t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date])
+        # t.language(:proxy => [:ead, :archdesc, :did, :language])
+        # t.creator(:proxy => [:ead, :archdesc, :did, :creator])
+        # t.scope_content(:proxy => [:ead, :archdesc, :scopecontent])
+        # t.subject(:proxy => [:ead, :archdesc, :subject])
+        # t.name_coverage(:proxy => [:ead, :archdesc,  :name_coverage])
+        # t.persname_coverage(:proxy => [:ead, :archdesc, :persname_coverage])
+        # t.corpname_coverage(:proxy => [:ead, :archdesc, :corpname_coverage])
+        # t.geographical_coverage(:proxy => [:ead, :archdesc,  :geographical_coverage])
+        # t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc])
+        # t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type])
+        # t.bioghist(:proxy => [:ead, :archdesc, :bioghist])
+
+      end # set_terminology
 
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.marc(
-            "xmlns:marc" => "http://purl.org/marc/elements/1.1/",
-            "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
-            "xsi:schemaLocation" => "http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
-
-            xml.record
-            # xml['marc'].title
-            # xml['marc'].description
+          # xml.doc.create_internal_subset(
+          #   'ead',
+          #   "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
+          #   ""
+          # )
+          xml.marc {
+            xml.collection {
+              #   xml.leader
+              # xml.filedesc {
+              #   xml.titlestmt {
+              #     xml.titleproper
+              #   }
+              # }
+              # }
+              # xml.archdesc {
+              #   xml.did
+              #   xml.dsc
+            }
           }
         end
         return builder.doc
       end
 
-      # merge in special facets (e.g. person) into solr document
-      def to_solr(solr_doc=Hash.new)
-        solr_doc = super(solr_doc)
+    end
 
-        # Retrieve list of all people and add them to facet and search indexes in solr document
-        person_array = get_person_array()
+  end
 
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
-
-        # title_sorted - A SOLR index for sorting titles
-        if (title.length > 0)
-          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-          if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
-          end
-        end
-
-        # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ""
-        ng_xml.xpath("//text()").each do |text_node|
-          all_metadata += text_node.text
-          all_metadata += " "
-        end
-        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
-
-        # Split facets into different languages based on xml:lang
-        faceted_language_indexes = Hash.new
-        faceted_language_indexes.merge! split_array_into_languages("subject")
-        faceted_language_indexes.merge! split_array_into_languages("coverage")
-        faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
-        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
-
-        faceted_language_indexes.each do | key, value |
-          solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
-        end
-
-        # Split date ranges into separate indexes
-        #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
-        #solr_doc.merge!(date_ranges)
-
-        solr_doc
-      end
-
-      # Some indexes may need to be split up into different languages
-      def split_array_into_languages(index_name="")
-        results = Hash.new
-
-        if index_name == ""
-          return results
-        end
-
-        array_values = send index_name
-
-        array_values.each_with_index do |value, i|
-          value_lang = send(index_name, i).send(index_name+"_lang")
-
-          foo = "eng"
-
-          if (value_lang.length > 0)
-            foo = value_lang[0].strip
-          end
-
-          foo = DRI::Metadata::Descriptors.standardise_language_code foo
-
-          if foo == nil
-            foo = "eng"
-          end
-
-          if !results.has_key? index_name+"_"+foo
-            results[index_name+"_"+foo] = [value]
-          else
-            results[index_name+"_"+foo] |= [value]
-          end
-        end
-
-        return results
-      end
-
-      # Creates an array of all names stored in the metadata
-      def get_person_array()
-        people = contributor | creator | publisher
-
-        DRI::Vocabulary::marcRelators.each do |role|
-          people |= send("role_"+role)
-        end
-
-        return people
-      end
-
-      def collection?
-        type.include? "Collection"
-      end
-
-      def custom_validations
-        errors = Hash.new
-
-        # title_result = false
-        # description_result = false
-        # rights_result = false
-        # type_result = false
-        # date_result = false
-        #
-        # title.each do |curr_title|
-        #   title_result = true unless curr_title.blank?
-        # end
-        #
-        # description.each do |curr_description|
-        #   description_result = true unless curr_description.blank?
-        # end
-        #
-        # rights.each do |curr_right|
-        #   rights_result = true unless curr_right.blank?
-        # end
-        #
-        # type.each do |curr_type|
-        #   type_result = true unless curr_type.blank?
-        # end
-        #
-        # date.each do |curr_date|
-        #   date_result = true unless curr_date.blank?
-        # end
-        #
-        # if !date_result
-        #   creation_date.each do |curr_date|
-        #     date_result = true unless curr_date.blank?
-        #   end
-        # end
-        #
-        # if !date_result
-        #   published_date.each do |curr_date|
-        #     date_result = true unless curr_date.blank?
-        #   end
-        # end
-        #
-        # errors[:title] = "can't be blank" if title_result == false
-        # errors[:description] = "can't be blank" if description_result == false
-        # errors[:rights] = "can't be blank" if rights_result == false
-        # errors[:type] = "can't be blank" if type_result == false
-        # errors[:date] = "can't be blank" if date_result == false
-
-        return errors
-      end
-
-      # Load Dublin Core terminology
-      load_inherited_terminology
-    end # class
-
-  end # module
-
-end # module
+end
