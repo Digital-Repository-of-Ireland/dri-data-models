@@ -3,7 +3,7 @@ module DRI
   module Metadata
 
     class Marc < DRI::Metadata::Base
-      # OM (Opinionated Metadata) terminology mapping to an EAD Collection
+      # OM (Opinionated Metadata) terminology mapping to an Marc Collection
       set_terminology do |t|
         t.root(:path=>"*", :namespace_prefix => nil)
 
@@ -15,6 +15,7 @@ module DRI
           t.licence(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.creator(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.creation_date(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
           t.record(:path=>"record", :namespace_prefix => nil) {
             t.leader(:path=>"leader", :namespace_prefix => nil)
             t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"})
@@ -42,11 +43,11 @@ module DRI
             # end
 
             t.datafield_336(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "336", :ind1 => " ", :ind2 => " "}) {
-              t.datafield_336_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
+              t.datafield_336_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
 
             t.datafield_010(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "010", :ind1 => " ", :ind2 => " "}) {
-              t.datafield_010_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
+              t.datafield_010_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
 
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
@@ -161,7 +162,9 @@ module DRI
           # )
           xml.marc {
             xml.collection {
-              #   xml.leader
+              xml.record {
+                xml.leader
+              }
               # xml.filedesc {
               #   xml.titlestmt {
               #     xml.titleproper
@@ -177,6 +180,49 @@ module DRI
         return builder.doc
       end
 
+      def to_solr(solr_doc=Hash.new)
+        solr_doc = super(solr_doc)
+
+        # Retrieve list of all people and add them to facet and search indexes in solr document
+        # person_array = get_person_array()
+
+        # solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        # solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+
+        # title_sorted - A SOLR index for sorting titles
+        # if (title.length > 0)
+        #   sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+        #   if (sorted_title != "")
+        #     solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+        #   end
+        # end
+
+        # all_metadata - A SOLR index of all the text contained in the XML document
+        # all_metadata = ""
+        # ng_xml.xpath("//text()").each do |text_node|
+        #   all_metadata += text_node.text
+        #   all_metadata += " "
+        # end
+        # solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+
+        # Split facets into different languages based on xml:lang
+        # faceted_language_indexes = Hash.new
+        # faceted_language_indexes.merge! split_array_into_languages("subject")
+        # faceted_language_indexes.merge! split_array_into_languages("coverage")
+        # faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
+        # faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
+
+        # faceted_language_indexes.each do | key, value |
+        #   solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
+        #   solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
+        # end
+
+        # Split date ranges into separate indexes
+        #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
+        #solr_doc.merge!(date_ranges)
+
+        solr_doc
+      end
     end
 
   end

@@ -50,6 +50,7 @@ module DRI
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
         has_attributes :datafield_336_ind1__ind2__subfield_a, datastream: :descMetadata, multiple: true
+        has_attributes :leader, datastream: :descMetadata, multiple: true
 
 
         validate :custom_validations
@@ -305,6 +306,7 @@ module DRI
         result = nil
         xml = nil
 
+        puts "***xml_text#{xml_text}"
         if (xml_text.is_a? Nokogiri::XML::Document)
           xml = xml_text
         else
@@ -322,9 +324,11 @@ module DRI
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
-        end       
+        elsif ['marc'].include? root_name
+          result = "DRI::Metadata::Marc"
+        end
 
-        return result
+      return result
       end
 
       def reset_metadata_check
@@ -335,27 +339,39 @@ module DRI
         ds_class = ""
         ds = nil
 
-        if (new_record? && desc_metadata_class != nil)
-          # For new objects, check what metadata class was asked for during initialization
-          ds_class = @desc_metadata_class.to_s
+          if (new_record? && desc_metadata_class != nil)
+            # For new objects, check what metadata class was asked for during initialization
+            ds_class = @desc_metadata_class.to_s
+            puts "***ITS NEW#{ds_class}"
 
-          if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::MODS",
-                 "DRI::Metadata::EncodedArchivalDescription", 
-                 "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
-            ds = ds_class.constantize.new
+
+            if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::MODS",
+                   "DRI::Metadata::EncodedArchivalDescription",
+                   "DRI::Metadata::EncodedArchivalDescriptionComponent", "DRI::Metadata::Marc"].include? ds_class
+              ds = ds_class.constantize.new
+            else
+              # Load class from :desc_metadata_class which is set ingest_controller
+              ds = desc_metadata_class.constantize.new
+            end
           else
-            # Load class from :desc_metadata_class which is set ingest_controller
-            ds = desc_metadata_class.constantize.new
-          end
-        else
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
+          puts "***descMetadata#{descMetadata}"
+          load_datastreams
+          puts "digital_object.inspect#{digital_object.inspect}"
+          puts "***load_datastreams#{load_datastreams}"
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
+          puts "***ds_class#{ds_class}"
+
           old_digital_object = descMetadata.digital_object
+          puts "***old_digital_object#{old_digital_object}"
           unless (ds_class == nil)
+            puts "***DSisNotnil"
             ds = ds_class.constantize.from_xml descMetadata.to_xml
+            puts "***DS#{ds}"
+
           else
-            ds = DRI::Metadata::QualifiedDublinCore.new
+            ds = DRI::Metadata::Marc.new
           end
           ds.digital_object = old_digital_object
         end
