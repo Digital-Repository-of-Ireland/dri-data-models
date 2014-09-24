@@ -320,6 +320,8 @@ module DRI
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
           result = "DRI::Metadata::MODS"
+        elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
+          result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
@@ -328,7 +330,7 @@ module DRI
           result = "DRI::Metadata::Marc"
         end
 
-      return result
+        return result
       end
 
       def reset_metadata_check
@@ -358,7 +360,6 @@ module DRI
           # the XML uses and load the correct class.
           puts "***descMetadata#{descMetadata}"
           load_datastreams
-          puts "digital_object.inspect#{digital_object.inspect}"
           puts "***load_datastreams#{load_datastreams}"
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
           puts "***ds_class#{ds_class}"
@@ -371,7 +372,7 @@ module DRI
             puts "***DS#{ds}"
 
           else
-            ds = DRI::Metadata::Marc.new
+            ds = DRI::Metadata::QualifiedDublinCore.new
           end
           ds.digital_object = old_digital_object
         end
