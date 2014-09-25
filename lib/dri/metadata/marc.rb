@@ -4,8 +4,8 @@ module DRI
 
     class Marc < DRI::Metadata::Base
 
-      # df= data fields, df=datafield, sf=subfield,
       # OM (Opinionated Metadata) terminology mapping to an Marc Collection
+      # df=datafield, sf=subfield,
       set_terminology do |t|
         t.root(:path=>"collection", :namespace_prefix => nil)
         
@@ -19,43 +19,8 @@ module DRI
             t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"})
             t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
 
-            # Mandatory; DC Title
-            #t.df_245(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "245", :ind1 => " ", :ind2 => " "}) {
-              # t.245$a
-            #  t.sf_245a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #  t.sf_245c(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #}
-            # Mandatory; DC Description
-            #t.df_500(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "500", :ind1 => " ", :ind2 => " "}) {
-              # t.500$a
-            #  t.description(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #}
-            # Mandatory; DC Creator
-            #t.df_100(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "100", :ind1 => " ", :ind2 => " "}) {
-              # t.100$a
-            #  t.creator(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #}
-            # Mandatory; DC Rights
-            #t.df_506(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "506", :ind1 => " ", :ind2 => " "}) {
-              # t.506$a
-            #  t.rights(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #}
-            # Mandatory; DC Date of creation
-            #t.df_260(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "260", :ind1 => " ", :ind2 => " "}) {
-              # t.260$c
-            #  t.creation_date(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #  t.sf_260a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #  t.sf_260b(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "b"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            #}
-
-            # Load from Vocabulary, result i.e. df_010a with ind1=" " and ind2=" "
+            # Load from Vocabulary
             DRI::Vocabulary::marcDatafields.each do |df|
-              # Skip for mandatory df, all sf should go above inside the proper df
-              #next if df[:code] == "260"
-              #next if df[:code] == "506"
-              #next if df[:code] == "100"
-              #next if df[:code] == "500"
-              #next if df[:code] == "245"
               t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => "#{df[:code]}", :ind1 => "#{df[:ind1]}", :ind2 => "#{df[:ind2]}"}){
                 df[:sf].each do |sf|
                   t.send ("sf_#{df[:code]}#{sf}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "#{sf}"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
@@ -82,10 +47,6 @@ module DRI
         t.controlfield_003(:proxy => [:record, :controlfield_003])
         t.controlfield_005(:proxy => [:record, :controlfield_005])
         t.controlfield_008(:proxy => [:record, :controlfield_008])
-
-        #DRI::Vocabulary::marcDatafields.each do |df|
-        #    t.send ("sf_" + df[:code] + df[:sf]), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + df[:sf]).to_sym]
-        #end
 
       end # set_terminology
 
