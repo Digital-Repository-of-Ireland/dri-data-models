@@ -49,8 +49,6 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
-        # has_attributes :df_260a, datastream: :descMetadata, multiple: true
-
         has_attributes *(DRI::Vocabulary::marcDatafields.map { |df| ("sf_" + df[:code] + df[:sf]).to_sym}), datastream: :descMetadata, multiple: true
         # has_attributes  *(10.upto(999).to_a.map { |number| ('a'.upto('z').to_a + 0.upto(9).to_a).map { |attr| "df_#{number.to_s}#{attr.to_s}".to_sym}}), datastream: :descMetadata, multiple: true
 
