@@ -7,13 +7,12 @@ module DRI
       # df= data fields, df=datafield, sf=subfield,
       # OM (Opinionated Metadata) terminology mapping to an Marc Collection
       set_terminology do |t|
-        t.root(:path=>"*", :namespace_prefix => nil)
-
-        t.collection(:path=>"collection", :namespace_prefix => nil) {
-          t.record(:path=>"record", :namespace_prefix=>nil) {
+        t.root(:path=>"collection", :namespace_prefix => nil)
+        
+         t.record(:path=>"record", :namespace_prefix=>nil) {
 
             # Mandatory; DC Type
-            t.type(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
             t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"})
             t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"})
@@ -21,65 +20,72 @@ module DRI
             t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
 
             # Mandatory; DC Title
-            t.df_245(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "245", :ind1 => " ", :ind2 => " "}) {
+            #t.df_245(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "245", :ind1 => " ", :ind2 => " "}) {
               # t.245$a
-              t.title(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-              t.sf_245c(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
+            #  t.sf_245a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #  t.sf_245c(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #}
             # Mandatory; DC Description
-            t.df_500(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "500", :ind1 => " ", :ind2 => " "}) {
+            #t.df_500(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "500", :ind1 => " ", :ind2 => " "}) {
               # t.500$a
-              t.description(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
+            #  t.description(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #}
             # Mandatory; DC Creator
-            t.df_100(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "100", :ind1 => " ", :ind2 => " "}) {
+            #t.df_100(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "100", :ind1 => " ", :ind2 => " "}) {
               # t.100$a
-              t.creator(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
+            #  t.creator(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #}
             # Mandatory; DC Rights
-            t.df_506(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "506", :ind1 => " ", :ind2 => " "}) {
+            #t.df_506(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "506", :ind1 => " ", :ind2 => " "}) {
               # t.506$a
-              t.rights(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
+            #  t.rights(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #}
             # Mandatory; DC Date of creation
-            t.df_260(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "260", :ind1 => " ", :ind2 => " "}) {
+            #t.df_260(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "260", :ind1 => " ", :ind2 => " "}) {
               # t.260$c
-              t.creation_date(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-              t.sf_260a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-              t.sf_260b(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "b"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
+            #  t.creation_date(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #  t.sf_260a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #  t.sf_260b(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "b"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            #}
 
             # Load from Vocabulary, result i.e. df_010a with ind1=" " and ind2=" "
             DRI::Vocabulary::marcDatafields.each do |df|
               # Skip for mandatory df, all sf should go above inside the proper df
-              next if df[:code] == "260"
-              next if df[:code] == "506"
-              next if df[:code] == "100"
-              next if df[:code] == "500"
-              next if df[:code] == "245"
-
-              t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => df[:code], :ind1 => df[:ind1], :ind2 => df[:ind2]}){
-                t.send ("sf_#{df[:code]}#{df[:sf]}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => df[:sf]}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
-              }
+              #next if df[:code] == "260"
+              #next if df[:code] == "506"
+              #next if df[:code] == "100"
+              #next if df[:code] == "500"
+              #next if df[:code] == "245"
+              t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => "#{df[:code]}", :ind1 => "#{df[:ind1]}", :ind2 => "#{df[:ind2]}"}){
+                df[:sf].each do |sf|
+                  t.send ("sf_#{df[:code]}#{sf}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "#{sf}"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+                end
+            }
             end
-          }
         }
-        # Mandatory fields
-        t.title(:proxy => [:collection, :record, :df_245, :title])
-        t.description(:proxy => [:collection, :record, :df_500, :description])
-        t.type(:proxy => [:collection, :record, :type])
-        t.creator(:proxy => [:collection, :record, :df_100, :creator])
-        t.rights(:proxy => [:collection, :record, :df_506, :rights])
-        t.creation_date(:proxy => [:collection, :record, :df_260, :creation_date])
-
-        t.controlfield_001(:proxy => [:collection, :record, :controlfield_001])
-        t.controlfield_003(:proxy => [:collection, :record, :controlfield_003])
-        t.controlfield_005(:proxy => [:collection, :record, :controlfield_005])
-        t.controlfield_008(:proxy => [:collection, :record, :controlfield_008])
-
+       
         DRI::Vocabulary::marcDatafields.each do |df|
-            t.send ("sf_" + df[:code] + df[:sf]), :proxy=>[:collection, :record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + df[:sf]).to_sym]
+            df[:sf].each do |sf|
+              t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym]
+            end
         end
+ 
+        # Mandatory fields
+        t.title(:ref => [:sf_245a])
+        t.description(:proxy => [:record, :df_500, :sf_500a])
+        t.type(:proxy => [:record, :leader])
+        t.creator(:proxy => [:record, :df_100, :sf_100a])
+        t.rights(:proxy => [:record, :df_506, :sf_506a])
+        t.creation_date(:proxy => [:sf_260c])
+
+        t.controlfield_001(:proxy => [:record, :controlfield_001])
+        t.controlfield_003(:proxy => [:record, :controlfield_003])
+        t.controlfield_005(:proxy => [:record, :controlfield_005])
+        t.controlfield_008(:proxy => [:record, :controlfield_008])
+
+        #DRI::Vocabulary::marcDatafields.each do |df|
+        #    t.send ("sf_" + df[:code] + df[:sf]), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + df[:sf]).to_sym]
+        #end
 
       end # set_terminology
 
@@ -91,14 +97,12 @@ module DRI
           #   "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
           #   ""
           # )
-          xml.marc("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
+          xml.collection("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
                    "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                    "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
-            xml.collection {
               xml.record {
                 xml.leader
               }
-            }
           }
         end
         return builder.doc
@@ -120,6 +124,8 @@ module DRI
         #     solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
         #   end
         # end
+
+        solr_doc.merge!(Solrizer.solr_name('title', :stored_sortable, type: :string) => [title])
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         # all_metadata = ""

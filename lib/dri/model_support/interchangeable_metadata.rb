@@ -49,7 +49,7 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
-        has_attributes *(DRI::Vocabulary::marcDatafields.map { |df| ("sf_" + df[:code] + df[:sf]).to_sym}), datastream: :descMetadata, multiple: true
+        has_attributes *(DRI::Vocabulary::marcDatafields.flat_map { |df| df[:sf].flat_map { |sf| "sf_#{df[:code]}#{sf}".to_sym }}), datastream: :descMetadata, multiple: true
 
         validate :custom_validations
       end
