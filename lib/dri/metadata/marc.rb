@@ -3,152 +3,103 @@ module DRI
   module Metadata
 
     class Marc < DRI::Metadata::Base
+
+      # df= data fields, df=datafield, sf=subfield,
       # OM (Opinionated Metadata) terminology mapping to an Marc Collection
       set_terminology do |t|
         t.root(:path=>"*", :namespace_prefix => nil)
 
         t.collection(:path=>"collection", :namespace_prefix => nil) {
-          t.title(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.description(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.type(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.rights(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.licence(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.creator(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.creation_date(:namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.record(:path=>"record", :namespace_prefix=>nil) {
 
-          t.record(:path=>"record", :namespace_prefix => nil) {
-            t.leader(:path=>"leader", :namespace_prefix => nil)
+            # Mandatory; DC Type
+            t.type(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
             t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"})
             t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"})
             t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"})
             t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
 
-            # DRI::Vocabulary::marcDatafields.each do |datafield|
-            #   #  Create Datafield
-            #   t.send( "datafield_"+datafield[0], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => datafield[0], :ind1 => datafield[1], :ind2 => datafield[2]}){
-            #     # t.send "subfield", :path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}
-            #     # t.subfield(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"})
-            #     # t.subfield(:proxy => [:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym])
-            #     # t.send :proxy => [:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym]
-            #
-            #     # Format of the subfield: datafield-ind1-ind2-subfield ie:
-            #     # 650_ind1_1_ind2_0_subfield_a,
-            #     # empty attributes are replaced with underscore '_' ie:
-            #     # 650_ind1___ind2___subfield_a
-            #
-            #     datafield[3].each do |subfield|
-            #       t.send ("datafield_" + datafield[0]+"_ind1_"+ datafield[1].sub( ' ', '_') + "_ind2_" + datafield[1].sub( ' ', '_') +"_subfield_"+ subfield), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => subfield}
+            # 10.upto(999).to_a.each do |number|
+            #   t.send( "df_"+number.to_s, :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => number.to_s, :ind1 => " ", :ind2 => " "}){
+            #     ('a'.upto('z').to_a + 0.upto(9).to_a).each do |attr|
+            #       t.send ("df_#{number.to_s}#{attr.to_s}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => attr}
             #     end
             #   }
             # end
 
-            t.datafield_336(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "336", :ind1 => " ", :ind2 => " "}) {
-              t.datafield_336_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            # Mandatory; DC Title
+            t.df_245(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "245", :ind1 => " ", :ind2 => " "}) {
+              # t.245$a
+              t.title(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+              t.sf_245c(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            }
+            # Mandatory; DC Description
+            t.df_500(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "500", :ind1 => " ", :ind2 => " "}) {
+              # t.500$a
+              t.description(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            }
+            # Mandatory; DC Creator
+            t.df_100(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "100", :ind1 => " ", :ind2 => " "}) {
+              # t.100$a
+              t.creator(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            }
+            # Mandator; DC Rights
+            t.df_506(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "506", :ind1 => " ", :ind2 => " "}) {
+              # t.506$a
+              t.rights(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            }
+            # Mandator; DC Date of creation
+            t.df_260(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "260", :ind1 => " ", :ind2 => " "}) {
+              # t.260$c
+              t.creation_date(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+              t.sf_260a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+              t.sf_260b(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "b"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
 
-            t.datafield_010(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "010", :ind1 => " ", :ind2 => " "}) {
-              t.datafield_010_ind1__ind2__subfield_a(:path => "subfield", :namespace_prefix => nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.df_015(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "015", :ind1 => " ", :ind2 => " "}) {
+              # t.260$c
+              t.sf_015a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
 
-            # We need to keep track of the unitid in order to sync this XML snippet to the correct
-            # component tag in the complete EAD XML datastream in the collection object!
-            # t.eadid(:path=>"eadid", :namespace_prefix => nil) {
-            #   t.repository_code(:path => {:attribute=>"mainagencycode"}, :namespace_prefix => nil)
-            #   t.country_code(:path => {:attribute=>"countrycode"}, :namespace_prefix => nil)
-            #   t.identifier(:path => {:attribute=>"identifier"}, :namespace_prefix => nil)
-            # }
-            # t.filedesc {
-            #   t.titlestmt {
-            #     t.title(:path=>"titleproper")
-            #   }
-            # }
+            # Load from Vocabulary, result i.e. df_010a with ind1=" " and ind2=" "
+            DRI::Vocabulary::marcDatafields.each do |df|
+              # Skip for mandatory df, all sf should go above inside the proper df
+              next if df[:code] == "260"
+              next if df[:code] == "506"
+              next if df[:code] == "100"
+              next if df[:code] == "500"
+              next if df[:code] == "245"
+              # next if df[:code] == || "506" || "100" || "500" || "245"
+
+              t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => df[:code], :ind1 => df[:ind1], :ind2 => df[:ind2]}){
+                t.send ("sf_#{df[:code]}#{df[:sf]}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => df[:sf]}
+              }
+            end
           }
-          # t.archdesc {
-          #   t.subject(:path=>"subject")
-          #   t.name_coverage(:path=>"name")
-          #   t.persname_coverage(:path=>"persname")
-          #   t.corpname_coverage(:path=>"corpname")
-          #   t.geographical_coverage(:path=>"geogname")
-          #   t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-          #   t.did(:path => "did", :namespace_prefix => nil) {
-          #     t.abstract()
-          #     t.language(:path=>"langmaterial")
-          #     t.creator(:path=>"origination")
-          #
-          #     t.creation_date(:path=>"unitdate") {
-          #       t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
-          #       t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
-          #     }
-          #     t.physdesc(:path=>"physdesc") {
-          #       t.type(:path=>"genreform")
-          #     }
-          #     # t.dao(:path=>"dao") {
-          #     #   t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
-          #     # }
-          #   }
-          #   t.bioghist {
-          #
-          #   }
-          #   t.scopecontent {
-          #
-          #   }
-          # }
         }
-        t.title(:proxy => [:collection, :title])
-        t.description(:proxy => [:collection, :description])
-        t.type(:proxy => [:collection, :type])
-        t.rights(:proxy => [:collection, :rights])
-        t.licence(:proxy => [:collection, :licence])
-        t.creator(:proxy => [:collection, :creator])
-        t.creation_date(:proxy => [:collection, :creation_date])
+        # Mandatory fields
+        t.title(:proxy => [:collection, :record, :df_245, :title])
+        t.description(:proxy => [:collection, :record, :df_500, :description])
+        t.type(:proxy => [:collection, :record, :type])
+        t.creator(:proxy => [:collection, :record, :df_100, :creator])
+        t.rights(:proxy => [:collection, :record, :df_506, :rights])
+        t.creation_date(:proxy => [:collection, :record, :df_260, :creation_date])
 
-        t.leader(:proxy => [:collection, :record, :leader])
         t.controlfield_001(:proxy => [:collection, :record, :controlfield_001])
         t.controlfield_003(:proxy => [:collection, :record, :controlfield_003])
         t.controlfield_005(:proxy => [:collection, :record, :controlfield_005])
         t.controlfield_008(:proxy => [:collection, :record, :controlfield_008])
 
-        t.datafield_336_ind1__ind2__subfield_a(:proxy=> [:collection, :record, :datafield_336, :datafield_336_ind1__ind2__subfield_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.datafield_010_ind1__ind2__subfield_a(:proxy=> [:collection, :record, :datafield_010, :datafield_010_ind1__ind2__subfield_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        DRI::Vocabulary::marcDatafields.each do |df|
+            t.send ("sf_" + df[:code] + df[:sf]), :proxy=>[:collection, :record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + df[:sf]).to_sym]
+        end
 
-
-        # ["020", ["0", "1"], ["0", "4"], ["a", "b"], ["021", ["0", "1"], ["0", "4"], ["a", "b"]]].each do |datafield|
-        #   t.send "datafield_"+datafield[0], :proxy=> [:collection, :record, :datafield_020]
-        # end
-
-        # DRI::Vocabulary::marcDatafields.each do |datafield|
-        #     t.send "datafield_"+datafield[0], :proxy=> [:collection, :record, ("datafield_" + datafield[0]).to_sym]
-        #     #  Loop over Subfields from vocabulary
-        #     datafield[3].each do |subfield|
-        #       t.send ("datafield_" + datafield[0]+"_ind1_"+ datafield[1].sub( ' ', '_') + "_ind2_" + datafield[1].sub( ' ', '_') +"_subfield_"+ subfield), :proxy=>[:collection, :record, ("datafield_" + datafield[0]).to_sym, ("subfield_" + subfield).to_sym]
+        # 10.upto(999).to_a.each do |number|
+        #     ('a'.upto('z').to_a + 0.upto(9).to_a).each do |attr|
+        #       t.send ("df_" + number.to_s + attr.to_s), :proxy=>[:collection, :record, ("df_" + number.to_s).to_sym, ("df_#{number.to_s}#{attr.to_s}").to_sym]
         #     end
         # end
-
-        # t.datafield_020(:proxy=> [:collection, :record, :datafield_020])
-        # t.datafield_021(:proxy=> [:collection, :record, :datafield_021])
-
-
-        # t.subfield(:proxy => [:collection, :record, :datafield, :subfield])
-
-        # t.ead_level(:proxy => [:ead, :archdesc, :ead_level])
-        # t.unitid(:proxy => [:ead, :eadheader, :eadid])
-        # t.repository_code(:proxy => [:ead, :eadheader, :eadid, :repository_code])
-        # t.country_code(:proxy => [:ead, :eadheader, :eadid, :country_code])
-        # t.identifier(:proxy => [:ead, :eadheader, :eadid, :identifier])
-        # t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title])
-        # t.abstract(:proxy => [:ead, :archdesc, :did,  :abstract])
-        # t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date])
-        # t.language(:proxy => [:ead, :archdesc, :did, :language])
-        # t.creator(:proxy => [:ead, :archdesc, :did, :creator])
-        # t.scope_content(:proxy => [:ead, :archdesc, :scopecontent])
-        # t.subject(:proxy => [:ead, :archdesc, :subject])
-        # t.name_coverage(:proxy => [:ead, :archdesc,  :name_coverage])
-        # t.persname_coverage(:proxy => [:ead, :archdesc, :persname_coverage])
-        # t.corpname_coverage(:proxy => [:ead, :archdesc, :corpname_coverage])
-        # t.geographical_coverage(:proxy => [:ead, :archdesc,  :geographical_coverage])
-        # t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc])
-        # t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type])
-        # t.bioghist(:proxy => [:ead, :archdesc, :bioghist])
 
       end # set_terminology
 
@@ -160,20 +111,13 @@ module DRI
           #   "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
           #   ""
           # )
-          xml.marc {
+          xml.marc("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
+                   "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
+                   "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
             xml.collection {
               xml.record {
                 xml.leader
               }
-              # xml.filedesc {
-              #   xml.titlestmt {
-              #     xml.titleproper
-              #   }
-              # }
-              # }
-              # xml.archdesc {
-              #   xml.did
-              #   xml.dsc
             }
           }
         end
@@ -222,6 +166,56 @@ module DRI
         #solr_doc.merge!(date_ranges)
 
         solr_doc
+      end
+
+      def custom_validations
+        errors = Hash.new
+
+        title_result = false
+        type_result = false
+        description_result = false
+        creator_result = false
+        rights_result = false
+        creation_date_result = false
+
+        title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
+
+        type.each do |curr_type|
+          type_result = true unless curr_type.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        creator.each do |curr_creator|
+          creator_result = true unless curr_creator.blank?
+        end
+
+        rights.each do |curr_rights|
+          rights_result = true unless curr_rights.blank?
+        end
+
+        creation_date.each do |curr_creation_date|
+          creation_date_result = true unless curr_creation_date.blank?
+        end
+
+
+        errors[:title] = "can't be blank" if title_result == false
+        errors[:type] = "can't be blank" if type_result == false
+        errors[:description] = "can't be blank" if description_result == false
+        errors[:creator] = "can't be blank" if creator_result == false
+        errors[:creation_date] = "can't be blank" if creation_date_result == false
+        errors[:rights] = "can't be blank" if rights_result == false
+
+
+        errors
+      end
+
+      def interchangeable?
+        false
       end
     end
 

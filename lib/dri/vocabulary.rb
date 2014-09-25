@@ -234,5 +234,58 @@ module DRI
         "Text"
       ]
     end
+
+    # Array [ Decimal Classification Number (R), First Indicator, Second Indicator, Subfield Code ]
+    # :code = datafield no, :ind1 = indicator1, :ind2 = indicator2, :sf = subfield
+    # Below you shove in any sf except the mandatory fields
+    # NCCB Required Fields
+    def self.marcDatafields
+      [
+        {:code => "015", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "016", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "020", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "040", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "041", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "082", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "083", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "110", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "111", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "222", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "240", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "245", :ind1 => " ", :ind2 => " ", :sf => "c"},
+        {:code => "248", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "250", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "255", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "260", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "260", :ind1 => " ", :ind2 => " ", :sf => "b"},
+        {:code => "300", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "336", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "350", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "490", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "501", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "503", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "504", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "505", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "514", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "530", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "531", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "546", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "561", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "563", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "600", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "610", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "611", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "650", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "651", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "655", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "700", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "710", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "740", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "745", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "900", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "910", :ind1 => " ", :ind2 => " ", :sf => "a"},
+        {:code => "997", :ind1 => " ", :ind2 => " ", :sf => "a"}
+      ]
+    end
   end
 end
