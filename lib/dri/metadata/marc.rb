@@ -37,11 +37,11 @@ module DRI
  
         # Mandatory fields
         t.title(:ref => [:sf_245a])
-        t.description(:proxy => [:record, :df_500, :sf_500a])
+        t.description(:ref => [:sf_500a])
         t.type(:proxy => [:record, :leader])
-        t.creator(:proxy => [:record, :df_100, :sf_100a])
-        t.rights(:proxy => [:record, :df_506, :sf_506a])
-        t.creation_date(:proxy => [:sf_260c])
+        t.creator(:ref => [:sf_100a])
+        t.rights(:ref => [:sf_506a])
+        t.creation_date(:ref => [:sf_260c])
 
         t.controlfield_001(:proxy => [:record, :controlfield_001])
         t.controlfield_003(:proxy => [:record, :controlfield_003])
