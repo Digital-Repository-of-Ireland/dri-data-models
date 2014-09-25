@@ -20,14 +20,6 @@ module DRI
             t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"})
             t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
 
-            # 10.upto(999).to_a.each do |number|
-            #   t.send( "df_"+number.to_s, :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => number.to_s, :ind1 => " ", :ind2 => " "}){
-            #     ('a'.upto('z').to_a + 0.upto(9).to_a).each do |attr|
-            #       t.send ("df_#{number.to_s}#{attr.to_s}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => attr}
-            #     end
-            #   }
-            # end
-
             # Mandatory; DC Title
             t.df_245(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "245", :ind1 => " ", :ind2 => " "}) {
               # t.245$a
@@ -44,22 +36,17 @@ module DRI
               # t.100$a
               t.creator(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
-            # Mandator; DC Rights
+            # Mandatory; DC Rights
             t.df_506(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "506", :ind1 => " ", :ind2 => " "}) {
               # t.506$a
               t.rights(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
-            # Mandator; DC Date of creation
+            # Mandatory; DC Date of creation
             t.df_260(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "260", :ind1 => " ", :ind2 => " "}) {
               # t.260$c
               t.creation_date(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "c"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
               t.sf_260a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
               t.sf_260b(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "b"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            }
-
-            t.df_015(:path => "datafield", :namespace_prefix => nil, :attributes=>{:tag => "015", :ind1 => " ", :ind2 => " "}) {
-              # t.260$c
-              t.sf_015a(:path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "a"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             }
 
             # Load from Vocabulary, result i.e. df_010a with ind1=" " and ind2=" "
@@ -70,10 +57,9 @@ module DRI
               next if df[:code] == "100"
               next if df[:code] == "500"
               next if df[:code] == "245"
-              # next if df[:code] == || "506" || "100" || "500" || "245"
 
               t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => df[:code], :ind1 => df[:ind1], :ind2 => df[:ind2]}){
-                t.send ("sf_#{df[:code]}#{df[:sf]}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => df[:sf]}
+                t.send ("sf_#{df[:code]}#{df[:sf]}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => df[:sf]}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
               }
             end
           }
@@ -94,12 +80,6 @@ module DRI
         DRI::Vocabulary::marcDatafields.each do |df|
             t.send ("sf_" + df[:code] + df[:sf]), :proxy=>[:collection, :record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + df[:sf]).to_sym]
         end
-
-        # 10.upto(999).to_a.each do |number|
-        #     ('a'.upto('z').to_a + 0.upto(9).to_a).each do |attr|
-        #       t.send ("df_" + number.to_s + attr.to_s), :proxy=>[:collection, :record, ("df_" + number.to_s).to_sym, ("df_#{number.to_s}#{attr.to_s}").to_sym]
-        #     end
-        # end
 
       end # set_terminology
 
