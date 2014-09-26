@@ -42,7 +42,7 @@ module DRI
         t.type(:proxy => [:collection, :record, :leader])
         t.creator(:proxy => [:collection, :record, :df_100, :sf_100a])
         t.rights(:proxy => [:collection, :record, :df_506, :sf_506a])
-        t.creation_date(:proxy => [i:collection, :record, :df_260, :sf_260c])
+        t.creation_date(:proxy => [:collection, :record, :df_260, :sf_260c])
 
         t.controlfield_001(:proxy => [:record, :controlfield_001])
         t.controlfield_003(:proxy => [:record, :controlfield_003])
