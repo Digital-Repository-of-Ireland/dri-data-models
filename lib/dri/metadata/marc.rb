@@ -23,7 +23,8 @@ module DRI
             DRI::Vocabulary::marcDatafields.each do |df|
               t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => "#{df[:code]}", :ind1 => "#{df[:ind1]}", :ind2 => "#{df[:ind2]}"}){
                 df[:sf].each do |sf|
-                  t.send ("sf_#{df[:code]}#{sf}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "#{sf}"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+                  puts "#{df[:code]}$#{sf}"
+                  t.send ("sf_#{df[:code]}#{sf}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "#{sf}"}
                 end
             }
             end
@@ -31,17 +32,17 @@ module DRI
        
         DRI::Vocabulary::marcDatafields.each do |df|
             df[:sf].each do |sf|
-              t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym]
+              t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable]
             end
         end
  
         # Mandatory fields
-        t.title(:ref => [:sf_245a])
-        t.description(:ref => [:sf_500a])
-        t.type(:proxy => [:record, :leader])
-        t.creator(:ref => [:sf_100a])
-        t.rights(:ref => [:sf_506a])
-        t.creation_date(:ref => [:sf_260c])
+        t.title(:proxy => [:collection, :record, :df_245, :sf_245a])
+        t.description(:proxy => [:collection, :record, :df_500, :sf_500a])
+        t.type(:proxy => [:collection, :record, :leader])
+        t.creator(:proxy => [:collection, :record, :df_100, :sf_100a])
+        t.rights(:proxy => [:collection, :record, :df_506, :sf_506a])
+        t.creation_date(:proxy => [i:collection, :record, :df_260, :sf_260c])
 
         t.controlfield_001(:proxy => [:record, :controlfield_001])
         t.controlfield_003(:proxy => [:record, :controlfield_003])
