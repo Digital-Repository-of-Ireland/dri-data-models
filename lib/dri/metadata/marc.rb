@@ -152,8 +152,8 @@ module DRI
 
 
         errors[:title] = "can't be blank" if title_result == false
-        errors[:type] = "can't be blank" if type_result == false
-        errors[:description] = "can't be blank" if description_result == false
+        #errors[:type] = "can't be blank" if type_result == false
+        #errors[:description] = "can't be blank" if description_result == false
         errors[:creator] = "can't be blank" if creator_result == false
         errors[:creation_date] = "can't be blank" if creation_date_result == false
         errors[:rights] = "can't be blank" if rights_result == false
