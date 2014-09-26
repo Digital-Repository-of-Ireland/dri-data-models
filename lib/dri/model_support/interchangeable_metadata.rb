@@ -317,6 +317,8 @@ module DRI
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
           result = "DRI::Metadata::MODS"
+        elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
+          result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
