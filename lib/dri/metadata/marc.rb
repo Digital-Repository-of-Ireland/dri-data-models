@@ -14,10 +14,10 @@ module DRI
             # Mandatory; DC Type
             t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-            t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"})
-            t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"})
-            t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"})
-            t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"})
+            t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+            t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
             # Load from Vocabulary
             DRI::Vocabulary::marcDatafields.each do |df|
@@ -29,7 +29,7 @@ module DRI
             }
             end
         }
-       
+
         DRI::Vocabulary::marcDatafields.each do |df|
             df[:sf].each do |sf|
               t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable]
@@ -37,12 +37,21 @@ module DRI
         end
  
         # Mandatory fields
-        t.title(:ref => [:sf_245a])
-        t.description(:ref => [:sf_500a])
+        t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]')
+        t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]')
         t.type(:proxy => [:record, :leader])
-        t.creator(:ref => [:sf_100a])
-        t.rights(:ref => [:sf_506a])
-        t.creation_date(:proxy => [:record, :df_260, :sf_260c])
+        t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]')
+        t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]')
+        # Jenny still needs to find out what to put in there
+        t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]')
+
+        # Pointing to specif field using :proxy and :ref
+        # t.title(:ref => [:sf_245a])
+        # t.description(:ref => [:sf_500a])
+        # t.type(:proxy => [:record, :leader])
+        # t.creator(:ref => [:sf_100a])
+        # t.rights(:ref => [:sf_506a])
+        # t.creation_date(:proxy => [:record, :df_260, :sf_260c])
 
         t.controlfield_001(:proxy => [:record, :controlfield_001])
         t.controlfield_003(:proxy => [:record, :controlfield_003])
@@ -87,7 +96,12 @@ module DRI
         #   end
         # end
 
-        solr_doc.merge!(Solrizer.solr_name('title', :stored_sortable, type: :string) => [title])
+        solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :text) => title)
+        solr_doc.merge!(Solrizer.solr_name('description', :stored_searchable, type: :text) => description)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :text) => type)
+        solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator)
+        solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :text) => rights)
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         # all_metadata = ""
@@ -126,38 +140,44 @@ module DRI
         rights_result = false
         creation_date_result = false
 
-        title.each do |curr_title|
-          title_result = true unless curr_title.blank?
-        end
 
-        type.each do |curr_type|
-          type_result = true unless curr_type.blank?
-        end
+        title_result = true unless title.blank?
+        type_result = true unless type.blank?
+        description_result = true unless description.blank?
+        creator_result = true unless creator.blank?
+        rights_result = true unless rights.blank?
+        creation_date_result = true unless creation_date.blank?
 
-        description.each do |curr_description|
-          description_result = true unless curr_description.blank?
-        end
-
-        creator.each do |curr_creator|
-          creator_result = true unless curr_creator.blank?
-        end
-
-        rights.each do |curr_rights|
-          rights_result = true unless curr_rights.blank?
-        end
-
-        creation_date.each do |curr_creation_date|
-          creation_date_result = true unless curr_creation_date.blank?
-        end
-
+        # title.each do |curr_title|
+        #   title_result = true unless curr_title.blank?
+        # end
+        #
+        # type.each do |curr_type|
+        #   type_result = true unless curr_type.blank?
+        # end
+        #
+        # description.each d.o |curr_description|
+        #   description_result = true unless curr_description.blank?
+        # end
+        #
+        # creator.each do |curr_creator|
+        #   creator_result = true unless curr_creator.blank?
+        # end
+        #
+        # rights.each do |curr_rights|
+        #   rights_result = true unless curr_rights.blank?
+        # end
+        #
+        # creation_date.each do |curr_creation_date|
+        #   creation_date_result = true unless curr_creation_date.blank?
+        # end
 
         errors[:title] = "can't be blank" if title_result == false
-        #errors[:type] = "can't be blank" if type_result == false
-        #errors[:description] = "can't be blank" if description_result == false
+        errors[:type] = "can't be blank" if type_result == false
+        errors[:description] = "can't be blank" if description_result == false
         errors[:creator] = "can't be blank" if creator_result == false
         errors[:creation_date] = "can't be blank" if creation_date_result == false
         errors[:rights] = "can't be blank" if rights_result == false
-
 
         errors
       end
