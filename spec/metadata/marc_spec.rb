@@ -9,6 +9,10 @@ describe 'Batch' do
 
   end
 
+  it "should be a kind of Batch" do
+    @marc_item.should be_kind_of(Batch)
+  end
+
   it "should expose the Marc components' identifiers - mandatory fields" do
     @marc_item.type.first.should == "01142cam  2200301 a 4500"
     @marc_item.title.first.should == "Arithmetic /"
