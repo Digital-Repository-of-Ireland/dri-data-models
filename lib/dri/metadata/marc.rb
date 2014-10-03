@@ -29,7 +29,7 @@ module DRI
             }
             end
         }
-
+        # TODO: Add more loops for ind1 and ind2
         DRI::Vocabulary::marcDatafields.each do |df|
             df[:sf].each do |sf|
               t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable]

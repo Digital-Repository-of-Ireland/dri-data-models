@@ -50,6 +50,9 @@ describe 'Batch' do
     @batch = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescription
     @batch.datastreams.keys.should include("descMetadata")
     @batch.descMetadata.class.should == DRI::Metadata::EncodedArchivalDescription
+    @batch = Batch.new :desc_metadata_class => DRI::Metadata::Marc
+    @batch.datastreams.keys.should include("descMetadata")
+    @batch.descMetadata.class.should == DRI::Metadata::Marc
   end
 
   it "should default to using Qualified Dublin Core if Batch is new" do
