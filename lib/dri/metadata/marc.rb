@@ -141,12 +141,13 @@ module DRI
         creation_date_result = false
 
 
-        title_result = true unless title.blank?
-        type_result = true unless type.blank?
-        description_result = true unless description.blank?
-        creator_result = true unless creator.blank?
-        rights_result = true unless rights.blank?
-        creation_date_result = true unless creation_date.blank?
+        # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
+        title_result = true unless title.join.squish == ""
+        type_result = true unless type.join.squish == ""
+        description_result = true unless description.join.squish == ""
+        creator_result = true unless creator.join.squish == ""
+        rights_result = true unless rights.join.squish == ""
+        creation_date_result = true unless creation_date.join.squish == ""
 
         # title.each do |curr_title|
         #   title_result = true unless curr_title.blank?
