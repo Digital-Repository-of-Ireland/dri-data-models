@@ -105,12 +105,12 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
-        # all_metadata = ""
-        # ng_xml.xpath("//text()").each do |text_node|
-        #   all_metadata += text_node.text
-        #   all_metadata += " "
-        # end
-        # solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+        all_metadata = ""
+        ng_xml.xpath("//text()").each do |text_node|
+          all_metadata += text_node.text
+          all_metadata += " "
+        end
+        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
         # Split facets into different languages based on xml:lang
         # faceted_language_indexes = Hash.new
