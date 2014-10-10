@@ -38,7 +38,9 @@ module DRI
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]')
 
-        t.controlfield(:proxy => [:record, :controlfield])
+        t.controlfield_tag(:proxy => [:record, :controlfield, :tag])
+        t.controlfield_value(:proxy => [:record, :controlfield])
+
         t.datafield(:ref => [:record, :datafield])
         t.datafield_tag(:proxy => [:record, :datafield, :tag])
         t.datafield_ind1(:proxy => [:record, :datafield, :ind1])

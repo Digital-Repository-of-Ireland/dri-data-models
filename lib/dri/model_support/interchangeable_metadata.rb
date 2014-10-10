@@ -51,7 +51,7 @@ module DRI
 
         #has_attributes *(DRI::Vocabulary::marcDatafields.flat_map { |df| df[:sf].flat_map { |sf| "sf_#{df[:code]}#{sf}".to_sym }}), datastream: :descMetadata, multiple: true
 
-        has_attributes :controlfield, datastream: :descMetadata, multiple: true
+        has_attributes :controlfield, :controlfield_tag, :controlfield_value, datastream: :descMetadata, multiple: true
         has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
         has_attributes :subfield, :subfield_code, :subfield_value, datastream: :descMetadata, multiple: true
 
