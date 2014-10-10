@@ -13,30 +13,22 @@ module DRI
 
             # Mandatory; DC Type
             t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
-            t.controlfield_001(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "001"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            t.controlfield_003(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "003"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            t.controlfield_005(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "005"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            t.controlfield_008(:path=>"controlfield", :namespace_prefix => nil, :attributes=>{:tag => "008"}, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
-            # Load from Vocabulary
-            DRI::Vocabulary::marcDatafields.each do |df|
-              t.send( "df_"+df[:code], :path=>"datafield", :namespace_prefix=>nil, :attributes=>{:tag => "#{df[:code]}", :ind1 => "#{df[:ind1]}", :ind2 => "#{df[:ind2]}"}){
-                df[:sf].each do |sf|
-                  puts "#{df[:code]}$#{sf}"
-                  t.send ("sf_#{df[:code]}#{sf}"), :path => "subfield", :namespace_prefix=>nil, :attributes=>{:code => "#{sf}"}
-                end
+            
+            t.controlfield {
+              t.controlfield_tag(:path=>{:attribute=>"tag"})
             }
-            end
+            
+            t.datafield {
+              t.tag(:path=>{:attribute=>"tag"})
+              t.ind1(:path=>{:attribute=>"ind1"})
+              t.ind2(:path=>{:attribute=>"ind2"})
+              t.subfield(:path => "subfield") {
+                t.code(:path=>{:attribute=>"code"})
+              }
+            }
+
         }
-        # TODO: Add more loops for ind1 and ind2
-        # TODO: Add full metadata
-        DRI::Vocabulary::marcDatafields.each do |df|
-            df[:sf].each do |sf|
-              t.send ("sf_" + df[:code] + sf), :proxy=>[:record, ("df_" + df[:code]).to_sym, ("sf_" + df[:code] + sf).to_sym], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable]
-            end
-        end
- 
+
         # Mandatory fields
         t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]')
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]')
@@ -46,18 +38,14 @@ module DRI
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]')
 
-        # Pointing to specif field using :proxy and :ref
-        # t.title(:ref => [:sf_245a])
-        # t.description(:ref => [:sf_500a])
-        # t.type(:proxy => [:record, :leader])
-        # t.creator(:ref => [:sf_100a])
-        # t.rights(:ref => [:sf_506a])
-        # t.creation_date(:proxy => [:record, :df_260, :sf_260c])
+        t.controlfield(:proxy => [:record, :controlfield])
+        t.datafield(:ref => [:record, :datafield])
+        t.datafield_tag(:proxy => [:record, :datafield, :tag])
+        t.datafield_ind1(:proxy => [:record, :datafield, :ind1])
+        t.datafield_ind2(:proxy => [:record, :datafield, :ind2])
 
-        t.controlfield_001(:proxy => [:record, :controlfield_001])
-        t.controlfield_003(:proxy => [:record, :controlfield_003])
-        t.controlfield_005(:proxy => [:record, :controlfield_005])
-        t.controlfield_008(:proxy => [:record, :controlfield_008])
+        t.subfield_value(:proxy => [:record, :datafield, :subfield])
+        t.subfield_code(:proxy => [:record, :datafield, :subfield, :code])
 
       end # set_terminology
 
@@ -74,6 +62,10 @@ module DRI
                    "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
               xml.record {
                 xml.leader
+                xml.controlfield(:tag => '')
+                xml.datafield(:tag => '', :ind1 => '#', :ind2 => '#') {
+                  xml.subfield(:code => '')
+                }
               }
           }
         end
@@ -187,8 +179,7 @@ module DRI
       def interchangeable?
         false
       end
+    
     end
-
   end
-
 end
