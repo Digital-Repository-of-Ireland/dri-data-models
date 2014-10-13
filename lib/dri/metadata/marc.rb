@@ -17,7 +17,7 @@ module DRI
             t.controlfield {
               t.controlfield_tag(:path=>{:attribute=>"tag"})
             }
-            
+           
             t.datafield {
               t.tag(:path=>{:attribute=>"tag"})
               t.ind1(:path=>{:attribute=>"ind1"})
@@ -45,9 +45,6 @@ module DRI
         t.datafield_tag(:proxy => [:record, :datafield, :tag])
         t.datafield_ind1(:proxy => [:record, :datafield, :ind1])
         t.datafield_ind2(:proxy => [:record, :datafield, :ind2])
-
-        t.subfield_value(:proxy => [:record, :datafield, :subfield])
-        t.subfield_code(:proxy => [:record, :datafield, :subfield, :code])
 
       end # set_terminology
 
@@ -180,6 +177,24 @@ module DRI
 
       def interchangeable?
         false
+      end
+
+      def add_subfields(datafields)
+        #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
+
+        ng_xml.search("//subfield").each do |n|
+          n.remove
+        end
+
+        datafields.each do |index, subfield|
+          index = index.to_i
+          
+          self.datafield(index).subfield = subfield['subfield_value']
+
+          subfield['subfield_code'].each_with_index do |code, j|
+            self.datafield(index).subfield(j).code = "#{code}"
+          end
+        end
       end
     
     end

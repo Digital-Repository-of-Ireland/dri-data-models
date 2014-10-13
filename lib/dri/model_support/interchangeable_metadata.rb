@@ -53,7 +53,6 @@ module DRI
 
         has_attributes :controlfield, :controlfield_tag, :controlfield_value, datastream: :descMetadata, multiple: true
         has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
-        has_attributes :subfield, :subfield_code, :subfield_value, datastream: :descMetadata, multiple: true
 
         validate :custom_validations
       end
@@ -430,6 +429,15 @@ module DRI
         end
 
         solr_doc
+      end
+
+      def attributes=(properties)
+        subfields = properties.delete('datafield_subfields')
+        super(properties)
+
+        if descMetadata.class.to_s == "DRI::Metadata::Marc"
+          self.descMetadata.add_subfields(subfields) unless subfields.nil?
+        end
       end
 
     end
