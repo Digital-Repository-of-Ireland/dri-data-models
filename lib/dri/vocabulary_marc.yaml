@@ -1,0 +1,289 @@
+:controlfield:
+  :tag:
+    "000":
+      :label: "LEADER"
+      :subfield:
+        "00":
+          :label: "fixed length control field"
+          :required: true
+          :multivalue: false
+    "001":
+      :label: "CONTROL NUMBER"
+      :subfield:
+        "00":
+          :label: "control field"
+          :required: false
+          :multivalue: false
+    "003":
+      :label: "CONTROL NUMBER IDENTIFIER"
+      :subfield:
+        "00":
+          :label: "control field"
+          :required: true
+          :multivalue: false
+    "005":
+      :label: "DATE AND TIME OF LATEST TRANSACTION"
+      :subfield:
+        "00":
+          :label: "control field"
+          :required: true
+          :multivalue: false
+    "006":
+      :label: "FIXED-LENGTH DATA ELEMENTS--ADDITIONAL MATERIAL CHARACTERISTICS--GENERAL INFORMATION"
+      :subfield:
+        "00":
+          :label: "fixed length control field"
+          :required: false
+          :multivalue: false
+    "007":
+      :label: "PHYSICAL DESCRIPTION FIXED FIELD--GENERAL INFORMATION"
+      :subfield:
+        "00":
+          :label: "fixed length control field"
+          :required: false
+          :multivalue: false
+    "008":
+      :label: "FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION"
+      :subfield:
+        "00":
+          :label: "fixed length control field"
+          :required: true
+          :multivalue: false
+:datafield:
+  :tag:
+    "010":
+      :label: "LIBRARY OF CONGRESS CONTROL NUMBER"
+      :multivalue: false
+      :subfield:
+        "a":
+          :label: "LC control number"
+          :multivalue: false
+    "015":
+      :label: "NATIONAL BIBLIOGRAPHY NUMBER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source"
+          :multivalue: false
+        "a":
+          :label: "National bibliography number"
+          :multivalue: true
+        "q":
+          :label: "Qualifying information"
+          :multivalue: true
+    "016":
+      :label: "NATIONAL BIBLIOGRAPHIC AGENCY CONTROL NUMBER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source"
+          :multivalue: false
+        "a":
+          :label: "Record control number"
+          :multivalue: false
+    "020":
+      :label: "INTERNATIONAL STANDARD BOOK NUMBER"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "International Standard Book Number"
+          :multivalue: false
+        "c":
+          :label: "Terms of availability"
+          :multivalue: false
+        "q":
+          :label: "Qualifying information"
+          :multivalue: true
+    "022":
+      :label: "INTERNATIONAL STANDARD SERIAL NUMBER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source"
+          :multivalue: false
+        "a":
+          :label: "International Standard Serial Number"
+          :multivalue: false
+    "024":
+      :label: "OTHER STANDARD IDENTIFIER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source of number or code "
+          :multivalue: false
+        "a":
+          :label: "Standard number or code "
+          :multivalue: false
+        "c":
+          :label: "Terms of availability"
+          :multivalue: false
+        "d":
+          :label: "Additional codes following the standard number or code"
+          :multivalue: false
+        "q":
+          :label: "Qualifying information"
+          :multivalue: true
+    "027":
+      :label: "STANDARD TECHNICAL REPORT NUMBER"
+      :multivalue: true
+      :subfield:
+        "q":
+          :label: "Qualifying information"
+          :multivalue: true
+    "028":
+      :label: "PUBLISHER NUMBER"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "Publisher number"
+          :multivalue: false
+        "b":
+          :label: "Source"
+          :multivalue: false
+    "035":
+      :label: "SYSTEM CONTROL NUMBER"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "System control number"
+          :multivalue: false
+    "037":
+      :label: "SOURCE OF ACQUISITION"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "Stock number"
+          :multivalue: false
+        "b":
+          :label: "Source of stock"
+          :multivalue: false
+        "c":
+          :label: "Terms of availability"
+          :multivalue: true
+        "f":
+          :label: "Form of issue"
+          :multivalue: true
+        "g":
+          :label: "Additional format characteristics"
+          :multivalue: true
+        "n":
+          :label: "Note"
+          :multivalue: true
+    "040":
+      :label: "CATALOGING SOURCE"
+      :multivalue: false
+      :subfield:
+        "a":
+          :label: "Original cataloging agency"
+          :multivalue: false
+        "b":
+          :label: "Language of cataloging"
+          :multivalue: false
+        "c":
+          :label: "Transcribing agency"
+          :multivalue: false
+          :required: true
+        "d":
+          :label: "Modifying agency"
+          :multivalue: false
+        "e":
+          :label: "Description conventions"
+          :multivalue: false
+    "041":
+      :label: "LANGUAGE CODE"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "Language code of text/sound track or separate title"
+          :multivalue: true
+        "d":
+          :label: "Language code of sung or spoken text"
+          :multivalue: true
+        "e":
+          :label: "Language code of librettos"
+          :multivalue: true
+        "g":
+          :label: "Language code of accompanying material other than librettos"
+          :multivalue: false
+        "h":
+          :label: "Language code of original and/or intermediate translations of text"
+          :multivalue: false
+    "045":
+      :label: "TIME PERIOD OF CONTENT"
+      :multivalue: false
+      :subfield:
+        "a":
+          :label: "Time period code"
+          :multivalue: true
+        "b":
+          :label: "Formatted 9999 B.C. through C.E. time period"
+          :multivalue: true
+    "047":
+      :label: "FORM OF MUSICAL COMPOSITION CODE"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source of code"
+          :multivalue: false
+        "a":
+          :label: "Form of musical composition code"
+          :multivalue: true
+    "048":
+      :label: "NUMBER OF MUSICAL INSTRUMENTS OR VOICES CODE"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Source of code"
+          :multivalue: false
+        "a":
+          :label: "Performer or ensemble"
+          :multivalue: true
+        "b":
+          :label: "Soloist"
+          :multivalue: true
+    "050":
+      :label: "LIBRARY OF CONGRESS CALL NUMBER"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "Classification number"
+          :multivalue: true
+        "b":
+          :label: "Item number"
+          :multivalue: false
+    "074":
+      :label: "GPO ITEM NUMBER"
+      :multivalue: true
+      :subfield:
+        "a":
+          :label: "GPO item number"
+          :multivalue: false
+        "z":
+          :label: "Canceled/invalid GPO item number"
+          :multivalue: true
+    "082":
+      :label: "DEWEY DECIMAL CLASSIFICATION NUMBER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Edition number"
+          :multivalue: false
+        "a":
+          :label: "Classification number"
+          :multivalue: true
+        "b":
+          :label: "Item number"
+          :multivalue: false
+    "086":
+      :label: "GOVERNMENT DOCUMENT CLASSIFICATION NUMBER"
+      :multivalue: true
+      :subfield:
+        "2":
+          :label: "Number source"
+          :multivalue: false
+        "a":
+          :label: "Classification number"
+          :multivalue: false
+        "b":
+          :label: "Canceled/invalid classification number"
+          :multivalue: true
