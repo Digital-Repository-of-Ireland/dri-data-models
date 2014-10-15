@@ -49,6 +49,7 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
+
         #has_attributes *(DRI::Vocabulary::marcDatafields.flat_map { |df| df[:sf].flat_map { |sf| "sf_#{df[:code]}#{sf}".to_sym }}), datastream: :descMetadata, multiple: true
 
         has_attributes :controlfield, :controlfield_tag, :controlfield_value, datastream: :descMetadata, multiple: true
@@ -432,11 +433,12 @@ module DRI
       end
 
       def attributes=(properties)
-        subfields = properties.delete('datafield_subfields')
+        datafields = properties.delete('datafield')
+        puts "***datafield!!!#{datafields}"
         super(properties)
 
         if descMetadata.class.to_s == "DRI::Metadata::Marc"
-          self.descMetadata.add_subfields(subfields) unless subfields.nil?
+          self.descMetadata.add_datafields(datafields) unless datafields.nil?
         end
       end
 

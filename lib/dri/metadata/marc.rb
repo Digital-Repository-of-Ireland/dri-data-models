@@ -45,6 +45,7 @@ module DRI
         t.datafield_tag(:proxy => [:record, :datafield, :tag])
         t.datafield_ind1(:proxy => [:record, :datafield, :ind1])
         t.datafield_ind2(:proxy => [:record, :datafield, :ind2])
+        t.val(:proxy => [:record, :datafield, :subfield])
 
       end # set_terminology
 
@@ -124,54 +125,54 @@ module DRI
 
       def custom_validations
         errors = Hash.new
-
-        title_result = false
-        type_result = false
-        description_result = false
-        creator_result = false
-        rights_result = false
-        creation_date_result = false
-
-
-        # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
-        title_result = true unless title.join.squish == ""
-        type_result = true unless type.join.squish == ""
-        description_result = true unless description.join.squish == ""
-        creator_result = true unless creator.join.squish == ""
-        rights_result = true unless rights.join.squish == ""
-        creation_date_result = true unless creation_date.join.squish == ""
-
-        # title.each do |curr_title|
-        #   title_result = true unless curr_title.blank?
-        # end
         #
-        # type.each do |curr_type|
-        #   type_result = true unless curr_type.blank?
-        # end
+        # title_result = false
+        # type_result = false
+        # description_result = false
+        # creator_result = false
+        # rights_result = false
+        # creation_date_result = false
         #
-        # description.each d.o |curr_description|
-        #   description_result = true unless curr_description.blank?
-        # end
         #
-        # creator.each do |curr_creator|
-        #   creator_result = true unless curr_creator.blank?
-        # end
+        # # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
+        # title_result = true unless title.join.squish == ""
+        # type_result = true unless type.join.squish == ""
+        # description_result = true unless description.join.squish == ""
+        # creator_result = true unless creator.join.squish == ""
+        # rights_result = true unless rights.join.squish == ""
+        # creation_date_result = true unless creation_date.join.squish == ""
         #
-        # rights.each do |curr_rights|
-        #   rights_result = true unless curr_rights.blank?
-        # end
+        # # title.each do |curr_title|
+        # #   title_result = true unless curr_title.blank?
+        # # end
+        # #
+        # # type.each do |curr_type|
+        # #   type_result = true unless curr_type.blank?
+        # # end
+        # #
+        # # description.each d.o |curr_description|
+        # #   description_result = true unless curr_description.blank?
+        # # end
+        # #
+        # # creator.each do |curr_creator|
+        # #   creator_result = true unless curr_creator.blank?
+        # # end
+        # #
+        # # rights.each do |curr_rights|
+        # #   rights_result = true unless curr_rights.blank?
+        # # end
+        # #
+        # # creation_date.each do |curr_creation_date|
+        # #   creation_date_result = true unless curr_creation_date.blank?
+        # # end
         #
-        # creation_date.each do |curr_creation_date|
-        #   creation_date_result = true unless curr_creation_date.blank?
-        # end
-
-        errors[:title] = "can't be blank" if title_result == false
-        errors[:type] = "can't be blank" if type_result == false
-        errors[:description] = "can't be blank" if description_result == false
-        errors[:creator] = "can't be blank" if creator_result == false
-        errors[:creation_date] = "can't be blank" if creation_date_result == false
-        errors[:rights] = "can't be blank" if rights_result == false
-
+        # errors[:title] = "can't be blank" if title_result == false
+        # errors[:type] = "can't be blank" if type_result == false
+        # errors[:description] = "can't be blank" if description_result == false
+        # errors[:creator] = "can't be blank" if creator_result == false
+        # errors[:creation_date] = "can't be blank" if creation_date_result == false
+        # errors[:rights] = "can't be blank" if rights_result == false
+        #
         errors
       end
 
@@ -179,9 +180,26 @@ module DRI
         false
       end
 
+      def add_datafields(datafields)
+        ng_xml.search("//datafield").each do |n|
+          n.remove
+        end
+        datafields.each do |index, datafield|
+          index = index.to_i
+          self.datafield(index).tag = datafield['datafield_tag']
+          self.datafield(index).ind1 = datafield['datafield_ind1']
+          self.datafield(index).ind2 = datafield['datafield_ind2']
+
+          datafield['subfield'].each do |sub_index, subfield|
+            sub_index = sub_index.to_i
+            self.datafield(index).subfield(sub_index).val = subfield['subfield_value']
+            self.datafield(index).subfield(sub_index).code = subfield['subfield_code']
+          end
+        end
+      end
+
       def add_subfields(datafields)
         #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
-
         ng_xml.search("//subfield").each do |n|
           n.remove
         end
@@ -196,7 +214,10 @@ module DRI
           end
         end
       end
-    
+
+      def marc_vocabulary
+        @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
+      end
     end
   end
 end
