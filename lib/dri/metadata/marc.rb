@@ -17,7 +17,7 @@ module DRI
             t.controlfield {
               t.controlfield_tag(:path=>{:attribute=>"tag"})
             }
-           
+
             t.datafield {
               t.tag(:path=>{:attribute=>"tag"})
               t.ind1(:path=>{:attribute=>"ind1"})
@@ -38,25 +38,20 @@ module DRI
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]')
 
+        # Controlfields
+        t.controlfield(:ref => [:record, :controlfield])
         t.controlfield_tag(:proxy => [:record, :controlfield, :controlfield_tag])
-        t.controlfield_value(:proxy => [:record, :controlfield])
-
+        # Datafields
         t.datafield(:ref => [:record, :datafield])
         t.datafield_tag(:proxy => [:record, :datafield, :tag])
         t.datafield_ind1(:proxy => [:record, :datafield, :ind1])
         t.datafield_ind2(:proxy => [:record, :datafield, :ind2])
-        t.val(:proxy => [:record, :datafield, :subfield])
 
       end # set_terminology
 
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          # xml.doc.create_internal_subset(
-          #   'ead',
-          #   "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
-          #   ""
-          # )
           xml.collection("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
                    "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                    "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
@@ -198,22 +193,33 @@ module DRI
         end
       end
 
-      def add_subfields(datafields)
-        #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
-        ng_xml.search("//subfield").each do |n|
+      def add_controlfields(controlfields)
+        ng_xml.search("//controlfield").each do |n|
           n.remove
         end
-
-        datafields.each do |index, subfield|
+        controlfields.each do |index, controlfield|
           index = index.to_i
-          
-          self.datafield(index).subfield = subfield['subfield_value']
-
-          subfield['subfield_code'].each_with_index do |code, j|
-            self.datafield(index).subfield(j).code = "#{code}"
-          end
+          self.controlfield(index).controlfield_tag = controlfield['controlfield_tag']
+          self.controlfield(index).val = controlfield['controlfield_value']
         end
       end
+
+      # def add_subfields(datafields)
+      #   #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
+      #   ng_xml.search("//subfield").each do |n|
+      #     n.remove
+      #   end
+      #
+      #   datafields.each do |index, subfield|
+      #     index = index.to_i
+      #
+      #     self.datafield(index).subfield = subfield['subfield_value']
+      #
+      #     subfield['subfield_code'].each_with_index do |code, j|
+      #       self.datafield(index).subfield(j).code = "#{code}"
+      #     end
+      #   end
+      # end
 
       def marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
