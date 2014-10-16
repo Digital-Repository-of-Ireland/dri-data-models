@@ -181,9 +181,15 @@ module DRI
         end
         datafields.each do |index, datafield|
           index = index.to_i
-          self.datafield(index).tag = datafield['datafield_tag']
-          self.datafield(index).ind1 = datafield['datafield_ind1']
-          self.datafield(index).ind2 = datafield['datafield_ind2']
+          if index == 0
+            self.record.datafield.tag = datafield['datafield_tag']
+            self.record.datafield.ind1 = datafield['datafield_ind1']
+            self.record.datafield.ind2 = datafield['datafield_ind2']
+          else
+            self.record.datafield(index).tag = datafield['datafield_tag']
+            self.record.datafield(index).ind1 = datafield['datafield_ind1']
+            self.record.datafield(index).ind2 = datafield['datafield_ind2']
+          end
 
           datafield['subfield'].each do |sub_index, subfield|
             sub_index = sub_index.to_i
