@@ -179,23 +179,24 @@ module DRI
         ng_xml.search("//datafield").each do |n|
           n.remove
         end
+
+        record = ng_xml.at('record')
+
         datafields.each do |index, datafield|
-          index = index.to_i
-          if index == 0
-            self.record.datafield.tag = datafield['datafield_tag']
-            self.record.datafield.ind1 = datafield['datafield_ind1']
-            self.record.datafield.ind2 = datafield['datafield_ind2']
-          else
-            self.record.datafield(index).tag = datafield['datafield_tag']
-            self.record.datafield(index).ind1 = datafield['datafield_ind1']
-            self.record.datafield(index).ind2 = datafield['datafield_ind2']
-          end
+          node = Nokogiri::XML::Node.new('datafield', ng_xml)
+          node['tag'] = datafield['datafield_tag'].first
+          node['ind1'] = datafield['datafield_ind1'].first
+          node['ind2'] = datafield['datafield_ind2'].first
 
           datafield['subfield'].each do |sub_index, subfield|
-            sub_index = sub_index.to_i
-            self.datafield(index).subfield(sub_index).val = subfield['subfield_value']
-            self.datafield(index).subfield(sub_index).code = subfield['subfield_code']
-          end
+            subfield_node = Nokogiri::XML::Node.new('subfield', ng_xml)
+            subfield_node['code'] = subfield['subfield_code'].first
+            subfield_node.content = subfield['subfield_value'].first
+
+            node.add_child(subfield_node)
+          end           
+
+          record.add_child(node)
         end
       end
 
@@ -203,10 +204,15 @@ module DRI
         ng_xml.search("//controlfield").each do |n|
           n.remove
         end
+      
+        record = ng_xml.at('record')
+
         controlfields.each do |index, controlfield|
-          index = index.to_i
-          self.controlfield(index).controlfield_tag = controlfield['controlfield_tag']
-          self.controlfield(index).val = controlfield['controlfield_value']
+            node = Nokogiri::XML::Node.new('controlfield', ng_xml)
+            node['tag'] = controlfield['controlfield_tag'].first
+            node.content = controlfield['controlfield_value'].first
+            
+            record.add_child(node)
         end
       end
 
