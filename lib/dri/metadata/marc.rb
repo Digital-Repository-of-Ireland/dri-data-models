@@ -30,13 +30,13 @@ module DRI
         }
 
         # Mandatory fields
-        t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]')
-        t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]')
-        t.type(:proxy => [:record, :leader])
-        t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]')
-        t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]')
+        t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.type(:proxy => [:record, :leader], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Jenny still needs to find out what to put in there
-        t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]')
+        t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         # Controlfields
         t.controlfield(:ref => [:record, :controlfield])
@@ -84,12 +84,12 @@ module DRI
         #   end
         # end
 
-        solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :text) => title)
-        solr_doc.merge!(Solrizer.solr_name('description', :stored_searchable, type: :text) => description)
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :text) => type)
-        solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator)
-        solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :text) => rights)
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
+        #solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :text) => title)
+        #solr_doc.merge!(Solrizer.solr_name('description', :stored_searchable, type: :text) => description)
+        #solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :text) => type)
+        #solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator)
+        #solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :text) => rights)
+        #solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
