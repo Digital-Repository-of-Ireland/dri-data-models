@@ -233,7 +233,7 @@ module DRI
       #   end
       # end
 
-      def marc_vocabulary
+      def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end
     end

@@ -1,54 +1,60 @@
 :controlfield:
-  :tag:
-    "000":
-      :label: "LEADER"
-      :subfield:
-        "00":
-          :label: "fixed length control field"
-          :required: true
-          :multivalue: false
-    "001":
-      :label: "CONTROL NUMBER"
-      :subfield:
-        "00":
-          :label: "control field"
-          :required: false
-          :multivalue: false
-    "003":
-      :label: "CONTROL NUMBER IDENTIFIER"
-      :subfield:
-        "00":
-          :label: "control field"
-          :required: true
-          :multivalue: false
-    "005":
-      :label: "DATE AND TIME OF LATEST TRANSACTION"
-      :subfield:
-        "00":
-          :label: "control field"
-          :required: true
-          :multivalue: false
-    "006":
-      :label: "FIXED-LENGTH DATA ELEMENTS--ADDITIONAL MATERIAL CHARACTERISTICS--GENERAL INFORMATION"
-      :subfield:
-        "00":
-          :label: "fixed length control field"
-          :required: false
-          :multivalue: false
-    "007":
-      :label: "PHYSICAL DESCRIPTION FIXED FIELD--GENERAL INFORMATION"
-      :subfield:
-        "00":
-          :label: "fixed length control field"
-          :required: false
-          :multivalue: false
-    "008":
-      :label: "FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION"
-      :subfield:
-        "00":
-          :label: "fixed length control field"
-          :required: true
-          :multivalue: false
+  "000":
+    :tag: "000"
+    :label: "LEADER"
+    :multivalue: NO
+    :subfield:
+      :code: "00"
+      :label: "fixed length control field"
+      :required: YES
+  "001":
+    :tag: "001"
+    :label: "CONTROL NUMBER"
+    :multivalue: NO
+    :subfield:
+      :code: "00"
+      :label: "control field"
+      :required: NO
+  "003":
+    :tag: "003"
+    :label: "CONTROL NUMBER IDENTIFIER"
+    :multivalue: NO
+    :subfield:
+      :code: "00"
+      :label: "control field"
+      :required: YES
+  "005":
+    :tag: "005"
+    :label: "DATE AND TIME OF LATEST TRANSACTION"
+    :multivalue: NO
+    :subfield:
+      :code: "00"
+      :label: "control field"
+      :required: YES
+  "006":
+    :tag: "006"
+    :label: "FIXED-LENGTH DATA ELEMENTS--ADDITIONAL MATERIAL CHARACTERISTICS--GENERAL INFORMATION"
+    :multivalue: YES
+    :subfield:
+      :code: "00"
+      :label: "fixed length control field"
+      :required: NO
+  "007":
+    :tag: "007"
+    :label: "PHYSICAL DESCRIPTION FIXED FIELD--GENERAL INFORMATION"
+    :multivalue: YES
+    :subfield:
+      :code: "00"
+      :label: "fixed length control field"
+      :required: NO
+  "008":
+    :tag: "008"
+    :label: "FIXED-LENGTH DATA ELEMENTS--GENERAL INFORMATION"
+    :multivalue: NO
+    :subfield:
+      :code: "00"
+      :label: "fixed length control field"
+      :required: YES
 :datafield:
   :tag:
     "010":
