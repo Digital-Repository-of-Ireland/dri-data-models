@@ -412,3 +412,419 @@
         :label: "Canceled/invalid classification number"
         :multivalue: YES
         :required: NO
+  "100":
+    :tag: "100"
+    :label: "MAIN ENTRY--PERSONAL NAME"
+    :multivalue: NO
+    :subfield:
+      "4":
+        :code: "4"
+        :label: "Relator code"
+        :multivalue: YES
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Dates associated with a name"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Relator term"
+        :multivalue: YES
+        :required: NO
+      "q":
+        :code: "q"
+        :label: "Fuller form of name"
+        :multivalue: NO
+        :required: NO
+  "110":
+    :tag: "110"
+    :label: "MAIN ENTRY--CORPORATE NAME"
+    :multivalue: NO
+    :subfield:
+      "4":
+        :code: "4"
+        :label: "Relator code"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Subordinate unit"
+        :multivalue: YES
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Relator term"
+        :multivalue: YES
+        :required: NO
+  "111":
+    :tag: "111"
+    :label: "MAIN ENTRY--MEETING NAME"
+    :multivalue: NO
+    :subfield:
+      "4":
+        :code: "4"
+        :label: "Relator code"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Location of meeting"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Date of meeting"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Subordinate unit"
+        :multivalue: YES
+        :required: NO
+      "j":
+        :code: "j"
+        :label: "Relator term"
+        :multivalue: YES
+        :required: NO
+  "130":
+    :tag: "130"
+    :label: "MAIN ENTRY--UNIFORM TITLE"
+    :multivalue: NO
+    :subfield:
+      "l":
+        :code: "l"
+        :label: "Language of a work"
+        :multivalue: NO
+        :required: NO
+      "r"
+        :code: "r"
+        :label: "Key for music"
+        :multivalue: NO
+        :required: NO
+  "210":
+    :tag: "210"
+    :label: "ABBREVIATED TITLE"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source"
+        :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Abbreviated title"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Qualifying information"
+        :multivalue: NO
+        :required: NO
+  "222":
+    :tag: "222"
+    :label: "KEY TITLE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Key title"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Qualifying information"
+        :multivalue: NO
+        :required: NO
+  "240":
+    :tag: "240"
+    :label: "UNIFORM TITLE"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Uniform title"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Medium"
+        :multivalue: NO
+        :required: NO
+      "l":
+        :code: "l"
+        :label: "Language of a work"
+        :multivalue: NO
+        :required: NO
+      "r":
+        :code: "r"
+        :label: "Key for music"
+        :multivalue: NO
+        :required: NO
+      "s":
+        :code: "s"
+        :label: "Version"
+        :multivalue: NO
+        :required: NO
+  "243":
+    :tag: "243"
+    :label: "COLLECTIVE UNIFORM TITLE"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Uniform title"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Medium"
+        :multivalue: NO
+        :required: NO
+      "l":
+        :code: "l"
+        :label: "Language of a work"
+        :multivalue: NO
+        :required: NO
+      "s":
+        :code: "s"
+        :label: "Version"
+        :multivalue: NO
+        :required: NO
+  "245":
+    :tag: "245"
+    :label: "TITLE STATEMENT"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Title"
+        :multivalue: NO
+        :required: YES
+      "b":
+        :code: "b"
+        :label: "Remainder of title"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Statement of responsibility, etc"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Medium"
+        :multivalue: NO
+        :required: NO
+  "246":
+    :tag: "246"
+    :label: "VARYING FORM OF TITLE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Title proper/short title"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Remainder of title"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Medium"
+        :multivalue: NO
+        :required: NO
+      "i":
+        :code: "i"
+        :label: "Display text"
+        :multivalue: NO
+        :required: NO
+  "247":
+    :tag: "247"
+    :label: "FORMER TITLE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Title"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Remainder of title"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Medium"
+        :multivalue: NO
+        :required: NO
+  "250":
+    :tag: "250"
+    :label: "EDITION STATEMENT"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Edition statement"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Remainder of edition statement"
+        :multivalue: NO
+        :required: NO
+  "260":
+    :tag: "260"
+    :label: "PUBLICATION, DISTRIBUTION, ETC. (IMPRINT)"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Place of publication, distribution, etc"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Name of publisher, distributor, etc"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Date of publication, distribution, etc"
+        :multivalue: YES
+        :required: NO
+  "264":
+    :tag: "264"
+    :label: "PRODUCTION, PUBLICATION, DISTRIBUTION, MANUFACTURE STATEMENTS"
+    :multivalue: NO
+    :subfield:
+      "3":
+        :code: "3"
+        :label: "Materials Specified"
+        :multivalue: NO
+        :required: NO
+      "6":
+        :code: "6"
+        :label: "Linkage"
+        :multivalue: NO
+        :required: NO
+      "8":
+        :code: "8"
+        :label: "Field link and sequence number"
+        :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Place of production, publication, distribution, manufacture"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Name of producer, publisher, distributor, manufacturer"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Date of production, publication, distribution, manufacture"
+        :multivalue: YES
+        :required: NO
+  "270":
+    :tag: "270"
+    :label: "ADDRESS"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Address"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "City"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "State of province"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Country"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Postal code"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Terms preceding attention name"
+        :multivalue: NO
+        :required: NO
+      "g":
+        :code: "g"
+        :label: "Attention name"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Attention position"
+        :multivalue: NO
+        :required: NO
+      "i":
+        :code: "i"
+        :label: "Type of address"
+        :multivalue: NO
+        :required: NO
+      "j":
+        :code: "j"
+        :label: "Specialized telephone number"
+        :multivalue: YES
+        :required: NO
+      "k":
+        :code: "k"
+        :label: "Telephone number"
+        :multivalue: YES
+        :required: NO
+      "l":
+        :code: "l"
+        :label: "Fax number"
+        :multivalue: YES
+        :required: NO
+      "m":
+        :code: "m"
+        :label: "Electronic mail address"
+        :multivalue: YES
+        :required: NO
+      "n":
+        :code: "n"
+        :label: "TDD or TTY number"
+        :multivalue: YES
+        :required: NO
+      "p":
+        :code: "p"
+        :label: "Contact person"
+        :multivalue: YES
+        :required: NO
+      "q":
+        :code: "q"
+        :label: "Title of contact person"
+        :multivalue: YES
+        :required: NO
+      "r":
+        :code: "r"
+        :label: "Hours"
+        :multivalue: YES
+        :required: NO
+      "z":
+        :code: "z"
+        :label: "Public note"
+        :multivalue: YES
+        :required: NO
+
