@@ -91,10 +91,12 @@
         :code: "2"
         :label: "Source"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Record control number"
         :multivalue: NO
+        :required: NO
   "020":
     :tag: "020"
     :label: "INTERNATIONAL STANDARD BOOK NUMBER"
@@ -104,14 +106,17 @@
         :code: "a"
         :label: "International Standard Book Number"
         :multivalue: NO
+        :required: NO
       "c":
         :code: "c"
         :label: "Terms of availability"
         :multivalue: NO
+        :required: NO
       "q":
         :code: "q"
         :label: "Qualifying information"
         :multivalue: YES
+        :required: NO
   "022":
     :tag: "022"
     :label: "INTERNATIONAL STANDARD SERIAL NUMBER"
@@ -121,10 +126,12 @@
         :code: "2"
         :label: "Source"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "International Standard Serial Number"
         :multivalue: NO
+        :required: NO
   "024":
     :tag: "024"
     :label: "OTHER STANDARD IDENTIFIER"
@@ -134,22 +141,27 @@
         :code: "2"
         :label: "Source of number or code "
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Standard number or code "
         :multivalue: NO
+        :required: NO
       "c":
         :code: "c"
         :label: "Terms of availability"
         :multivalue: NO
+        :required: NO
       "d":
         :code: "d"
         :label: "Additional codes following the standard number or code"
         :multivalue: NO
+        :required: NO
       "q":
         :code: "q"
         :label: "Qualifying information"
         :multivalue: YES
+        :required: NO
   "027":
     :tag: "027"
     :label: "STANDARD TECHNICAL REPORT NUMBER"
@@ -159,6 +171,7 @@
         :code: "q"
         :label: "Qualifying information"
         :multivalue: YES
+        :required: NO
   "028":
     :tag: "028"
     :label: "PUBLISHER NUMBER"
@@ -168,10 +181,12 @@
         :code: "a"
         :label: "Publisher number"
         :multivalue: NO
+        :required: NO
       "b":
         :code: "b"
         :label: "Source"
         :multivalue: NO
+        :required: NO
   "035":
     :tag: "035"
     :label: "SYSTEM CONTROL NUMBER"
@@ -181,6 +196,7 @@
         :code: "a"
         :label: "System control number"
         :multivalue: NO
+        :required: NO
   "037":
     :tag: "037"
     :label: "SOURCE OF ACQUISITION"
@@ -190,26 +206,32 @@
         :code: "a"
         :label: "Stock number"
         :multivalue: NO
+        :required: NO
       "b":
         :code: "b"
         :label: "Source of stock"
         :multivalue: NO
+        :required: NO
       "c":
         :code: "c"
         :label: "Terms of availability"
         :multivalue: YES
+        :required: NO
       "f":
         :code: "f"
         :label: "Form of issue"
         :multivalue: YES
+        :required: NO
       "g":
         :code: "g"
         :label: "Additional format characteristics"
         :multivalue: YES
+        :required: NO
       "n":
         :code: "n"
         :label: "Note"
         :multivalue: YES
+        :required: NO
   "040":
     :tag: "040"
     :label: "CATALOGING SOURCE"
@@ -219,10 +241,12 @@
         :code: "a"
         :label: "Original cataloging agency"
         :multivalue: NO
+        :required: NO
       "b":
         :code: "b"
         :label: "Language of cataloging"
         :multivalue: NO
+        :required: NO
       "c":
         :code: "c"
         :label: "Transcribing agency"
@@ -232,10 +256,12 @@
         :code: "d"
         :label: "Modifying agency"
         :multivalue: NO
+        :required: NO
       "e":
         :code: "e"
         :label: "Description conventions"
         :multivalue: NO
+        :required: NO
   "041":
     :tag: "041"
     :label: "LANGUAGE CODE"
@@ -245,22 +271,27 @@
         :code: "a"
         :label: "Language code of text/sound track or separate title"
         :multivalue: YES
+        :required: NO
       "d":
         :code: "d"
         :label: "Language code of sung or spoken text"
         :multivalue: YES
+        :required: NO
       "e":
         :code: "e"
         :label: "Language code of librettos"
         :multivalue: YES
+        :required: NO
       "g":
         :code: "g"
         :label: "Language code of accompanying material other than librettos"
         :multivalue: NO
+        :required: NO
       "h":
         :code: "h"
         :label: "Language code of original and/or intermediate translations of text"
         :multivalue: NO
+        :required: NO
   "045":
     :tag: "045"
     :label: "TIME PERIOD OF CONTENT"
@@ -270,10 +301,12 @@
         :code: "a"
         :label: "Time period code"
         :multivalue: YES
+        :required: NO
       "b":
         :code: "b"
         :label: "Formatted 9999 B.C. through C.E. time period"
         :multivalue: YES
+        :required: NO
   "047":
     :tag: "047"
     :label: "FORM OF MUSICAL COMPOSITION CODE"
@@ -283,10 +316,12 @@
         :code: "2"
         :label: "Source of code"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Form of musical composition code"
         :multivalue: YES
+        :required: NO
   "048":
     :tag: "048"
     :label: "NUMBER OF MUSICAL INSTRUMENTS OR VOICES CODE"
@@ -296,14 +331,17 @@
         :code: "2"
         :label: "Source of code"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Performer or ensemble"
         :multivalue: YES
+        :required: NO
       "b":
         :code: "b"
         :label: "Soloist"
         :multivalue: YES
+        :required: NO
   "050":
     :tag: "050"
     :label: "LIBRARY OF CONGRESS CALL NUMBER"
@@ -313,10 +351,12 @@
         :code: "a"
         :label: "Classification number"
         :multivalue: YES
+        :required: NO
       "b":
         :code: "b"
         :label: "Item number"
         :multivalue: NO
+        :required: NO
   "074":
     :tag: "074"
     :label: "GPO ITEM NUMBER"
@@ -326,10 +366,12 @@
         :code: "a"
         :label: "GPO item number"
         :multivalue: NO
+        :required: NO
       "z":
         :code: "z"
         :label: "Canceled/invalid GPO item number"
         :multivalue: YES
+        :required: NO
   "082":
     :tag: "082"
     :label: "DEWEY DECIMAL CLASSIFICATION NUMBER"
@@ -339,14 +381,17 @@
         :code: "2"
         :label: "Edition number"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Classification number"
         :multivalue: YES
+        :required: NO
       "b":
         :code: "b"
         :label: "Item number"
         :multivalue: NO
+        :required: NO
   "086":
     :tag: "086"
     :label: "GOVERNMENT DOCUMENT CLASSIFICATION NUMBER"
@@ -356,11 +401,14 @@
         :code: "2"
         :label: "Number source"
         :multivalue: NO
+        :required: NO
       "a":
         :code: "a"
         :label: "Classification number"
         :multivalue: NO
+        :required: NO
       "b":
         :code: "b"
         :label: "Canceled/invalid classification number"
         :multivalue: YES
+        :required: NO
