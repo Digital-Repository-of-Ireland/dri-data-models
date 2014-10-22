@@ -827,4 +827,349 @@
         :label: "Public note"
         :multivalue: YES
         :required: NO
+  "300":
+    :tag": "300"
+    :label: "PHYSICAL DESCRIPTION"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Extent"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Other physical details"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Dimensions"
+        :multivalue: YES
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Accompanying material"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Type of unit"
+        :multivalue: YES
+        :required: NO
+      "g"
+        :code: "g"
+        :label: "Size of unit"
+        :multivalue: YES
+        :required: NO
+  "306":
+    :tag: "306"
+    :label: "PLAYING TIME"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Playing time"
+        :multivalue: NO
+        :required: NO
+  "310":
+    :tag: "310"
+    :label: "CURRENT PUBLICATION FREQUENCY"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Current publication frequency"
+        :multivalue: NO
+        :required: NO
+  "336":
+    :tag: "336":
+    :label: "CONTENT TYPE"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source"
+        :multivalue: NO
+        :required: NO
+      "3":
+        :code: "3"
+        :label: "Materials Specified"
+        :multivalue: YES
+        :required: NO
+      "6":
+        :code: "6"
+        :label: "Linkage"
+        :multivalue: YES
+        :required: NO
+      "8":
+        :code: "8"
+        :label: "Field link and sequence number"
+        :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Content Type Term"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Content Type Code"
+        :multivalue: YES
+        :required: NO
+  "337":
+    :tag: "337"
+    :label: "MEDIA TYPE"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source"
+        :multivalue: NO
+        :required: NO
+      "3":
+        :code: "3"
+        :label: "Materials Specified"
+        :multivalue: YES
+        :required: NO
+      "6":
+        :code: "6"
+        :label: "Linkage"
+        :multivalue: YES
+        :required: NO
+      "8":
+        :code: "8"
+        :label: "Field link and sequence number"
+        :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Media Type Term"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Media Type Code"
+        :multivalue: YES
+        :required: NO
+  "338":
+    :tag: "338"
+    :label: "CARRIER TYPE"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source"
+        :multivalue: NO
+        :required: NO
+      "3":
+        :code: "3"
+        :label: "Materials Specified"
+        :multivalue: YES
+        :required: NO
+      "6":
+        :code: "6"
+        :label: "Linkage"
+        :multivalue: YES
+        :required: NO
+      "8":
+        :code: "8"
+        :label: "Field link and sequence number"
+        :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Carrier Type Term"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Carrier Type Code"
+        :multivalue: YES
+        :required: NO
+  "362":
+    :tag: "362"
+    :label: "DATES OF PUBLICATION AND/OR SEQUENTIAL DESIGNATION"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Dates of publication and/or sequential designation"
+        :multivalue: NO
+        :required: NO
+  "365":
+    :tag: "365"
+    :label: "TRADE PRICE"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source of price type code"
+        :multivalue: NO
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Price type code"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Price amount"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Price type code"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Unit of pricing"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Price note"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Price effective from"
+        :multivalue: NO
+        :required: NO
+      "g":
+        :code: "g"
+        :label: "Price effective until"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Tax rate 1"
+        :multivalue: NO
+        :required: NO
+      "i":
+        :code: "i"
+        :label: "Tax rate 2"
+        :multivalue: NO
+        :required: NO
+      "j":
+        :code: "j"
+        :label: "ISO country code"
+        :multivalue: NO
+        :required: NO
+      "k":
+        :code: "k"
+        :label: "MARC country code"
+        :multivalue: NO
+        :required: NO
+      "m":
+        :code: "m"
+        :label: "Identification of pricing entity"
+        :multivalue: NO
+        :required: NO
+  "366":
+    :tag: "366"
+    :label: "TRADE AVAILABILITY INFORMATION"
+    :multivalue: YES
+    :subfield:
+      "2":
+        :code: "2"
+        :label: "Source of availability status code"
+        :multivalue: NO
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Publishers' compressed title identification"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Detailed date of publication"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Availability status code"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Expected next availability date"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Note"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Publishers' discount category"
+        :multivalue: NO
+        :required: NO
+      "g":
+        :code: "g"
+        :label: "Date made out of print"
+        :multivalue: NO
+        :required: NO
+      "j":
+        :code: "j"
+        :label: "ISO country code"
+        :multivalue: NO
+        :required: NO
+      "k":
+        :code: "k"
+        :label: "MARC country code"
+        :multivalue: NO
+        :required: NO
+      "m":
+        :code: "m"
+        :label: "Identification of agency"
+        :multivalue: NO
+        :required: NO
+  "440":
+    :tag: "440"
+    :label: "SERIES STATEMENT/ADDED ENTRY--TITLE"
+    :multivalue: YES
+    :subfield:
+      "n":
+        :code: "n"
+        :label: "Number of part/section of a work"
+        :multivalue: YES
+        :required: NO
+      "p":
+        :code: "p"
+        :label: "Name of part/section of a work"
+        :multivalue: YES
+        :required: NO
+      "v":
+        :code: "v"
+        :label: "Volume number/sequential designation"
+        :multivalue: NO
+        :required: NO
+      "x":
+        :code: "x"
+        :label: "International Standard Serial Number"
+        :multivalue: NO
+        :required: NO
+  "490":
+    :tag: "490"
+    :label: "SERIES STATEMENT"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Series Statement"
+        :multivalue: YES
+        :required: NO
+      "v":
+        :code: "v"
+        :label: "Volume number/sequential designation"
+        :multivalue: YES
+        :required:
+      "x":
+        :code: "x"
+        :label: "International Standard Serial Number"
+        :multivalue: NO
+        :required: NO
 
