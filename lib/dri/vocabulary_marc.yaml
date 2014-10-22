@@ -820,7 +820,7 @@
         :multivalue: YES
         :required: NO
   "300":
-    :tag": "300"
+    :tag: "300"
     :label: "PHYSICAL DESCRIPTION"
     :multivalue: YES
     :subfield:
@@ -1509,7 +1509,7 @@
         :label: "Availability source"
         :multivalue: YES
         :required: NO
-      "c"
+      "c":
         :code: "c"
         :label: "Degree of control"
         :multivalue: NO
@@ -2099,21 +2099,21 @@
         :label: "Geographic subdivision"
         :multivalue: YES
         :required: NO
-  "656":
-    :tag: "656"
-    :label: "INDEX TERM--OCCUPATION"
-    :multivalue: YES
-    :subfield:
-  "657":
-    :tag: "657"
-    :label: "INDEX TERM--FUNCTION"
-    :multivalue: YES
-    :subfield:
-  "658":
-    :tag: "658"
-    :label: "INDEX TERM--CURRICULUM OBJECTIVE"
-    :multivalue: YES
-    :subfield:
+#  "656":
+#    :tag: "656"
+#    :label: "INDEX TERM--OCCUPATION"
+#    :multivalue: YES
+#    :subfield:
+#  "657":
+#    :tag: "657"
+#    :label: "INDEX TERM--FUNCTION"
+#    :multivalue: YES
+#    :subfield:
+#  "658":
+#    :tag: "658"
+#    :label: "INDEX TERM--CURRICULUM OBJECTIVE"
+#    :multivalue: YES
+#    :subfield:
   "662":
     :tag: "662"
     :label: "SUBJECT ADDED ENTRY--HIERARCHICAL PLACE NAME"
@@ -2199,31 +2199,31 @@
         :label: "Geographic subdivision"
         :multivalue: YES
         :required: NO
-  "691":
-    :tag: "691"
-    :label: "LOCAL SUBJECT ADDED ENTRY--GEOGRAPHIC NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "696":
-    :tag: "696"
-    :label: "LOCAL SUBJECT ADDED ENTRY--PERSONAL NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "697":
-    :tag: "697"
-    :label: "LOCAL SUBJECT ADDED ENTRY--CORPORATE NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "698":
-    :tag: "698"
-    :label: "LOCAL SUBJECT ADDED ENTRY--MEETING NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "699":
-    :tag: "699"
-    :label: "LOCAL SUBJECT ADDED ENTRY--UNIFORM TITLE (RLIN)"
-    :multivalue: YES
-    :subfield:
+#  "691":
+#    :tag: "691"
+#    :label: "LOCAL SUBJECT ADDED ENTRY--GEOGRAPHIC NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "696":
+#    :tag: "696"
+#    :label: "LOCAL SUBJECT ADDED ENTRY--PERSONAL NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "697":
+#    :tag: "697"
+#    :label: "LOCAL SUBJECT ADDED ENTRY--CORPORATE NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "698":
+#    :tag: "698"
+#    :label: "LOCAL SUBJECT ADDED ENTRY--MEETING NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "699":
+#    :tag: "699"
+#    :label: "LOCAL SUBJECT ADDED ENTRY--UNIFORM TITLE (RLIN)"
+#    :multivalue: YES
+#    :subfield:
   "700":
     :tag: "700"
     :label: "ADDED ENTRY--PERSONAL NAME"
@@ -2394,26 +2394,26 @@
         :label: "Host Itemnumber"
         :multivalue: NO
         :required: NO
-  "796":
-    :tag: "796"
-    :label: "LOCAL ADDED ENTRY--PERSONAL NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "797":
-    :tag: "797"
-    :label: "LOCAL ADDED ENTRY--CORPORATE NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "798":
-    :tag: "798"
-    :label: "LOCAL ADDED ENTRY--MEETING NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "799":
-    :tag: "799"
-    :label: "LOCAL ADDED ENTRY--UNIFORM TITLE (RLIN)"
-    :multivalue: YES
-    :subfield:
+#  "796":
+#    :tag: "796"
+#    :label: "LOCAL ADDED ENTRY--PERSONAL NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "797":
+#    :tag: "797"
+#    :label: "LOCAL ADDED ENTRY--CORPORATE NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "798":
+#    :tag: "798"
+#    :label: "LOCAL ADDED ENTRY--MEETING NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "799":
+#    :tag: "799"
+#    :label: "LOCAL ADDED ENTRY--UNIFORM TITLE (RLIN)"
+#    :multivalue: YES
+#    :subfield:
   "800":
     :tag: "800"
     :label: "SERIES ADDED ENTRY--PERSONAL NAME"
@@ -2674,26 +2674,26 @@
         :label: "Content of non-MARC field"
         :multivalue: NO
         :required: NO
-  "896":
-    :tag: "896"
-    :label: "LOCAL SERIES ADDED ENTRY--PERSONAL NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "897":
-    :tag: "897"
-    :label: "LOCAL SERIES ADDED ENTRY--CORPORATE NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "898":
-    :tag: "898"
-    :label: "LOCAL SERIES ADDED ENTRY--MEETING NAME (RLIN)"
-    :multivalue: YES
-    :subfield:
-  "899":
-    :tag: "899"
-    :label: "LOCAL SERIES ADDED ENTRY--UNIFORM TITLE (RLIN)"
-    :multivalue: YES
-    :subfield:
+#  "896":
+#    :tag: "896"
+#    :label: "LOCAL SERIES ADDED ENTRY--PERSONAL NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "897":
+#    :tag: "897"
+#    :label: "LOCAL SERIES ADDED ENTRY--CORPORATE NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "898":
+#    :tag: "898"
+#    :label: "LOCAL SERIES ADDED ENTRY--MEETING NAME (RLIN)"
+#    :multivalue: YES
+#    :subfield:
+#  "899":
+#    :tag: "899"
+#    :label: "LOCAL SERIES ADDED ENTRY--UNIFORM TITLE (RLIN)"
+#    :multivalue: YES
+#    :subfield:
   "942":
     :tag: "942"
     :label: "ADDED ENTRY ELEMENTS (KOHA)"
