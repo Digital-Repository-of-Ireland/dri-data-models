@@ -414,6 +414,11 @@
         :label: "Relator code"
         :multivalue: YES
         :required: NO
+      "a":
+        :code: "a"
+        :label: "Personal name"
+        :multivalue: NO
+        :required: NO
       "d":
         :code: "d"
         :label: "Dates associated with a name"
@@ -1929,6 +1934,11 @@
         :label: "Source of heading or term"
         :multivalue: NO
         :required: NO
+      "a":
+        :code: "a"
+        :label: "Personal name"
+        :multivalue: NO
+        :required: NO
       "b":
         :code: "b"
         :label: "Topical term following geographic name as entry element"
@@ -2233,6 +2243,11 @@
         :code: "4"
         :label: "Relator code"
         :multivalue: YES
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Personal name"
+        :multivalue: NO
         :required: NO
       "b":
         :code: "b"
