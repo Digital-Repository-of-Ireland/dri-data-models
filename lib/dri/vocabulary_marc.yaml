@@ -1,12 +1,4 @@
 :controlfield:
-  "000":
-    :tag: "000"
-    :label: "LEADER"
-    :multivalue: NO
-    :subfield:
-      :code: "00"
-      :label: "fixed length control field"
-      :required: YES
   "001":
     :tag: "001"
     :label: "CONTROL NUMBER"
@@ -497,7 +489,7 @@
         :label: "Language of a work"
         :multivalue: NO
         :required: NO
-      "r"
+      "r":
         :code: "r"
         :label: "Key for music"
         :multivalue: NO
@@ -857,7 +849,7 @@
         :label: "Type of unit"
         :multivalue: YES
         :required: NO
-      "g"
+      "g":
         :code: "g"
         :label: "Size of unit"
         :multivalue: YES
@@ -883,7 +875,7 @@
         :multivalue: NO
         :required: NO
   "336":
-    :tag: "336":
+    :tag: "336"
     :label: "CONTENT TYPE"
     :multivalue: YES
     :subfield:

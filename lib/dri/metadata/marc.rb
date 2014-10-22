@@ -11,7 +11,6 @@ module DRI
         
          t.record(:path=>"record", :namespace_prefix=>nil) {
 
-            # Mandatory; DC Type
             t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             
             t.controlfield {
@@ -32,11 +31,12 @@ module DRI
         # Mandatory fields
         t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.type(:proxy => [:record, :leader], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        t.leader(:proxy => [:record, :leader])
 
         # Controlfields
         t.controlfield(:ref => [:record, :controlfield])
@@ -175,6 +175,10 @@ module DRI
         false
       end
 
+      def type
+        [ng_xml.xpath('substring(//record/leader, 7, 1)')]
+      end
+
       def add_datafields(datafields)
         ng_xml.search("//datafield").each do |n|
           n.remove
@@ -215,27 +219,11 @@ module DRI
             record.add_child(node)
         end
       end
-
-      # def add_subfields(datafields)
-      #   #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
-      #   ng_xml.search("//subfield").each do |n|
-      #     n.remove
-      #   end
-      #
-      #   datafields.each do |index, subfield|
-      #     index = index.to_i
-      #
-      #     self.datafield(index).subfield = subfield['subfield_value']
-      #
-      #     subfield['subfield_code'].each_with_index do |code, j|
-      #       self.datafield(index).subfield(j).code = "#{code}"
-      #     end
-      #   end
-      # end
-
+      
       def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end
     end
+
   end
 end
