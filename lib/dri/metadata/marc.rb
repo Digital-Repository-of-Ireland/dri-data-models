@@ -11,7 +11,6 @@ module DRI
         
          t.record(:path=>"record", :namespace_prefix=>nil) {
 
-            # Mandatory; DC Type
             t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
             
             t.controlfield {
@@ -32,11 +31,12 @@ module DRI
         # Mandatory fields
         t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.type(:proxy => [:record, :leader], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        t.leader(:proxy => [:record, :leader])
 
         # Controlfields
         t.controlfield(:ref => [:record, :controlfield])
@@ -70,26 +70,9 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
-        # Retrieve list of all people and add them to facet and search indexes in solr document
-        # person_array = get_person_array()
-
-        # solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        # solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
-
-        # title_sorted - A SOLR index for sorting titles
-        # if (title.length > 0)
-        #   sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-        #   if (sorted_title != "")
-        #     solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
-        #   end
-        # end
-
-        #solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :text) => title)
-        #solr_doc.merge!(Solrizer.solr_name('description', :stored_searchable, type: :text) => description)
-        #solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :text) => type)
-        #solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator)
-        #solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :text) => rights)
-        #solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :displayable) => type)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -175,6 +158,10 @@ module DRI
         false
       end
 
+      def type
+        [DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
+      end
+
       def add_datafields(datafields)
         ng_xml.search("//datafield").each do |n|
           n.remove
@@ -215,27 +202,11 @@ module DRI
             record.add_child(node)
         end
       end
-
-      # def add_subfields(datafields)
-      #   #"datafield"=>{"0"=>{"subfield_code"=>["e", ""], "subfield_value"=>["   92005291 ", "ill."]}, "1"=>{"subfield_code"=>["a", "a"], "subfield_value"=>["   value ", "test"]}
-      #   ng_xml.search("//subfield").each do |n|
-      #     n.remove
-      #   end
-      #
-      #   datafields.each do |index, subfield|
-      #     index = index.to_i
-      #
-      #     self.datafield(index).subfield = subfield['subfield_value']
-      #
-      #     subfield['subfield_code'].each_with_index do |code, j|
-      #       self.datafield(index).subfield(j).code = "#{code}"
-      #     end
-      #   end
-      # end
-
+      
       def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end
     end
+
   end
 end

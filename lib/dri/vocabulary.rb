@@ -235,6 +235,23 @@ module DRI
       ]
     end
 
+    def self.marcType
+      {"a" => "Language material", 
+        "c" => "Notated music",
+        "d" => "Manuscript notated music",
+        "e" => "Cartographic material",
+        "f" => "Manuscript cartographic material",
+        "g" => "Projected medium",
+        "i" => "Nonmusical sound recording",
+        "j" => "Musical sound recording",
+        "k" => "Two-dimensional nonprojectable graphic",
+        "m" => "Computer File",
+        "o" => "Kit",
+        "p" => "Mixed materials",
+        "r" => "Three-dimensional artifact or naturally occurring object",
+        "t" => "Manuscript language material"}
+    end
+
     # Array [ Decimal Classification Number (R), First Indicator, Second Indicator, Subfield Code ]
     # :code = datafield no, :ind1 = indicator1, :ind2 = indicator2, :sf = subfield
     # Below you shove in any sf except the mandatory fields

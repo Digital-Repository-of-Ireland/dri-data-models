@@ -121,6 +121,8 @@ module DRI
         if file_type.empty?
           # As a last resort try to determine the file type from the
           # DCMI vocabulary in the metadata.
+          #
+          type = self.descMetadata.type
           if type.include?("Sound")
             file_type.push "audio"
             file_type_display.push "Audio"

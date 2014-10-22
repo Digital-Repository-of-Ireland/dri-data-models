@@ -12,10 +12,6 @@ class Batch < ActiveFedora::Base
       
   has_many :generic_files, :property => :is_part_of
 
-
-  # has_metadata 'descMetadata', type: DRI::Metadata::Marc
-  # has_attributes :record, datastream: 'descMetadata', multiple: true
-
   has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
   has_attributes :full_text, datastream: :extracted, multiple: true
 

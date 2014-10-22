@@ -1,6 +1,6 @@
 module DRI
   module ModelSupport
-  	module InterchangeableMetadata
+    module InterchangeableMetadata
       extend ActiveSupport::Concern
     
       included do
@@ -49,8 +49,7 @@ module DRI
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
-        #has_attributes *(DRI::Vocabulary::marcDatafields.flat_map { |df| df[:sf].flat_map { |sf| "sf_#{df[:code]}#{sf}".to_sym }}), datastream: :descMetadata, multiple: true
-
+        has_attributes :leader, datastream: :descMetadata, multiple: false
         has_attributes :controlfield, :controlfield_tag, :controlfield_value, datastream: :descMetadata, multiple: true
         has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
 
@@ -397,7 +396,7 @@ module DRI
 
         #main_category = nil
 
-        type.each do | curr_category |
+        self.descMetadata.type.each do | curr_category |
           #if DRI::Vocabulary::dcmiType.include? curr_category
             object_types.push curr_category.split.map(&:capitalize)*' '
            # main_category = curr_category
