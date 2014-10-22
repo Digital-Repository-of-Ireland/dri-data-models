@@ -1172,4 +1172,528 @@
         :label: "International Standard Serial Number"
         :multivalue: NO
         :required: NO
-
+  "500":
+    :tag: "500"
+    :label: "GENERAL NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "General note"
+        :multivalue: NO
+        :required: NO
+  "501":
+    :tag: "500"
+    :label: "WITH NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "With note"
+        :multivalue: NO
+        :required: NO
+  "504":
+    :tag: "504"
+    :label: "BIBLIOGRAPHY, ETC. NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Bibliography, etc"
+        :multivalue: NO
+        :required: NO
+  "505":
+    :tag: "505"
+    :label: "FORMATTED CONTENTS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Formatted contents note"
+        :multivalue: NO
+        :required: NO
+      "g":
+        :code: "g"
+        :label: "Miscellaneous information"
+        :multivalue: YES
+        :required: NO
+      "r":
+        :code: "r"
+        :label: "Statement of responsibility"
+        :multivalue: YES
+        :required: NO
+      "t":
+        :code: "t"
+        :label: "Title"
+        :multivalue: YES
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "508":
+    :tag: "508"
+    :label: "CREATION/PRODUCTION CREDITS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Creation/production credits note"
+        :multivalue: NO
+        :required: NO
+  "511":
+    :tag: "511"
+    :label: "PARTICIPANT OR PERFORMER NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Participant or performer note"
+        :multivalue: NO
+        :required: NO
+  "518":
+    :tag: "518"
+    :label: "DATE/TIME AND PLACE OF AN EVENT NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Date/time and place of an event note"
+        :multivalue: NO
+        :required: NO
+  "520":
+    :tag: "520"
+    :label: "SUMMARY, ETC."
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :title: "Summary, etc"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :title: "Expansion of summary note"
+        :multivalue: NO
+        :required: NO
+      "u":
+        :code: "u"
+        :title: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "521":
+    :tag: "521"
+    :label: "TARGET AUDIENCE NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Target audience note"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Source"
+        :multivalue: NO
+        :required: NO
+  "522":
+    :tag: "522"
+    :label: "GEOGRAPHIC COVERAGE NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Geographic coverage note"
+        :multivalue: NO
+        :required: NO
+  "524":
+    :tag: "524"
+    :label: "PREFERRED CITATION OF DESCRIBED MATERIALS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Preferred citation of described materials note"
+        :multivalue: NO
+        :required: NO
+  "526":
+    :tag: "526"
+    :label: "STUDY PROGRAM INFORMATION NOTE"
+    :multivalue: NO
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Program name"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Interest level"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Reading level"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Title point value"
+        :multivalue: NO
+        :required: NO
+  "530":
+    :tag: "530"
+    :label: "ADDITIONAL PHYSICAL FORM AVAILABLE NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Additional physical form available note"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Availability source"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Availability conditions"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Order number"
+        :multivalue: NO
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "533":
+    :tag: "533"
+    :label: "REPRODUCTION NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Type of reproduction"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Place of reproduction"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Agency responsible for reproduction"
+        :multivalue: YES
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Date of reproduction"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Physical description of reproduction"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Series statement of reproduction"
+        :multivalue: YES
+        :required: NO
+      "m":
+        :code: "m"
+        :label: "Dates and/or sequential designation of issues reproduced"
+        :multivalue: YES
+        :required: NO
+      "n":
+        :code: "n"
+        :label: "Note about reproduction"
+        :multivalue: YES
+        :required: NO
+  "538":
+    :tag: "538"
+    :label: "SYSTEM DETAILS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "System details note"
+        :multivalue: NO
+        :required: NO
+      "i":
+        :code: "i"
+        :label: "Display text"
+        :multivalue: NO
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "541":
+    :tag: "541"
+    :label: "IMMEDIATE SOURCE OF ACQUISITION NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Source of acquisition"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Address"
+        :multivalue: NO
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Method of acquisition"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Date of acquisition"
+        :multivalue: NO
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Accession number"
+        :multivalue: NO
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Owner"
+        :multivalue: NO
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Purchase price"
+        :multivalue: NO
+        :required: NO
+      "n":
+        :code: "n"
+        :label: "Extent"
+        :multivalue: NO
+        :required: NO
+      "o":
+        :code: "o"
+        :label: "Type of unit"
+        :multivalue: YES
+        :required: NO
+  "546":
+    :tag: "546"
+    :label: "LANGUAGE NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Language note"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Information code or alphabet"
+        :multivalue: YES
+        :required: NO
+  "555":
+    :tag: "555"
+    :label: "CUMULATIVE INDEX/FINDING AIDS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Cumulative index/finding aids note"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Availability source"
+        :multivalue: YES
+        :required: NO
+      "c"
+        :code: "c"
+        :label: "Degree of control"
+        :multivalue: NO
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Bibliographic reference"
+        :multivalue: NO
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "556":
+    :tag: "556"
+    :label: "INFORMATION ABOUT DOCUMENTATION NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Information about documentation note"
+        :multivalue: NO
+        :required: NO
+      "z":
+        :code: "z"
+        :label: "International Standard Book Number"
+        :multivalue: YES
+        :required: NO
+  "562":
+    :tag: "562"
+    :label: "COPY AND VERSION IDENTIFICATION NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Identifying markings"
+        :multivalue: YES
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Copy identification"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Version identification"
+        :multivalue: YES
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Presentation format"
+        :multivalue: YES
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Number of copies"
+        :multivalue: YES
+        :required: NO
+  "563":
+    :tag: "563"
+    :label: "BINDING INFORMATION"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Binding note"
+        :multivalue: NO
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+  "583":
+    :tag: "583"
+    :label: "ACTION NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Action"
+        :multivalue: NO
+        :required: NO
+      "b":
+        :code: "b"
+        :label: "Action identification"
+        :multivalue: YES
+        :required: NO
+      "c":
+        :code: "c"
+        :label: "Time/date of action"
+        :multivalue: YES
+        :required: NO
+      "d":
+        :code: "d"
+        :label: "Action interval"
+        :multivalue: YES
+        :required: NO
+      "e":
+        :code: "e"
+        :label: "Contingency for action"
+        :multivalue: YES
+        :required: NO
+      "f":
+        :code: "f"
+        :label: "Authorization"
+        :multivalue: YES
+        :required: NO
+      "h":
+        :code: "h"
+        :label: "Jurisdiction"
+        :multivalue: NO
+        :required: NO
+      "i":
+        :code: "i"
+        :label: "Method of action"
+        :multivalue: YES
+        :required: NO
+      "j":
+        :code: "j"
+        :label: "Site of action"
+        :multivalue: YES
+        :required: NO
+      "k":
+        :code: "k"
+        :label: "Action agent"
+        :multivalue: YES
+        :required: NO
+      "l":
+        :code: "l"
+        :label: "Status"
+        :multivalue: YES
+        :required: NO
+      "n":
+        :code: "n"
+        :label: "Extent"
+        :multivalue: YES
+        :required: NO
+      "o":
+        :code: "o"
+        :label: "Type of unit"
+        :multivalue: YES
+        :required: NO
+      "u":
+        :code: "u"
+        :label: "Uniform Resource Identifier"
+        :multivalue: YES
+        :required: NO
+      "z":
+        :code: "z"
+        :label: "Public note"
+        :multivalue: YES
+        :required: NO
+  "585":
+    :tag: "585"
+    :label: "EXHIBITIONS NOTE"
+    :multivalue: YES
+    :subfield:
+      "3":
+        :code: "3"
+        :label: "Materials specified"
+        :multivalue: NO
+        :required: NO
+      "a":
+        :code: "a"
+        :label: "Exhibitions note"
+        :multivalue: NO
+        :required: NO
+  "586":
+    :tag: "586"
+    :label: "AWARDS NOTE"
+    :multivalue: YES
+    :subfield:
+      "a":
+        :code: "a"
+        :label: "Awards note"
+        :multivalue: NO
+        :required: NO
