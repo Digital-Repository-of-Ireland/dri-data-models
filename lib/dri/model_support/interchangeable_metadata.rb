@@ -1,6 +1,6 @@
 module DRI
   module ModelSupport
-  	module InterchangeableMetadata
+    module InterchangeableMetadata
       extend ActiveSupport::Concern
     
       included do

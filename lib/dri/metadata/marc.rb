@@ -70,26 +70,9 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
-        # Retrieve list of all people and add them to facet and search indexes in solr document
-        # person_array = get_person_array()
-
-        # solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        # solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
-
-        # title_sorted - A SOLR index for sorting titles
-        # if (title.length > 0)
-        #   sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-        #   if (sorted_title != "")
-        #     solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
-        #   end
-        # end
-
-        #solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :text) => title)
-        #solr_doc.merge!(Solrizer.solr_name('description', :stored_searchable, type: :text) => description)
-        #solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :text) => type)
-        #solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator)
-        #solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :text) => rights)
-        #solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable, type: :text) => creation_date)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :displayable) => type)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -176,7 +159,7 @@ module DRI
       end
 
       def type
-        [ng_xml.xpath('substring(//record/leader, 7, 1)')]
+        [DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
       end
 
       def add_datafields(datafields)
