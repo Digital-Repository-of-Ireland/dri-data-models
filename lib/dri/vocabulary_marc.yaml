@@ -1186,7 +1186,7 @@
           :multivalue: NO
           :required: NO
     "501":
-      :tag: "500"
+      :tag: "501"
       :label: "WITH NOTE"
       :multivalue: YES
       :subfield:
