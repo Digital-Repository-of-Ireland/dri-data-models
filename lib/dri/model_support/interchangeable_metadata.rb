@@ -50,7 +50,7 @@ module DRI
         has_attributes :country_code, datastream: :descMetadata, multiple: false
 
         has_attributes :leader, datastream: :descMetadata, multiple: false
-        has_attributes :isbn, datastream: :descMetadata, multiple: true
+        
         has_attributes :controlfield, :controlfield_tag, :controlfield_value, datastream: :descMetadata, multiple: true
         has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
 

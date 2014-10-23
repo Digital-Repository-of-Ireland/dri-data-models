@@ -29,14 +29,21 @@ module DRI
         }
 
         # Mandatory fields
-        t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a" or @code="b" or @code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.creator(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        
+        # common fields
         t.language(:path => 'record/datafield[@tag="041"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
-        t.isbn(:path => 'record/datafield[@tag="020"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.publisher(:path => 'record/datafield[@tag="260"]/subfield[@code="b"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.published_date(:path => 'record/datafield[@tag="260"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])       
+        t.subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="648" or @tag="650" or @tag="651" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.contributor(:path => 'record/datafield[@tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        # marc fields
         t.leader(:proxy => [:record, :leader])
 
         # Controlfields
@@ -74,6 +81,12 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
         solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
 
+        # Retrieve list of all people and add them to facet and search indexes in solr document
+        person_array = get_person_array()
+
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
         ng_xml.xpath("//text()").each do |text_node|
@@ -99,6 +112,11 @@ module DRI
         #solr_doc.merge!(date_ranges)
 
         solr_doc
+      end
+
+      # Creates an array of all names stored in the metadata
+      def get_person_array()
+          contributor | creator | publisher
       end
 
       def custom_validations
