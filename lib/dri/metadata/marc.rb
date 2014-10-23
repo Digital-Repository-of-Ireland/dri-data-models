@@ -35,7 +35,8 @@ module DRI
         t.rights(:path => 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Jenny still needs to find out what to put in there
         t.creation_date(:path => 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
+        t.language(:path => 'record/datafield[@tag="041"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
+        t.isbn(:path => 'record/datafield[@tag="020"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.leader(:proxy => [:record, :leader])
 
         # Controlfields
@@ -72,7 +73,6 @@ module DRI
 
         solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
         solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
-        solr_doc.merge!(Solrizer.solr_name('type', :displayable) => type)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -180,10 +180,10 @@ module DRI
             subfield_node['code'] = subfield['subfield_code'].first
             subfield_node.content = subfield['subfield_value'].first
 
-            node.add_child(subfield_node)
+            node.add_child(subfield_node) unless subfield_node.content.blank?
           end           
 
-          record.add_child(node)
+          record.add_child(node) unless node.children.empty?
         end
       end
 
