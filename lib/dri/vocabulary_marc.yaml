@@ -244,7 +244,7 @@
           :code: "c"
           :label: "Transcribing agency"
           :multivalue: NO
-          :required: YES
+          :required: NO
         "d":
           :code: "d"
           :label: "Modifying agency"
@@ -333,6 +333,16 @@
         "b":
           :code: "b"
           :label: "Soloist"
+          :multivalue: YES
+          :required: NO
+    "049":
+      :tag: "049"
+      :label: "Local Holdings"
+      :multivalue: NO
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "Holding library"
           :multivalue: YES
           :required: NO
     "050":
@@ -446,6 +456,11 @@
           :label: "Relator code"
           :multivalue: YES
           :required: NO
+        "a":
+          :code: "a"
+          :label: "Corporate name or jurisdiction name as entry element"
+          :multivalue: NO
+          :required: NO
         "b":
           :code: "b"
           :label: "Subordinate unit"
@@ -465,6 +480,11 @@
           :code: "4"
           :label: "Relator code"
           :multivalue: YES
+          :required: NO
+        "a":
+          :code: "a"
+          :label: "Meeting name or jurisdiction name as entry element"
+          :multivalue: NO
           :required: NO
         "c":
           :code: "c"
@@ -491,6 +511,11 @@
       :label: "MAIN ENTRY--UNIFORM TITLE"
       :multivalue: NO
       :subfield:
+        "a":
+          :code: "a"
+          :label: "Uniform title"
+          :multivalue: NO
+          :required: NO
         "l":
           :code: "l"
           :label: "Language of a work"
@@ -1245,6 +1270,16 @@
           :label: "Creation/production credits note"
           :multivalue: NO
           :required: NO
+    "510":
+      :tag: "510"
+      :label: "Citation/References Note"
+      :multivalue: YES
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "Name of source"
+          :multivalue: NO
+          :required: NO
     "511":
       :tag: "511"
       :label: "PARTICIPANT OR PERFORMER NOTE"
@@ -1440,6 +1475,16 @@
           :label: "Uniform Resource Identifier"
           :multivalue: YES
           :required: NO
+    "540":
+      :tag: "540"
+      :label: "Terms Governing Use and Reproduction Note"
+      :multivalue: YES
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "Terms governing use and reproduction"
+          :multivalue: NO
+          :required: NO
     "541":
       :tag: "541"
       :label: "IMMEDIATE SOURCE OF ACQUISITION NOTE"
@@ -1549,6 +1594,16 @@
           :code: "z"
           :label: "International Standard Book Number"
           :multivalue: YES
+          :required: NO
+    "561":
+      :tag: "561"
+      :label: "Ownership and Custodial History"
+      :multivalue: YES
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "History"
+          :multivalue: NO
           :required: NO
     "562":
       :tag: "562"
@@ -1711,6 +1766,11 @@
           :label: "Source of heading or term"
           :multivalue: NO
           :required: NO
+        "a":
+          :code: "a"
+          :label: "Personal name"
+          :multivalue: NO
+          :required: NO
         "b":
           :code: "b"
           :label: "Numeration"
@@ -1766,6 +1826,11 @@
           :label: "Source of heading or term"
           :multivalue: NO
           :required: NO
+        "a":
+          :code: "a"
+          :label: "Corporate name or jurisdiction name as entry element"
+          :multivalue: NO
+          :required: NO
         "b":
           :code: "b"
           :label: "Subordinate unit"
@@ -1814,6 +1879,11 @@
         "2":
           :code: "2"
           :label: "Source of heading or term"
+          :multivalue: NO
+          :required: NO
+        "a":
+          :code: "a"
+          :label: "Meeting name or jurisdiction name as entry element"
           :multivalue: NO
           :required: NO
         "c":
@@ -1996,6 +2066,11 @@
           :label: "Source of heading or term"
           :multivalue: NO
           :required: NO
+        "a":
+          :code: "a"
+          :label: "Geographic name"
+          :multivalue: NO
+          :required: NO
         "e":
           :code: "e"
           :label: "Relator term"
@@ -2084,6 +2159,11 @@
         "2":
           :code: "2"
           :label: "Source of term"
+          :multivalue: NO
+          :required: NO
+        "a":
+          :code: "a"
+          :label: "Genre/form data or focus term"
           :multivalue: NO
           :required: NO
         "b":
@@ -2310,6 +2390,11 @@
         "e":
           :code: "e"
           :label: "Relator term"
+          :multivalue: YES
+          :required: NO
+        "x":
+          :code: "x"
+          :label: "General subdivision"
           :multivalue: YES
           :required: NO
     "711":
@@ -2553,6 +2638,36 @@
           :label: "Version"
           :multivalue: NO
           :required: NO
+    "850":
+      :tag: "850"
+      :label: "Holding Institution"
+      :multivalue: YES
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "Holding institution"
+          :multivalue: YES
+          :required: NO
+    "852":
+      :tag: "852"
+      :label: "Location"
+      :multivalue: YES
+      :subfield:
+        "a":
+          :code: "a"
+          :label: "Location"
+          :multivalue: NO
+          :required: NO
+        "b":
+          :code: "b"
+          :label: "Sublocation or collection"
+          :multivalue: YES
+          :required: NO
+        "c":
+          :code: "c"
+          :label: "Shelving location"
+          :multivalue: YES
+          :required: NO
     "856":
       :tag: "856"
       :label: "ELECTRONIC LOCATION AND ACCESS"
@@ -2733,7 +2848,7 @@
           :code: "c"
           :label: "Koha [default] item type"
           :multivalue: NO
-          :required: YES
+          :required: NO
         "e":
           :code: "e"
           :label: "Edition"
