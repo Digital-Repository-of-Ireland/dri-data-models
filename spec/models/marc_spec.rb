@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe 'Batch' do
+describe 'Marc' do
 
   before(:each) do
     @item_xml = fixture("marc/sandburg.xml")
-    @marc_item = Batch.new :desc_metadata_class => DRI::Metadata::Marc
+    @marc_item = Marc.new
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
 
   end
@@ -13,8 +13,12 @@ describe 'Batch' do
     @marc_item.should be_kind_of(Batch)
   end
 
+  it "should have a marc datastream" do
+    @marc_item.descMetadata.should be_kind_of(DRI::Metadata::Marc)
+  end
+
   it "should expose the Marc components' identifiers - mandatory fields" do
-    @marc_item.type.first.should == "01142cam  2200301 a 4500"
+    @marc_item.type.first.should == "Language material"
     @marc_item.title.first.should == "Arithmetic /"
     @marc_item.description.should ==   ["\n      1 v. (unpaged) :\n      ill. (some col.) ;\n      26 cm.\n    ", "\n      One Mylar sheet included in pocket.\n    ", "\n      A poem about numbers and their characteristics. Features anamorphic, or distorted, drawings which can be restored to normal by viewing from a particular angle or by viewing the image's reflection in the provided Mylar cone.\n    "]
     @marc_item.creator.should ==   ["\n      Sandburg, Carl,\n      1878-1967.\n    ", "\n      Rand, Ted,\n      ill.\n    "]
@@ -23,15 +27,17 @@ describe 'Batch' do
   end
 
   it "should validate the presence of title attribute" do
-    @marc_item.should be_valid
-    @marc_item.title = [""]
+    @marc_item = Marc.new
+    @no_title = fixture("marc/sandburg_no_title.xml")
+    @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@no_title).to_xml
     @marc_item.should_not be_valid
   end
-  it "should validate the presence of type attribute" do
-    @marc_item.should be_valid
-    @marc_item.type = [""]
-    @marc_item.should_not be_valid
-  end
+
+  #it "should validate the presence of type attribute" do
+  #  @marc_item.should be_valid
+  #  @marc_item.type = [""]
+  #  @marc_item.should_not be_valid
+  #end
   it "should validate the presence of description attribute" do
     @marc_item.should be_valid
     @marc_item.description = [""]

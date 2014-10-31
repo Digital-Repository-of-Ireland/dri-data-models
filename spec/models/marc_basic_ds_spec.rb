@@ -1,11 +1,11 @@
 require 'spec_helper'
 require 'nokogiri'
 
-describe 'Batch' do
+describe 'Marc' do
 
   before(:each) do
     @item_xml = fixture("marc/sandburg.xml")
-    @marc_item = Batch.new :desc_metadata_class => DRI::Metadata::Marc
+    @marc_item = Marc.new
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
   end
   context "general behaviors" do

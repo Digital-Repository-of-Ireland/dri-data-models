@@ -122,7 +122,7 @@ module DRI
       def custom_validations
         errors = Hash.new
         #
-        # title_result = false
+        title_result = false
         # type_result = false
         # description_result = false
         # creator_result = false
@@ -131,16 +131,16 @@ module DRI
         #
         #
         # # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
-        # title_result = true unless title.join.squish == ""
+        title_result = true unless title.join.squish == ""
         # type_result = true unless type.join.squish == ""
         # description_result = true unless description.join.squish == ""
         # creator_result = true unless creator.join.squish == ""
         # rights_result = true unless rights.join.squish == ""
         # creation_date_result = true unless creation_date.join.squish == ""
         #
-        # # title.each do |curr_title|
-        # #   title_result = true unless curr_title.blank?
-        # # end
+        title.each do |curr_title|
+          title_result = true unless curr_title.blank?
+        end
         # #
         # # type.each do |curr_type|
         # #   type_result = true unless curr_type.blank?
@@ -162,7 +162,7 @@ module DRI
         # #   creation_date_result = true unless curr_creation_date.blank?
         # # end
         #
-        # errors[:title] = "can't be blank" if title_result == false
+        errors[:title] = "can't be blank" if title_result == false
         # errors[:type] = "can't be blank" if type_result == false
         # errors[:description] = "can't be blank" if description_result == false
         # errors[:creator] = "can't be blank" if creator_result == false

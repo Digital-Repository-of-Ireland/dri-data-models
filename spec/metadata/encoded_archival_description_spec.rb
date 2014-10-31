@@ -1,19 +1,19 @@
 require 'spec_helper'
 
-describe 'Batch' do
+describe 'EncodedArchivalDescription' do
 
   before(:each) do
     @series_xml = fixture("ead/component_series.xml")
     @file_xml = fixture("ead/component_file.xml")
     @item_xml = fixture("ead/component_item.xml")
     @collection_xml = fixture("ead/ead_collection.xml")
-    @ead_collection = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescription
+    @ead_collection = EncodedArchivalDescription.new :collection #DRI::Metadata::EncodedArchivalDescription
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
-    @ead_series = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
+    @ead_series = EncodedArchivalDescription.new :component #:desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
     @ead_series.update_metadata DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@series_xml).to_xml
-    @ead_file = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
+    @ead_file = EncodedArchivalDescription.new :component #:desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
     @ead_file.update_metadata DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@file_xml).to_xml
-    @ead_item = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
+    @ead_item = EncodedArchivalDescription.new :component #:desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
     @ead_item.update_metadata DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@item_xml).to_xml
     
   end
@@ -184,7 +184,7 @@ describe 'Batch' do
       curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
       curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
       curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
-      curr_batch = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
+      curr_batch = EncodedArchivalDescription.new :component
       curr_batch.update_metadata curr_file
       curr_batch.unitid.should == "KDW/RM/02"
       curr_batch.ead_level.should == "file"

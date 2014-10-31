@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe 'Batch' do
+describe 'EncodedArchivalDescription' do
 
   before(:each) do
     @collection_xml = fixture("ead/ead_collection.xml")
-    @ead_collection = Batch.new :desc_metadata_class => DRI::Metadata::EncodedArchivalDescription
+    @ead_collection = EncodedArchivalDescription.new :collection
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
   end
 

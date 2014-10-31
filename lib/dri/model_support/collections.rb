@@ -1,6 +1,6 @@
 module DRI
   module ModelSupport
-  	module Collections
+    module Collections
       extend ActiveSupport::Concern
 
       included do
