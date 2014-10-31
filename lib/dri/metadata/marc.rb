@@ -55,6 +55,19 @@ module DRI
         t.datafield_ind1(:proxy => [:record, :datafield, :ind1])
         t.datafield_ind2(:proxy => [:record, :datafield, :ind2])
 
+        @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
+        @marc[:controlfield].each do |cf|
+          t.send ("cf_#{cf[1][:tag]}"), :path => "record/controlfield[@tag='#{cf[1][:tag]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+        end
+
+        @marc[:datafield].each do |section|
+          section[1].each do |df|
+              df[1][:subfield].each do |sf|
+                t.send ("df_#{df[1][:tag]}#{sf[1][:code]}"), :path => "record/datafield[@tag='#{df[1][:tag]}']/subfield[@code='#{sf[1][:code]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+              end
+          end
+        end
+
       end # set_terminology
 
       # Build the xml doc
@@ -220,7 +233,7 @@ module DRI
             record.add_child(node)
         end
       end
-      
+
       def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end
