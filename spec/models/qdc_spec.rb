@@ -282,6 +282,81 @@ describe 'Batch' do
     @audio.should_not be_valid
   end
 
+  it "should not index null date values" do
+    @audio = Batch.new
+    @audio.title = "A fake record"
+    @audio.rights = "Rights"
+    @audio.creation_date = "null"
+    @audio.published_date = "null"
+    @audio.date = "null"
+    @audio.description = "A fake object"
+
+    solr_doc = @audio.to_solr
+    solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].should_not include("null")
+    solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].should_not include("null")
+    solr_doc[Solrizer.solr_name('date', :stored_searchable)].should_not include("null")
+  end
+
+  it "should only hide the null values" do
+    @audio = Batch.new
+    @audio.title = "A fake record"
+    @audio.rights = "Rights"
+    @audio.creation_date = ["2014-10-17", "null"]
+    @audio.published_date = ["2014-10-17", "null"]
+    @audio.date = ["2014-10-17", "null"]
+    @audio.description = "A fake object"
+
+    solr_doc = @audio.to_solr
+    solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].should_not include("null")
+    solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].should_not include("null")
+    solr_doc[Solrizer.solr_name('date', :stored_searchable)].should_not include("null")
+
+    solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].should include("2014-10-17")
+    solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].should include("2014-10-17")
+    solr_doc[Solrizer.solr_name('date', :stored_searchable)].should include("2014-10-17")
+  end
+
+  it "should not index null creator values" do
+    @audio = Batch.new
+    @audio.title = "A fake record"
+    @audio.rights = "Rights"
+    @audio.creator = "null"
+    @audio.creation_date = "null"
+    @audio.published_date = "null"
+    @audio.date = "null"
+    @audio.description = "A fake object"
+
+    solr_doc = @audio.to_solr
+    solr_doc[Solrizer.solr_name('creator', :stored_searchable)].should_not include("null")
+  end
+
+  it "should only not index null creator values" do
+    @audio = Batch.new
+    @audio.title = "A fake record"
+    @audio.rights = "Rights"
+    @audio.creator = ["A Creator", "null"]
+    @audio.creation_date = "null"
+    @audio.published_date = "null"
+    @audio.date = "null"
+    @audio.description = "A fake object"
+
+    solr_doc = @audio.to_solr
+    solr_doc[Solrizer.solr_name('creator', :stored_searchable)].should_not include("null")
+    solr_doc[Solrizer.solr_name('creator', :stored_searchable)].should include("A Creator")
+  end
+
+  it "should make a case insensitive check for null" do
+    @audio = Batch.new
+    @audio.title = "A fake record"
+    @audio.rights = "Rights"
+    @audio.creator = "NuLl"
+    @audio.date = "2014-10-17"
+    @audio.description = "A fake object"
+
+    solr_doc = @audio.to_solr
+    solr_doc[Solrizer.solr_name('creator', :stored_searchable)].should_not include("NuLl")
+  end
+
   after(:each) do
     unless @audio.new_record?
       @audio.delete
