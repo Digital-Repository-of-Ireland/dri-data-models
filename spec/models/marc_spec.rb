@@ -33,32 +33,6 @@ describe 'Marc' do
     @marc_item.should_not be_valid
   end
 
-  #it "should validate the presence of type attribute" do
-  #  @marc_item.should be_valid
-  #  @marc_item.type = [""]
-  #  @marc_item.should_not be_valid
-  #end
-  it "should validate the presence of description attribute" do
-    @marc_item.should be_valid
-    @marc_item.description = [""]
-    @marc_item.should_not be_valid
-  end
-  it "should validate the presence of creator attribute" do
-    @marc_item.should be_valid
-    @marc_item.creator = [""]
-    @marc_item.should_not be_valid
-  end
-  it "should validate the presence of rights attribute" do
-    @marc_item.should be_valid
-    @marc_item.rights = [""]
-    @marc_item.should_not be_valid
-  end
-  it "should validate the presence of creation_date attribute" do
-    @marc_item.should be_valid
-    @marc_item.creation_date = [""]
-    @marc_item.should_not be_valid
-  end
-
   after(:each) do
     unless @marc_item.new_record?
       @marc_item.delete
