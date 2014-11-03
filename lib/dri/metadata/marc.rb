@@ -57,13 +57,13 @@ module DRI
 
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
         @marc[:controlfield].each do |cf|
-          t.send ("cf_#{cf[1][:tag]}"), :path => "record/controlfield[@tag='#{cf[1][:tag]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+          t.send ("cf_#{cf[1][:tag]}"), :path => "record/controlfield[@tag='#{cf[1][:tag]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable]
         end
 
         @marc[:datafield].each do |section|
           section[1].each do |df|
               df[1][:subfield].each do |sf|
-                t.send ("df_#{df[1][:tag]}#{sf[1][:code]}"), :path => "record/datafield[@tag='#{df[1][:tag]}']/subfield[@code='#{sf[1][:code]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
+                t.send ("df_#{df[1][:tag]}#{sf[1][:code]}"), :path => "record/datafield[@tag='#{df[1][:tag]}']/subfield[@code='#{sf[1][:code]}']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable]
               end
           end
         end
