@@ -38,11 +38,10 @@ module DRI
         # common fields
         t.language(:path => 'record/datafield[@tag="041"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
         t.publisher(:path => 'record/datafield[@tag="260"]/subfield[@code="b"] | //record/datafield[@tag="710"]/subfield[@code="x"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.published_date(:path => 'record/datafield[@tag="260"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.published_date(:path => 'record/datafield[@tag="260"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, :sortable])
         t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])       
-        t.subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="648" or @tag="650" or @tag="651" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="650" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         t.contributor(:path => 'record/datafield[@tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111" or @tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
         # marc fields
         t.leader(:proxy => [:record, :leader])
@@ -68,6 +67,16 @@ module DRI
               end
           end
         end
+
+        # NCCB Specific fields
+        t.add_title_info(:path => 'record/datafield[@tag="130" or @tag="246"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+        t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.other_names(:path => 'record/datafield[@tag="700" or @tag="720"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.notes(:path => 'record/datafield[@tag="500" or @tag="504" or @tag="505" or @tag="510" or @tag="520" or @tag="530" or @tag="546"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.shelfmark(:path => 'record/datafield[@tag="082"]/subfield[@code="a"] | //record/datafield[@tag="852"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Extra Facets:
+        t.author_facet(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111" or @tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.subject_name_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
       end # set_terminology
 
@@ -109,6 +118,10 @@ module DRI
         end
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
+        solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
+        solr_doc.merge!(Solrizer.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
+        solr_doc.merge!(Solrizer.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
+
         # Split facets into different languages based on xml:lang
         # faceted_language_indexes = Hash.new
         # faceted_language_indexes.merge! split_array_into_languages("subject")
@@ -135,54 +148,54 @@ module DRI
 
       def custom_validations
         errors = Hash.new
-        #
+
         title_result = false
-        # type_result = false
-        # description_result = false
-        # creator_result = false
-        # rights_result = false
-        # creation_date_result = false
-        #
-        #
-        # # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
+        type_result = false
+        description_result = false
+        creator_result = false
+        rights_result = false
+        creation_date_result = false
+
+
+        # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
         title_result = true unless title.join.squish == ""
-        # type_result = true unless type.join.squish == ""
-        # description_result = true unless description.join.squish == ""
-        # creator_result = true unless creator.join.squish == ""
-        # rights_result = true unless rights.join.squish == ""
-        # creation_date_result = true unless creation_date.join.squish == ""
-        #
+        type_result = true unless type.join.squish == ""
+        description_result = true unless description.join.squish == ""
+        creator_result = true unless creator.join.squish == ""
+        rights_result = true unless rights.join.squish == ""
+        creation_date_result = true unless creation_date.join.squish == ""
+
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
         end
-        # #
-        # # type.each do |curr_type|
-        # #   type_result = true unless curr_type.blank?
-        # # end
-        # #
-        # # description.each d.o |curr_description|
-        # #   description_result = true unless curr_description.blank?
-        # # end
-        # #
-        # # creator.each do |curr_creator|
-        # #   creator_result = true unless curr_creator.blank?
-        # # end
-        # #
-        # # rights.each do |curr_rights|
-        # #   rights_result = true unless curr_rights.blank?
-        # # end
-        # #
-        # # creation_date.each do |curr_creation_date|
-        # #   creation_date_result = true unless curr_creation_date.blank?
-        # # end
-        #
+
+        type.each do |curr_type|
+          type_result = true unless curr_type.blank?
+        end
+
+        description.each do |curr_description|
+          description_result = true unless curr_description.blank?
+        end
+
+        creator.each do |curr_creator|
+          creator_result = true unless curr_creator.blank?
+        end
+
+        rights.each do |curr_rights|
+          rights_result = true unless curr_rights.blank?
+        end
+
+        creation_date.each do |curr_creation_date|
+          creation_date_result = true unless curr_creation_date.blank?
+        end
+
         errors[:title] = "can't be blank" if title_result == false
-        # errors[:type] = "can't be blank" if type_result == false
-        # errors[:description] = "can't be blank" if description_result == false
-        # errors[:creator] = "can't be blank" if creator_result == false
-        # errors[:creation_date] = "can't be blank" if creation_date_result == false
-        # errors[:rights] = "can't be blank" if rights_result == false
-        #
+        errors[:type] = "can't be blank" if type_result == false
+        errors[:description] = "can't be blank" if description_result == false
+        errors[:creator] = "can't be blank" if creator_result == false
+        errors[:creation_date] = "can't be blank" if creation_date_result == false
+        errors[:rights] = "can't be blank" if rights_result == false
+
         errors
       end
 
