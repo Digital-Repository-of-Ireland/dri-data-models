@@ -104,10 +104,10 @@ class EncodedArchivalDescription < Batch
       content_changed = self.descMetadata.changed?
     end
 
-   yield
-   if content_changed && !new_record?
-     Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
-   end
+    yield
+    if content_changed && !new_record?
+      Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
+    end
   end 
  
 end
