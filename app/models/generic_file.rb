@@ -19,9 +19,10 @@ class GenericFile < ActiveFedora::Base
   #after_initialize :redirect_content
 
   belongs_to :batch, property: :is_part_of
-
+  # Declare a 'dri_properties' DS, of the following type
   has_metadata :name => "dri_properties", :type => DRI::Metadata::FileProperties
 
+  # Declare the attributes of 'dri_properties' DS - 'checksum_md5...' - and that the DS is non-repeatable
   has_attributes :checksum_md5, datastream: :dri_properties, multiple: false
   has_attributes :checksum_sha256, datastream: :dri_properties, multiple: false
   has_attributes :checksum_rmd160, datastream: :dri_properties, multiple: false
@@ -29,7 +30,7 @@ class GenericFile < ActiveFedora::Base
   # DRI is not storing files in Fedora (which would be too slow to be of practical use),
   # instead a datastream will link to a URL in the DRI storage system.
   def update_file_reference(dsid, opts)
-    if datastreams.has_key?(dsid) 
+    if datastreams.has_key?(dsid)
       (send dsid).dsLocation = opts[:url]
       if opts.has_key?(:mimeType)
         (send dsid).mimeType = opts[:mimeType]
