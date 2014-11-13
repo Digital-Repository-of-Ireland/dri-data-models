@@ -90,18 +90,21 @@ describe 'EncodedArchivalDescription' do
     @ead_series.scope_content = ""
     @ead_series.abstract = ""
     @ead_series.bioghist = ""
+    @ead_series.dao_desc = ""
     @ead_series.should_not be_valid
 
     @ead_file.should be_valid
     @ead_file.scope_content = ""
     @ead_file.abstract = ""
     @ead_file.bioghist = ""
+    @ead_file.dao_desc = ""
     @ead_file.should_not be_valid
 
     @ead_item.should be_valid
     @ead_item.scope_content = ""
     @ead_item.abstract = ""
     @ead_item.bioghist = ""
+    @ead_item.dao_desc = ""
     @ead_item.should_not be_valid
   end
 

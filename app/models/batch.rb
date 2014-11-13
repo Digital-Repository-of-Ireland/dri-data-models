@@ -9,10 +9,13 @@ class Batch < ActiveFedora::Base
   include DRI::ModelSupport::InterchangeableMetadata
   include DRI::ModelSupport::Files
   include DRI::ModelSupport::Collections
-      
+
   has_many :generic_files, :property => :is_part_of
 
+  # Declare a 'extracted' DS, of the following type
   has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
+
+  # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
   has_attributes :full_text, datastream: :extracted, multiple: true
 
   def Batch.with_standard(standard, args = {})
@@ -38,8 +41,9 @@ class Batch < ActiveFedora::Base
     end
   end
 
-  # Unstemmed, searchable, stored
+  # Initialises the Solr index field (and its type) for this object
   def noid_indexer
+    # Unstemmed, searchable, stored
     @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
   end
 
@@ -58,6 +62,8 @@ class Batch < ActiveFedora::Base
     return true
   end
 
+  # Performs the indexing of this object into Solr
+  # @param solr_doc []
   def to_solr(solr_doc={}, opts={})
     solr_doc = super(solr_doc, opts)
 

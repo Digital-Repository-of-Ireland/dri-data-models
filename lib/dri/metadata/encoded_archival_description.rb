@@ -22,7 +22,7 @@ module DRI
                 t.title(:path=>"titleproper")
               }
             }
-          }  
+          }
           t.archdesc {
              t.subject(:path=>"subject")
               t.name_coverage(:path=>"name")
@@ -34,7 +34,7 @@ module DRI
               t.abstract()
               t.language(:path=>"langmaterial")
               t.creator(:path=>"origination")
-             
+
               t.creation_date(:path=>"unitdate") {
                 t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
                 t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
@@ -44,12 +44,16 @@ module DRI
               }
               t.dao(:path=>"dao") {
                 t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
+                t.daodesc
               }
             }
             t.bioghist {
 
             }
             t.scopecontent {
+
+            }
+            t.userestrict {
 
             }
           }
@@ -60,6 +64,8 @@ module DRI
         t.country_code(:proxy => [:ead, :eadheader, :eadid, :country_code], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.identifier(:proxy => [:ead, :eadheader, :eadid, :identifier], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[Descriptors.cleaned_searchable, :sortable])
+        t.description(:proxy => [:abstract], :index_as=>[Descriptors.cleaned_searchable])
+        # FIXME - the UI is expecting the proxy :description, do we also need to index the proxy :abstract?
         t.abstract(:proxy => [:ead, :archdesc, :did,  :abstract], :index_as=>[Descriptors.cleaned_searchable])
         t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable])
         t.language(:proxy => [:ead, :archdesc, :did, :language], :index_as=>[Descriptors.cleaned_searchable,  Descriptors.language_facetable])
@@ -73,37 +79,45 @@ module DRI
         t.physdesc(:proxy => [:ead, :archdesc, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable])
         t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.bioghist(:proxy => [:ead, :archdesc, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
-  
+        t.rights(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # TODO Following three terms need to be reviewed, temporary for tracking EAD issues
+        t.dao(:proxy => [:ead, :archdesc, :did, :dao])
+        t.dao_href(:proxy => [:ead, :archdesc, :did, :dao, :href])
+        t.dao_desc(:proxy => [:ead, :archdesc, :did, :dao, :daodesc])
+        # TODO Add published_date field to the terminology. What's the mapped EAD term?
+        t.published_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
 
+      # synchronize_metadata_on_save
+      # Currently, it is only used in EAD. Likely to be used in MODS too.
       def synchronize_metadata_on_save
         @synchronize_metadata_on_save || true
       end
 
       # Build the xml doc
       def self.xml_template
-          builder = Nokogiri::XML::Builder.new do |xml|
-            xml.doc.create_internal_subset(
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.doc.create_internal_subset(
               'ead',
               "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
               ""
-              )
-            xml.ead {
-              xml.eadheader {
-                xml.eadid
-                xml.filedesc {
-                  xml.titlestmt {
-                    xml.titleproper
-                  }
+          )
+          xml.ead {
+            xml.eadheader {
+              xml.eadid
+              xml.filedesc {
+                xml.titlestmt {
+                  xml.titleproper
                 }
               }
-              xml.archdesc {
-                xml.did
-                xml.dsc
-              }
             }
-          end
-          return builder.doc
+            xml.archdesc {
+              xml.did
+              xml.dsc
+            }
+          }
+        end
+        return builder.doc
       end
 
       def to_solr(solr_doc=Hash.new)
@@ -113,60 +127,67 @@ module DRI
         person_array = get_person_array()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :searchable) => description)
+        # FIXME Need to check what, and how to index, Solr fields
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description)
 
         solr_doc
       end
 
-
+      # Mapping to UI person attribute from EAD
       def get_person_array()
-         return ead.archdesc.name_coverage | ead.archdesc.persname_coverage | ead.archdesc.corpname_coverage | ead.archdesc.did.creator
+        return ead.archdesc.name_coverage | ead.archdesc.persname_coverage |
+            ead.archdesc.corpname_coverage | ead.archdesc.did.creator
       end
 
+      # Mapping to UI description attribute from EAD: abstract, scopecontent, bioghist, daodesc
       def description
-        return ead.archdesc.did.abstract | ead.archdesc.scopecontent | ead.archdesc.bioghist
+        return ead.archdesc.did.abstract | ead.archdesc.scopecontent | ead.archdesc.bioghist | ead.archdesc.did.dao.daodesc
       end
 
       def metadata_path field
         case field
-        when :ead_level
-          [:ead, :archdesc, :ead_level]
-        when :title
-          [:ead, :eadheader, :filedesc, :titlestmt, :title]
-        when :abstract
-          [:ead, :archdesc, :did, :abstract]
-        when :bioghist
-          [:ead, :archdesc, :bioghist]
-        when :scope_content
-          [:ead, :archdesc, :scopecontent]
-        when :ead_level
-          [:ead, :archdesc, :ead_level]
-        when :language
-          [:ead, :archdesc, :did, :language]
-        when :creator
-          [:ead, :archdesc, :did, :creator]
-        when :creation_date
-          [:ead, :archdesc, :did, :creation_date]
-        when :name_coverage
-          [:ead, :archdesc,  :name_coverage]
-        when :geographical_coverage
-          [:ead, :archdesc, :geographical_coverage]
-        when :physdesc
-          [:ead, :archdesc, :did, :physdesc]
-        when :type
-          [:ead, :archdesc, :did, :physdesc, :type]
-        when :dao
-          [:ead, :archdesc, :did, :dao]
-        when :unitid
-          [:ead, :eadheader, :eadid]
-        when :repository_code
-          [:ead, :eadheader, :eadid, :repository_code]
-        when :country_code
-          [:ead, :eadheader, :eadid, :country_code]
-        when :identifier
-          [:ead, :eadheader, :eadid, :identifier]
-        else
-          []
+          when :ead_level
+            [:ead, :archdesc, :ead_level]
+          when :title
+            [:ead, :eadheader, :filedesc, :titlestmt, :title]
+          when :abstract
+            [:ead, :archdesc, :did, :abstract]
+          when :bioghist
+            [:ead, :archdesc, :bioghist]
+          when :scope_content
+            [:ead, :archdesc, :scopecontent]
+          when :ead_level
+            [:ead, :archdesc, :ead_level]
+          when :language
+            [:ead, :archdesc, :did, :language]
+          when :creator
+            [:ead, :archdesc, :did, :creator]
+          when :creation_date
+            [:ead, :archdesc, :did, :creation_date]
+          when :name_coverage
+            [:ead, :archdesc,  :name_coverage]
+          when :geographical_coverage
+            [:ead, :archdesc, :geographical_coverage]
+          when :physdesc
+            [:ead, :archdesc, :did, :physdesc]
+          when :type
+            [:ead, :archdesc, :did, :physdesc, :type]
+          when :dao
+            [:ead, :archdesc, :did, :dao]
+          when :dao_href
+            [:ead, :archdesc, :did, :dao, :href]
+          when :dao_desc
+            [:ead, :archdesc, :did, :dao, :daodesc]
+          when :unitid
+            [:ead, :eadheader, :eadid]
+          when :repository_code
+            [:ead, :eadheader, :eadid, :repository_code]
+          when :country_code
+            [:ead, :eadheader, :eadid, :country_code]
+          when :identifier
+            [:ead, :eadheader, :eadid, :identifier]
+          else
+            []
         end
       end
 
@@ -211,7 +232,7 @@ module DRI
         ead.eadheader.eadid.repository_code.each do |curr_rc|
           rc_result = true unless curr_rc.blank?
         end
-        
+
         errors[:title] = "can't be blank" if title_result == false
         errors[:abstract] = "can't be blank" if description_result == false
         errors[:ead_level] = "can't be blank" if ead_level_result == false

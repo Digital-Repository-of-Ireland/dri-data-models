@@ -9,10 +9,11 @@ module DRI
         belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'Batch'
         has_many :governed_items, :property=>:is_governed_by, :class_name => 'Batch'
 
+        # Two relationships below are used to manage a collection's structure
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'Batch'
         has_many :items, :property=>:is_member_of_collection, :class_name => 'Batch'
 
-        # Additional relationships to keep track of sibling order, important for EAD and similar archive standards
+        # Additional relationships to keep track of sibling order, important for EAD and similar standards (e.g. MODS)
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'Batch'
         belongs_to :next_sibling, :property=>:is_preceded_by, :class_name => 'Batch'
 
@@ -43,21 +44,24 @@ module DRI
       end
 
       def is_root_collection?
-      	# It is a root collection if it is already defined to be a collection, it has
-      	# been already saved in Fedora and it has no governing collection
+      	# It is a root collection if it is already defined to be a collection; it has
+      	# been already saved in Fedora; it has no governing collection and
+        # it's not a member of any other collection (collection.count == 0)
         (!new_record?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
       end
 
       private
 
+      #
+      # @param[Hash]
+      #
       def collections_to_solr(solr_doc=Hash.new)
-
         # Add title metadata from parent collections
         ancestor_titles = []
         ancestor_ids = []
 
         curr_gov_collection = governing_collection
-
+        # TODO - Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
         while (curr_gov_collection != nil)
           ancestor_titles << curr_gov_collection.title[0]
           ancestor_ids << curr_gov_collection.pid

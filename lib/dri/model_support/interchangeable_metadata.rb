@@ -2,11 +2,13 @@ module DRI
   module ModelSupport
     module InterchangeableMetadata
       extend ActiveSupport::Concern
-    
+
       included do
         attr_accessor :desc_metadata_class
 
+        # Descriptive metadata datastream
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
+        # Complete metadata record datastream
         has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
 
         after_initialize :load_attributes
@@ -128,7 +130,7 @@ module DRI
           ds.digital_object = old_digital_object
         end
 
-        if (ds != nil)       
+        if (ds != nil)
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
         end
