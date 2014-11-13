@@ -10,6 +10,7 @@ class EncodedArchivalDescription < Batch
   has_attributes :physdesc, datastream: :descMetadata, multiple: true
   has_attributes :dao, datastream: :descMetadata, multiple: true
   has_attributes :dao_href, datastream: :descMetadata, multiple: true
+  has_attributes :dao_desc, datastream: :descMetadata, multiple: true
   has_attributes :unitid, datastream: :descMetadata, multiple: false
   has_attributes :repository_code, datastream: :descMetadata, multiple: false
   has_attributes :country_code, datastream: :descMetadata, multiple: false        

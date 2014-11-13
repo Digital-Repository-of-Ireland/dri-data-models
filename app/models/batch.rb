@@ -52,6 +52,11 @@ class Batch < ActiveFedora::Base
     add_relationship(:has_model, self.class.superclass.to_class_uri)
   end
 
+  # Updates the metadata class of the current digital object in case we are now working
+  # with a different metadata standard
+  # @param[String,File] xml_text xml metadata content or a File
+  # @return[boolean] true if op successful
+  # Note: Use this in preference over the setting xml directly in the OmDatastreams
   def update_metadata xml_text
     if (xml_text.is_a? File)
       xml_text = xml_text.read
