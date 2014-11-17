@@ -1,4 +1,5 @@
-class QualifiedDublinCore < Batch
+module DRI
+class QualifiedDublinCore < DRI::Batch
 
   has_attributes :date, datastream: :descMetadata, multiple: true
   has_attributes :relation, datastream: :descMetadata, multiple: true
@@ -20,7 +21,7 @@ class QualifiedDublinCore < Batch
   end
 
   def model_name
-    Batch.model_name
+    DRI::Batch.model_name
   end
 
   def roles= roles
@@ -33,4 +34,5 @@ class QualifiedDublinCore < Batch
     super(properties)
   end
       
+end
 end

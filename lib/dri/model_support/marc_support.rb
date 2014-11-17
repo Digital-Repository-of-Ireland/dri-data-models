@@ -23,7 +23,7 @@ module DRI
       end
 
       def create_object xml
-        new_object = Batch.with_standard :marc
+        new_object = DRI::Batch.with_standard :marc
         new_object.governing_collection = self.governing_collection
         new_object.depositor = self.depositor
         new_object.status = self.status

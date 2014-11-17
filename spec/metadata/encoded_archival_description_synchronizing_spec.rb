@@ -4,7 +4,7 @@ describe 'EncodedArchivalDescription' do
 
   before(:each) do
     @collection_xml = fixture("ead/ead_collection.xml")
-    @ead_collection = EncodedArchivalDescription.new :collection
+    @ead_collection = DRI::EncodedArchivalDescription.new :collection
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
   end
 

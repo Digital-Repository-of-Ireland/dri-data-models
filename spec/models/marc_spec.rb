@@ -4,13 +4,13 @@ describe 'Marc' do
 
   before(:each) do
     @item_xml = fixture("marc/sandburg.xml")
-    @marc_item = Marc.new
+    @marc_item = DRI::Marc.new
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
 
   end
 
   it "should be a kind of Batch" do
-    @marc_item.should be_kind_of(Batch)
+    @marc_item.should be_kind_of(DRI::Batch)
   end
 
   it "should have a marc datastream" do
@@ -27,7 +27,7 @@ describe 'Marc' do
   end
 
   it "should validate the presence of title attribute" do
-    @marc_item = Marc.new
+    @marc_item = DRI::Marc.new
     @no_title = fixture("marc/sandburg_no_title.xml")
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@no_title).to_xml
     @marc_item.should_not be_valid

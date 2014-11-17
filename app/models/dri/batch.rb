@@ -1,3 +1,4 @@
+module DRI
 class Batch < ActiveFedora::Base
   include ActiveFedora::Auditable
   include Sufia::ModelMethods
@@ -10,7 +11,7 @@ class Batch < ActiveFedora::Base
   include DRI::ModelSupport::Files
   include DRI::ModelSupport::Collections
 
-  has_many :generic_files, :property => :is_part_of
+  has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of
 
   # Declare a 'extracted' DS, of the following type
   has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
@@ -18,7 +19,7 @@ class Batch < ActiveFedora::Base
   # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
   has_attributes :full_text, datastream: :extracted, multiple: true
 
-  def Batch.with_standard(standard, args = {})
+  def self.with_standard(standard, args = {})
    case standard
    when :marc
      Marc.new(args)
@@ -35,9 +36,9 @@ class Batch < ActiveFedora::Base
 
   def self.find_or_create(pid)
     begin
-      Batch.find(pid)
+      DRI::Batch.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
-      Batch.create({pid: pid})
+      DRI::Batch.create({pid: pid})
     end
   end
 
@@ -86,7 +87,6 @@ class Batch < ActiveFedora::Base
   # Indexing object types as a hierarchical tree
   def object_types_to_solr(solr_doc=Hash.new)
 
-    # Add title metadata from parent collections
     object_types = []
 
     self.descMetadata.type.each do | curr_category |
@@ -105,4 +105,5 @@ class Batch < ActiveFedora::Base
     solr_doc
   end
 
+end
 end

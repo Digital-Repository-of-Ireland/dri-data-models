@@ -5,12 +5,12 @@ describe 'Marc' do
 
   before(:each) do
     @item_xml = fixture("marc/sandburg.xml")
-    @marc_item = Marc.new
+    @marc_item = DRI::Marc.new
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
   end
   context "general behaviors" do
     it "should be a kind of Batch" do
-      @marc_item.should be_kind_of(Batch)
+      @marc_item.should be_kind_of(DRI::Batch)
     end
 
     it "datastrea: descMetadata should be a kind of OmDatastream" do

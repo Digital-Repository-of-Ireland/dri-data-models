@@ -1,4 +1,5 @@
-class EncodedArchivalDescription < Batch
+module DRI
+class EncodedArchivalDescription < DRI::Batch
 
   include DRI::ModelSupport::Ead
 
@@ -111,4 +112,5 @@ class EncodedArchivalDescription < Batch
     end
   end 
  
+end
 end

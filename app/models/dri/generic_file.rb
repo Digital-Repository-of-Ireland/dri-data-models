@@ -1,3 +1,4 @@
+module DRI
 class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile
   include Sufia::ModelMethods
@@ -18,7 +19,7 @@ class GenericFile < ActiveFedora::Base
 
   #after_initialize :redirect_content
 
-  belongs_to :batch, property: :is_part_of
+  belongs_to :batch, :class_name => "DRI::Batch", property: :is_part_of
   # Declare a 'dri_properties' DS, of the following type
   has_metadata :name => "dri_properties", :type => DRI::Metadata::FileProperties
 
@@ -79,5 +80,4 @@ class GenericFile < ActiveFedora::Base
   end
 
 end
-
-
+end

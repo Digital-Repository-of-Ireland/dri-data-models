@@ -1,4 +1,5 @@
-class Marc < Batch 
+module DRI
+class Marc < DRI::Batch 
 
   include DRI::ModelSupport::MarcSupport
 
@@ -69,4 +70,5 @@ class Marc < Batch
     end
   end
       
+end
 end
