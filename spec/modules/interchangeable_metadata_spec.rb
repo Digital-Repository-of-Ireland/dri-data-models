@@ -8,21 +8,21 @@ describe 'Batch' do
   end
 
   it "should have the ability to replace metadata" do
-    @mods = (DRI::Metadata::MODS.new).to_xml
+    @mods = (DRI::Metadata::Mods.new).to_xml
     @batch.datastreams.keys.should include("descMetadata")
     @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore
     @batch.update_metadata @mods
-    @batch.descMetadata.class.should == DRI::Metadata::MODS
+    @batch.descMetadata.class.should == DRI::Metadata::Mods
   end
 
   it "should have the ability to test if the metadata is in a different class than what it originally loaded with" do
     # From a new class
-    @mods = (DRI::Metadata::MODS.new).to_xml
+    @mods = (DRI::Metadata::Mods.new).to_xml
     @dc = (DRI::Metadata::QualifiedDublinCore.new).to_xml
     @batch.datastreams.keys.should include("descMetadata")
     @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore
     @batch.update_metadata @mods
-    @batch.descMetadata.class.should == DRI::Metadata::MODS
+    @batch.descMetadata.class.should == DRI::Metadata::Mods
     @batch.has_metadata_class_changed?.should == true
     @batch.update_metadata @dc
     @batch.descMetadata.class.should == DRI::Metadata::QualifiedDublinCore

@@ -334,7 +334,7 @@ module DRI
         if namespace.has_value?("http://purl.org/dc/elements/1.1/")
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
-          result = "DRI::Metadata::MODS"
+          result = "DRI::Metadata::Mods"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
@@ -356,7 +356,7 @@ module DRI
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
-          if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::MODS",
+          if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::Mods",
                  "DRI::Metadata::EncodedArchivalDescription",
                  "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             ds = ds_class.constantize.new
