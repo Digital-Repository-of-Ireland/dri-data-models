@@ -1,7 +1,7 @@
 module DRI
 class EncodedArchivalDescription < DRI::Batch
 
-  include DRI::ModelSupport::Ead
+  include DRI::ModelSupport::EadSupport
 
   has_attributes :abstract, datastream: :descMetadata, multiple: false
   has_attributes :bioghist, datastream: :descMetadata, multiple: false
@@ -14,7 +14,7 @@ class EncodedArchivalDescription < DRI::Batch
   has_attributes :dao_desc, datastream: :descMetadata, multiple: true
   has_attributes :unitid, datastream: :descMetadata, multiple: false
   has_attributes :repository_code, datastream: :descMetadata, multiple: false
-  has_attributes :country_code, datastream: :descMetadata, multiple: false        
+  has_attributes :country_code, datastream: :descMetadata, multiple: false
   has_attributes :identifier, datastream: :descMetadata, multiple: true
 
   around_save :synchronize_if_changed
@@ -107,6 +107,7 @@ class EncodedArchivalDescription < DRI::Batch
     end
 
     yield
+
     if content_changed && !new_record?
       Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
     end

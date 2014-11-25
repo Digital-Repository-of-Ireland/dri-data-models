@@ -1,6 +1,6 @@
 module DRI
   module ModelSupport
-    module Ead
+    module EadSupport
       extend ActiveSupport::Concern
       
       def synchronize_children_to_metadata
@@ -15,8 +15,8 @@ module DRI
           prev_obj = nil
           child_obj = nil
 
-          child_obj = Batch.find(solr_name('collection_id', :stored_searchable) => pid,
-                                         solr_name('is_first_sibling', :stored_searchable) => "1")
+          child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable) => pid,
+                                                      solr_name('is_first_sibling', :stored_searchable) => "1")
 
           if child_obj == []
             child_obj = nil
