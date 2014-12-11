@@ -21,11 +21,12 @@ install_deps)
     ;;
 configure)
     rm Gemfile.lock
-    bundle install --verbose
+    bundle install --quiet
     ;;
 compile)
     ;;
 check)
+    bundle install
     bundle exec rake ci
     ;;
 package)
