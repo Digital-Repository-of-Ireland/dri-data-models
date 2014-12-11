@@ -47,14 +47,14 @@ namespace :jetty do
 end
 
 desc "Run Continuous Integration"
-task :ci => ['ci:setup:rspec'] do
+task :ci => ['jetty:reset','ci:setup:rspec'] do
   ENV['environment'] = "test"
-  #jetty_params = Jettywrapper.load_config
-  #jetty_params[:startup_wait]= 120
-  #error = Jettywrapper.wrap(jetty_params) do
+  jetty_params = Jettywrapper.load_config
+  jetty_params[:startup_wait]= 120
+  error = Jettywrapper.wrap(jetty_params) do
     Rake::Task['rspec'].invoke
-  #end
-  #raise "test failures: #{error}" if error
+  end
+  raise "test failures: #{error}" if error
 
   Rake::Task["rdoc"].invoke
 end
