@@ -10,11 +10,11 @@ else
   printf "ERROR: An RVM installation was not found.\n"
 fi
 
-GEM_PATH=$HOME/.rvm/gems/ruby-2.1.5:$GEM_PATH
-
 rvm use ruby-2.1.5 || exit 100
 rvm use ruby-2.1.5@build --create || exit 100
 rvm --force gemset empty ruby-2.1.5@build || exit 100
+
+gem install bundler
 
 case $1 in
 patch)
@@ -23,12 +23,12 @@ install_deps)
     ;;
 configure)
     rm Gemfile.lock
-    $HOME/.rvm/gems/ruby-2.1.5/bin/bundle install --quiet
+    bundle install --quiet
     ;;
 compile)
     ;;
 check)
-    $HOME/.rvm/gems/ruby-2.1.5/bin bundle exec rake ci
+    bundle exec rake ci
     ;;
 package)
     ;;
