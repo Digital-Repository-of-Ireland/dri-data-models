@@ -14,8 +14,6 @@ rvm use ruby-2.1.5 || exit 100
 rvm use ruby-2.1.5@build --create || exit 100
 rvm --force gemset empty ruby-2.1.5@build || exit 100
 
-gem env
-
 case $1 in
 patch)
     ;;
@@ -23,7 +21,7 @@ install_deps)
     ;;
 configure)
     rm Gemfile.lock
-    bundle install --quiet
+    bundle install --verbose
     ;;
 compile)
     ;;
