@@ -38,6 +38,7 @@ class Batch < ActiveFedora::Base
     begin
       DRI::Batch.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
+      # FIXME Do we have issues here when instantiating Batch directly? What standard?
       DRI::Batch.create({pid: pid})
     end
   end

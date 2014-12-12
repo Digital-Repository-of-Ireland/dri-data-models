@@ -314,5 +314,17 @@ module DRI
         {:code => "997", :ind1 => " ", :ind2 => " ", :sf => ["a"]}
       ]
     end
+
+    # FIXME List extracted from NIVAL collection. Look for recommended controlled vocabularies
+    def self.eadRoles
+      [
+          "publisher",
+          "contributor",
+          "institution",
+          "business",
+          "designer",
+          "photographer"
+      ]
+    end
   end
 end

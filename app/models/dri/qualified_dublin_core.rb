@@ -3,7 +3,7 @@ class QualifiedDublinCore < DRI::Batch
 
   # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
   # Language, Relation, Coverage, Rights
-  # All DC elements added to the DM - Simple DC Ingest formåå
+  # All DC elements added to the DM - Simple DC Ingest form
   has_attributes :date, datastream: :descMetadata, multiple: true
   has_attributes :relation, datastream: :descMetadata, multiple: true
   has_attributes :source, datastream: :descMetadata, multiple: true

@@ -9,32 +9,44 @@ module DRI
         end
         if descMetadata.class == DRI::Metadata::EncodedArchivalDescription ||
            descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
-           
+
           metadata_child_index = 0
 
           prev_obj = nil
           child_obj = nil
 
-          child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable) => pid,
+          # FIXME See desc below
+          # If the current object is an EAD root collection and the repo is empty then we do not call find
+          # If called it will raise an exception since the collection_id and the is_first_sibling solr terms
+          # are not stored in the index
+          if (is_root_collection?)
+            child_obj = []
+          elsif
+            # Find the first child (child not preceded by another child) of the current object
+            child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable) => self.pid.to_s,
                                                       solr_name('is_first_sibling', :stored_searchable) => "1")
+            # Important! - added pid.to_s to the query above to ensure a Solr exact match query.
+          end
 
           if child_obj == []
             child_obj = nil
           else
-            child_obj = child_obj[0]
+            child_obj = child_obj[0] unless child_obj == nil
           end
 
           # Find the immediate children of this collection in the metadata
           metadata_children = []
 
           if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
-            metadata_children = fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
+            metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
           else
-            metadata_children = fullMetadata.ng_xml.xpath("/*/dsc/*")
+            metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
           end
 
           if metadata_children.empty?
-            Batch.find(solr_name('ancestor_id', :stored_searchable) => pid).each do |obj|
+            # Find all the objects for which the ancestor is the current EAD object
+            # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
+            EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => self.pid.to_s).each do |obj|
               obj.generic_files.each do |file_obj|
                 file_obj.delete
               end
@@ -43,16 +55,18 @@ module DRI
           end
 
           while metadata_child_index < metadata_children.length do
-            metadata_cc = metadata_children[metadata_child_index].xpath('did/unitid/@countrycode')[0].value
-            metadata_rc = metadata_children[metadata_child_index].xpath('did/unitid/@repositorycode')[0].value
-            metadata_id = metadata_children[metadata_child_index].xpath('did/unitid/@identifier')[0].value
+
+            #metadata_cc = metadata_children[metadata_child_index].xpath('did/unitid/@countrycode')[0].value
+            #metadata_rc = metadata_children[metadata_child_index].xpath('did/unitid/@repositorycode')[0].value
+            #metadata_id = metadata_children[metadata_child_index].xpath('did/unitid/@identifier')[0].value
 
 
-            if child_obj != nil &&
-               child_obj.identifier.include?(metadata_id) &&
-               child_obj.country_code == metadata_cc &&
-               child_obj.repository_code == metadata_rc
+            #if child_obj != nil &&
+            #    child_obj.identifier.include?(metadata_id) &&
+            #    child_obj.country_code == metadata_cc &&
+            #    child_obj.repository_code == metadata_rc
 
+            if is_ead_same_object?(child_obj, metadata_children[metadata_child_index])
               # Metadata identifiers match current child's identifiers
               # we can replace the child's metadata if the replacement metadata differs
 
@@ -63,7 +77,6 @@ module DRI
 
               # now we can do the comparison
               if metadata_children[metadata_child_index].to_s != clean_fullMetadata
-
                 child_obj.update_metadata metadata_children[metadata_child_index].to_s
                 child_obj.previous_sibling = prev_obj
 
@@ -138,7 +151,8 @@ module DRI
           while child_obj != nil do
             to_delete = child_obj
             child_obj = child_obj.next_sibling
-            Batch.find(solr_name('ancestor_id', :stored_searchable) => to_delete.pid).each do |obj|
+            # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
+            EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => to_delete.pid.to_s).each do |obj|
               obj.generic_files.each do |file_obj|
                 file_obj.delete
               end
@@ -147,8 +161,52 @@ module DRI
             to_delete.delete
           end
         end
-      end
+      end # synchronize_children_to_metadata
 
-    end
-  end
-end
+      private
+
+      # Checks that the metadata identifiers match the identifiers of the current EAD component child
+      # being analysed
+      # @param child_obj the current EAD stored child
+      # @param elem the new EAD child from metadata
+      # @return[boolean] true if the identifiers match
+      def is_ead_same_object?(child_obj, elem)
+
+        metadata_id_attr = nil
+        metadata_url_attr = nil
+        metadata_publicid_attr = nil
+
+        # Get the text value for unitid
+        metadata_id = elem.xpath('did/unitid')[0].text
+
+        # Get the value of unitid/@identifier
+        if elem.xpath('did/unitid/@identifier')[0] != nil
+          metadata_id_attr = elem.xpath('did/unitid/@identifier')[0].value
+        end
+        # Get the value of unitid/@url
+        if elem.xpath('did/unitid/@url')[0] != nil
+          metadata_url_attr = elem.xpath('did/unitid/@url')[0].value
+        end
+        # Get the value of unitid/@publicid
+        if elem.xpath('did/unitid/@publicid')[0] != nil
+          metadata_publicid_attr = elem.xpath('did/unitid/@publicid')[0].value
+        end
+
+        # To check that the metadata ids match the current child's ids
+        # we need to look first at the value of unitid AND
+        # then compare against one of the following attributes of unitid: identifier OR url OR publicid
+        if child_obj != nil &&
+            child_obj.identifier.include?(metadata_id) &&
+            (child_obj.identifier_id.include?(metadata_id_attr) ||
+                child_obj.identifier_url.include?(metadata_url_attr) ||
+                child_obj.identifier_public_id.include?(metadata_publicid_attr)
+            )
+          return true
+        else
+          return false
+        end
+      end # is_ead_same_element?
+
+    end # module
+  end # module
+end # module

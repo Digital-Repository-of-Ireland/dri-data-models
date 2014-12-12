@@ -93,11 +93,11 @@ module DRI
         if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
           solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
         end
-        
+
         solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
 
         solr_doc
-      end
-    end
-  end
-end
+      end #collections_to_solr
+    end # module
+  end # module
+end #module

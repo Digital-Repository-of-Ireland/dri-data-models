@@ -3,10 +3,10 @@ require 'spec_helper'
 describe 'EncodedArchivalDescription' do
 
   before(:each) do
-    @series_xml = fixture("ead/component_series.xml")
-    @file_xml = fixture("ead/component_file.xml")
-    @item_xml = fixture("ead/component_item.xml")
-    @collection_xml = fixture("ead/ead_collection.xml")
+    @series_xml = fixture("ead/components/component_series.xml")
+    @file_xml = fixture("ead/components/component_file.xml")
+    @item_xml = fixture("ead/components/component_item.xml")
+    @collection_xml = fixture("ead/collections/ead_collection.xml")
     @ead_collection = DRI::EncodedArchivalDescription.new :collection #DRI::Metadata::EncodedArchivalDescription
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
     @ead_series = DRI::EncodedArchivalDescription.new :component #:desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
@@ -19,25 +19,25 @@ describe 'EncodedArchivalDescription' do
   end
 
   it "should expose the EAD components' identifiers" do
-    @ead_collection.unitid.should == "IE/NIVAL KDW"
+    @ead_collection.identifier.should == "IE/NIVAL KDW"
     @ead_collection.country_code.should == "IE"
     @ead_collection.repository_code.should == "IE-DuNIV"
-    @ead_collection.identifier.should == ["KDW"]
+    @ead_collection.identifier_id.should == ["KDW"]
 
-    @ead_series.unitid.should == "KDW/RM"
+    @ead_series.identifier.should == "KDW/RM"
     @ead_series.country_code.should == "IE"
     @ead_series.repository_code.should == "IE-DuNIV"
-    @ead_series.identifier.should == ["RM"]
+    @ead_series.identifier_id.should == ["RM"]
 
-    @ead_file.unitid.should == "KDW/RM/02"
+    @ead_file.identifier.should == "KDW/RM/02"
     @ead_file.country_code.should == "IE"
     @ead_file.repository_code.should == "IE-DuNIV"
-    @ead_file.identifier.should == ["02"]
+    @ead_file.identifier_id.should == ["02"]
 
-    @ead_item.unitid.should == "KDW/RM/02/04"
+    @ead_item.identifier.should == "KDW/RM/02/04"
     @ead_item.country_code.should == "IE"
     @ead_item.repository_code.should == "IE-DuNIV"
-    @ead_item.identifier.should == ["04"]
+    @ead_item.identifier_id.should == ["04"]
   end
 
   it "should expose the level of the EAD component" do
@@ -63,19 +63,19 @@ describe 'EncodedArchivalDescription' do
 
   it "should validate the presence of the title metadata field" do
     @ead_collection.should be_valid
-    @ead_collection.title = ""
+    @ead_collection.title = [""]
     @ead_collection.should_not be_valid
 
     @ead_series.should be_valid
-    @ead_series.title = ""
+    @ead_series.title = [""]
     @ead_series.should_not be_valid
 
     @ead_file.should be_valid
-    @ead_file.title = ""
+    @ead_file.title = [""]
     @ead_file.should_not be_valid
 
     @ead_item.should be_valid
-    @ead_item.title = ""
+    @ead_item.title = [""]
     @ead_item.should_not be_valid
   end
 
@@ -90,21 +90,21 @@ describe 'EncodedArchivalDescription' do
     @ead_series.scope_content = ""
     @ead_series.abstract = ""
     @ead_series.bioghist = ""
-    @ead_series.dao_desc = ""
+    @ead_series.dao_desc = [""]
     @ead_series.should_not be_valid
 
     @ead_file.should be_valid
     @ead_file.scope_content = ""
     @ead_file.abstract = ""
     @ead_file.bioghist = ""
-    @ead_file.dao_desc = ""
+    @ead_file.dao_desc = [""]
     @ead_file.should_not be_valid
 
     @ead_item.should be_valid
     @ead_item.scope_content = ""
     @ead_item.abstract = ""
     @ead_item.bioghist = ""
-    @ead_item.dao_desc = ""
+    @ead_item.dao_desc = [""]
     @ead_item.should_not be_valid
   end
 
@@ -128,19 +128,19 @@ describe 'EncodedArchivalDescription' do
 
   it "should validate the presence of an EAD identifier" do
     @ead_collection.should be_valid
-    @ead_collection.unitid = ""
+    @ead_collection.identifier = ""
     @ead_collection.should_not be_valid
 
     @ead_series.should be_valid
-    @ead_series.unitid = ""
+    @ead_series.identifier = ""
     @ead_series.should_not be_valid
 
     @ead_file.should be_valid
-    @ead_file.unitid = ""
+    @ead_file.identifier = ""
     @ead_file.should_not be_valid
 
     @ead_item.should be_valid
-    @ead_item.unitid = ""
+    @ead_item.identifier = ""
     @ead_item.should_not be_valid
   end
 
@@ -183,13 +183,13 @@ describe 'EncodedArchivalDescription' do
   it "should handle all variations of the EAD component node" do
     variations = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12']
     variations.each do | curr_node_name |
-      file_xml2 = fixture("ead/component_file.xml")
+      file_xml2 = fixture("ead/components/component_file.xml")
       curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
       curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
       curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
       curr_batch = DRI::EncodedArchivalDescription.new :component
       curr_batch.update_metadata curr_file
-      curr_batch.unitid.should == "KDW/RM/02"
+      curr_batch.identifier.should == "KDW/RM/02"
       curr_batch.ead_level.should == "file"
     end
   end

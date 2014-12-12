@@ -14,26 +14,46 @@ module DRI
         after_initialize :load_attributes
         after_save :reset_metadata_check
 
+        # TODO Check that these match the DRI Level 1 and 2 terms (some are missing)
+        # DRI Mandatory (M)
+        # Title (collection-level)
         has_attributes :title, datastream: :descMetadata, multiple: true
+        # Description (collection-level)
         has_attributes :description, datastream: :descMetadata, multiple: true
-        has_attributes :language, datastream: :descMetadata, multiple: true
-        has_attributes :creator, datastream: :descMetadata, multiple: true
-        has_attributes :contributor, datastream: :descMetadata, multiple: true
-        has_attributes :publisher, datastream: :descMetadata, multiple: true
-        has_attributes :published_date, datastream: :descMetadata, multiple: true
-        has_attributes :creation_date, datastream: :descMetadata, multiple: true
-        has_attributes :subject, datastream: :descMetadata, multiple: true
+        # ADDED TYPE, it is compulsory
+        has_attributes :type, datastream: :descMetadata, multiple: true
+        # Rights (collection-level)
         has_attributes :rights, datastream: :descMetadata, multiple: true
+        # Creator (collection-level)
+        has_attributes :creator, datastream: :descMetadata, multiple: true
+
+        # DRI Recommended (R)
+        # Contributor
+        has_attributes :contributor, datastream: :descMetadata, multiple: true
+        # Publisher (collection-level, DRI pre-populated)
+        has_attributes :publisher, datastream: :descMetadata, multiple: true
+        # Published Date (collection-level)
+        has_attributes :published_date, datastream: :descMetadata, multiple: true
+        # Creation Date (collection-level, DRI pre-populated)
+        has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        # Subject (collection-level)
+        has_attributes :subject, datastream: :descMetadata, multiple: true
+        # Language (collection-level)
+        has_attributes :language, datastream: :descMetadata, multiple: true
+
+        # FIXME - check DRI elements below, not included here initially
+        # Source (collection-level, R)
+        # has_attributes :source, datastream: :descMetadata, multiple: true
+        # Geographical coverage (collection-level)
+        # has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
+        # Temporal coverage (collection-level)
+        # has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
 
         validate :custom_validations
       end
 
       def has_metadata_class_changed?
-        if (@metadata_class != descMetadata.class)
-          true
-        else
-          false
-        end
+        (@metadata_class != descMetadata.class) ? true : false
       end
 
       # Should only be set in a new class
@@ -63,7 +83,7 @@ module DRI
         else
           return true
         end
-      end
+      end # custom_validations
 
       def get_metadata_class_from_xml xml_text
         result = nil
@@ -81,7 +101,7 @@ module DRI
         if namespace.has_value?("http://purl.org/dc/elements/1.1/")
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
-          result = "DRI::Metadata::MODS"
+          result = "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
@@ -92,8 +112,8 @@ module DRI
           result = "DRI::Metadata::Marc"
         end
 
-      return result
-      end
+        return result
+      end # get_metadata_class_from_xml
 
       def reset_metadata_check
         @metadata_class = descMetadata.class
@@ -108,7 +128,7 @@ module DRI
           ds_class = @desc_metadata_class.to_s
 
           if ["DRI::Metadata::QualifiedDublinCore",
-              "DRI::Metadata::MODS",
+              "DRI::Metadata::Mods",
               "DRI::Metadata::EncodedArchivalDescription",
               "DRI::Metadata::EncodedArchivalDescriptionComponent",
               "DRI::Metadata::Marc"].include? ds_class
@@ -136,8 +156,7 @@ module DRI
         end
 
         @metadata_class = descMetadata.class
-      end
-
-    end
-  end
-end
+      end # load_attributes
+    end # module
+  end # module
+end # module
