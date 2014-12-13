@@ -10,5 +10,13 @@ module DRI
     def attributes=(properties)
       super(properties)
     end
-  end
-end
+
+    def self.find_or_create(pid)
+      begin
+        DRI::Mods.find(pid)
+      rescue ActiveFedora::ObjectNotFoundError
+        DRI::Mods.create({pid: pid})
+      end
+    end
+  end # class
+end # module

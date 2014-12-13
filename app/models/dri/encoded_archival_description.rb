@@ -33,7 +33,7 @@ module DRI
     has_attributes :dao_desc, datastream: :descMetadata, multiple: true
 
     # EAD Elements with multiple mappings
-    #has_attributes :language_profiledesc, datastream: :descMetadata, multiple: true
+    #has_attributes :language_did, datastream: :descMetadata, multiple: true
     #has_attributes :creation_date_profiledesc, datastream: :descMetadata, multiple: true
     has_attributes :access_restrict, datastream: :descMetadata, multiple: true
     has_attributes :subject_archdesc, datastream: :descMetadata, multiple: true
@@ -56,6 +56,14 @@ module DRI
       args[:desc_metadata_class] = metadata_class
 
       super(args)
+    end
+
+    def self.find_or_create(pid)
+      begin
+        DRI::EncodedArchivalDescription.find(pid)
+      rescue ActiveFedora::ObjectNotFoundError
+        DRI::EncodedArchivalDescription.create({pid: pid})
+      end
     end
 
     def attributes=(properties)
