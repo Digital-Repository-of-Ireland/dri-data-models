@@ -113,15 +113,15 @@ module DRI
         }
         # Proxies for the DRI fields
         # Title (collection-level, M)
-        t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[Descriptors.cleaned_searchable, :sortable])
+        t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Description (collection-level, M)
         t.description(:proxy => [:ead, :archdesc, :scopecontent], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Language //archdesc/did/langmaterial/language (collection-level, R best practice)
-        t.language(:proxy => [:ead, :archdesc, :did, :langmaterial, :language], :index_as=>[Descriptors.cleaned_searchable,  Descriptors.language_facetable])
+        # Language //archdesc/did/langmaterial/language (collection-level, R best practice) but for NIVAL... use langusage in the eadHeader
+        t.language(:proxy => [:ead, :eadheader, :profiledesc, :langusage, :language], :index_as=>[Descriptors.cleaned_searchable,  Descriptors.language_facetable])
         # Creator (collection-level, M)
         t.creator(:proxy => [:ead, :archdesc, :did, :creator], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
         # Contributor (R)
-        t.contributor(:proxy => [:ead, :archdesc, :did, :origination, :contributor], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
+        t.contributor(:proxy => [:ead, :archdesc, :did, :origination, :contributor], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
         # Publisher (collection-level, DRI pre-populated)
         t.publisher(:proxy => [:ead, :eadheader, :filedesc, :publicationstmt, :publisher], :index_as=>[Descriptors.cleaned_searchable, :sortable])
         # Published Date (collection-level, DRI pre-populated)
@@ -157,7 +157,7 @@ module DRI
         # Daodesc
         t.dao_desc(:proxy => [:ead, :archdesc, :did, :dao, :daodesc])
         # Type ead - repository
-        t.type_ead(:value => "archival finding aid")
+        t.type_ead(:proxy => [:ead, :archdesc, :ead_level])
         # Eadid
         #t.eadid(:proxy => [:ead, :eadheader, :eadid], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Unitid
@@ -174,7 +174,7 @@ module DRI
 
         # DRI ELEMENTS with multiple mappings
         # Language
-        t.language_profiledesc(:proxy => [:ead, :eadheader, :profiledesc, :langusage, :language], :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
+        t.language_did(:proxy => [:ead, :archdesc, :did, :langmaterial, :language], :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
         # Creation_Date
         t.creation_date_profiledesc(:proxy => [:ead, :eadheader, :profiledesc, :creation, :date], :index_as=>[Descriptors.cleaned_searchable])
         # License
@@ -197,15 +197,30 @@ module DRI
         @synchronize_metadata_on_save || true
       end
 
+      # When working with EAD documents using namespaces and schema-based
+      #def from_xml(xml=nil)
+      #  if xml.nil?
+      #  # noop: handled in #ng_xml accessor.. tmpl.ng_xml = self.xml_template
+      #  elsif xml.kind_of? Nokogiri::XML::Node
+      #    self.ng_xml = xml.remove_namespaces!
+      #  else
+      #    self.ng_xml = Nokogiri::XML::Document.parse(xml).remove_namespaces!
+      #  end
+      #end
+
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.doc.create_internal_subset(
-              'ead',
-              "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
-              ""
-          )
-          xml.ead {
+          # Updated EAD to use XSD as opposed to DTD
+          #xml.doc.create_internal_subset(
+          #    'ead',
+          #    "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
+          #    ""
+          #)
+          xml.ead("xmlns:xlink"=>"http://www.w3.org/1999/xlink",
+                  "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
+                  "xmlns:ead"=>"urn:isbn:1-931666-22-9",
+                  "xsi:schemaLocation"=>"http://www.loc.gov/ead ead.xsd") {
             xml.eadheader {
               xml.eadid
               xml.filedesc {
@@ -274,7 +289,7 @@ module DRI
       end
 
       def language_for_index()
-        return language | language_profiledesc
+        return language | language_did
       end
       # Mapping to UI description attribute from EAD: scopecontent, abstract, bioghist, daodesc
       def description_for_index()
@@ -293,7 +308,7 @@ module DRI
 
       # Helpers for getting elements with multiple mappings
       def get_language()
-        (language != []) ? language : language_profiledesc
+        (language != []) ? language : language_did
       end
 
       def get_description()
@@ -333,9 +348,9 @@ module DRI
           when :ead_level, :type_ead
             [:ead, :archdesc, :ead_level]
           when :language
-            [:ead, :archdesc, :did, :langmaterial, :language]
-          when :language_profiledesc
             [:ead, :eadheader, :profiledesc, :langusage, :language]
+          when :language_did
+            [:ead, :archdesc, :did, :langmaterial, :language]
           when :creator
             [:ead, :archdesc, :did, :creator]
           when :contributor

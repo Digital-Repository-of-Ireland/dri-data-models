@@ -84,8 +84,11 @@ module DRI
 
       if object_types.empty?
         case descMetadata
-        when DRI::Metadata::EncodedArchivalDescriptionComponent
-          object_types.push ead_level.split.map(&:capitalize)*' '
+          when DRI::Metadata::EncodedArchivalDescriptionComponent
+            if (descMetadata.collection?)
+              object_types.push "Collection"
+            end
+            object_types.push ead_level.split.map(&:capitalize)*' '
         when DRI::Metadata::EncodedArchivalDescription
           object_types.push "Collection"
         end

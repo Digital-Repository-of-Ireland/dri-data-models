@@ -12,7 +12,7 @@ module DRI
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
           t.archdesc{
             # Recommendation from DC to EAD crosswalk: archdesc with att level for type
-            t.type_ead(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+            t.c_level_attr(:path => {:attribute=>"level"}, :namespace_prefix => nil)
             # Subject can be within controlaccess
             t.controlaccess {
               t.head
@@ -71,9 +71,7 @@ module DRI
           t.bioghist {
 
           }
-          t.scopecontent {
-
-          }
+          t.scopecontent(:path=>"scopecontent", :namespace_prefix => nil)
           t.userestrict {
 
           }
@@ -86,17 +84,17 @@ module DRI
         # Title
         t.title(:proxy => [:c, :did, :unittitle], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
         # Description
-        t.description(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable])
+        t.description(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Creator
-        t.creator(:proxy => [:c, :did, :creator], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.creator(:proxy => [:c, :did, :creator], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
         # Rights
         t.rights(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Creation Date
-        t.creation_date(:proxy => [:c, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.language_facetable])
+        t.creation_date(:proxy => [:c, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         # DRI Common fields
         # Language
-        t.language(:proxy => [:c, :did, :langmaterial, :language], :index_as=>[:stored_searchable, Descriptors.language_facetable])
+        t.language(:proxy => [:c, :did, :langmaterial, :language], :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
         # Publisher
         t.publisher(:proxy => [:c, :archdesc, :repository], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Published Date
@@ -105,7 +103,7 @@ module DRI
         # Subject
         t.subject(:proxy => [:c, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Contributor
-        t.contributor(:proxy => [:c, :did, :origination, :contributor], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.contributor(:proxy => [:c, :did, :origination, :contributor], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
 
         # EAD specific fields
         # Ead Level
@@ -128,8 +126,8 @@ module DRI
         t.geographical_coverage(:proxy => [:c, :archdesc, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.type(:ref => [:c, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.language_facetable])
-        t.type_ead(:ref => [:c, :archdesc, :type_ead], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.language_facetable])
+        t.type(:proxy => [:c, :did, :physdesc, :type], :index_as=>[:stored_searchable])
+        t.type_ead(:proxy => [:c, :ead_level], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.dao(:proxy => [:c, :did, :dao])
         t.dao_href(:proxy => [:c, :did, :dao, :href])
         t.dao_desc(:proxy => [:c, :did, :dao, :daodesc])
@@ -149,6 +147,13 @@ module DRI
         @synchronize_metadata_on_save || true
       end
 
+      #def from_xml(xml=nil)
+      #  if xml.nil?
+      #    # noop: handled in #ng_xml accessor.. tmpl.ng_xml = self.xml_template
+      #  elsif
+      #    self.ng_xml = xml
+      #  end
+      #end
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
@@ -205,7 +210,6 @@ module DRI
         # TODO Check whether this has to be indexed here
         # Description
         description_array = description_for_index()
-
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Rights
@@ -280,10 +284,10 @@ module DRI
             [:c, :bioghist]
           when :scope_content
             [:scope_content]
-          when :ead_level
+          when :ead_level, :type_ead
             [:c, :ead_level]
           when :language
-            [:c, :did, :language]
+            [:c, :did, :langmaterial, :language]
           when :creator
             [:c, :did, :creator]
           when :contributor
@@ -308,8 +312,6 @@ module DRI
             [:c, :did, :physdesc]
           when :type
             [:c, :did, :physdesc, :type]
-          when :type_ead
-            [:c, :archdesc, :type_ead]
           when :dao
             [:c, :did, :dao]
           when :dao_href
@@ -431,8 +433,10 @@ module DRI
 
         # DRI
         errors[:title] = "can't be blank" if title_result == false
-        errors[:description] = "can't be blank" if description_result == false
-        errors[:creator] = "can't be blank" if creator_result == false
+        # FIXME Is description not DRI compulsory??
+        #errors[:description] = "can't be blank" if description_result == false
+        # FIXME Is creator not DRI compulsory??
+        #errors[:creator] = "can't be blank" if creator_result == false
         #errors[:rights] = "can't be blank" if rights_result == false
         #errors[:abstract] = "can't be blank" if description_result == false
 
