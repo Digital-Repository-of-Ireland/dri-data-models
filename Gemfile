@@ -23,8 +23,6 @@ gem 'iso-639'
 #gem 'chronic'
 
 group :development, :test do
-  # dri-user-group gem added for the rspec tests
-  gem "user_group", :git => 'git@tracker.dri.ie:drirepo/dri-user-group.git', :branch => 'develop'
   gem 'rcov', :platform => :mri_18
   gem 'simplecov', :platform => [:mri_19, :mri_20]
   gem 'simplecov-rcov', :platform => [:mri_19, :mri_20]
@@ -43,4 +41,9 @@ group :development, :test do
   gem 'ci_reporter_cucumber'
   gem 'ci_reporter_rspec'  
   gem 'rspec-legacy_formatters'
+end
+
+group :test do
+  # dri-user-group gem added for the rspec tests
+  gem "user_group", :git => 'git@tracker.dri.ie:drirepo/dri-user-group.git', :branch => 'develop'
 end
