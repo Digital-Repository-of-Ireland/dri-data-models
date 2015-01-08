@@ -19,34 +19,59 @@ module DRI
           # If the current object is an EAD root collection and the repo is empty then we do not call find
           # If called it will raise an exception since the collection_id and the is_first_sibling solr terms
           # are not stored in the index
-          if (is_root_collection?)
-            child_obj = []
-          elsif
+          #if (is_root_collection?)
+          #  child_obj = []
+          #else
             # Find the first child (child not preceded by another child) of the current object
-            child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable) => self.pid.to_s,
-                                                      solr_name('is_first_sibling', :stored_searchable) => "1")
+            # Changed way of retrieving children from Solr. Exact match query by collection_id needed
+            solr_query = "collection_id_tesim:\"#{pid.to_s}\" AND is_first_sibling_tesim:1"
+            # The query service returns back a set of Solr Documents, therefore need to be casted later on
+            child_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+            # Add type: :string to solr_name
+            #child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable, type: :string) => pid.to_s, solr_name('is_first_sibling', :stored_searchable) => "1")
             # Important! - added pid.to_s to the query above to ensure a Solr exact match query.
-          end
+          #end
 
           if child_obj == []
             child_obj = nil
-          else
-            child_obj = child_obj[0] unless child_obj == nil
+          elsif child_obj != nil
+            # Line below if using EAD.find method for retrieving children
+            #child_obj = child_obj[0] unless child_obj == nil
+            # If using SolrService.query
+            # Create an instance of Solr document from the retrieved first child
+            doc = SolrDocument.new(child_obj[0])
+            # Cast the solr document to its corresponding Fedora object
+            child_obj = EncodedArchivalDescription.find(doc.id)
           end
 
           # Find the immediate children of this collection in the metadata
           metadata_children = []
 
+          # Remove Ead namespaces
+          #fullMetadataNoNs = self.fullMetadata.ng_xml.clone
           if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
+            #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/ead/archdesc/dsc/*")
             metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
           else
+            #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/*/dsc/*")
             metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
           end
 
           if metadata_children.empty?
             # Find all the objects for which the ancestor is the current EAD object
             # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
-            EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => self.pid.to_s).each do |obj|
+            # Changed way of retrieving children from Solr. Exact match query by ancestor_id needed
+            solr_query = "ancestor_id_tesim:\"#{pid.to_s}\""
+
+            # Line below uncommented if using EAD.find
+            # EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => self.pid.to_s).each do |obj|
+            # The query service returns back a set of Solr Documents, therefore need to be casted later on
+            ActiveFedora::SolrService.query(solr_query, :defType => "edismax").each do |obj|
+              # If using SolrService.query
+              # Create an instance of Solr document
+              doc = SolrDocument.new(obj)
+              # Cast the solr document to its corresponding Fedora object
+              obj = EncodedArchivalDescription.find(doc.id)
               obj.generic_files.each do |file_obj|
                 file_obj.delete
               end
@@ -55,7 +80,6 @@ module DRI
           end
 
           while metadata_child_index < metadata_children.length do
-
             #metadata_cc = metadata_children[metadata_child_index].xpath('did/unitid/@countrycode')[0].value
             #metadata_rc = metadata_children[metadata_child_index].xpath('did/unitid/@repositorycode')[0].value
             #metadata_id = metadata_children[metadata_child_index].xpath('did/unitid/@identifier')[0].value
@@ -76,7 +100,7 @@ module DRI
               clean_fullMetadata = clean_fullMetadata[0..-2]
 
               # now we can do the comparison
-              if metadata_children[metadata_child_index].to_s != clean_fullMetadata
+              if (metadata_children[metadata_child_index].to_s != clean_fullMetadata)
                 child_obj.update_metadata metadata_children[metadata_child_index].to_s
                 child_obj.previous_sibling = prev_obj
 
@@ -86,13 +110,13 @@ module DRI
                 end
 
               end
-
               prev_obj = child_obj
               child_obj = prev_obj.next_sibling
               metadata_child_index += 1
 
             elsif child_obj != nil
               # TODO: DELETE child
+              logger.info("Delete child needed")
             else
               # Create a new child
               new_child = EncodedArchivalDescription.new :component
@@ -107,10 +131,17 @@ module DRI
 
               # Don't add new node if it's invalid
               if new_child.valid?
+                logger.info("NIVAL: #{new_child.title} is about to be saved!")
                 new_child.save
 
                 # add to queue
                 prev_obj = new_child
+              else
+                # TODO Notify DRI App that there are invalid objects!!
+                logger.error("ERR_NIVAL: #{new_child.title}")
+                new_child.errors.messages.each do |key, value|
+                  logger.error("#{key}: #{value}")
+                end
               end
 
               metadata_child_index += 1
@@ -125,9 +156,11 @@ module DRI
         #     queue up child
         #   child = child.next_sibling
         #   marker++
+        # TODO For EAD Updates the case below is unimplemented
         # else if child != nil and check if child identifier is not in metadata
         #   child = child.next_sibling
         #   delete node and it's children
+        # TODO For EAD Updates the case below is unimplemented
         # else if child != nil and check if metadata is in children
         #   prev_later_child = later_child.prev_sibling
         #   later_child.prev_sibling = prev_child
@@ -151,8 +184,20 @@ module DRI
           while child_obj != nil do
             to_delete = child_obj
             child_obj = child_obj.next_sibling
+
+            solr_query = "ancestor_id_tesim:\"#{to_delete.pid.to_s}\""
+
             # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
-            EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => to_delete.pid.to_s).each do |obj|
+            # Line below uncommented if using EAD.find
+            #EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => to_delete.pid.to_s).each do |obj|
+
+            # The query service returns back a set of Solr Documents, therefore need to be casted later on
+            ActiveFedora::SolrService.query(solr_query, :defType => "edismax").each do |obj|
+              # If using SolrService.query
+              # Create an instance of Solr document
+              doc = SolrDocument.new(obj)
+              # Cast the solr document to its corresponding Fedora object
+              obj = EncodedArchivalDescription.find(doc.id)
               obj.generic_files.each do |file_obj|
                 file_obj.delete
               end
@@ -206,6 +251,10 @@ module DRI
           return false
         end
       end # is_ead_same_element?
+
+      def is_child_id_in_metadata(child_obj, md_elem)
+        # TODO Implement method for checking whether an existing child identifier is present in new metadata when updating collections
+      end # is_child_id_in_metadata
 
     end # module
   end # module
