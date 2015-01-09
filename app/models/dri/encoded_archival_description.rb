@@ -43,6 +43,7 @@ module DRI
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
 
     around_save :synchronize_if_changed
 
@@ -68,6 +69,16 @@ module DRI
 
     def attributes=(properties)
       super(properties)
+    end
+
+    # Override from collection.rb adding EAD-specific solr additions
+    def collections_to_solr(solr_doc=Hash.new)
+      binding.pry
+      solr_doc = super(solr_doc)
+      if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
+        solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+      end
+      solr_doc
     end
 
     # Indexing object types as a hierarchical tree
