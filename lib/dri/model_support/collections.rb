@@ -95,6 +95,7 @@ module DRI
         end
 
         solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
+        solr_doc.merge!(solr_name('is_collection', :stored_searchable) => is_collection?)
 
         solr_doc
       end #collections_to_solr
