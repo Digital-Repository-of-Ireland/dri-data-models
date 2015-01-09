@@ -46,10 +46,21 @@ module DRI
               t.contributor(:path=>"persname", :attributes=>{:role=>"contributor"}, :namespace_prefix => nil)
             }
 
-            t.creation_date(:path=>"unitdate") {
+            t.unitdate(:path=>"unitdate") {
               t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
               t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
             }
+
+            #t.creation_date(:path=>"unitdate", :attributes=>{:datechar=>"Creation"}) {
+            #  t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
+            #  t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
+            #}
+
+            #t.temporal_coverage(:path=>"unitdate") {
+            #  t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
+            #  t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
+            #}
+
             t.physdesc(:path=>"physdesc") {
               t.type(:path=>"genreform")
             }
@@ -67,6 +78,10 @@ module DRI
               t.url_attr(:path => {:attribute=>"url"}, :namespace_prefix => nil)
               t.public_id_attr(:path => {:attribute=>"publicid"}, :namespace_prefix => nil)
             }
+          }
+          t.controlaccess {
+            # Or just subject within controlaccess as immediate child of c
+            t.subject_c(:path=>"subject")
           }
           t.bioghist {
 
@@ -90,7 +105,7 @@ module DRI
         # Rights
         t.rights(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Creation Date
-        t.creation_date(:proxy => [:c, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.creation_date(:path => 'unitdate[@datechar="Creation"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         # DRI Common fields
         # Language
@@ -99,7 +114,7 @@ module DRI
         t.publisher(:proxy => [:c, :archdesc, :repository], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Published Date
         # TODO Add published_date field to the terminology. What's the mapped EAD term?
-        t.published_date(:proxy => [:c, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.published_date(:ref => [:creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Subject
         t.subject(:proxy => [:c, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Contributor
@@ -118,12 +133,14 @@ module DRI
         t.access_restrict(:proxy => [:c, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Subject
         t.subject_archdesc(:proxy => [:c, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.subject_control_access(:proxy => [:c, :controlaccess, :subject_c], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
         t.name_coverage(:proxy => [:c, :archdesc, :controlaccess, :name_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.persname_coverage(:proxy => [:c, :archdesc, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:c, :archdesc, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:c, :archdesc, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.temporal_coverage(:path => 'unitdate[not(@datechar="Creation")]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.type(:proxy => [:c, :did, :physdesc, :type], :index_as=>[:stored_searchable])
@@ -193,11 +210,14 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type_array)
         solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type_array)
 
-        # Person EAD has several "name" tags, so we merge them together into the SOLR document
+        # Person  - EAD has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index()
 
         solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
         solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+
+        solr_doc.merge!(Solrizer.solr_name('creator', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -216,7 +236,7 @@ module DRI
         rights_array = rights_for_index()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('rights', :stored_searchable, type: :string) => rights_array)
 
-        # FIXME License
+        # FIXME Licence
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => access_restrict) unless access_restrict == []
 
         # Subject
@@ -225,6 +245,17 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject_array)
         solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_array)
 
+        # Creation date
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date)
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
+
+        # Language
+        solr_doc.merge!(Solrizer.solr_name('language', :stored_searchable) => language)
+
+        # Geographical Coverage
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
+        # Temporal Coverage
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
         solr_doc
       end #to_solr
 
@@ -244,9 +275,9 @@ module DRI
         return rights | access_restrict
       end
 
-      # Mapping to UI subjects: controlaccess/subject or subject
+      # Mapping to UI subjects: archdesc/controlaccess/subject or subject or controlaccess/subject
       def subject_for_index()
-        return subject | subject_archdesc
+        return subject | subject_archdesc | subject_control_access
       end
 
       # Mapping to UI subjects: //c/archdesc/@level or type
@@ -294,12 +325,14 @@ module DRI
             [:c, :did, :origination, :contributor]
           when :publisher
             [:c, :archdesc, :repository]
-          when :creation_date
-            [:c, :did, :creation_date]
+          when :creation_date, :published_date
+            [:creation_date]
           when :subject
             [:c, :archdesc, :control_access, :subject_a]
           when :subject_archdesc
             [:c, :archdesc, :subject_b]
+          when :subject_control_access
+            [:c, :controlaccess, :subject_c]
           when :name_coverage
             [:c, :archdesc, :name_coverage]
           when :persname_coverage
@@ -308,6 +341,8 @@ module DRI
             [:c, :archdesc, :controlaccess, :corpname_coverage]
           when :geographical_coverage
             [:c, :archdesc, :geographical_coverage]
+          when :temporal_coverage
+            [:c, :did, :temporal_coverage]
           when :physdesc
             [:c, :did, :physdesc]
           when :type

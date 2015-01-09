@@ -90,7 +90,7 @@ module DRI
                 t.contributor(:path=>"persname", :attributes=>{:role=>"contributor"}, :namespace_prefix => nil)
               }
 
-              t.creation_date(:path=>"unitdate") {
+              t.unitdate(:path=>"unitdate") {
                 t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
                 t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
               }
@@ -128,7 +128,7 @@ module DRI
         # TODO Add published_date field to the terminology. What's the mapped EAD term?
         t.published_date(:proxy => [:ead, :eadheader, :filedesc, :publicationstmt, :date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Creation Date: creation_date within archdesc first, if not present, then look in eadheader/profiledesc (collection-level, M)
-        t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.creation_date(:path => 'unitdate[@datechar="Creation"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # ORIGINAL - t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable])
         # Subject (collection-level, R)
         t.subject(:proxy => [:ead, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
@@ -187,6 +187,7 @@ module DRI
         t.persname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:ead, :archdesc, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.temporal_coverage(:path => 'unitdate[not(@datechar="Creation")]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # EAD Elements
         t.note(:proxy => [:ead, :eadheader, :filedesc, :notestmt, :note], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
@@ -280,6 +281,9 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject_array)
         solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_array)
 
+        # Published Date
+        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => creation_date_profiledesc | published_date)
+
         solr_doc
       end #solr_doc
 
@@ -358,7 +362,7 @@ module DRI
           when :publisher
             [:ead, :eadheader, :filedesc, :publicationstmt, :publisher]
           when :creation_date
-            [:ead, :archdesc, :did, :creation_date]
+            [:creation_date]
           when :creation_date_profiledesc
             [:ead, :eadheader, :profiledesc, :creation, :date]
           when :published_date
