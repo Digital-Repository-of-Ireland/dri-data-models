@@ -73,7 +73,6 @@ module DRI
 
     # Override from collection.rb adding EAD-specific solr additions
     def collections_to_solr(solr_doc=Hash.new)
-      binding.pry
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
         solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
