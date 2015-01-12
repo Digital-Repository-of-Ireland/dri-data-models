@@ -133,7 +133,7 @@ module DRI
         # Subject (collection-level, R)
         t.subject(:proxy => [:ead, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         # Rights (collection-level, M)
-        t.rights(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        t.rights(:proxy => [:ead, :archdesc, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Type (M)
         t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
@@ -178,7 +178,7 @@ module DRI
         # Creation_Date
         t.creation_date_profiledesc(:proxy => [:ead, :eadheader, :profiledesc, :creation, :date], :index_as=>[Descriptors.cleaned_searchable])
         # License
-        t.access_restrict(:proxy => [:ead, :archdesc, :accessrestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.user_restrict(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Subject
         t.subject_archdesc(:proxy => [:ead, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
@@ -284,6 +284,9 @@ module DRI
         # Published Date
         solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => creation_date_profiledesc | published_date)
 
+        # Licence
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => user_restrict) unless user_restrict == []
+
         solr_doc
       end #solr_doc
 
@@ -302,7 +305,7 @@ module DRI
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
-        return rights | access_restrict
+        return rights | user_restrict
       end
 
       # Mapping to UI subjects: controlaccess/subject or subject
@@ -332,7 +335,7 @@ module DRI
       end
 
       def get_rights()
-        (rights != []) ? rights : access_restrict
+        (rights != []) ? rights : user_restrict
       end
 
       def get_subject()
@@ -400,9 +403,9 @@ module DRI
           when :country_code
             [:ead, :eadheader, :eadid, :country_code]
           when :rights
-            [:ead, :archdesc, :userestrict]
-          when :access_restrict
             [:ead, :archdesc, :accessrestrict]
+          when :user_restrict
+            [:ead, :archdesc, :userestrict]
           when :subject
             [:ead, :archdesc, :controlaccess, :subject_a]
           when :subject_archdesc

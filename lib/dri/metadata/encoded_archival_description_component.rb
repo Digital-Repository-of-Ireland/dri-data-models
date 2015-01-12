@@ -103,7 +103,7 @@ module DRI
         # Creator
         t.creator(:proxy => [:c, :did, :creator], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
         # Rights
-        t.rights(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        t.rights(:proxy => [:c, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Creation Date
         t.creation_date(:path => 'unitdate[@datechar="Creation"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
@@ -129,8 +129,8 @@ module DRI
         t.bioghist(:proxy => [:c, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
         # Scopecontent
         t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable])
-        # Accessrestrict
-        t.access_restrict(:proxy => [:c, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        # Userestrict / Licence
+        t.user_restrict(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Subject
         t.subject_archdesc(:proxy => [:c, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.subject_control_access(:proxy => [:c, :controlaccess, :subject_c], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
@@ -233,11 +233,11 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Rights
-        rights_array = rights_for_index()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('rights', :stored_searchable, type: :string) => rights_array)
+        #rights_array = rights_for_index()
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('rights', :stored_searchable, type: :string) => rights)
 
         # FIXME Licence
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => access_restrict) unless access_restrict == []
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => user_restrict) unless user_restrict == []
 
         # Subject
         subject_array = subject_for_index()
@@ -272,7 +272,7 @@ module DRI
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
-        return rights | access_restrict
+        return rights | user_restrict
       end
 
       # Mapping to UI subjects: archdesc/controlaccess/subject or subject or controlaccess/subject
@@ -296,7 +296,7 @@ module DRI
       end
 
       def get_rights()
-        (rights != []) ? rights : access_restrict
+        (rights != []) ? rights : user_restrict
       end
 
       def get_subject()
@@ -368,9 +368,9 @@ module DRI
           when :identifier_public_id
             [:c, :did, :unitid, :public_id_attr]
           when :rights
-            [:ead, :archdesc, :userestrict]
-          when :access_restrict
-            [:ead, :archdesc, :access_restrict]
+            [:c, :accessrestrict]
+          when :userestrict
+            [:c, :userestrict]
           when :note
             [:c, :did, :note]
           else
