@@ -2,12 +2,14 @@ module DRI
   module ModelSupport
   	module InterchangeableMetadata
       extend ActiveSupport::Concern
-    
+
       included do
         attr_accessor :desc_metadata_class
 
+        # Descriptive metadata datastream
         has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
-        has_metadata :name => "fullMetadata", :type => ActiveFedora::OmDatastream
+        # Complete metadata record datastream
+        has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
 
         after_initialize :load_attributes
         after_save :reset_metadata_check
@@ -45,6 +47,7 @@ module DRI
         has_attributes :physdesc, datastream: :descMetadata, multiple: true
         has_attributes :dao, datastream: :descMetadata, multiple: true
         has_attributes :dao_href, datastream: :descMetadata, multiple: true
+        has_attributes :dao_desc, datastream: :descMetadata, multiple: true
         has_attributes :unitid, datastream: :descMetadata, multiple: false
         has_attributes :repository_code, datastream: :descMetadata, multiple: false
         has_attributes :country_code, datastream: :descMetadata, multiple: false
@@ -73,7 +76,11 @@ module DRI
         end
       end
 
-      # Use this in preference over the setting xml directly in the OmDatastreams
+      # Updates the metadata class of the current digital object in case we are now working
+      # with a different metadata standard
+      # @param[String,File] xml_text xml metadata content or a File
+      # @return[boolean] true if op successful
+      # Note: Use this in preference over the setting xml directly in the OmDatastreams
       def update_metadata xml_text
         if (xml_text.is_a? File)
           xml_text = xml_text.read
@@ -83,12 +90,19 @@ module DRI
         replacing_metadata = get_metadata_class_from_xml xml_text
 
         if curr_metadata == replacing_metadata
+          # No changes in the metadata class and the class is EAD, then modify MD DS
           if replacing_metadata == "DRI::Metadata::EncodedArchivalDescription" ||
               replacing_metadata == "DRI::Metadata::EncodedArchivalDescriptionComponent"
+            # fullMetadata stores the complete EAD MD record
             fullMetadata.ng_xml = xml_text
+            # Remove xml from the complete EAD metadata record:
+            # Collection-level: reduce it to eadHeader, archDesc
+            # EAD Component-level: reduce to the component xml snippet
             xml_text = split_ead_xml xml_text, replacing_metadata
           end
 
+          # descMetadata DS stores the XML snippet
+          # for either collection or EAD component level metadata
           descMetadata.ng_xml = xml_text
 
           return true
@@ -98,7 +112,7 @@ module DRI
 
           # Given that the original and replacing metadata are definitely
           # using different metadata schema, do any of them disallow
-          # being interchanged.
+          # being interchanged?
           if !ds.interchangeable? || !descMetadata.interchangeable?
             return false
           end
@@ -134,9 +148,10 @@ module DRI
         if self.new_record?
           return
         end
+
         if descMetadata.class == DRI::Metadata::EncodedArchivalDescription ||
            descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
-           
+
           metadata_child_index = 0
 
           prev_obj = nil
@@ -196,7 +211,10 @@ module DRI
 
                 if child_obj.valid?
                   child_obj.save
-                  # add to queue
+                  # TODO add to queue
+                  #if child_obj.generic_files.empty?
+                  #  Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
+                  #end
                 end
 
               end
@@ -223,7 +241,9 @@ module DRI
               if new_child.valid?
                 new_child.save
 
-                # add to queue
+                # TODO add to queue
+                # Sufia.queue.push(IngestFilesFromMetadataJob.new(new_child.pid))
+
                 prev_obj = new_child
               end
 
@@ -314,12 +334,12 @@ module DRI
         if namespace.has_value?("http://purl.org/dc/elements/1.1/")
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
-          result = "DRI::Metadata::MODS"
+          result = "DRI::Metadata::Mods"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
-        end       
+        end
 
         return result
       end
@@ -332,12 +352,12 @@ module DRI
         ds_class = ""
         ds = nil
 
-        if (new? && desc_metadata_class != nil)
+        if (new_record? && desc_metadata_class != nil)
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
-          if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::MODS",
-                 "DRI::Metadata::EncodedArchivalDescription", 
+          if ["DRI::Metadata::QualifiedDublinCore", "DRI::Metadata::Mods",
+                 "DRI::Metadata::EncodedArchivalDescription",
                  "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             ds = ds_class.constantize.new
           else
@@ -356,7 +376,7 @@ module DRI
           ds.digital_object = old_digital_object
         end
 
-        if (ds != nil)       
+        if (ds != nil)
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
         end
@@ -371,7 +391,8 @@ module DRI
           content_changed = self.descMetadata.changed?
         end
 
-        yield
+        yield # Perform digital object save
+
         if content_changed && !new_record?
           Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
         end

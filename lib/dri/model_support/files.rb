@@ -10,8 +10,16 @@ module DRI
         around_save :ingest_files_if_changed
       end
 
-
       def process_ingest_of_file_urls
+        # TODO AMG - implement different behaviour for EAD, MODS, etc
+        # At the moment only works for EAD: i.e. dao_href element
+        # case descMetadata
+        #  when DRI::Metadata::EncodedArchivalDescription
+        #  when DRI::Metadata::EncodedArchivalDescriptionComponent
+        #  when DRI::Metadata::Mods
+        #  when DRI::Metadata::ModsCollection
+        #  when ...
+        # end
         self.dao_href.each do |url|
           if !url.blank?
             add_file_from_url url.strip
@@ -19,14 +27,18 @@ module DRI
         end
       end
 
-      # Ingest a file from a given url
+      # Ingest a file (generic_file) from a given URL
       def add_file_from_url file_url
         file_name = File.basename(URI(file_url).path)
         begin
+
+          # We have a copy of the remote file for processing
           temp_file = Tempfile.new(['tmp', File.extname(file_url)])
           temp_file.binmode
           open(file_url) { |data| temp_file.write data.read}
           temp_file.close
+
+          # TODO AMG - add_file should create the content DS and also relate the generic_file to the MD object
           add_file temp_file, "content", file_name
           true
         rescue Exception => e
@@ -34,7 +46,9 @@ module DRI
           logger.error e.backtrace.join("\n")
           false
         ensure
-          temp_file.unlink
+          # Explicitly close the temp file
+          temp_file.close unless temp_file.nil?
+          temp_file.unlink unless temp_file.nil?
         end
       end
 
@@ -67,6 +81,7 @@ module DRI
           end
         end
 
+        # TODO - AMG check generic_file to batch rel is indexed properly
         solr_query = "is_part_of_ssim:info:fedora/#{pid}"
         results = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
@@ -119,6 +134,7 @@ module DRI
         end
 
         if file_type.empty?
+          # FIXME Use Vocabulary.dcmiType rather that if-elsif
           # As a last resort try to determine the file type from the
           # DCMI vocabulary in the metadata.
           if type.include?("Sound")
@@ -187,11 +203,17 @@ module DRI
       end
 
       # Ingest a file into a GenericFile and add it to the Batch object
-      def add_file file, dsid="content",file_name
+      # This method is implemented in dri-app/config/initializers/batch_files_support.rb
+      def add_file file, dsid="content", file_name
+        # FIXME At present add_file is implemented in the DRI App
+        # binding.pry
+        #gf = GenericFile.new(:pid => Sufia::IdService.mint)
+        #gf.batch = self
+        # ...
+        #gf.save
       end
 
       private
-
 
       def ingest_files_if_changed
 
@@ -201,10 +223,13 @@ module DRI
           content_changed = self.descMetadata.changed?
         end
 
+        # Does the actual collection/file save
         yield
-
+        # Remove self.dao_href for temporarily tracking EAD
+        # if content_changed && self.generic_files.empty? && !new_record?
+        # TODO Only works for EAD - If other MD classes call this method this has to be fixed
         if content_changed && self.generic_files.empty? &&
-            !self.dao_href.empty? && !new_record?
+          !self.dao_href.empty? && !new_record?
           Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
         end
       end

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Batch do
+describe 'Batch' do
 
   before(:each) do
     @collection_xml = fixture("ead/ead_collection.xml")

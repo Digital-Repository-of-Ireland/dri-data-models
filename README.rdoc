@@ -37,3 +37,4 @@ or your own instance of Fedora-Commons or SOLR running.
 To run the tests, the following command is required
 
   $ rake rspec
+

@@ -1,7 +1,7 @@
 # spec/modules/generic_file.rb
 require 'spec_helper'
 
-describe GenericFile do
+describe 'GenericFile' do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests
@@ -18,6 +18,10 @@ describe GenericFile do
   it "should not have the ability to create new datastreams when updating a file reference" do
     @file_asset.update_file_reference("randomfile", {:url => "http://johndadlez.com/MP3/BTAS2_D1_45_Gotham.mp3", :mimeType => "audio/mpeg3"})
     @file_asset.datastreams.keys.should_not include("randomfile")
+  end
+
+  it "should have a characterize method" do
+    @file_asset.should respond_to?(:characterize)
   end
 
   #it "should validate the existence of file content" do

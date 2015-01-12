@@ -133,7 +133,12 @@ module DRI
 
       # merge in special facets (e.g. person) into solr document
       def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+        solr_doc = super(solr_doc)
+
+        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[Solrizer.solr_name("published_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[Solrizer.solr_name("creator", :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
@@ -213,7 +218,8 @@ module DRI
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
-          people = contributor | creator | publisher
+          people = contributor | publisher
+          people |= creator.reject{|c| /^null$/i.match(c)}  
 
           DRI::Vocabulary::marcRelators.each do |role|
             people |= send("role_"+role)

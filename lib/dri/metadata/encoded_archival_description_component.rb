@@ -22,7 +22,7 @@ module DRI
             t.abstract
             t.language(:path=>"langmaterial")
             t.creator(:path=>"origination")
-            
+
             t.creation_date(:path=>"unitdate") {
               t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
               t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
@@ -32,6 +32,7 @@ module DRI
             }
             t.dao(:path=>"dao") {
               t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
+              t.daodesc
             }
 
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
@@ -48,10 +49,17 @@ module DRI
           t.scopecontent {
 
           }
+          t.userestrict {
+
+          }
         }
         t.ead_level(:proxy => [:c, :ead_level])
         t.title(:proxy => [:c, :did, :unittitle], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
+        t.description(:proxy => [:dao_desc], :index_as=>[Descriptors.cleaned_searchable])
+        # t.description(:proxy => [:c, :did, :abstract])
+        # FIXME - the UI is expecting the proxy :description, do we also need to index the proxy :abstract?
         t.abstract(:proxy => [:c, :did, :abstract], :index_as=>[Descriptors.cleaned_searchable])
+        # t.abstract(:proxy => [:c, :did, :abstract])
         t.bioghist(:proxy => [:c, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
         t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable])
         t.language(:proxy => [:c, :did, :language], :index_as=>[:stored_searchable, Descriptors.language_facetable])
@@ -66,11 +74,14 @@ module DRI
         t.type(:ref => [:c, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.language_facetable])
         t.dao(:proxy => [:c, :did, :dao])
         t.dao_href(:proxy => [:c, :did, :dao, :href])
+        t.dao_desc(:proxy => [:c, :did, :dao, :daodesc])
         t.unitid(:proxy => [:c, :did, :unitid], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.repository_code(:proxy => [:c, :did, :unitid, :repository_code], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.country_code(:proxy => [:c, :did, :unitid, :country_code], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.identifier(:proxy => [:c, :did, :unitid, :identifier], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-
+        t.rights(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # TODO Add published_date field to the terminology. What's the mapped EAD term?
+        t.published_date(:proxy => [:c, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
       end # set_terminology
 
@@ -95,15 +106,17 @@ module DRI
       def retrieve_xpath
          terminology.xpath_for(:title)
       end
+
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
-
+        # FIXME - Index metadata terms that are required for the UI Solr search: title, description, check what else
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('title', :stored_searchable, type: :string) => title)
         # EAD has several "name" tags, so we merge them together into the SOLR document
         person_array = get_person_array()
         description_array = description
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :stored_searchable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :searchable) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         solr_doc
       end
@@ -112,8 +125,10 @@ module DRI
          return name_coverage | persname_coverage | corpname_coverage | creator
       end
 
+      # Choose from the first available term from EAD that can be mapped to description
+      # Abstract, scope_content, bioghist or daodesc
       def description
-        return abstract |scope_content | bioghist
+        return abstract | scope_content | bioghist | dao_desc
       end
 
       def metadata_path field
@@ -146,6 +161,8 @@ module DRI
           [:c, :did, :physdesc, :type]
         when :dao_href
           [:c, :did, :dao, :href]
+        when :dao_desc
+          [:c, :did, :dao, :daodesc]
         when :unitid
           [:c, :did, :unitid]
         when :repository_code
@@ -187,7 +204,7 @@ module DRI
         matchingNodes = parentMetadataXML.xpath(".//parent::unitid[@repository_code='#{repository_code}' and @countrycode='#{country_code}' and "+
                                             " text()=#{unitid}]")
         # Queue synchronization between parent and grandparent
-        if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent 
+        if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
           Sufia.queue.push(SynchronizeMetadata.new(parent.pid))
         end
       end
@@ -225,7 +242,7 @@ module DRI
         repository_code.each do |curr_rc|
           rc_result = true unless curr_rc.blank?
         end
-        
+
         errors[:title] = "can't be blank" if title_result == false
         errors[:abstract] = "can't be blank" if description_result == false
         errors[:ead_level] = "can't be blank" if ead_level_result == false

@@ -37,6 +37,20 @@ module DRI
         end
       end
 
+      def prefix
+        '' # add a prefix for solr index terms if you need to namespace identical terms in multiple data streams 
+      end
+
+      def remove_null_values solr_doc, field
+        [:stored_searchable, :facetable].each do |index_type|
+          if solr_doc[Solrizer.solr_name(field, index_type)].present?
+            solr_doc[Solrizer.solr_name(field, index_type)].delete_if{|v| /^null$/i.match(v)}
+          end
+        end
+
+        solr_doc
+      end
+
     end
   end
 end

@@ -18,18 +18,13 @@ Gem::Specification.new do |s|
   s.files = Dir["{app,config,db,lib}/**/*"] + ["Rakefile", "README.rdoc"]
   s.test_files = Dir["{spec}/**/*"]
 
-  s.add_dependency "hydra-head", "6.4.0"
-  s.add_dependency "hydra-access-controls", "6.4.0"
-  s.add_dependency "iso-639"
-  s.add_dependency "sufia-models", "3.4.0"
-  s.add_development_dependency "rspec"
-  s.add_development_dependency "mocha"
-  s.add_development_dependency "rspec-rails"
-  s.add_development_dependency "cucumber"
-  s.add_development_dependency "rdoc"
-  s.add_development_dependency "rake"
-  s.add_development_dependency "rack-test"
-  #s.add_development_dependency "simplecov"
+  s.require_paths = ["lib", "app"]  
 
-  s.require_paths = ["lib", "app/models"]
+  s.add_dependency "rails", ">= 4.0"
+  s.add_dependency 'sass-rails', '~> 4.0.3'
+  s.add_dependency "hydra-head", ">= 7.0"
+  s.add_dependency "hydra-access-controls"
+  s.add_dependency "hydra-collections"
+  s.add_dependency "iso-639"
+  s.add_dependency "sufia-models", ">= 4.0.0"
 end
