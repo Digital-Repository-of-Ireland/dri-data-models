@@ -3,7 +3,8 @@ require 'spec_helper'
 describe 'EncodedArchivalDescription' do
 
   before(:each) do
-    @collection_xml = fixture("ead/collections/ead_collection.xml")
+    @collection_xml = fixture("ead/collections/ead_collection_dtd.xml")
+    @collection_modified_xml = fixture("ead/collections/ead_collection_modified_dtd.xml")
     @ead_collection = DRI::EncodedArchivalDescription.new :collection
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
     @ead_collection.save
@@ -86,6 +87,15 @@ describe 'EncodedArchivalDescription' do
   end
 
   xit "should modify children's metadata if metadata specifies this" do
+    # Load in the previously saved collection the new metadata (one component child has been added)
+    new_collection = DRI::EncodedArchivalDescription.find_or_create(@ead_collection.pid.to_s)
+    new_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_modified_xml).to_xml
+    new_collection.save
+
+    title = "Fake Invitation"
+    solr_query = "title_tesim:\"#{title.to_s}\""
+    new_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+    new_obj.length.should == 1
   end
 
   after(:each) do

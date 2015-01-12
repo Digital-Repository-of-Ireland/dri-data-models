@@ -6,7 +6,7 @@ describe 'EncodedArchivalDescription' do
     @series_xml = fixture("ead/components/component_series.xml")
     @file_xml = fixture("ead/components/component_file.xml")
     @item_xml = fixture("ead/components/component_item.xml")
-    @collection_xml = fixture("ead/collections/ead_collection.xml")
+    @collection_xml = fixture("ead/collections/ead_collection_dtd.xml")
     @ead_collection = DRI::EncodedArchivalDescription.new :collection #DRI::Metadata::EncodedArchivalDescription
     @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
     @ead_series = DRI::EncodedArchivalDescription.new :component #:desc_metadata_class => DRI::Metadata::EncodedArchivalDescriptionComponent
@@ -86,26 +86,27 @@ describe 'EncodedArchivalDescription' do
     @ead_collection.bioghist = ""
     @ead_collection.should_not be_valid
 
-    @ead_series.should be_valid
-    @ead_series.scope_content = ""
-    @ead_series.abstract = ""
-    @ead_series.bioghist = ""
-    @ead_series.dao_desc = [""]
-    @ead_series.should_not be_valid
+    # AMG Commented - description is not compulsory at object level!
+    #@ead_series.should be_valid
+    #@ead_series.scope_content = ""
+    #@ead_series.abstract = ""
+    #@ead_series.bioghist = ""
+    #@ead_series.dao_desc = [""]
+    #@ead_series.should_not be_valid
 
-    @ead_file.should be_valid
-    @ead_file.scope_content = ""
-    @ead_file.abstract = ""
-    @ead_file.bioghist = ""
-    @ead_file.dao_desc = [""]
-    @ead_file.should_not be_valid
+    #@ead_file.should be_valid
+    #@ead_file.scope_content = ""
+    #@ead_file.abstract = ""
+    #@ead_file.bioghist = ""
+    #@ead_file.dao_desc = [""]
+    #@ead_file.should_not be_valid
 
-    @ead_item.should be_valid
-    @ead_item.scope_content = ""
-    @ead_item.abstract = ""
-    @ead_item.bioghist = ""
-    @ead_item.dao_desc = [""]
-    @ead_item.should_not be_valid
+    #@ead_item.should be_valid
+    #@ead_item.scope_content = ""
+    #@ead_item.abstract = ""
+    #@ead_item.bioghist = ""
+    #@ead_item.dao_desc = [""]
+    #@ead_item.should_not be_valid
   end
 
   it "should validate the presence of the level attribute" do
