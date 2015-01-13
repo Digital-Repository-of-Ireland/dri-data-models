@@ -132,8 +132,8 @@ module DRI
         # ORIGINAL - t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable])
         # Subject (collection-level, R)
         t.subject(:proxy => [:ead, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        # Rights (collection-level, M)
-        t.rights(:proxy => [:ead, :archdesc, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        # Rights (collection-level, M) From the guidelines, at collection-level maps to userestrict
+        t.rights(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Type (M)
         t.type(:proxy => [:ead, :archdesc, :did, :physdesc, :type], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
@@ -178,7 +178,8 @@ module DRI
         # Creation_Date
         t.creation_date_profiledesc(:proxy => [:ead, :eadheader, :profiledesc, :creation, :date], :index_as=>[Descriptors.cleaned_searchable])
         # License
-        t.user_restrict(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.licence(:proxy => [:ead, :archdesc, :userestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.access_restrict(:proxy => [:ead, :archdesc, :accessrestrict], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Subject
         t.subject_archdesc(:proxy => [:ead, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
@@ -270,7 +271,7 @@ module DRI
         end
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
-        description_array = description_for_index()
+        # description_array = description_for_index()
 
         # FIXME Need to check what, and how to index, Solr fields
         # solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
@@ -285,7 +286,7 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => creation_date_profiledesc | published_date)
 
         # Licence
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => user_restrict) unless user_restrict == []
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence) unless licence == []
 
         solr_doc
       end #solr_doc
@@ -305,7 +306,11 @@ module DRI
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
-        return rights | user_restrict
+        (rights != [] && !rights.first.include?("CC-BY")) ? rights : ['No rights statement']
+      end
+
+      def licence_for_index()
+        (licence != [] && licence.first.include?("CC-BY")) ? licence : []
       end
 
       # Mapping to UI subjects: controlaccess/subject or subject
@@ -335,7 +340,7 @@ module DRI
       end
 
       def get_rights()
-        (rights != []) ? rights : user_restrict
+        (rights != []) ? rights : []
       end
 
       def get_subject()
@@ -402,10 +407,10 @@ module DRI
             [:ead, :eadheader, :eadid, :repository_code]
           when :country_code
             [:ead, :eadheader, :eadid, :country_code]
-          when :rights
-            [:ead, :archdesc, :accessrestrict]
-          when :user_restrict
+          when :rights, :licence
             [:ead, :archdesc, :userestrict]
+          when :access_restrict
+            [:ead, :archdesc, :accessrestrict]
           when :subject
             [:ead, :archdesc, :controlaccess, :subject_a]
           when :subject_archdesc
@@ -455,7 +460,7 @@ module DRI
           creator_result = true unless curr_creator.blank?
         end
         # Rights
-        rights_for_index().each do |curr_r|
+        rights.each do |curr_r|
           rights_result = true unless curr_r.blank?
         end
 
@@ -495,6 +500,7 @@ module DRI
         # For EAD header maps to eadid and for components maps to unitid
         errors[:identifier] = "can't be blank" if ead_id_result == false
         errors[:country_code] = "can't be blank" if cc_result == false
+        # FIXME The repositorycode attribute of unitid should not be compulsory. Fine for NIVAL but not in general
         errors[:repository_code] = "can't be blank" if rc_result == false
 
         # errors[:ead_id] = "can't be blank" if ead_id_result == false

@@ -102,8 +102,10 @@ module DRI
         t.description(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Creator
         t.creator(:proxy => [:c, :did, :creator], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
-        # Rights
-        t.rights(:proxy => [:c, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        # Rights - From guidelines, comes from userestrict
+        t.rights(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        # Userestrict / Licence
+        t.licence(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Creation Date
         t.creation_date(:path => 'unitdate[@datechar="Creation"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
@@ -129,8 +131,8 @@ module DRI
         t.bioghist(:proxy => [:c, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
         # Scopecontent
         t.scope_content(:proxy => [:c, :scopecontent], :index_as=>[Descriptors.cleaned_searchable])
-        # Userestrict / Licence
-        t.user_restrict(:proxy => [:c, :userestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
+        # Accessrestrict - access conditions
+        t.access_restrict(:proxy => [:c, :accessrestrict], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Subject
         t.subject_archdesc(:proxy => [:c, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.subject_control_access(:proxy => [:c, :controlaccess, :subject_c], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
@@ -233,11 +235,13 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Rights
-        #rights_array = rights_for_index()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('rights', :stored_searchable, type: :string) => rights)
+        rights_array = rights_for_index()
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('rights', :stored_searchable, type: :string) => rights_array)
 
         # FIXME Licence
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => user_restrict) unless user_restrict == []
+        # Licence
+        licence_array = licence_for_index()
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
 
         # Subject
         subject_array = subject_for_index()
@@ -267,12 +271,22 @@ module DRI
       # Choose from the first available term from EAD that can be mapped to description
       # Abstract, scope_content, bioghist or daodesc
       def description_for_index()
-        return abstract | scope_content | bioghist | dao_desc | note
+        return scope_content unless scope_content == []
+        return abstract unless abstract == []
+        return bioghist unless bioghist == []
+        return dao_desc unless dao_desc == []
+        return note unless scope_content == []
+        # No concatenation, rather use the order of precedence above
+        # return abstract | scope_content | bioghist | dao_desc | note
       end
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
-        return rights | user_restrict
+        (rights != [] && !rights.first.include?("CC-BY")) ? rights : ['No rights statement']
+      end
+
+      def licence_for_index()
+        (licence != [] && licence.first.include?("CC-BY")) ? licence : []
       end
 
       # Mapping to UI subjects: archdesc/controlaccess/subject or subject or controlaccess/subject
@@ -296,7 +310,7 @@ module DRI
       end
 
       def get_rights()
-        (rights != []) ? rights : user_restrict
+        (rights != []) ? rights : []
       end
 
       def get_subject()
@@ -367,10 +381,10 @@ module DRI
             [:c, :did, :unitid, :url_attr]
           when :identifier_public_id
             [:c, :did, :unitid, :public_id_attr]
-          when :rights
-            [:c, :accessrestrict]
-          when :userestrict
+          when :rights, :licence
             [:c, :userestrict]
+          when :access_restrict
+            [:c, :accessrestrict]
           when :note
             [:c, :did, :note]
           else
@@ -480,6 +494,7 @@ module DRI
         errors[:ead_level] = "can't be blank" if ead_level_result == false
         errors[:identifier] = "can't be blank" if unit_id_result == false
         errors[:country_code] = "can't be blank" if cc_result == false
+        # FIXME The repositorycode attribute of unitid should not be compulsory. Fine for NIVAL but not in general
         errors[:repository_code] = "can't be blank" if rc_result == false
 
         errors
