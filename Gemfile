@@ -41,6 +41,7 @@ group :development, :test do
   gem 'ci_reporter_cucumber'
   gem 'ci_reporter_rspec'  
   gem 'rspec-legacy_formatters'
+  gem 'paper_trail', '~> 3.0.6'
 end
 
 group :test do
