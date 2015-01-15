@@ -276,6 +276,7 @@ module DRI
         return bioghist unless bioghist == []
         return dao_desc unless dao_desc == []
         return note unless note == []
+        return []
         # No concatenation, rather use the order of precedence above
         # return abstract | scope_content | bioghist | dao_desc | note
       end
