@@ -191,6 +191,9 @@ module DRI
         t.temporal_coverage(:path => 'unitdate[not(@datechar="Creation")]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # EAD Elements
         t.note(:proxy => [:ead, :eadheader, :filedesc, :notestmt, :note], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        # Cover image
+        # t.cover_image(:path => 'archdesc[@level="fonds"]/did/dao/@href', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
 
       # synchronize_metadata_on_save
@@ -286,7 +289,8 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => creation_date_profiledesc | published_date)
 
         # Licence
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence) unless licence == []
+        licence_array = licence_for_index()
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
 
         solr_doc
       end #solr_doc
