@@ -310,7 +310,10 @@ module DRI
       end
 
       def licence_for_index()
-        (licence != [] && licence.first.include?("CC-BY")) ? licence : []
+        if (licence != [])
+          (licence.first.include?("CC-BY")) ? licence : ['Please see copyright statement']
+        end
+        return []
       end
 
       # Mapping to UI subjects: controlaccess/subject or subject
