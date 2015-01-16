@@ -292,6 +292,10 @@ module DRI
         licence_array = licence_for_index()
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
 
+        # Type
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
+
+
         solr_doc
       end #solr_doc
 
@@ -316,8 +320,9 @@ module DRI
       def licence_for_index()
         if (licence != [])
           (licence.first.include?("CC-BY")) ? licence : ['Please see copyright statement']
+        else
+          return []
         end
-        return []
       end
 
       # Mapping to UI subjects: controlaccess/subject or subject

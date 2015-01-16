@@ -283,14 +283,29 @@ module DRI
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
-        (rights != [] && !rights.first.include?("CC-BY")) ? rights : ['No rights statement']
+        if (rights != [])
+          (!rights.first.include?("CC-BY")) ? (return rights) : (return ['No rights statement'])
+        else
+          fedora_object = DRI::EncodedArchivalDescription.find(pid)
+
+          solr_query = "id:\"#{fedora_object.governing_collection.pid.to_s}\""
+          docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+
+          parent_rights = docs.first[Solrizer.solr_name('rights', :stored_searchable, type: :string)]
+          if parent_rights != nil
+            return parent_rights
+          else
+            return []
+          end
+        end
       end
 
       def licence_for_index()
         if (licence != [])
           (licence.first.include?("CC-BY")) ? licence : ['Please see copyright statement']
+        else
+          return []
         end
-        return []
       end
 
       # Mapping to UI subjects: archdesc/controlaccess/subject or subject or controlaccess/subject
@@ -430,10 +445,10 @@ module DRI
       def custom_validations
         errors = Hash.new
 
-        # DRI Mandatory elements
+        # DRI Mandatory elements (At collection-level)
         title_result = false
-        description_result = false
-        creator_result = false
+        #description_result = false
+        #creator_result = false
         #rights_result = false
 
         # EAD-specific validation from best practices
@@ -447,17 +462,17 @@ module DRI
           title_result = true unless curr_title.blank?
         end
         # Description
-        description_for_index().each do |curr_description|
-          description_result = true unless curr_description.blank?
-        end
+        #description_for_index().each do |curr_description|
+        #  description_result = true unless curr_description.blank?
+        #end
         # Rights
         #rights_for_index().each do |curr_rights|
         #  rights_result = true unless curr_rights.blank?
         #end
         # Creator
-        creator.each do |curr_creator|
-          creator_result = true unless curr_creator.blank?
-        end
+        #creator.each do |curr_creator|
+        #  creator_result = true unless curr_creator.blank?
+        #end
 
         # EAD-specific
         ead_level.each do |curr_ead_level|
@@ -486,11 +501,14 @@ module DRI
 
         # DRI
         errors[:title] = "can't be blank" if title_result == false
-        # FIXME Is description not DRI compulsory??
-        #errors[:description] = "can't be blank" if description_result == false
-        # FIXME Is creator not DRI compulsory??
-        #errors[:creator] = "can't be blank" if creator_result == false
-        #errors[:rights] = "can't be blank" if rights_result == false
+
+        #if (collection?)
+          # FIXME Are creator, description and rights not DRI compulsory??
+          #errors[:description] = "can't be blank" if description_result == false
+          #errors[:creator] = "can't be blank" if creator_result == false
+          #errors[:rights] = "can't be blank" if rights_result == false
+        #end
+
         #errors[:abstract] = "can't be blank" if description_result == false
 
 

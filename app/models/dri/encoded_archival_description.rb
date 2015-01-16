@@ -110,9 +110,10 @@ module DRI
       solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
       solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
 
-      if rights.empty?
-        solr_doc.merge!(solr_name('rights', :stored_searchable) => ['No rights statement'])
-      end
+      # TODO Implementing rights inheritance from parent collections if not present
+      #if rights.empty?
+      #  solr_doc.merge!(solr_name('rights', :stored_searchable) => ['No rights statement'])
+      #end
 
       solr_doc
     end
