@@ -7,4 +7,7 @@ tmp/
 *.sqlite3
 *.log
 .idea/
-spec/reports/
+spec/reports/*
+spec/test_app/config/predicate_mappings.yml
+.ruby-version
+jetty/

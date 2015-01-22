@@ -1,7 +1,7 @@
 module DRI
   module Metadata
     autoload :Base, 'dri/metadata/base'
-  	autoload :Descriptors, 'dri/metadata/descriptors'
+    autoload :Descriptors, 'dri/metadata/descriptors'
     autoload :DublinCoreAudio, 'dri/metadata/dublin_core_audio'
     autoload :DublinCorePdfdoc, 'dri/metadata/dublin_core_pdfdoc'
     autoload :DublinCoreCollection, 'dri/metadata/dublin_core_collection'
@@ -14,5 +14,6 @@ module DRI
     autoload :Extracted, 'dri/metadata/extracted'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
+    autoload :Marc, 'dri/metadata/marc'
   end
 end

@@ -18,6 +18,7 @@ module DRI
         has_attributes :depositing_institute, datastream: :properties, multiple: false
         has_attributes :licence, datastream: :properties, multiple: false
         has_attributes :ingest_files_from_metadata, datastream: :properties, multiple: false
+
       end
     end
   end

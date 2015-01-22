@@ -25,7 +25,7 @@ module DRI
             add_file_from_url url.strip
           end
         end
-      end
+      end # process_ingest_of_file_urls
 
       # Ingest a file (generic_file) from a given URL
       def add_file_from_url file_url
@@ -50,7 +50,7 @@ module DRI
           temp_file.close unless temp_file.nil?
           temp_file.unlink unless temp_file.nil?
         end
-      end
+      end # add_file_from_url
 
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
@@ -137,6 +137,8 @@ module DRI
           # FIXME Use Vocabulary.dcmiType rather that if-elsif
           # As a last resort try to determine the file type from the
           # DCMI vocabulary in the metadata.
+          #
+          type = self.descMetadata.type
           if type.include?("Sound")
             file_type.push "audio"
             file_type_display.push "Audio"
@@ -149,7 +151,7 @@ module DRI
           elsif type.include?("Image")
             file_type.push "image"
             file_type_display.push "Image"
-          elsif type.include?("Collection")
+          elsif (type.include?("Collection") || is_collection?)
             file_type.push "collection"
             file_type_display.push "Collection"
           else
@@ -200,7 +202,7 @@ module DRI
         solr_doc.merge!(solr_name('file_count', :stored_sortable, type: :integer) => [file_count])
 
         solr_doc
-      end
+      end # file_metadata_to_solr
 
       # Ingest a file into a GenericFile and add it to the Batch object
       # This method is implemented in dri-app/config/initializers/batch_files_support.rb
@@ -232,7 +234,10 @@ module DRI
           !self.dao_href.empty? && !new_record?
           Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
         end
-      end
-    end
-  end
-end
+      end # ingest_files_if_changed
+
+    end # module
+
+  end # module
+
+end # module

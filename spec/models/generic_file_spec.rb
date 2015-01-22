@@ -5,7 +5,7 @@ describe 'GenericFile' do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests
-    @file_asset = GenericFile.new
+    @file_asset = DRI::GenericFile.new
   end
 
   it "should have the ability to add references to audio files" do

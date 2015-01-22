@@ -4,7 +4,7 @@ describe 'Batch' do
   
   before(:each) do
     # This gives you a test article object that can be used in any of the tests
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.type = ["Sound"]
 
     @attributes_hash = {
@@ -28,7 +28,7 @@ describe 'Batch' do
   it "should load from xml" do
     @dc = fixture("audios/dublin_core_audio_sample1.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    audio2 = Batch.new
+    audio2 = DRI::QualifiedDublinCore.new
     audio2.update_metadata @ds.to_xml
     audio2.descMetadata.content_changed?.should == true
     audio2.should be_valid
@@ -76,13 +76,13 @@ describe 'Batch' do
     # From ingestion
     @dc = fixture("audios/dublin_core_audio_sample1.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2 = Batch.new
+    @audio2 = DRI::QualifiedDublinCore.new
     @audio2.update_metadata @ds.to_xml
     @audio2.should be_valid
   end
 
   it "the status property should be set as 'draft' when a new Audio object is created" do
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.status.should == "draft"
   end
      
@@ -125,22 +125,22 @@ describe 'Batch' do
     # From ingestion
     @dc = fixture("audios/dublin_core_audio_notitle_sample.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2 = Batch.new
+    @audio2 = DRI::QualifiedDublinCore.new
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
     # From update_attributes assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash[:title] = [""]
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash.delete("title")
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
 
     # From variable assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.description = ["blah"]
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
@@ -161,17 +161,17 @@ describe 'Batch' do
     @audio.should_not be_valid
 
     # From update_attributes assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash[:description] = [""]
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash.delete("description")
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
 
     # From variable assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.title = ["blah"]
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
@@ -189,22 +189,22 @@ describe 'Batch' do
     # From ingestion
     @dc = fixture("audios/dublin_core_audio_norights_sample.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2 = Batch.new
+    @audio2 = DRI::QualifiedDublinCore.new
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
     # From update_attributes assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash[:rights] = [""]
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash.delete("rights")
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
 
     # From variable assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.title = ["blah"]
     @audio.rights = []
     @audio.creator = ["blah"]
@@ -221,22 +221,22 @@ describe 'Batch' do
     # From ingestion
     @dc = fixture("audios/dublin_core_audio_notype_sample.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2 = Batch.new
+    @audio2 = DRI::QualifiedDublinCore.new
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
     # From update_attributes assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash[:type] = [""]
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash.delete("type")
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
 
     # From variable assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.title = ["blah"]
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
@@ -253,23 +253,23 @@ describe 'Batch' do
     # From ingestion
     @dc = fixture("audios/dublin_core_audio_nodate_sample.xml")
     @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
-    @audio2 = Batch.new
+    @audio2 = DRI::QualifiedDublinCore.new
     @audio2.update_metadata @ds.to_xml
     @audio2.should_not be_valid
 
     # From update_attributes assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash[:type] = [""]
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @attributes_hash.delete("creation_date")
     @attributes_hash.delete("published_date")
     @audio.update_attributes( @attributes_hash )
     @audio.should_not be_valid
 
     # From variable assignment
-    @audio = Batch.new
+    @audio = DRI::QualifiedDublinCore.new
     @audio.title = ["blah"]
     @audio.rights = ["blah"]
     @audio.creator = ["blah"]
@@ -281,7 +281,7 @@ describe 'Batch' do
     @audio.date = [""]
     @audio.should_not be_valid
   end
-
+  
   after(:each) do
     unless @audio.new_record?
       @audio.delete

@@ -234,5 +234,97 @@ module DRI
         "Text"
       ]
     end
+
+    def self.marcType
+      {"a" => "Language material", 
+        "c" => "Notated music",
+        "d" => "Manuscript notated music",
+        "e" => "Cartographic material",
+        "f" => "Manuscript cartographic material",
+        "g" => "Projected medium",
+        "i" => "Nonmusical sound recording",
+        "j" => "Musical sound recording",
+        "k" => "Two-dimensional nonprojectable graphic",
+        "m" => "Computer File",
+        "o" => "Kit",
+        "p" => "Mixed materials",
+        "r" => "Three-dimensional artifact or naturally occurring object",
+        "t" => "Manuscript language material"}
+    end
+
+    # Array [ Decimal Classification Number (R), First Indicator, Second Indicator, Subfield Code ]
+    # :code = datafield no, :ind1 = indicator1, :ind2 = indicator2, :sf = subfield
+    # Below you shove in any sf except the mandatory fields
+    # NCCB Required Fields
+    def self.marcDatafields
+      [
+        {:code => "010", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "015", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "016", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "020", :ind1 => " ", :ind2 => " ", :sf => ["a", "c"]},
+        {:code => "040", :ind1 => " ", :ind2 => " ", :sf => ["a", "c", "d"]},
+        {:code => "041", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "042", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "050", :ind1 => "0", :ind2 => "0", :sf => ["a", "b"]},
+        {:code => "082", :ind1 => "0", :ind2 => "0", :sf => ["a", "2"]},
+        {:code => "083", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "100", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "110", :ind1 => "1", :ind2 => " ", :sf => ["a", "d"]},
+        {:code => "111", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "222", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "240", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "245", :ind1 => "1", :ind2 => "0", :sf => ["a", "c"]},
+        {:code => "248", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "250", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "255", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "260", :ind1 => " ", :ind2 => " ", :sf => ["a", "b", "c"]},
+        {:code => "264", :ind1 => " ", :ind2 => " ", :sf => ["c"]},
+        {:code => "300", :ind1 => " ", :ind2 => " ", :sf => ["a", "b", "c"]},
+        {:code => "336", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "350", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "490", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "500", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "501", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "503", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "504", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "505", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "506", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "514", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "520", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "530", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "531", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "540", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "542", :ind1 => " ", :ind2 => " ", :sf => ["f"]},
+        {:code => "546", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "561", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "563", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "600", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "610", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "611", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "650", :ind1 => " ", :ind2 => "1", :sf => ["a"]},
+        {:code => "651", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "655", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "700", :ind1 => "1", :ind2 => " ", :sf => ["a", "e"]},
+        {:code => "710", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "711", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "740", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "745", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "900", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "910", :ind1 => " ", :ind2 => " ", :sf => ["a"]},
+        {:code => "997", :ind1 => " ", :ind2 => " ", :sf => ["a"]}
+      ]
+    end
+
+    # FIXME List extracted from NIVAL collection. Look for recommended controlled vocabularies
+    def self.eadRoles
+      [
+          "publisher",
+          "contributor",
+          "institution",
+          "business",
+          "designer",
+          "photographer"
+      ]
+    end
   end
 end
