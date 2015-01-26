@@ -13,6 +13,9 @@ module DRI
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
             # component tag in the complete EAD XML datastream in the collection object!
             t.eadid(:path=>"eadid", :namespace_prefix => nil) {
+              # EAD Standard note: for eadid the mandatory attributes are mainagencycode and countrycode
+              # We map t.repository_code to mainagencycode since this is the one needed and to reuse the term with
+              # ead components (the ead class attribute needed is only repository_code)
               t.repository_code(:path => {:attribute=>"mainagencycode"}, :namespace_prefix => nil)
               t.country_code(:path => {:attribute=>"countrycode"}, :namespace_prefix => nil)
               t.identifier_attr(:path => {:attribute=>"identifier"}, :namespace_prefix => nil)
@@ -52,7 +55,6 @@ module DRI
             }
           }
           t.archdesc {
-            t.repository
             t.scopecontent {
             }
             # Subject can be
@@ -100,6 +102,9 @@ module DRI
               t.dao(:path=>"dao") {
                 t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
                 t.daodesc
+              }
+              t.repository {
+                t.corpname
               }
             }
             t.bioghist {
@@ -183,7 +188,6 @@ module DRI
         # Subject
         t.subject_archdesc(:proxy => [:ead, :archdesc, :subject_b], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
-        # FIXME The proxies below do not have an attribute in the EncodedArchivalDescription class
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
         t.persname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
@@ -192,8 +196,9 @@ module DRI
         # EAD Elements
         t.note(:proxy => [:ead, :eadheader, :filedesc, :notestmt, :note], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        # Cover image
-        # t.cover_image(:path => 'archdesc[@level="fonds"]/did/dao/@href', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Institute
+        t.institute(:proxy => [:ead, :archdesc, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+
       end # set_terminology
 
       # synchronize_metadata_on_save
@@ -274,10 +279,10 @@ module DRI
         end
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
-        # description_array = description_for_index()
+        # Description
+        description_array = description_for_index()
 
-        # FIXME Need to check what, and how to index, Solr fields
-        # solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Subject
         subject_array = subject_for_index()
@@ -286,7 +291,10 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_array)
 
         # Published Date
-        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => creation_date_profiledesc | published_date)
+        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => published_date) unless published_date == []
+
+        # Publisher
+        solr_doc.merge!(Solrizer.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
 
         # Licence
         licence_array = licence_for_index()
@@ -295,6 +303,10 @@ module DRI
         # Type
         solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
 
+        # Institute and sponsor/Depositing Institute: archdesc/did/repository
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :facetable) => institute) unless institute == []
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :stored_searchable, type: :string) => institute) unless institute == []
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :stored_searchable, type: :string) => institute) unless institute == []
 
         solr_doc
       end #solr_doc
@@ -307,9 +319,16 @@ module DRI
       def language_for_index()
         return language | language_did
       end
-      # Mapping to UI description attribute from EAD: scopecontent, abstract, bioghist, daodesc
+      # Mapping to UI description attribute from EAD: scopecontent, abstract
       def description_for_index()
-        return description | abstract | bioghist | dao_desc | note
+        return description unless description == []
+        return abstract unless abstract == []
+        #return bioghist unless bioghist == []
+        #return dao_desc unless dao_desc == []
+        #return note unless note == []
+        return []
+        # No concatenation, instead use the order of precedence above
+        # return abstract | scope_content | bioghist | dao_desc | note
       end
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
@@ -319,9 +338,9 @@ module DRI
 
       def licence_for_index()
         if (licence != [])
-          (licence.first.include?("CC-BY")) ? licence : ['Please see copyright statement']
+          (licence.first.include?("CC-BY")) ? licence : ['Please see rights statement']
         else
-          return []
+          return ['Please see rights statement']
         end
       end
 
@@ -336,12 +355,13 @@ module DRI
       end
 
       def get_description()
+        # description maps to scopecontent
         return description unless description == []
-        return abstract unless description_abstract == []
-        return bioghist unless description_bioghist ==[]
-        return dao_desc unless description_daodesc == []
+        return abstract unless abstract == []
+        #return bioghist unless bioghist ==[]
+        #return dao_desc unless dao_desc == []
         # Added also note from the eadHeader
-        return note unless note == []
+        #return note unless note == []
         []
       end
 
@@ -429,6 +449,8 @@ module DRI
             [:ead, :archdesc, :subject_b]
           when :note
             [:ead, :eadheader, :filedesc, :notestmt, :note]
+          when :institute
+            [:ead, :archdesc, :did, :repository, :corpname]
           else
             []
         end
@@ -442,13 +464,16 @@ module DRI
         true
       end
 
-      # DRI Mandatory elements + EAD LC best practices
+      # DRI Mandatory elements + EAD LoC best practices
       def custom_validations
         errors = Hash.new
 
         # Mandatory elements at collection-level
         title_result = false
+        # Description, from MD Taskforce: either scopecontent or abstract; but at least one of them
+        # Description maps to scopecontent by default and abstract to abstract
         description_result = false
+        abstract_result = false
         creator_result = false
         rights_result = false
 
@@ -463,9 +488,13 @@ module DRI
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
         end
-        # Description
-        description_for_index().each do |curr_description|
+        # Description (scopecontent)
+        description.each do |curr_description|
           description_result = true unless curr_description.blank?
+        end
+        # Abstract
+        abstract.each do |curr_abstract|
+          abstract_result = true unless curr_abstract.blank?
         end
         # Creator
         creator.each do |curr_creator|
@@ -481,40 +510,51 @@ module DRI
           ead_level_result = true unless curr_ead_level.blank?
         end
 
+        # Identifier validation
         identifier.each do |curr_ead_id|
-          if (!curr_ead_id.blank? &&
-          (!identifier_id.blank? ||
-          !identifier_url.blank? ||
-          !identifier_public_id.blank?))
-            ead_id_result = true
-          end
-          #ead_id_result = true unless curr_ead_id.blank?
+          ead_id_result = true unless curr_ead_id.blank?
+          # the validation above is commented now because it is only an EAD recommendation
+          #if (!curr_ead_id.blank? &&
+          #(!identifier_id.blank? ||
+          #!identifier_url.blank? ||
+          #!identifier_public_id.blank?))
+          #  ead_id_result = true
+          #end
         end
 
+        # Validation for eadid, @countrycode is a mandatory attribute for eadid element
         country_code.each do |curr_cc|
           cc_result = true unless curr_cc.blank?
         end
 
+        # Validation for eadid, @mainagencycode (repository_code here) is mandatory for eadid element
         repository_code.each do |curr_rc|
           rc_result = true unless curr_rc.blank?
         end
 
+        # TODO Should we add validation for creation date?
+
         # DRI Compulsory elements
         errors[:title] = "can't be blank" if title_result == false
-        errors[:description] = "can't be blank" if description_result == false
+        errors[:description] = "can't be blank" if (description_result == false && abstract_result == false)
         errors[:creator] = "can't be blank" if creator_result == false
         errors[:rights] = "can't be blank" if rights_result == false
         # errors[:abstract] = "can't be blank" if description_result == false
 
         # Specific EAD validation
         errors[:ead_level] = "can't be blank" if ead_level_result == false
-        # For validation of unitid or eadid we now use identifier
-        # For EAD header maps to eadid and for components maps to unitid
-        errors[:identifier] = "can't be blank" if ead_id_result == false
-        errors[:country_code] = "can't be blank" if cc_result == false
-        # FIXME The repositorycode attribute of unitid should not be compulsory. Fine for NIVAL but not in general
-        errors[:repository_code] = "can't be blank" if rc_result == false
 
+        # EADID validation
+        # 1. eadid must be present
+        # 1.1 the attribute mainagencycode is compulsory for eadid
+        # 1.2 the attribute countrycode is compulsory for eadid
+        if (ead_id_result == false)
+          errors[:identifier] = "can't be blank"
+        elsif (cc_result == false || rc_result == false)
+          errors[:identifier] = "invalid use"
+          errors[:country_code] = "can't be blank" if cc_result == false
+          errors[:repository_code] = "can't be blank" if rc_result == false
+        end
         # errors[:ead_id] = "can't be blank" if ead_id_result == false
 
         errors

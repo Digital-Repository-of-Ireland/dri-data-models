@@ -4,7 +4,7 @@ module DRI
     include DRI::ModelSupport::EadSupport
 
     # Specific EAD terms mapped
-    # Identifier
+    # Identifier - for ead header maps to eadid; for components to unitid
     has_attributes :identifier, datastream: :descMetadata, multiple: false
     #has_attributes :unitid, datastream: :descMetadata, multiple: false
     #has_attributes :eadid, datastream: :descMetadata, multiple: false
@@ -44,6 +44,9 @@ module DRI
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+
+    # Institute
+    has_attributes :institute, datastream: :descMetadata, multiple: true
 
     around_save :synchronize_if_changed
 
@@ -156,6 +159,7 @@ module DRI
         content_changed = self.descMetadata.changed?
       end
 
+      # Do the object save
       yield
 
       if content_changed && !new_record?
