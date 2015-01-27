@@ -216,36 +216,28 @@ module DRI
       # @param elem the new EAD child from metadata
       # @return[boolean] true if the identifiers match
       def is_ead_same_object?(child_obj, elem)
-
-        metadata_id_attr = nil
-        metadata_url_attr = nil
-        metadata_publicid_attr = nil
+        repository_code_attr = nil
+        country_code_attr = nil
 
         # Get the text value for unitid
         metadata_id = elem.xpath('did/unitid')[0].text
 
-        # Get the value of unitid/@identifier
-        if elem.xpath('did/unitid/@identifier')[0] != nil
-          metadata_id_attr = elem.xpath('did/unitid/@identifier')[0].value
+        # Get the value of unitid/@repositorycode
+        if elem.xpath('did/unitid/@repositorycode')[0] != nil
+          repository_code_attr = elem.xpath('did/unitid/@repositorycode')[0].value
         end
-        # Get the value of unitid/@url
-        if elem.xpath('did/unitid/@url')[0] != nil
-          metadata_url_attr = elem.xpath('did/unitid/@url')[0].value
-        end
-        # Get the value of unitid/@publicid
-        if elem.xpath('did/unitid/@publicid')[0] != nil
-          metadata_publicid_attr = elem.xpath('did/unitid/@publicid')[0].value
+        # Get the value of unitid/@countrycode
+        if elem.xpath('did/unitid/@countrycode')[0] != nil
+          country_code_attr = elem.xpath('did/unitid/@countrycode')[0].value
         end
 
         # To check that the metadata ids match the current child's ids
-        # we need to look first at the value of unitid AND
-        # then compare against one of the following attributes of unitid: identifier OR url OR publicid
-        if child_obj != nil &&
+        # we need to look first at the value of unitid/eadid AND
+        # then compare against the following attributes of unitid: repositorycode/mainagencycode and countrycode
+        if (child_obj != nil &&
             child_obj.identifier.include?(metadata_id) &&
-            (child_obj.identifier_id.include?(metadata_id_attr) ||
-                child_obj.identifier_url.include?(metadata_url_attr) ||
-                child_obj.identifier_public_id.include?(metadata_publicid_attr)
-            )
+            child_obj.repository_code == repository_code_attr &&
+            child_obj.country_code == country_code_attr)
           return true
         else
           return false
