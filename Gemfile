@@ -42,3 +42,8 @@ group :development, :test do
   gem 'ci_reporter_rspec'  
   gem 'rspec-legacy_formatters'
 end
+
+group :test do
+  # dri-user-group gem added for the rspec tests
+  gem "user_group", :git => 'git@tracker.dri.ie:drirepo/dri-user-group.git', :branch => 'develop'
+end

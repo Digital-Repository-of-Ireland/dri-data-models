@@ -90,14 +90,16 @@ module DRI
           solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => [pid])
         end
 
-        if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-          solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
-        end
-        
+        # Overriden in encoded_archival_collection.rb
+        #if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
+        #  solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+        #end
+
         solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
+        solr_doc.merge!(solr_name('is_collection', :stored_searchable) => is_collection?)
 
         solr_doc
-      end
-    end
-  end
-end
+      end #collections_to_solr
+    end # module
+  end # module
+end #module

@@ -8,3 +8,6 @@ tmp/
 *.log
 .idea/
 spec/reports/*
+spec/test_app/config/predicate_mappings.yml
+.ruby-version
+jetty/
