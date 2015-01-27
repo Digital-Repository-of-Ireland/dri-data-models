@@ -7,7 +7,7 @@ module DRI
         attr_accessor :desc_metadata_class
 
         # Descriptive metadata datastream
-        has_metadata :name => "descMetadata", :type => ActiveFedora::OmDatastream
+        has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
         # Complete metadata record datastream
         has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
 
@@ -154,8 +154,10 @@ module DRI
           ds.instance_variable_set :@dsid, "descMetadata"
           self.add_datastream ds
         end
-
         @metadata_class = descMetadata.class
+        # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
+        self.descMetadata.save
+
       end # load_attributes
     end # module
   end # module
