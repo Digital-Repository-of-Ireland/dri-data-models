@@ -156,7 +156,7 @@ module DRI
         end
         @metadata_class = descMetadata.class
         # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
-        self.descMetadata.save
+        self.descMetadata.save if self.descMetadata.changed?
 
       end # load_attributes
     end # module
