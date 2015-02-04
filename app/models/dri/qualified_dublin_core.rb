@@ -36,6 +36,14 @@ class QualifiedDublinCore < DRI::Batch
   def attributes=(properties)
     super(properties)
   end
+
+  def self.find_or_create(pid)
+    begin
+      DRI::QualifiedDublinCore.find(pid)
+    rescue ActiveFedora::ObjectNotFoundError
+      DRI::QualifiedDublinCore.create({pid: pid})
+    end
+  end
       
 end
 end
