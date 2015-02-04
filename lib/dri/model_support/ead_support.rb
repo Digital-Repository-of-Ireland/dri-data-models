@@ -54,7 +54,10 @@ module DRI
             metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
           else
             #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/*/dsc/*")
-            metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
+            # FIXME Original statement - this only works for components under dsc.
+            #metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
+
+            metadata_children = get_ead_children_components(self.fullMetadata.ng_xml)
           end
 
           if metadata_children.empty?
@@ -131,14 +134,14 @@ module DRI
 
               # Don't add new node if it's invalid
               if new_child.valid?
-                logger.info("NIVAL: #{new_child.title} is about to be saved!")
+                logger.info("EAD_SAVE: #{new_child.title} is valid!")
                 new_child.save
 
                 # add to queue
                 prev_obj = new_child
               else
                 # TODO Notify DRI App that there are invalid objects!!
-                logger.error("ERR_NIVAL: #{new_child.title}")
+                logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
                 new_child.errors.messages.each do |key, value|
                   logger.error("#{key}: #{value}")
                 end
@@ -248,6 +251,19 @@ module DRI
         # TODO Implement method for checking whether an existing child identifier is present in new metadata when updating collections
       end # is_child_id_in_metadata
 
+      # Returns an array of children ead components
+      # @param Nokogiri::XML
+      # @return Nokogiri::XML::NodeSet (Array of EAD Components)
+      def get_ead_children_components(metadata)
+        # Components in EAD can either be children of dsc; or children of c
+        # 1. dsc/c
+        return metadata.xpath("/*/dsc/*") unless metadata.xpath("/*/dsc/*").empty?
+        # 2. c/c and 3. c01/c02/...
+        # For Xpath 2.0
+        # return metadata.xpath("/*/*[matches(local-name(), 'c[01-12]')]") unless metadata.xpath("/*/*[matches(local-name(),'c[01-12]')]").empty?
+        # For Xpath 1.0
+        return metadata.xpath("/*/*[starts-with(local-name(), 'c')]")
+      end
     end # module
   end # module
 end # module

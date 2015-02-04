@@ -76,6 +76,7 @@ module DRI
             t.corpname_coverage(:path=>"corpname")
             t.geographical_coverage(:path=>"geogname")
             t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+            t.other(:path => {:attribute=>"otherlevel"}, :namespace_prefix => nil)
             t.did(:path => "did", :namespace_prefix => nil) {
               t.abstract()
               # TODO Decide the preference order for language: within eadheader or within did
@@ -151,6 +152,8 @@ module DRI
         t.scope_content(:proxy => [:ead, :archdesc, :scopecontent], :index_as=>[Descriptors.cleaned_searchable])
         # Eadlevel
         t.ead_level(:proxy => [:ead, :archdesc, :ead_level])
+        # Eadlevel - otherlevel
+        t.ead_level_other(:proxy => [:ead, :archdesc, :other])
         # Namecoverage
         t.name_coverage(:proxy => [:ead, :archdesc, :controlaccess, :name_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Physdesc
@@ -391,6 +394,8 @@ module DRI
             [:ead, :archdesc, :bioghist]
           when :ead_level, :type_ead
             [:ead, :archdesc, :ead_level]
+          when :ead_level_other
+            [:ead, :archdesc, :other]
           when :language
             [:ead, :eadheader, :profiledesc, :langusage, :language]
           when :language_did

@@ -5,9 +5,12 @@ module DRI
 
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
-    has_attributes :identifier, datastream: :descMetadata, multiple: false
-    #has_attributes :unitid, datastream: :descMetadata, multiple: false
+    # (!) Important - change on identifier for components: repeatable
+    has_attributes :identifier, datastream: :descMetadata, multiple: true
+
+    #has_attributes :unitid, datastream: :descMetadata, multiple: true
     #has_attributes :eadid, datastream: :descMetadata, multiple: false
+
     has_attributes :repository_code, datastream: :descMetadata, multiple: false
     has_attributes :country_code, datastream: :descMetadata, multiple: false
     has_attributes :identifier_id, datastream: :descMetadata, multiple: true
@@ -24,6 +27,7 @@ module DRI
     #has_attributes :type, datastream: :descMetadata, multiple: true
     has_attributes :type_ead, datastream: :descMetadata, multiple: true
     has_attributes :ead_level, datastream: :descMetadata, multiple: false
+    has_attributes :ead_level_other, datastream: :descMetadata, multiple: false
 
     #has_attributes :physdesc, datastream: :descMetadata, multiple: true
 
@@ -146,7 +150,15 @@ module DRI
       if (xml_type == "DRI::Metadata::EncodedArchivalDescription")
         xml.xpath("/ead/archdesc/dsc/*").remove
       else
-        xml.xpath("/*/dsc/*").remove
+        # 1. dsc/c
+        if (!xml.xpath("/*/dsc/*").empty?)
+          xml.xpath("/*/dsc/*").remove
+        else
+          # 2. c/c or 3. c/c01/c02...
+          # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
+          # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
+          xml.xpath("/*/*[starts-with(local-name(), 'c')]").remove
+        end
       end
 
       return xml

@@ -10,6 +10,7 @@ module DRI
 
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
+          t.other(:path => {:attribute=>"otherlevel"}, :namespace_prefix => nil)
           t.archdesc{
             # Recommendation from DC to EAD crosswalk: archdesc with att level for type
             t.c_level_attr(:path => {:attribute=>"level"}, :namespace_prefix => nil)
@@ -127,6 +128,7 @@ module DRI
         # EAD specific fields
         # Ead Level
         t.ead_level(:proxy => [:c, :ead_level])
+        t.ead_level_other(:proxy => [:c, :other])
         # Abstract
         t.abstract(:proxy => [:c, :did, :abstract], :index_as=>[Descriptors.cleaned_searchable])
         # Bioghist
@@ -372,7 +374,7 @@ module DRI
 
       # Mapping to UI subjects: //c/archdesc/@level or type
       def type_for_index()
-        return type_ead.map(&:capitalize) | type
+        return type_ead.map(&:capitalize) | ead_level_other.map(&:capitalize) | type
       end
 
       # Helpers for getting elements with multiple mappings
@@ -407,6 +409,8 @@ module DRI
             [:scope_content]
           when :ead_level, :type_ead
             [:c, :ead_level]
+          when :ead_level_other
+            [:c, :other]
           when :language
             [:c, :did, :langmaterial, :language]
           when :creator
@@ -542,7 +546,7 @@ module DRI
 
         # For validation of unitid or eadid we now use identifier
         # For EAD header maps to eadid and for components maps to unitid
-        identifier.each do |curr_unit_id|
+        identifier.each_with_index do |curr_unit_id, index|
           # Removed this for unitid, it is only compulsory for EADID; just check for unitid presence
           #if (!curr_unit_id.blank? &&
           #    (!identifier_id.blank? ||
@@ -550,22 +554,23 @@ module DRI
           #            !identifier_public_id.blank?))
           #  unit_id_result = true
           #end
-          unit_id_result = true unless curr_unit_id.blank?
-        end
+          # Handle the case where multiple unitid are present: only the first should carry the attributes
+          if (index == 0)
+            unit_id_result = true unless curr_unit_id.blank?
+            country_code.each do |curr_cc|
+              cc_result = true unless curr_cc.blank?
+            end
 
-        country_code.each do |curr_cc|
-          cc_result = true unless curr_cc.blank?
-        end
-
-        repository_code.each do |curr_rc|
-          rc_result = true unless curr_rc.blank?
+            repository_code.each do |curr_rc|
+              rc_result = true unless curr_rc.blank?
+            end
+          end
         end
 
         # DRI
         errors[:title] = "can't be blank" if title_result == false
 
         #if (collection?)
-          # FIXME Are creator, description and rights not DRI compulsory??
           #errors[:description] = "can't be blank" if description_result == false
           #errors[:creator] = "can't be blank" if creator_result == false
           #errors[:rights] = "can't be blank" if rights_result == false
