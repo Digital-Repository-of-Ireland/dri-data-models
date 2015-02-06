@@ -54,7 +54,10 @@ module DRI
             metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
           else
             #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/*/dsc/*")
-            metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
+            # FIXME Original statement - this only works for components under dsc.
+            #metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
+
+            metadata_children = get_ead_children_components(self.fullMetadata.ng_xml)
           end
 
           if metadata_children.empty?
@@ -131,14 +134,14 @@ module DRI
 
               # Don't add new node if it's invalid
               if new_child.valid?
-                logger.info("NIVAL: #{new_child.title} is about to be saved!")
+                logger.info("EAD_SAVE: #{new_child.title} is valid!")
                 new_child.save
 
                 # add to queue
                 prev_obj = new_child
               else
                 # TODO Notify DRI App that there are invalid objects!!
-                logger.error("ERR_NIVAL: #{new_child.title}")
+                logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
                 new_child.errors.messages.each do |key, value|
                   logger.error("#{key}: #{value}")
                 end
@@ -216,36 +219,28 @@ module DRI
       # @param elem the new EAD child from metadata
       # @return[boolean] true if the identifiers match
       def is_ead_same_object?(child_obj, elem)
-
-        metadata_id_attr = nil
-        metadata_url_attr = nil
-        metadata_publicid_attr = nil
+        repository_code_attr = nil
+        country_code_attr = nil
 
         # Get the text value for unitid
         metadata_id = elem.xpath('did/unitid')[0].text
 
-        # Get the value of unitid/@identifier
-        if elem.xpath('did/unitid/@identifier')[0] != nil
-          metadata_id_attr = elem.xpath('did/unitid/@identifier')[0].value
+        # Get the value of unitid/@repositorycode
+        if elem.xpath('did/unitid/@repositorycode')[0] != nil
+          repository_code_attr = elem.xpath('did/unitid/@repositorycode')[0].value
         end
-        # Get the value of unitid/@url
-        if elem.xpath('did/unitid/@url')[0] != nil
-          metadata_url_attr = elem.xpath('did/unitid/@url')[0].value
-        end
-        # Get the value of unitid/@publicid
-        if elem.xpath('did/unitid/@publicid')[0] != nil
-          metadata_publicid_attr = elem.xpath('did/unitid/@publicid')[0].value
+        # Get the value of unitid/@countrycode
+        if elem.xpath('did/unitid/@countrycode')[0] != nil
+          country_code_attr = elem.xpath('did/unitid/@countrycode')[0].value
         end
 
         # To check that the metadata ids match the current child's ids
-        # we need to look first at the value of unitid AND
-        # then compare against one of the following attributes of unitid: identifier OR url OR publicid
-        if child_obj != nil &&
+        # we need to look first at the value of unitid/eadid AND
+        # then compare against the following attributes of unitid: repositorycode/mainagencycode and countrycode
+        if (child_obj != nil &&
             child_obj.identifier.include?(metadata_id) &&
-            (child_obj.identifier_id.include?(metadata_id_attr) ||
-                child_obj.identifier_url.include?(metadata_url_attr) ||
-                child_obj.identifier_public_id.include?(metadata_publicid_attr)
-            )
+            child_obj.repository_code == repository_code_attr &&
+            child_obj.country_code == country_code_attr)
           return true
         else
           return false
@@ -256,6 +251,19 @@ module DRI
         # TODO Implement method for checking whether an existing child identifier is present in new metadata when updating collections
       end # is_child_id_in_metadata
 
+      # Returns an array of children ead components
+      # @param Nokogiri::XML
+      # @return Nokogiri::XML::NodeSet (Array of EAD Components)
+      def get_ead_children_components(metadata)
+        # Components in EAD can either be children of dsc; or children of c
+        # 1. dsc/c
+        return metadata.xpath("/*/dsc/*") unless metadata.xpath("/*/dsc/*").empty?
+        # 2. c/c and 3. c01/c02/...
+        # For Xpath 2.0
+        # return metadata.xpath("/*/*[matches(local-name(), 'c[01-12]')]") unless metadata.xpath("/*/*[matches(local-name(),'c[01-12]')]").empty?
+        # For Xpath 1.0
+        return metadata.xpath("/*/*[starts-with(local-name(), 'c')]")
+      end
     end # module
   end # module
 end # module

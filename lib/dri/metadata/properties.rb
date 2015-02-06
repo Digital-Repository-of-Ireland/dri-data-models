@@ -11,7 +11,7 @@ module DRI
         t.object_type(:path=>"objectType", :namespace_prefix=>nil, :index_as=>[:displayable, :facetable])
         t.depositor(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
         t.metadata_md5(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
-        t.model_version(:path=>"modelVersion",:namespace_prefix => nil)
+        t.model_version(:path=>"model_version",:namespace_prefix => nil)
         t.verified(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.doi(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.cover_image(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
