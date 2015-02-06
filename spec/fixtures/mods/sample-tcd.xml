@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<mods version="3.5" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns="http://www.loc.gov/mods/v3"
+      xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd">
+  <titleInfo>
+    <title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</title>
+  </titleInfo>
+  <name type="personal">
+    <namePart>Baptista, Mother, Prioress, Dominican Convent, Dun Laoghaire</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">pat</roleTerm>
+      <roleTerm authority="marcrelator" type="text">UNKNOWN</roleTerm>
+    </role>
+  </name>
+  <name type="personal">
+    <namePart>Dowling, Willliam J., 1907-1980</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">art</roleTerm>
+      <roleTerm authority="marcrelator" type="text">Artist</roleTerm>
+    </role>
+  </name>
+  <name type="personal">
+    <namePart>Harry Clarke Stained Glass Ltd. (Irish stained glass firm,1930-1973)</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">cre</roleTerm>
+      <roleTerm authority="marcrelator" type="text">UNKNOWN</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Clarke family</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Active</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Irish</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>05</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>01</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>circa</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>issued</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>circa</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>1951</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>1959</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>1951</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>A.D.</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>A.D.</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>A.D.</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>A.D.</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>English</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Agnes, of Montepulciano, Saint, approximately 1268-1317</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Manuscripts Archives Research Library, Trinity College Dublin</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Dun Laoghaire, Co. Dublin: Saint Mary’s Dominican convent</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>repository</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>intended</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>tracing paper</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Saint Mary's Dominican convent, Dun Laoghaire, Co. Dublin</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Baptista, Mother, Prioress, Dominican Convent, Dun Laoghaire</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Dowling, Willliam J., 1907-1980</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Harry Clarke Stained Glass Ltd. (Irish stained glass firm,1930-1973)</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>pat</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>art</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>cre</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Clarke Studios: Designs &amp; Plans</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Dominicans</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Women saints</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Dogs</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Torches--Religious aspects</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Ships</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Drawings, Irish</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Dublin (Ireland : County)</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>Drawings</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <name type="corporate" authority="naf">
+    <namePart>pencils (drawing and writing equipment)</namePart>
+    <role>
+      <roleTerm authority="marcrelator" type="code">org</roleTerm>
+      <roleTerm authority="marcrelator" type="text">organisation</roleTerm>
+    </role>
+  </name>
+  <relatedItem type="series" displayLabel="Collection title">
+    <titleInfo>
+      <title>Clarke Studios: Designs &amp; Plans</title>
+    </titleInfo>
+  </relatedItem>
+  <relatedItem type="host" displayLabel="Is part of">
+    <titleInfo>
+      <title>Clarke Stained Glass Studios Collection</title>
+    </titleInfo>
+    <identifier type="uri" />
+  </relatedItem>
+  <typeOfResource>still image</typeOfResource>
+  <genre type="worktype" authority="aat">drawings (visual works)</genre>
+  <originInfo>
+    <place>
+      <placeTerm type="text" />
+    </place>
+    <publisher />
+    <dateOther>circa 1951-01-05</dateOther>
+    <dateOther>circa 1951</dateOther>
+  </originInfo>
+  <language>
+    <languageTerm type="text">English</languageTerm>
+    <languageTerm type="code" authority="iso639-2b">en</languageTerm>
+  </language>
+  <physicalDescription>
+    <extent>32 x 18.6 cm</extent>
+    <note type="medium" displayLabel="materials">tracing paper</note>
+    <note type="support" displayLabel="support">pencils (drawing and writing equipment)</note>
+    <internetMediaType>image/jpeg</internetMediaType>
+    <internetMediaType>image/tiff</internetMediaType>
+    <digitalOrigin>reformatted digital</digitalOrigin>
+  </physicalDescription>
+  <note>Coloured pencil sketch for stained glass window at the chapel of Saint Mary’s Dominican convent in Dun Laoghaire, Co. Dublin, featuring Saint Agnes of Montepulciano with Dominican symbols: a dog carrying a torch, and a ship. Materials/ Technique: Coloured pencil on tracing paper. Relation: See DRIS Document Number MS11182-1354_design 1354r.</note>
+  <note type="conservation history" displayLabel="Conservation History" />
+  <note type="acquisition" displayLabel="Provenance">Acquired by Trinity College Library from David Clarke, October 2002</note>
+  <note type="bibliography" displayLabel="Bibliography" />
+  <note type="funding" displayLabel="Sponsor">Digital Repository of Ireland</note>
+  <tableOfContents />
+  <abstract type="summary">The Clarke Studio Designs are a subsection of the Clarke Stained Glass Studios Collection, and contain stained glass designs, colour schemes, and opus sectile designs for stained glass work executed by the Clarke Studios, Dublin (Ireland) from 1894 to 1972. The Clarke Stained Glass Studios Collection contains stained glass designs, colour schemes, opus sectile designs, architects' blueprints and plans, photographs, documentation about sales and orders, correspondence, financial records, staffing records, and research documentation related to stained glass work executed by the Clarke Studios, Dublin from 1894 to 1972. The bulk of the material covers the period after Harry Clarke's death in 1931. Stained glass works were commissioned from Ireland, Great Britain, USA, Africa, Australia and New Zealand.</abstract>
+  <subject authority="lcsh">
+    <topic>Dominicans</topic>
+    <topic>Women saints</topic>
+    <topic>Dogs</topic>
+    <topic>Torches--Religious aspects</topic>
+    <topic>Ships</topic>
+    <topic>Drawings, Irish</topic>
+    <topic>Dublin (Ireland : County)</topic>
+  </subject>
+  <subject authority="lcsh">
+    <name type="personal" authority="naf">
+      <namePart>Agnes, of Montepulciano, Saint, approximately 1268-1317</namePart>
+    </name>
+  </subject>
+  <subject authority="lcsh">
+    <name type="personal" authority="naf">
+      <namePart>Agnes, of Montepulciano, Saint, approximately 1268-1317</namePart>
+    </name>
+  </subject>
+  <subject authority="lctgm">
+    <topic>Drawings</topic>
+  </subject>
+  <subject authority="local">
+    <topic>Saint Mary's Dominican convent, Dun Laoghaire, Co. Dublin</topic>
+  </subject>
+  <identifier type="DRIS">0103309</identifier>
+  <identifier type="DRIS_FOLDER">2756</identifier>
+  <identifier type="hdl">-------</identifier>
+  <identifier type="doi" displayLabel="Digital No.">MS11182-1364_1</identifier>
+  <location>
+    <url usage="primary display" access="object in context">http://----------</url>
+  </location>
+  <location>
+    <physicalLocation displayLabel="Department">Manuscripts &amp; Archives Research Library, Trinity College DublinDun Laoghaire, Co. Dublin: Saint Mary’s Dominican convent</physicalLocation>
+    <holdingSimple>
+      <copyInformation>
+        <shelfLocator>IE TCD MS 11182</shelfLocator>
+        <enumerationAndChronology>design 1364r order no. 2498</enumerationAndChronology>
+      </copyInformation>
+    </holdingSimple>
+  </location>
+  <accessCondition type="useAndReproduction">Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic and research applications only. Publication, transmission, or display is prohibited without the formal written approval of Trinity College Library Dublin. Please contact the head of Digital Resources and Imaging Services for further information (digitalresources@tcd.ie).</accessCondition>
+  <recordInfo>
+    <recordCreationDate encoding="w3cdtf">2014-02-07</recordCreationDate>
+    <recordChangeDate encoding="w3cdtf">2014-03-13</recordChangeDate>
+    <recordIdentifier source="DRIS">0103309</recordIdentifier>
+    <recordOrigin>Record Derived from DRIS Filemaker Database</recordOrigin>
+    <languageOfCataloging>
+      <languageTerm authority="iso639-2b">eng</languageTerm>
+    </languageOfCataloging>
+  </recordInfo>
+</mods>

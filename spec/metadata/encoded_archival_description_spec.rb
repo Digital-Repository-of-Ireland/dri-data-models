@@ -19,22 +19,22 @@ describe 'EncodedArchivalDescription' do
   end
 
   it "should expose the EAD components' identifiers" do
-    @ead_collection.identifier.should == "IE/NIVAL KDW"
+    @ead_collection.identifier.should == ["IE/NIVAL KDW"]
     @ead_collection.country_code.should == "IE"
     @ead_collection.repository_code.should == "IE-DuNIV"
     @ead_collection.identifier_id.should == ["KDW"]
 
-    @ead_series.identifier.should == "KDW/RM"
+    @ead_series.identifier.should == ["KDW/RM"]
     @ead_series.country_code.should == "IE"
     @ead_series.repository_code.should == "IE-DuNIV"
     @ead_series.identifier_id.should == ["RM"]
 
-    @ead_file.identifier.should == "KDW/RM/02"
+    @ead_file.identifier.should == ["KDW/RM/02"]
     @ead_file.country_code.should == "IE"
     @ead_file.repository_code.should == "IE-DuNIV"
     @ead_file.identifier_id.should == ["02"]
 
-    @ead_item.identifier.should == "KDW/RM/02/04"
+    @ead_item.identifier.should == ["KDW/RM/02/04"]
     @ead_item.country_code.should == "IE"
     @ead_item.repository_code.should == "IE-DuNIV"
     @ead_item.identifier_id.should == ["04"]
@@ -129,19 +129,19 @@ describe 'EncodedArchivalDescription' do
 
   it "should validate the presence of an EAD identifier" do
     @ead_collection.should be_valid
-    @ead_collection.identifier = ""
+    @ead_collection.identifier = [""]
     @ead_collection.should_not be_valid
 
     @ead_series.should be_valid
-    @ead_series.identifier = ""
+    @ead_series.identifier = [""]
     @ead_series.should_not be_valid
 
     @ead_file.should be_valid
-    @ead_file.identifier = ""
+    @ead_file.identifier = [""]
     @ead_file.should_not be_valid
 
     @ead_item.should be_valid
-    @ead_item.identifier = ""
+    @ead_item.identifier = [""]
     @ead_item.should_not be_valid
   end
 
@@ -190,7 +190,7 @@ describe 'EncodedArchivalDescription' do
       curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
       curr_batch = DRI::EncodedArchivalDescription.new :component
       curr_batch.update_metadata curr_file
-      curr_batch.identifier.should == "KDW/RM/02"
+      curr_batch.identifier.should == ["KDW/RM/02"]
       curr_batch.ead_level.should == "file"
     end
   end
