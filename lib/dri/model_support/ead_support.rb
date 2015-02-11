@@ -126,8 +126,11 @@ module DRI
               new_child.update_metadata metadata_children[metadata_child_index].to_xml
               new_child.previous_sibling = prev_obj
               new_child.governing_collection = self
-              new_child.depositor = depositor
-              new_child.status = status
+              # Add depositor, status and rightsMetadata from parent
+              new_child.depositor = self.depositor
+              new_child.status = self.status
+              new_child.datastreams['rightsMetadata'].content = self.rightsMetadata.content
+              # ingest_files_from_metadata
               new_child.ingest_files_from_metadata = ingest_files_from_metadata
               new_child.private_metadata="0"
               new_child.master_file="1"
