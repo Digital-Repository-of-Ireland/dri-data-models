@@ -132,8 +132,8 @@ module DRI
               new_child.datastreams['rightsMetadata'].content = self.rightsMetadata.content
               # ingest_files_from_metadata
               new_child.ingest_files_from_metadata = ingest_files_from_metadata
-              new_child.private_metadata="0"
-              new_child.master_file="1"
+              #new_child.private_metadata="0"
+              #new_child.master_file="1"
 
               # Don't add new node if it's invalid
               if new_child.valid?
