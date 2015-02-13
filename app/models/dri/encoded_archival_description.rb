@@ -87,6 +87,25 @@ module DRI
       solr_doc
     end
 
+    # Override from files.rb adding EAD-specific solr additions
+    def file_metadata_to_solr(solr_doc=Hash.new)
+      solr_doc = super(solr_doc)
+
+      file_type = []
+      file_type_display = []
+
+      if is_collection?
+        file_type.push "collection"
+
+        if !is_root_collection? && !ead_level.blank?
+          file_type_display.push ead_level.strip.capitalize
+        else
+          file_type_display.push "Collection"
+        end
+      end
+      solr_doc
+    end
+
     # Indexing object types as a hierarchical tree
     def object_types_to_solr(solr_doc=Hash.new)
 

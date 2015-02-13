@@ -2,9 +2,9 @@ module DRI
 
   module Metadata
 
-    # An ActiveFedora datastream that interacts with MODS.
-
-    class Mods < DRI::Metadata::Base
+    # An ActiveFedora datastream that interacts with a collection of MODS records.
+    # MODS Schema version changed to 3.5 (July 8, 2013) based on DRI MODS guidelines.
+    class ModsCollection < DRI::Metadata::Base
 
       # MODS XML constants.
       MODS_NS_PREFIX = "mods"
@@ -107,26 +107,23 @@ module DRI
             }
           }
 
-          t.type_resource(:path => "typeOfResource", :namespace_prefix => MODS_NS_PREFIX)
+          t.type_resource(:path => "typeOfResource", :attributes => {"collection" => "yes"}, :namespace_prefix => MODS_NS_PREFIX)
 
-          t.genre(:path => "genre", :namespace_prefix => MODS_NS_PREFIX)
-
-          t.physical_description(:path => "physicalDescription", :namespace_prefix => MODS_NS_PREFIX) {
-            t.form(:namespace_prefix => MODS_NS_PREFIX)
-            t.reformatting_quality(:path => "reformattingQuality", :namespace_prefix => MODS_NS_PREFIX)
-            t.internet_media(:path => "internetMediaType", :namespace_prefix => MODS_NS_PREFIX)
-            t.extent(:namespace_prefix => MODS_NS_PREFIX)
-            t.digital_origin(:path=>"digitalOrigin", :namespace_prefix => MODS_NS_PREFIX)
-            t.note(:ref=>[:note])
+          t.genre(:path => "genre", :namespace_prefix => MODS_NS_PREFIX) {
+            t.type(:path => {:attribute => "type"})
           }
 
-          # location
-          t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
-            t.physical_location(:namespace_prefix => MODS_NS_PREFIX)
-            t.shelf_locator(:path => "shelfLocator", :namespace_prefix => MODS_NS_PREFIX)
-            t.url(:namespace_prefix => MODS_NS_PREFIX)
-            t.holding_simple(:path => "holdingSimple", :namespace_prefix => MODS_NS_PREFIX)
-            t.holding_external(:path => "holdingExternal", :namespace_prefix => MODS_NS_PREFIX)
+          t.physical_description(:path => "physicalDescription", :namespace_prefix => MODS_NS_PREFIX) {
+            # The size of the collection
+            t.extent(:namespace_prefix => MODS_NS_PREFIX)
+            t.note(:ref=>[:note])
+          }
+          # Related Item
+          t.related_item(:path => "relatedItem", :namespace_prefix => MODS_NS_PREFIX) {
+            t.identifier_(:ref => [:identifier], :namespace_prefix => MODS_NS_PREFIX)
+            t.title_info(:ref => [:title_info])
+            t.type_related_item(:ref => [:type_resource], :namespace_prefix => MODS_NS_PREFIX)
+            t.genre_(:ref=> [:genre])
           }
 
           # tableOfContents
@@ -135,71 +132,10 @@ module DRI
             t.content_at(:path => {:attribute => "altContent"})
           }
 
-          # classification
-          t.classification(:namespace_prefix => MODS_NS_PREFIX)
-
-          # part
-          t.part(:path => "part", :namespace_prefix => MODS_NS_PREFIX) {
-            t.detail(:namespace_prefix => MODS_NS_PREFIX)
-            t.extent(:namespace_prefix => MODS_NS_PREFIX)
-            t.date(:ref => [:date])
-            t.text(:namespace_prefix => MODS_NS_PREFIX)
-          }
-
-          t.date(:path => "date", :namespace_prefix => MODS_NS_PREFIX) {
-            t.encoding_at(:path => {:attribute => "encoding"})
-            t.point_at(:path => {:attribute => "point"})
-          }
-
-          # recordInfo
-          t.record_info(:path => "recordInfo", :namespace_prefix => MODS_NS_PREFIX) {
-
-          }
-
-          t.target_audience(:path => "targetAudience", :namespace_prefix => MODS_NS_PREFIX) {
-            t.recordContentSource(:namespace_prefix => MODS_NS_PREFIX)
-            t.recordCreationDate(:namespace_prefix => MODS_NS_PREFIX)
-            t.recordChangeDate(:namespace_prefix => MODS_NS_PREFIX)
-            t.recordIdentifier(:namespace_prefix => MODS_NS_PREFIX)
-            t.recordOrigin(:namespace_prefix => MODS_NS_PREFIX)
-            t.lang_of_cataloging(:ref => [:lang_of_cataloging])
-            t.descriptionStandard(:namespace_prefix => MODS_NS_PREFIX)
-          }
-
-          t.lang_of_cataloging(:path => "languageOfCataloging", :namespace_prefix => MODS_NS_PREFIX) {
-            t.language_text(:path => "languageTerm",:attributes=>{:type=>"text"}, :namespace_prefix => MODS_NS_PREFIX)
-            t.language_code(:path => "languageTerm",:attributes=>{:type=>"code"}, :namespace_prefix => MODS_NS_PREFIX)
-            t.script_term_text(:path => "scriptTerm",:attributes=>{:type=>"text"}, :namespace_prefix => MODS_NS_PREFIX)
-            t.script_term_code(:path => "scriptTerm",:attributes=>{:type=>"code"}, :namespace_prefix => MODS_NS_PREFIX)
-          }
-
           # Note
           t.note(:path=>"note", :namespace_prefix => MODS_NS_PREFIX) {
             t.label_at(:path => {:attribute=> "displayLabel"})
             t.type_at(:path => {:attribute=> "type"})
-          }
-
-          # Related Item
-          t.related_item(:path => "relatedItem", :namespace_prefix => MODS_NS_PREFIX) {
-            t.title_info(:ref => [:title_info])
-            t.name_(:ref => [:name])
-            t.type_resource(:namespace_prefix => MODS_NS_PREFIX)
-            t.genre(:ref=> [:genre])
-            t.originInfo(:ref => [:origin_info])
-            t.language(:ref => [:language])
-            t.physical_description(:ref => [:physical_description])
-            t.abstract(:ref => [:abstract])
-            t.rel_toc(:ref => :table_contents)
-            t.targetAudience(:ref => [:target_audience])
-            t.note(:ref => [:note])
-            t.subject(:ref => [:subject])
-            t.classification(:namespace_prefix => MODS_NS_PREFIX)
-            t.identifier(:namespace_prefix => MODS_NS_PREFIX)
-            t.location(:ref => [:location])
-            t.access_condition(:ref => [:access_condition])
-            t.part(:ref => [:part])
-            t.extension(:namespace_prefix => MODS_NS_PREFIX)
-            t.recordInfo(:ref => [:record_info])
           }
 
           t.related_items_ids(:path => "relatedItem/mods:identifier", :namespace_prefix => MODS_NS_PREFIX)
@@ -209,11 +145,11 @@ module DRI
 
           # Title
           t.title(:proxy => [:title_info, :main_title], :index_as => [Descriptors.cleaned_searchable,
-                                                               Descriptors.cleaned_displayable])
+                                                                      Descriptors.cleaned_displayable])
           # Creator
           t.creator(:path => "name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('cre' or 'aut')]/mods:namePart",
                     :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
-                                                   Descriptors.cleaned_displayable,  :sortable],
+                                Descriptors.cleaned_displayable,  :sortable],
                     :namespace_prefix => MODS_NS_PREFIX)
           # Contributor
           t.contributor(:path => "name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = 'ctb']/mods:namePart",
@@ -226,51 +162,51 @@ module DRI
                         :namespace_prefix => MODS_NS_PREFIX)
           # Subject: defaults to subject/topic
           t.subject_(:path => "subject/mods:topic", :index_as=>[Descriptors.cleaned_searchable,
-                                                            Descriptors.cleaned_facetable,
-                                                            Descriptors.cleaned_displayable],
+                                                           Descriptors.cleaned_facetable,
+                                                           Descriptors.cleaned_displayable],
                      :namespace_prefix => MODS_NS_PREFIX)
 
           # Source
           # TODO - decide the preference: place for location, dates for temporal
           t.source(:path => "originInfo/mods:place/mods:placeTerm", :index_as=>[Descriptors.cleaned_displayable,
-                                                                 Descriptors.cleaned_facetable],
+                                                                      Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Type
           t.type(:proxy => [:type_resource], :index_as=>[Descriptors.cleaned_facetable,
-                                           Descriptors.cleaned_searchable,
-                                           Descriptors.cleaned_displayable],
+                                                         Descriptors.cleaned_searchable,
+                                                         Descriptors.cleaned_displayable],
                  :namespace_prefix => MODS_NS_PREFIX)
 
           # Rights - needs special indexing
           t.rights(:path => "accessCondition", :index_as=>[Descriptors.cleaned_searchable,
-                                                              Descriptors.cleaned_displayable],
+                                                           Descriptors.cleaned_displayable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Publisher
           t.publisher(:path => "originInfo/mods:publisher", :index_as => [Descriptors.cleaned_facetable,
-                                                                          Descriptors.cleaned_searchable,
-                                                                          Descriptors.cleaned_displayable],
+                                                                     Descriptors.cleaned_searchable,
+                                                                     Descriptors.cleaned_displayable],
                       :namespace_prefix => MODS_NS_PREFIX)
           # Published_date
           t.published_date(:path => "originInfo/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
-                                                                              Descriptors.cleaned_displayable],
+                                                                         Descriptors.cleaned_displayable],
                            :namespace_prefix => MODS_NS_PREFIX)
           # Creation_date
           t.creation_date(:path => "originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
-                                                                              Descriptors.cleaned_displayable],
+                                                                         Descriptors.cleaned_displayable],
                           :namespace_prefix => MODS_NS_PREFIX)
 
           # Coverage
           # temporal_coverage
           t.temporal_coverage(:path => "subject/mods:temporal", :index_as=>[Descriptors.cleaned_searchable,
-                                                                           Descriptors.cleaned_facetable,
-                                                                           Descriptors.cleaned_displayable],
+                                                                       Descriptors.cleaned_facetable,
+                                                                       Descriptors.cleaned_displayable],
                               :namespace_prefix => MODS_NS_PREFIX)
           t.temporal_coverage_lang(:path => "subject/mods:temporal/@lang")
 
           # geographical_coverage
           t.geographical_coverage(:path => "subject/mods:geographic", :index_as=>[Descriptors.cleaned_searchable,
-                                                                                 Descriptors.cleaned_facetable,
-                                                                                 Descriptors.cleaned_displayable],
+                                                                             Descriptors.cleaned_facetable,
+                                                                             Descriptors.cleaned_displayable],
                                   :namespace_prefix => MODS_NS_PREFIX)
           t.geographical_coverage_lang(:path => "subject/mods:geographic/@lang")
 
@@ -285,10 +221,10 @@ module DRI
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
           t.abstract(:path => "abstract", :index_as => [Descriptors.cleaned_searchable,
-                                                      Descriptors.cleaned_displayable],
+                                                        Descriptors.cleaned_displayable],
                      :namespace_prefix => MODS_NS_PREFIX)
           t.toc_(:ref => :table_contents, :index_as => [Descriptors.cleaned_searchable,
-                                                           Descriptors.cleaned_displayable])
+                                                       Descriptors.cleaned_displayable])
 
           # TODO - Check about @type for note - http://www.loc.gov/standards/mods/mods-notes.html
           t.note(:path => "note", :index_as => [Descriptors.cleaned_searchable,
@@ -313,20 +249,15 @@ module DRI
           t.cartographics_scale(:path => "subject/mods:cartographics/mods:scale", :namespace_prefix => MODS_NS_PREFIX)
           t.cartographics_coordinates(:path => "subject/mods:cartographics/mods:coordinates", :namespace_prefix => MODS_NS_PREFIX)
           t.cartographics_projection(:path => "subject/mods:cartographics/mods:projection", :namespace_prefix => MODS_NS_PREFIX)
-        end
 
+        end # End set terminology
       end
 
-      def synchronize_metadata_on_save
-        false
-      end
+      # TODO - Override OM method
+      def to_solr(solr_doc=Hash.new)
+        super(solr_doc)
 
-      def interchangeable?
-        false
-      end
-
-      def collection?
-        false
+        solr_doc
       end
 
       def metadata_path field
@@ -345,19 +276,6 @@ module DRI
         else
           []
         end
-      end
-
-      def update_indexed_attributes(params={}, opts={})
-        # if the params are just keys, not an array, make then into an array.
-        new_params = {}
-        params.each do |key, val|
-          if key.is_a? Array
-            new_params[key] = val
-          else
-            new_params[[key.to_sym]] = val
-          end
-        end
-        super(new_params, opts)
       end
 
       def roles= roles
@@ -381,6 +299,19 @@ module DRI
         end
       end
 
+      def update_indexed_attributes(params={}, opts={})
+        # if the params are just keys, not an array, make then into an array.
+        new_params = {}
+        params.each do |key, val|
+          if key.is_a? Array
+            new_params[key] = val
+          else
+            new_params[[key.to_sym]] = val
+          end
+        end
+        super(new_params, opts)
+      end
+
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
@@ -391,16 +322,25 @@ module DRI
                    "xmlns:dcterms" => "http://purl.org/dc/terms/",
                    "xmlns:#{CR_NS_PREFIX}" => CR_NS,
                    "xsi:schemaLocation" => MODS_SCHEMA) {
+            xml['mods'].titleInfo.title
+            xml['mods'].abstract
+            xml['mods'].typeOfResource("collection" => "yes", "type" => "dct"){xml.text("Collection")}
           }
         end
         return builder.doc
       end
 
-      # TODO - Override OM method
-      def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+      # The same as for EAD - we need to update the individual records within a MODS collection
+      def synchronize_metadata_on_save
+        @synchronize_metadata_on_save || true
+      end
 
-        solr_doc
+      def interchangeable?
+        false
+      end
+
+      def collection?
+        true
       end
 
       def custom_validations
@@ -428,7 +368,6 @@ module DRI
           type_result = true unless curr_type.blank?
         end
 
-
         creation_date.each do |curr_date|
           date_result = true unless curr_date.blank?
         end
@@ -441,10 +380,11 @@ module DRI
 
         return errors
       end
+
       # Load terminology
-      load_inherited_terminology      
+      load_inherited_terminology
     end # class
-    
+
   end # module
 
 end # module

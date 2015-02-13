@@ -3,7 +3,7 @@ module DRI
     module Transformations
       #require 'chronic'
 
-	  # A function to convert an array of names that conform to archiving formatting standards into human-readable names
+	    # A function to convert an array of names that conform to archiving formatting standards into human-readable names
       # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
       # "Valera, Éamon, de" is "Éamon de Valera"
       def self.transform_name(names=Array.new)
@@ -82,17 +82,17 @@ module DRI
       end
 
 
-      # Split date ranges into seperate _start and _end SOLR indexes
+      # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and
       # will have to be updated.
       #def self.transform_date_ranges(dates={})
 
-     # 	results = Hash.new
-#
+      # 	results = Hash.new
+      #
       #	dates.each do | key, value |
-     # 		start = []
-     # 		finish = []
+      # 		start = []
+      # 		finish = []
 
       #		value.each do | date_string |
       #			range = date_string.split("/")

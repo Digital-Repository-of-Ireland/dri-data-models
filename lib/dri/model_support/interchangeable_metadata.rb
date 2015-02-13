@@ -101,7 +101,7 @@ module DRI
         if namespace.has_value?("http://purl.org/dc/elements/1.1/")
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
-          result = "DRI::Metadata::Mods"
+          result = (xml.xpath("//mods:typeOfResource[@collection='yes']")) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
@@ -110,6 +110,8 @@ module DRI
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
         elsif ['marc'].include? root_name
           result = "DRI::Metadata::Marc"
+        elsif ['mods'].include? root_name
+          result = (xml.xpath("//typeOfResource[@collection='yes']")) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         end
 
         return result
@@ -129,6 +131,7 @@ module DRI
 
           if ["DRI::Metadata::QualifiedDublinCore",
               "DRI::Metadata::Mods",
+              "DRI::Metadata::ModsCollection",
               "DRI::Metadata::EncodedArchivalDescription",
               "DRI::Metadata::EncodedArchivalDescriptionComponent",
               "DRI::Metadata::Marc"].include? ds_class

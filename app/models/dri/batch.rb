@@ -21,16 +21,20 @@ class Batch < ActiveFedora::Base
 
   def self.with_standard(standard, args = {})
    case standard
-   when :marc
-     Marc.new(args)
-   when :qdc
-     QualifiedDublinCore.new(args)
-   when :ead_collection
-     EncodedArchivalDescription.new(:collection, args)
-   when :ead_component
-     EncodedArchivalDescription.new(:component, args)
-   else
-     QualifiedDublinCore.new(args)
+     when :marc
+       Marc.new(args)
+     when :qdc
+       QualifiedDublinCore.new(args)
+     when :ead_collection
+       EncodedArchivalDescription.new(:collection, args)
+     when :ead_component
+       EncodedArchivalDescription.new(:component, args)
+     when :mods_collection
+       Mods.new(:collection, args)
+     when :mods_record
+       Mods.new(:record, args)
+     else
+       QualifiedDublinCore.new(args)
    end
   end 
 
