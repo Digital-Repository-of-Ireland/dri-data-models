@@ -6,6 +6,8 @@ module DRI
       included do
         attr_accessor :desc_metadata_class
 
+        attr_accessor :trigger_update
+
         # Descriptive metadata datastream
         has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
         # Complete metadata record datastream
@@ -63,6 +65,16 @@ module DRI
         end
       end
 
+      # Issue 1195 - Trigger update, additional flag to avoid ead updates when loading fedora objects
+      # load_attributes changes the descMetadata datastream to load the right metadata class
+      def trigger_update= update
+        @trigger_update = update
+      end
+
+      def trigger_update
+        @trigger_update || false
+      end
+
       private
 
       @metadata_class
@@ -101,7 +113,7 @@ module DRI
         if namespace.has_value?("http://purl.org/dc/elements/1.1/")
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
-          result = (xml.xpath("//mods:typeOfResource[@collection='yes']")) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
+          result = (!xml.xpath("/mods:mods/mods:typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
@@ -111,7 +123,7 @@ module DRI
         elsif ['marc'].include? root_name
           result = "DRI::Metadata::Marc"
         elsif ['mods'].include? root_name
-          result = (xml.xpath("//typeOfResource[@collection='yes']")) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
+          result = (!xml.xpath("/mods/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         end
 
         return result
@@ -159,7 +171,7 @@ module DRI
         end
         @metadata_class = descMetadata.class
         # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
-        self.descMetadata.save if self.descMetadata.changed?
+        # self.descMetadata.save if self.descMetadata.changed?
 
       end # load_attributes
     end # module

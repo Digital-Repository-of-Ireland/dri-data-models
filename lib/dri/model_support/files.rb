@@ -241,7 +241,7 @@ module DRI
 
         content_changed = false
 
-        if (self.ingest_files_from_metadata == "true")
+        if (self.ingest_files_from_metadata == "true" && self.trigger_update)
           content_changed = self.descMetadata.changed?
         end
 

@@ -145,6 +145,9 @@ module DRI
     end
 
     def update_metadata xml_text
+      # Trigger update - issue 1195 (only trigger EAD update if updating descMetadata)
+      self.trigger_update=(true)
+
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -186,7 +189,7 @@ module DRI
     def synchronize_if_changed
       content_changed = false
 
-      if (self.descMetadata.synchronize_metadata_on_save == true)
+      if (self.descMetadata.synchronize_metadata_on_save == true && self.trigger_update)
         content_changed = self.descMetadata.changed?
       end
 
