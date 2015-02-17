@@ -6,6 +6,8 @@ module DRI
       included do
         attr_accessor :desc_metadata_class
 
+        attr_accessor :trigger_update
+
         # Descriptive metadata datastream
         has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
         # Complete metadata record datastream
@@ -61,6 +63,16 @@ module DRI
         if self.new?
           @desc_metadata_class = desc_metadata_class
         end
+      end
+
+      # Issue 1195 - Trigger update, additional flag to avoid ead updates when loading fedora objects
+      # load_attributes changes the descMetadata datastream to load the right metadata class
+      def trigger_update= update
+        @trigger_update = update
+      end
+
+      def trigger_update
+        @trigger_update || false
       end
 
       private
@@ -156,7 +168,7 @@ module DRI
         end
         @metadata_class = descMetadata.class
         # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
-        self.descMetadata.save if self.descMetadata.changed?
+        # self.descMetadata.save if self.descMetadata.changed?
 
       end # load_attributes
     end # module
