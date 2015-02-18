@@ -12,7 +12,7 @@ module DRI
         # Two relationships below are used to manage a collection's structure
         # (!) ONLY FOR COLLECTIONS
         belongs_to :parent_collection, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :has_collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
+        has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
 
         # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
