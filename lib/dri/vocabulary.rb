@@ -315,15 +315,20 @@ module DRI
       ]
     end
 
-    # FIXME List extracted from NIVAL collection. Look for recommended controlled vocabularies
-    def self.eadRoles
+    # MODS Relationship Types
+    def self.modsRelationshipTypes
       [
-          "publisher",
-          "contributor",
-          "institution",
-          "business",
-          "designer",
-          "photographer"
+        "preceding",
+        "succeeding",
+        "original",
+        "host",
+        "constituent",
+        "series",
+        "otherVersion",
+        "otherFormat",
+        "isReferencedBy",
+        "references",
+        "reviewOf"
       ]
     end
   end

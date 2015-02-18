@@ -10,10 +10,11 @@ module DRI
         has_many :governed_items, :property=>:is_governed_by, :class_name => 'DRI::Batch'
 
         # Two relationships below are used to manage a collection's structure
-        has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :items, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
+        # (!) ONLY FOR COLLECTIONS
+        belongs_to :parent_collection, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
+        has_many :has_collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
 
-        # Additional relationships to keep track of sibling order, important for EAD and similar standards (e.g. MODS)
+        # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
         belongs_to :next_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
 

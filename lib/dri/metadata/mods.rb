@@ -45,7 +45,14 @@ module DRI
           }
 
           # Language
-          t.language(:path => "language", :namespace_prefix => MODS_NS_PREFIX) {
+          t.language_any(:path => "language", :namespace_prefix => MODS_NS_PREFIX) {
+            t.language_for(:path => {:attribute => "objectPart"})
+            t.language_text(:path => "languageTerm",:attributes=>{:type=>"text"}, :namespace_prefix => MODS_NS_PREFIX)
+            t.language_code(:path => "languageTerm",:attributes=>{:type=>"code"}, :namespace_prefix => MODS_NS_PREFIX)
+          }
+
+          # language specific to resource
+          t.language_any_object_part(:path => "language[@objectPart]", :namespace_prefix => MODS_NS_PREFIX) {
             # When multiple language terms, to what resource the language applies can be specified
             # by using the @objectPart. Examples of its values: abstract, summary, note...
             t.language_for(:path => {:attribute => "objectPart"})
@@ -117,7 +124,8 @@ module DRI
             t.internet_media(:path => "internetMediaType", :namespace_prefix => MODS_NS_PREFIX)
             t.extent(:namespace_prefix => MODS_NS_PREFIX)
             t.digital_origin(:path=>"digitalOrigin", :namespace_prefix => MODS_NS_PREFIX)
-            t.note(:ref=>[:note])
+            t.note_mods_no_type(:ref=>[:note_mods_no_type])
+            t.note_mods_type(:ref=>[:note_mods_type])
           }
 
           # location
@@ -174,13 +182,18 @@ module DRI
           }
 
           # Note
-          t.note(:path=>"note", :namespace_prefix => MODS_NS_PREFIX) {
+          t.note_mods_type(:path=>"mods/mods:note[@type]", :namespace_prefix => MODS_NS_PREFIX) {
             t.label_at(:path => {:attribute=> "displayLabel"})
             t.type_at(:path => {:attribute=> "type"})
           }
 
+          t.note_mods_no_type(:path=>"mods/mods:note[not(@type)]", :namespace_prefix => MODS_NS_PREFIX) {
+            t.label_at(:path => {:attribute=> "displayLabel"})
+          }
+
           # Related Item
           t.related_item(:path => "relatedItem", :namespace_prefix => MODS_NS_PREFIX) {
+            t.identifier_(:path => "identifier", :attributes => {:type => "uri"}, :namespace_prefix => MODS_NS_PREFIX)
             t.title_info(:ref => [:title_info])
             t.name_(:ref => [:name])
             t.type_resource(:namespace_prefix => MODS_NS_PREFIX)
@@ -191,10 +204,10 @@ module DRI
             t.abstract(:ref => [:abstract])
             t.rel_toc(:ref => :table_contents)
             t.targetAudience(:ref => [:target_audience])
-            t.note(:ref => [:note])
+            t.note_mods_no_type(:ref => [:note_mods_no_type])
+            t.note_mods_type(:ref => [:note_mods_type])
             t.subject(:ref => [:subject])
             t.classification(:namespace_prefix => MODS_NS_PREFIX)
-            t.identifier(:namespace_prefix => MODS_NS_PREFIX)
             t.location(:ref => [:location])
             t.access_condition(:ref => [:access_condition])
             t.part(:ref => [:part])
@@ -202,60 +215,62 @@ module DRI
             t.recordInfo(:ref => [:record_info])
           }
 
-          t.related_items_ids(:path => "relatedItem/mods:identifier", :namespace_prefix => MODS_NS_PREFIX)
-
           # ----------------------------------------------------------------------------------------------------------
-          # Term proxies definition
+          # Term proxies definition: must be absolute paths, avoid picking relatedItem elements
 
           # Title
-          t.title(:proxy => [:title_info, :main_title], :index_as => [Descriptors.cleaned_searchable,
+          t.title(:proxy => [:mods, :title_info, :main_title], :index_as => [Descriptors.cleaned_searchable,
                                                                Descriptors.cleaned_displayable])
           # Creator
-          t.creator(:path => "name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('cre' or 'aut')]/mods:namePart",
+          t.creator(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('cre' or 'aut')]/mods:namePart",
                     :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                                    Descriptors.cleaned_displayable,  :sortable],
                     :namespace_prefix => MODS_NS_PREFIX)
           # Contributor
-          t.contributor(:path => "name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = 'ctb']/mods:namePart",
+          t.contributor(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = 'ctb']/mods:namePart",
                         :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                     Descriptors.cleaned_displayable,  :sortable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Description: abstract, tableOfContents, or note
-          t.description(:path => "abstract", :index_as => [Descriptors.cleaned_searchable,
+          t.description(:path => "mods/mods:abstract", :index_as => [Descriptors.cleaned_searchable,
                                                            Descriptors.cleaned_displayable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Subject: defaults to subject/topic
-          t.subject_(:path => "subject/mods:topic", :index_as=>[Descriptors.cleaned_searchable,
+          t.subject_(:path => "mods/mods:subject/mods:topic", :index_as=>[Descriptors.cleaned_searchable,
                                                             Descriptors.cleaned_facetable,
                                                             Descriptors.cleaned_displayable],
                      :namespace_prefix => MODS_NS_PREFIX)
 
+          # language
+          t.language(:path => "language/mods:languageTerm[@type='code']", :index_as=>[Descriptors.cleaned_searchable,
+                                                                           Descriptors.language_facetable])
+
           # Source
           # TODO - decide the preference: place for location, dates for temporal
-          t.source(:path => "originInfo/mods:place/mods:placeTerm", :index_as=>[Descriptors.cleaned_displayable,
+          t.source(:path => "mods/mods:originInfo/mods:place/mods:placeTerm", :index_as=>[Descriptors.cleaned_displayable,
                                                                  Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Type
-          t.type(:proxy => [:type_resource], :index_as=>[Descriptors.cleaned_facetable,
+          t.type(:proxy => [:mods, :type_resource], :index_as=>[Descriptors.cleaned_facetable,
                                            Descriptors.cleaned_searchable,
                                            Descriptors.cleaned_displayable],
                  :namespace_prefix => MODS_NS_PREFIX)
 
           # Rights - needs special indexing
-          t.rights(:path => "accessCondition", :index_as=>[Descriptors.cleaned_searchable,
+          t.rights(:path => "mods/mods:accessCondition", :index_as=>[Descriptors.cleaned_searchable,
                                                               Descriptors.cleaned_displayable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Publisher
-          t.publisher(:path => "originInfo/mods:publisher", :index_as => [Descriptors.cleaned_facetable,
+          t.publisher(:path => "mods/mods:originInfo/mods:publisher", :index_as => [Descriptors.cleaned_facetable,
                                                                           Descriptors.cleaned_searchable,
                                                                           Descriptors.cleaned_displayable],
                       :namespace_prefix => MODS_NS_PREFIX)
           # Published_date
-          t.published_date(:path => "originInfo/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
+          t.published_date(:path => "mods/mods:originInfo/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
                                                                               Descriptors.cleaned_displayable],
                            :namespace_prefix => MODS_NS_PREFIX)
           # Creation_date
-          t.creation_date(:path => "originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
+          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
                                                                               Descriptors.cleaned_displayable],
                           :namespace_prefix => MODS_NS_PREFIX)
 
@@ -274,6 +289,8 @@ module DRI
                                   :namespace_prefix => MODS_NS_PREFIX)
           t.geographical_coverage_lang(:path => "subject/mods:geographic/@lang")
 
+          t.geographic_code(:proxy => [:main_subject, :geographic_code])
+
           # Roles proxy, similar to QDC
           DRI::Vocabulary::marcRelators.each do |role|
             t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\']/mods:namePart",
@@ -281,7 +298,18 @@ module DRI
                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX
           end
 
+          # Relationships
+          DRI::Vocabulary::modsRelationshipTypes.each do |rel|
+            t.send "related_items_ids_" + rel,
+                   :path=>"relatedItem[@type='#{rel}']/mods:identifier[@type='uri']",
+                   :namespace_prefix => MODS_NS_PREFIX
+          end
+
           # MODS Terms
+          t.mods_id(:ref => [:uri], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+          t.related_items_ids(:path => "relatedItem/mods:identifier[@type='uri']", :namespace_prefix => MODS_NS_PREFIX)
+
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
           t.abstract(:path => "abstract", :index_as => [Descriptors.cleaned_searchable,
@@ -291,11 +319,10 @@ module DRI
                                                            Descriptors.cleaned_displayable])
 
           # TODO - Check about @type for note - http://www.loc.gov/standards/mods/mods-notes.html
-          t.note(:path => "note", :index_as => [Descriptors.cleaned_searchable,
-                                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX)
+          #t.note(:ref => [:note_mods], :namespace_prefix => MODS_NS_PREFIX)
 
           # Subject name
-          t.subject_name(:proxy => [:main_subject, :name_topic])
+          t.name_coverage(:proxy => [:main_subject, :name_topic])
 
           # Subject: temporal, date
           t.subject_temporal(:path => "subject/mods:temporal", :namespace_prefix => MODS_NS_PREFIX)
@@ -313,6 +340,9 @@ module DRI
           t.cartographics_scale(:path => "subject/mods:cartographics/mods:scale", :namespace_prefix => MODS_NS_PREFIX)
           t.cartographics_coordinates(:path => "subject/mods:cartographics/mods:coordinates", :namespace_prefix => MODS_NS_PREFIX)
           t.cartographics_projection(:path => "subject/mods:cartographics/mods:projection", :namespace_prefix => MODS_NS_PREFIX)
+
+          # language, specific to a terms of the MODS record: e.g. language for abstract
+          t.language_object_part(:ref => [:language_any_object_part])
         end
 
       end
@@ -398,10 +428,103 @@ module DRI
 
       # TODO - Override OM method
       def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+        solr_doc = super(solr_doc)
+
+
+        # Title_sorted - A SOLR index for sorting titles
+        if (title.length > 0)
+
+          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+
+          if (sorted_title != "")
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+          end
+        end
+
+        # Type
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+
+        # EAD has several "name" tags, so we merge them together into the SOLR document
+        person_array = person_array_for_index()
+
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+
+        # all_metadata - A SOLR index of all the text contained in the XML document
+        all_metadata = ""
+        ng_xml.xpath("//text()").each do |text_node|
+          all_metadata += text_node.text
+          all_metadata += " "
+        end
+        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+
+        # Description
+        description_array = description_for_index()
+
+        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
+
+        # Subject
+        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject) unless subject == []
+        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject) unless subject == []
+
+        subject_name_array = subject_name_for_index()
+        subject_place_array = subject_place_for_index()
+        subject_temporal_array = subject_temporal_for_index()
+
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_array) unless subject_name_array == []
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_array) unless subject_name_array == []
+
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array == []
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array == []
+
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array == []
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
         solr_doc
       end
+
+      # Indexing Methods
+      # --------------------------------------------------------------------------------------------------------------
+      def description_for_index
+        return abstract if !abstract.empty?
+        return toc if !toc.empty?
+        unless (note_mods_type.empty? && note_mods_no_type.empty?)
+          note_formatted = note_mods_type.collect!.with_index do |name, idx|
+            name = "#{name} [#{note_mods_type.type_at[idx]}]"
+          end
+          return note_formatted | note_mods_no_type
+        end
+
+        return []
+      end
+
+      def person_array_for_index()
+        return creator | contributor
+      end
+
+      # These are DRI Subject(Name)
+      def subject_name_for_index()
+        return name_coverage
+      end
+
+      # These are DRI Subject(Place)
+      def subject_place_for_index()
+        return geographical_coverage | hierarchical_geographic | cartographics_scale | cartographics_coordinates |
+            cartographics_projection | geographic_code
+      end
+
+      # These are DRI Subject(Place)
+      def subject_temporal_for_index()
+        # Extract temporal ranges
+        dates_range_array = subject_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (subject_date_end.length - 1)) ? ("#{name} - #{subject_date_end[idx]}") : name
+        end
+
+        return temporal_coverage | dates_range_array | date
+      end
+
+      # --------------------------------------------------------------------------------------------------------------
 
       def custom_validations
         errors = Hash.new
@@ -411,12 +534,18 @@ module DRI
         rights_result = false
         type_result = false
         date_result = false
+        identifier_result = true
+        rel_item_ids_result = true
+
+        mods_id.each do |id_uri|
+          identifier_result = false unless (!id_uri.blank? && Utils.valid_uri?(id_uri))
+        end
 
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
         end
 
-        description.each do |curr_description|
+        description_for_index().each do |curr_description|
           description_result = true unless curr_description.blank?
         end
 
@@ -433,6 +562,12 @@ module DRI
           date_result = true unless curr_date.blank?
         end
 
+        related_items_ids.each do |id_uri|
+          rel_item_ids_result = false unless (!id_uri.blank? && Utils.valid_uri?(id_uri))
+        end
+
+        errors[:mods_id] = "can't have a invalid URI." unless identifier_result == true
+        errors[:related_items_ids] = "Invalid URI present" unless rel_item_ids_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
         errors[:rights] = "can't be blank" if rights_result == false
