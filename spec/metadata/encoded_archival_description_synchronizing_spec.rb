@@ -19,22 +19,22 @@ describe 'EncodedArchivalDescription' do
     @ead_collection.governed_items.size.should == expected_nodes.length
 
     @ead_collection.governed_items.each do |curr_child|
-        expected_nodes.has_key?(curr_child.identifier).should == true
+        expected_nodes.has_key?(curr_child.identifier.first).should == true
 
         if (curr_child.previous_sibling == nil)
-          expected_nodes[curr_child.identifier]["prev"].should == nil
+          expected_nodes[curr_child.identifier.first]["prev"].should == nil
         else
-          expected_nodes[curr_child.identifier]["prev"].should == curr_child.previous_sibling.pid
+          expected_nodes[curr_child.identifier.first]["prev"].should == curr_child.previous_sibling.pid
         end
 
         if (curr_child.next_sibling == nil)
-          expected_nodes[curr_child.identifier]["next"].should == nil
+          expected_nodes[curr_child.identifier.first]["next"].should == nil
         else
-          expected_nodes[curr_child.identifier]["next"].should == curr_child.next_sibling.pid
+          expected_nodes[curr_child.identifier.first]["next"].should == curr_child.next_sibling.pid
         end
 
-        curr_child.title.should == [expected_nodes[curr_child.identifier]["title"]]
-        curr_child.ead_level.should == expected_nodes[curr_child.identifier]["level"]
+        curr_child.title.should == [expected_nodes[curr_child.identifier.first]["title"]]
+        curr_child.ead_level.should == expected_nodes[curr_child.identifier.first]["level"]
     end
   end
 
@@ -49,22 +49,22 @@ describe 'EncodedArchivalDescription' do
     ead_series.governed_items.size.should == expected_nodes.length
 
     ead_series.governed_items.each do |curr_child|
-        expected_nodes.has_key?(curr_child.identifier).should == true
+        expected_nodes.has_key?(curr_child.identifier.first).should == true
 
         if (curr_child.previous_sibling == nil)
-          expected_nodes[curr_child.identifier]["prev"].should == nil
+          expected_nodes[curr_child.identifier.first]["prev"].should == nil
         else
-          expected_nodes[curr_child.identifier]["prev"].should == curr_child.previous_sibling.pid
+          expected_nodes[curr_child.identifier.first]["prev"].should == curr_child.previous_sibling.pid
         end
 
         if (curr_child.next_sibling == nil)
-          expected_nodes[curr_child.identifier]["next"].should == nil
+          expected_nodes[curr_child.identifier.first]["next"].should == nil
         else
-          expected_nodes[curr_child.identifier]["next"].should == curr_child.next_sibling.pid
+          expected_nodes[curr_child.identifier.first]["next"].should == curr_child.next_sibling.pid
         end
 
-        curr_child.title.should == [ expected_nodes[curr_child.identifier]["title"]]
-        curr_child.ead_level.should == expected_nodes[curr_child.identifier]["level"]
+        curr_child.title.should == [ expected_nodes[curr_child.identifier.first]["title"]]
+        curr_child.ead_level.should == expected_nodes[curr_child.identifier.first]["level"]
     end
   end
 

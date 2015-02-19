@@ -5,9 +5,12 @@ module DRI
 
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
-    has_attributes :identifier, datastream: :descMetadata, multiple: false
-    #has_attributes :unitid, datastream: :descMetadata, multiple: false
+    # (!) Important - change on identifier for components: repeatable
+    has_attributes :identifier, datastream: :descMetadata, multiple: true
+
+    #has_attributes :unitid, datastream: :descMetadata, multiple: true
     #has_attributes :eadid, datastream: :descMetadata, multiple: false
+
     has_attributes :repository_code, datastream: :descMetadata, multiple: false
     has_attributes :country_code, datastream: :descMetadata, multiple: false
     has_attributes :identifier_id, datastream: :descMetadata, multiple: true
@@ -24,6 +27,7 @@ module DRI
     #has_attributes :type, datastream: :descMetadata, multiple: true
     has_attributes :type_ead, datastream: :descMetadata, multiple: true
     has_attributes :ead_level, datastream: :descMetadata, multiple: false
+    has_attributes :ead_level_other, datastream: :descMetadata, multiple: false
 
     #has_attributes :physdesc, datastream: :descMetadata, multiple: true
 
@@ -47,6 +51,12 @@ module DRI
 
     # Institute
     has_attributes :institute, datastream: :descMetadata, multiple: true
+
+    # Related Material
+    has_attributes :related_material, datastream: :descMetadata, multiple: true
+
+    # Alternative Form Available
+    has_attributes :alternative_form, datastream: :descMetadata, multiple: true
 
     around_save :synchronize_if_changed
 
@@ -122,6 +132,9 @@ module DRI
     end
 
     def update_metadata xml_text
+      # Trigger update - issue 1195 (only trigger EAD update if updating descMetadata)
+      self.trigger_update=(true)
+
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -146,7 +159,15 @@ module DRI
       if (xml_type == "DRI::Metadata::EncodedArchivalDescription")
         xml.xpath("/ead/archdesc/dsc/*").remove
       else
-        xml.xpath("/*/dsc/*").remove
+        # 1. dsc/c
+        if (!xml.xpath("/*/dsc/*").empty?)
+          xml.xpath("/*/dsc/*").remove
+        else
+          # 2. c/c or 3. c/c01/c02...
+          # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
+          # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
+          xml.xpath("/*/*[starts-with(local-name(), 'c')]").remove
+        end
       end
 
       return xml
@@ -155,7 +176,7 @@ module DRI
     def synchronize_if_changed
       content_changed = false
 
-      if (self.descMetadata.synchronize_metadata_on_save == true)
+      if (self.descMetadata.synchronize_metadata_on_save == true && self.trigger_update)
         content_changed = self.descMetadata.changed?
       end
 

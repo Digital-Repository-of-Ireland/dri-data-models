@@ -34,9 +34,10 @@
   </eadheader>
   <archdesc level="fonds" relatedencoding="ISAD(G)v2">
     <did>
-      <unittitle encodinganalog="3.1.2">Kilkenny Design Workshop</unittitle>
+      <unittitle encodinganalog="3.1.2"><geogname>Kilkenny</geogname> Design Workshop</unittitle>
       <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="KDW" encodinganalog="3.1.1">KDW</unitid>
       <unitdate datechar="Creation" normal="19630101/19881231" encodinganalog="3.1.3">1963 - 1988</unitdate>
+      <unitdate datechar="published" normal="19840101/19841231" encodinganalog="3.1.3">1984</unitdate>
       <physdesc>
         <extent encodinganalog="3.1.5">
           23 series containing 2682 files
@@ -50,9 +51,9 @@
       </origination>
     </did>
     <scopecontent encodinganalog="3.3.1">
-      <p>The bulk of the Archive consists of photographic material – photographic prints and negatives, 35mm slides and large-scale transparencies – which document all aspects of the Kilkenny Design Workshops.  Eleven of the series are devoted to images of KDW designed products; one series documents non-KDW designed products sold in the KDW retail outlets; and two record the people involved in KDW as employees, suppliers, or as part of the Designer Development programme. KDW related exhibitions and events are recorded in one series and the various premises used for KDW activities in another. The Education series mainly contains images used as research material, documentation of seminars and conferences, and slide presentations produced by KDW.  The material in the Views of Ireland series may have been collected for promotional or educational purposes. A small number of design drawings and printed ephemera are included in some files.
-
-        The Photographic Sample and Index of Record Sheets series documents to 26 volumes of information about the photographic material. The quality of the information is variable and often incomplete. There are no record sheets available for some of the series, e.g. ceramics. The Press-clipping series catalogues 31 volumes of press material covering a wide range of design and industry related subjects. The Public Relations series catalogues 4 volumes of scrap-books containing photographic and press material relating to KDW events and products. There is some degree of overlap from this material with the Exhibitions and Press-clipping series. The Related Material series includes selected items connected with KDW from other NIVAL collections.</p>
+      <head>Scope and Contents</head>
+      <p>The bulk of the Archive consists of photographic material – photographic prints and negatives, 35mm slides and large-scale transparencies – which document all aspects of the Kilkenny Design Workshops.  Eleven of the series are devoted to images of KDW designed products; one series documents non-KDW designed products sold in the KDW retail outlets; and two record the people involved in KDW as employees, suppliers, or as part of the Designer Development programme. KDW related exhibitions and events are recorded in one series and the various premises used for KDW activities in another. The Education series mainly contains images used as research material, documentation of seminars and conferences, and slide presentations produced by KDW.  The material in the Views of Ireland series may have been collected for promotional or educational purposes. A small number of design drawings and printed ephemera are included in some files.</p>
+      <p>The Photographic Sample and Index of Record Sheets series documents to 26 volumes of information about the photographic material. The quality of the information is variable and often incomplete. There are no record sheets available for some of the series, e.g. ceramics. The Press-clipping series catalogues 31 volumes of press material covering a wide range of design and industry related subjects. The Public Relations series catalogues 4 volumes of scrap-books containing photographic and press material relating to KDW events and products. There is some degree of overlap from this material with the Exhibitions and Press-clipping series. The Related Material series includes selected items connected with KDW from other NIVAL collections.</p>
     </scopecontent>
     <arrangement encodinganalog="3.3.4">
       <p>NIVAL has been engaged in a phased cataloguing the KDW collection over a number of years. Phase 3 of this project is currently under way. All material in the collection will be catalogued at series and file levels at the end of this phase. Following the completion of the cataloguing selected items from the files will be digitised. NIVAL has sought to maintain the original order of the photographic material, where possible utilising the KDW's own coding system. KDW produced photographic documentation of products, designers, premises and events associated with the Workshops. KDW had their own coding system which they applied to the each design job and to the resultant photographic documentation.
@@ -72,21 +73,15 @@
       <p>The collection is available for consultation in the NIVAL reading room. Please contact NIVAL in advance to arrange access.</p>
     </accessrestrict>
     <userestrict encodinganalog="3.4.1">
-      <p>The photographic material and press clippings are subject to copyright restrictions. Please consult NIVAL staff re other material in the collection.</p>
+      <p>The photographic material and press clippings are subject to copyright restrictions. Please consult <corpname>NIVAL</corpname> staff re other material in the collection.</p>
     </userestrict>
     <bibliography encodinganalog="3.5.4">
-      <p>Publications
-        Marchant, N. &amp; Addis, J. Kilkenny Design: twenty-one years of design in
-        Ireland. Lund Humphries. Kilkenny and London, 1985
-
-        Thorpe, Ruth (Ed.). Designing Ireland: a retrospective exhibition of Kilkenny Design Workshops,1963-1988 . Kilkenny: Crafts Council of Ireland, 2005
-
-        Journal articles
-        Caffery, Paul. “The Scandinavian ideal: a model for design in Ireland”. Scandinavian Journal of Design History, vol.8, pp.32-43, 1998
-
-        Moran, Anna, “Tradition in the Service of Modernity: Kilkenny Design Workshops and Selling Irish Design at American Department Store Promotions, 1967-1976” pp.191-207, in Ireland, Design and Visual Culture: Negotiating Modernity, 1922-92. King, L. &amp; Sissons, E. (Eds.), Cork University Press, 2011.
-
-        Turpin, John. “The Irish design reform movement of the 1960s”. Design Issues, vol.3, no.1, pp.4-21, Spring 1986</p>
+      <p>Publications</p>
+      <p>Marchant, N. &amp; Addis, J. Kilkenny Design: twenty-one years of design in Ireland. Lund Humphries. Kilkenny and London, 1985</p>
+      <p>Thorpe, Ruth (Ed.). Designing Ireland: a retrospective exhibition of Kilkenny Design Workshops,1963-1988 . Kilkenny: Crafts Council of Ireland, 2005</p>
+      <p>Journal articles</p>
+      <p><persname>Caffery, Paul.</persname> “The Scandinavian ideal: a model for design in Ireland”. Scandinavian Journal of Design History, vol.8, pp.32-43, 1998</p>
+      <p>Moran, Anna, “Tradition in the Service of Modernity: Kilkenny Design Workshops and Selling Irish Design at American Department Store Promotions, 1967-1976” pp.191-207, in Ireland, Design and Visual Culture: Negotiating Modernity, 1922-92. King, L. &amp; Sissons, E. (Eds.), Cork University Press, 2011.</p><p>Turpin, John. “The Irish design reform movement of the 1960s”. Design Issues, vol.3, no.1, pp.4-21, Spring 1986</p>
     </bibliography>
     <dsc type="combined">
       <c level="series">
