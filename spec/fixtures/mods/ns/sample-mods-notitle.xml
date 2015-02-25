@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mods:mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3"
            xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:identifier type="local">12345-678-9</mods:identifier>
   <mods:titleInfo>
     <mods:title/>
   </mods:titleInfo>

@@ -5,7 +5,7 @@
   xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
   xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
   <mods:mods version="3.5">
-    <mods:identifier type="uri">http://digital.library.upenn.edu/women/</mods:identifier>
+    <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
     <mods:titleInfo type="uniform" authority="dlfaqcoll">
       <mods:title>A Celebration of Women Writers: Americana</mods:title>
     </mods:titleInfo>
@@ -42,10 +42,16 @@
     <mods:subject authority="lcsh">
       <mods:topic>Fiction--Women authors</mods:topic>
     </mods:subject>
+    <mods:relatedItem type="constituent">
+      <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>Subcollection 1</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
   </mods:mods>
   <mods:mods>
     <!-- identifier will be used for relationships valid URI here -->
-    <mods:identifier type="uri">http://example.org/subcollection/1#</mods:identifier>
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
     <!-- The title of the collection -->
     <mods:titleInfo>
       <mods:title>Subcollection 1</mods:title>
@@ -107,7 +113,7 @@
     </mods:relatedItem>
   </mods:mods>
   <mods:mods>
-    <mods:identifier type="uri">http://example.org/gettysburg#</mods:identifier>
+    <mods:identifier type="local">http://example.org/gettysburg#</mods:identifier>
     <mods:titleInfo>
       <mods:title>At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative</mods:title>
     </mods:titleInfo>
@@ -160,7 +166,7 @@
       </mods:languageOfCataloging>
     </mods:recordInfo>
     <mods:relatedItem type="isReferencedBy">
-      <mods:identifier type="uri">http://digital.library.upenn.edu/women/</mods:identifier>
+      <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
       <mods:titleInfo>
         <mods:title>A Celebration of Women Writers: Americana</mods:title>
       </mods:titleInfo>

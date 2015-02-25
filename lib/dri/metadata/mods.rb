@@ -9,7 +9,7 @@ module DRI
       # MODS XML constants.
       MODS_NS_PREFIX = "mods"
       MODS_NS = 'http://www.loc.gov/mods/v3'
-      MODS_SCHEMA = 'http://www.loc.gov/standards/mods/v3/mods-3-5.xsd'
+      MODS_SCHEMA = 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd'
       CR_NS_PREFIX = "copyrightMD"
       CR_NS = "http://www.cdlib.org/inside/diglib/copyrightMD"
 
@@ -301,14 +301,14 @@ module DRI
           # Relationships
           DRI::Vocabulary::modsRelationshipTypes.each do |rel|
             t.send "related_items_ids_" + rel,
-                   :path=>"relatedItem[@type='#{rel}']/mods:identifier[@type='uri']",
+                   :path=>"relatedItem[@type='#{rel}']/mods:identifier[@type='local']",
                    :namespace_prefix => MODS_NS_PREFIX
           end
 
           # MODS Terms
-          t.mods_id(:ref => [:uri], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.mods_id_local(:path => "/mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          t.related_items_ids(:path => "relatedItem/mods:identifier[@type='uri']", :namespace_prefix => MODS_NS_PREFIX)
+          t.related_items_ids(:path => "relatedItem/mods:identifier[@type='local']", :namespace_prefix => MODS_NS_PREFIX)
 
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
@@ -528,17 +528,22 @@ module DRI
 
       def custom_validations
         errors = Hash.new
-
+        identifier_result = true
+        uri_result = true
+        rel_item_ids_result = true
         title_result = false
         description_result = false
         rights_result = false
         type_result = false
         date_result = false
-        identifier_result = true
-        rel_item_ids_result = true
 
-        mods_id.each do |id_uri|
-          identifier_result = false unless (!id_uri.blank? && Utils.valid_uri?(id_uri))
+        # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
+        if (mods_id_local.empty? || mods_id_local.size != 1)
+          identifier_result = false
+        end
+
+        uri.each do |uri_r|
+          uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
         end
 
         title.each do |curr_title|
@@ -557,17 +562,12 @@ module DRI
           type_result = true unless curr_type.blank?
         end
 
-
         creation_date.each do |curr_date|
           date_result = true unless curr_date.blank?
         end
 
-        related_items_ids.each do |id_uri|
-          rel_item_ids_result = false unless (!id_uri.blank? && Utils.valid_uri?(id_uri))
-        end
-
-        errors[:mods_id] = "can't have a invalid URI." unless identifier_result == true
-        errors[:related_items_ids] = "Invalid URI present" unless rel_item_ids_result == true
+        errors[:mods_id_local] = "not present." unless identifier_result == true
+        errors[:uri] = "Invalid URI present" unless uri.empty? || uri_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
         errors[:rights] = "can't be blank" if rights_result == false

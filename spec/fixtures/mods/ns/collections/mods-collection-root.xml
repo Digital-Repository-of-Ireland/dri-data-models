@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods version="3.5" xmlns:mods="http://www.loc.gov/mods/v3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+  xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+    <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
+    <mods:titleInfo type="uniform" authority="dlfaqcoll">
+      <mods:title>A Celebration of Women Writers: Americana</mods:title>
+    </mods:titleInfo>
+    <mods:abstract>A Celebration of Women Writers recognizes the contributions of women writers throughout history. The goal is to promote awareness of the breadth and variety of women's writing by providing easy access to available on-line information. The repository provides a comprehensive listing of links to biographical and bibliographical information about women writers, and complete published books written by women.</mods:abstract>
+    <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+    <mods:genre type="dct">Collection</mods:genre>
+    <mods:physicalDescription>
+      <mods:extent>249 records</mods:extent>
+    </mods:physicalDescription>
+    <mods:name type="personal">
+      <mods:namePart>Mark Ockerbloom, Mary, 1961-</mods:namePart>
+      <mods:role>
+        <mods:roleTerm type="code" authority="marcrelator">cre</mods:roleTerm>
+        <mods:roleTerm type="text" authority="marcrelator">Creator</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <mods:originInfo>
+      <mods:dateCreated encoding="w3cdtf">1961</mods:dateCreated>
+    </mods:originInfo>
+    <mods:language>
+      <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+    </mods:language>
+    <mods:accessCondition>
+      <copyrightMD:copyright copyright.status="copyrighted">Mary Mark Ockerbloom</copyrightMD:copyright>
+      <copyrightMD:general.note>The Celebration of Women Writers listing is copyrighted.</copyrightMD:general.note>
+    </mods:accessCondition>
+    <mods:subject authority="lcsh">
+      <mods:topic>Language Arts. Literature</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Children's literature--Women authors</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Fiction--Women authors</mods:topic>
+    </mods:subject>
+    <mods:relatedItem type="constituent">
+      <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>Subcollection 1</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem> 
+  </mods:mods>

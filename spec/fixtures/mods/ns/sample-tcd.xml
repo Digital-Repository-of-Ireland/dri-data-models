@@ -4,7 +4,7 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd"
            version="3.5" >
-  <mods:identifier type="uri">http://example.org/image/2#</mods:identifier>
+  <mods:identifier type="local">http://example.org/image/2#</mods:identifier>
   <mods:titleInfo>
     <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
   </mods:titleInfo>

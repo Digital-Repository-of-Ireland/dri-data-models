@@ -122,8 +122,11 @@ module DRI
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
         elsif ['marc'].include? root_name
           result = "DRI::Metadata::Marc"
-        elsif ['mods'].include? root_name
+        elsif ['mods'].include?(root_name)
           result = (!xml.xpath("/mods/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
+        elsif ['modsCollection'].include?(root_name)
+          # Check whether the first record is a collection
+          result = (!xml.xpath("/modsCollection/mods[1]/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         end
 
         return result

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
-           xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
-           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd"
-           version="3.5">
+<mods:mods version="3.5" xmlns:mods="http://www.loc.gov/mods/v3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+  xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
   <!-- identifier will be used for relationships valid URI here -->
   <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
   <!-- The title of the collection -->
@@ -59,4 +59,10 @@
   <mods:originInfo>
     <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
   </mods:originInfo>
+  <mods:relatedItem type="host">
+    <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>A Celebration of Women Writers: Americana</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
 </mods:mods>

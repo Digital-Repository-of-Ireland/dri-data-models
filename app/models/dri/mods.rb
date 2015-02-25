@@ -7,7 +7,9 @@ module DRI
     belongs_to :succeeding, :property=>:related_succeeding, :class_name => "DRI::Mods"
     belongs_to :original, :property=>:related_original, :class_name => "DRI::Mods"
     belongs_to :host, :property=>:related_host, :class_name => "DRI::Mods"
-    has_many :constituents, :property=>:related_constituent, :class_name => "DRI::Mods"
+    # Constituents is managed through the host relationship. This automatically adds a constituent
+    # whenever a host relationship is added
+    has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
     belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
     belongs_to :version, :property=>:related_version, :class_name => "DRI::Mods"
     belongs_to :format, :property=>:related_format, :class_name => "DRI::Mods"
@@ -16,7 +18,7 @@ module DRI
     belongs_to :review, :property=>:related_review, :class_name => "DRI::Mods"
 
     # MODS record identifier, not multi-valued
-    has_attributes :mods_id, datastream: :descMetadata, multiple: false
+    has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
     has_attributes :identifier, datastream: :descMetadata, multiple: false
     has_attributes :doi, datastream: :descMetadata, multiple: false
     has_attributes :uri, datastream: :descMetadata, multiple: false
@@ -71,7 +73,7 @@ module DRI
       super(properties)
     end
 
-    def update_metadata xml_text
+    def update_metadata(xml_text)
       self.trigger_update=(true)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
@@ -96,13 +98,13 @@ module DRI
       return true
     end
 
-    def roles= roles
+    def roles=(roles)
       if (descMetadata.class == DRI::Metadata::Mods || descMetadata.class == DRI::Metadata::ModsCollection)
         descMetadata.roles = roles
       end
     end
 
-    def split_xml xml_text
+    def split_xml(xml_text)
       unless xml_text.search("/mods:modsCollection").empty?
         collection = xml_text.search("/mods:modsCollection")
         mods_records = collection.children
@@ -133,45 +135,102 @@ module DRI
       end
     end
 
-    def add_mods_relationships(root_collection)
-      add_mods_relationship(related_items_ids_preceding, :preceding, root_collection)
-      add_mods_relationship(related_items_ids_succeeding, :succeeding, root_collection)
-      add_mods_relationship(related_items_ids_original, :original, root_collection)
-      add_mods_relationship(related_items_ids_host, :host, root_collection)
-      add_mods_relationship(related_items_ids_constituent, :constituents, root_collection)
-      add_mods_relationship(related_items_ids_series, :series, root_collection)
-      add_mods_relationship(related_items_ids_otherVersion, :version, root_collection)
-      add_mods_relationship(related_items_ids_otherFormat, :format, root_collection)
-      add_mods_relationship(related_items_ids_references, :references, root_collection)
-      add_mods_relationship(related_items_ids_isReferencedBy, :referenced_by, root_collection)
-      add_mods_relationship(related_items_ids_reviewOf, :review, root_collection)
+    # [For root collections only]
+    # Iterate over every collection's object and process relationships
+    #
+    def process_collection_relationships
+      if self.is_root_collection?
+        # Get all the collection's objects
+        # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
+        solr_query = "#{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+        collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+        unless collection_objects_docs.empty?
+          collection_objects_docs.each do |obj_doc|
+            doc = SolrDocument.new(obj_doc)
+            object = DRI::Mods.find(doc.id)
+            begin
+              Sufia.queue.push(CreateModsRelationshipsJob.new(object.pid))
+            rescue Exception => e
+              Logger.error(e.message)
+            end
+          end
+        end
+      else
+        Logger.error("The object #{self.pid} is not a collection container.")
+      end
     end # end add_relationships
 
-    def add_mods_relationship(rels_array, rels_name, root_collection)
+    def process_mods_relationships()
+      add_mods_relationship(related_items_ids_preceding, :preceding)
+      add_mods_relationship(related_items_ids_succeeding, :succeeding)
+      add_mods_relationship(related_items_ids_original, :original)
+      add_mods_relationship(related_items_ids_host, :host)
+      add_mods_relationship(related_items_ids_constituent, :constituents)
+      add_mods_relationship(related_items_ids_series, :series)
+      add_mods_relationship(related_items_ids_otherVersion, :version)
+      add_mods_relationship(related_items_ids_otherFormat, :format)
+      add_mods_relationship(related_items_ids_references, :references)
+      add_mods_relationship(related_items_ids_isReferencedBy, :referenced_by)
+      add_mods_relationship(related_items_ids_reviewOf, :review)
+    end
+
+    # Process a specific mods relationship for the object
+    # @return true if successful; false otherwise
+    #
+    def add_mods_relationship(rels_array, rels_name)
       if rels_array.empty?
-        return
+        return true
+      end
+
+      # Get Root collection
+      solr_query = "id:\"#{pid.to_s}\""
+      # The query service returns back a set of Solr Documents, therefore need to be casted later on
+      solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+
+      if (solr_docs == nil || solr_docs == [])
+        Logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+        return false
+      end
+
+      doc = SolrDocument.new(solr_docs[0])
+      root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+
+      if (root_collection == nil)
+        Logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+        return false
       end
 
       rels_array.each do |item_id|
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "mods_id_tesim:\"#{item_id.to_s}\" "+
-            "AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection}\""
+        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\" "+
+            "AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
-          # TODO Item not found, do we pop this id from related_item_ids?
-          rels_array.pop item_id
+          Logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+          return false
         else
           doc = SolrDocument.new(mods_item[0])
           # Cast the solr document to its corresponding Fedora object
           mods_obj = DRI::Mods.find(doc.id)
-
-          self.send("#{rels_name}=", mods_obj) unless mods_obj == nil
+          unless mods_obj == nil
+            if (rels_name.equal?(:constituents))
+              mods_obj.send("#{:host}=", self)
+              mods_obj.save if mods_obj.valid?
+            else
+              self.send("#{rels_name}=", mods_obj)
+            end
+          end
         end
       end
 
       # Save object, if valid
-      self.save if self.valid?
+      if self.valid?
+        self.save
+        return true
+      else
+        return false
+      end
     end # end add_mods_relationship
 
     def create_multiple_records
@@ -194,7 +253,7 @@ module DRI
           begin
             Sufia.queue.push(CreateModsRecordsJob.new(self.pid))
           rescue Exception => e
-            logger.error(e.message)
+            Logger.error(e.message)
           end
         end
       end # end if

@@ -6,6 +6,7 @@
   xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
   version="3.5">
   <mods:mods>
+    <mods:identifier type="local">12345-678-9</mods:identifier>
     <mods:titleInfo>
       <mods:title>At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative</mods:title>
     </mods:titleInfo>
@@ -85,6 +86,7 @@
     </mods:recordInfo>
   </mods:mods>
   <mods:mods>
+    <mods:identifier type="local">12345-678-10</mods:identifier>
     <mods:titleInfo>
       <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
     </mods:titleInfo>
