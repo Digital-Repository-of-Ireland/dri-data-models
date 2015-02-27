@@ -17,11 +17,14 @@ module DRI
     belongs_to :references, :property=>:related_reference, :class_name => "DRI::Mods"
     belongs_to :review, :property=>:related_review, :class_name => "DRI::Mods"
 
-    # MODS record identifier, not multi-valued
+    # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
-    has_attributes :identifier, datastream: :descMetadata, multiple: false
-    has_attributes :doi, datastream: :descMetadata, multiple: false
-    has_attributes :uri, datastream: :descMetadata, multiple: false
+    # MODS rest of identifiers are repeatable
+    has_attributes :identifier, datastream: :descMetadata, multiple: true
+    has_attributes :id_doi, datastream: :descMetadata, multiple: true
+    has_attributes :id_uri, datastream: :descMetadata, multiple: true
+    # Collection attribute
+    has_attributes :mods_type_collection, datastream: :descMetadata, multiple: false
     # Title
     has_attributes :subtitle, datastream: :descMetadata, multiple: true
     # Description

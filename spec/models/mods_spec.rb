@@ -17,9 +17,9 @@ describe 'Mods' do
     @mods_record.descMetadata.should be_kind_of(DRI::Metadata::Mods)
   end
 
-  xit "should have namespaces removed from the mods datastream" do
+  it "should have mods namespace prefix" do
     mods_ns = {"xmlns:mods" => "http://www.loc.gov/mods/v3"}
-    expect(@mods_record.descMetadata.ng_xml.namespaces).not_to include(mods_ns)
+    expect(@mods_record.descMetadata.ng_xml.namespaces).to include(mods_ns)
   end
 
   # DRI elements tests

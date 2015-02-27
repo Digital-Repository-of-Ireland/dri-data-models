@@ -25,8 +25,8 @@ module DRI
           }
           # Map to the mods record identifier (absolute xpath here from the root element)
           t.identifier(:path => "mods/mods:identifier", :namespace_prefix => MODS_NS_PREFIX)
-          t.doi(:ref => :identifier, :attributes => {:type=>"doi"}, :namespace_prefix => MODS_NS_PREFIX)
-          t.uri(:ref => :identifier, :attributes => {:type=>"uri"}, :namespace_prefix => MODS_NS_PREFIX)
+          t.id_doi(:ref => :identifier, :attributes => {:type=>"doi"}, :namespace_prefix => MODS_NS_PREFIX)
+          t.id_uri(:ref => :identifier, :attributes => {:type=>"uri"}, :namespace_prefix => MODS_NS_PREFIX)
 
           t.abstract(:path => "abstract", :namespace_prefix => MODS_NS_PREFIX)
 
@@ -115,7 +115,9 @@ module DRI
             }
           }
 
-          t.type_resource(:path => "typeOfResource", :attributes => {"collection" => "yes"}, :namespace_prefix => MODS_NS_PREFIX)
+          t.type_resource(:path => "typeOfResource", :namespace_prefix => MODS_NS_PREFIX) {
+            t.collection_at(:path => {:attribute=>"collection"})
+          }
 
           t.genre(:path => "genre", :namespace_prefix => MODS_NS_PREFIX) {
             t.type(:path => {:attribute => "type"})
@@ -241,6 +243,8 @@ module DRI
           # MODS Terms
           t.mods_id_local(:path => "/mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.related_items_ids(:path => "relatedItem/mods:identifier[@type='local']", :namespace_prefix => MODS_NS_PREFIX)
+
+          t.mods_type_collection(:proxy => [:mods, :type_resource, :collection_at])
 
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
@@ -488,13 +492,14 @@ module DRI
         rights_result = false
         type_result = false
         date_result = false
+        type_collection = false
 
         # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
-        if (mods_id_local.empty? || mods_id_local.size != 1)
+        if (mods_id_local.size == 1 && [""].include?(mods_id_local.first))
           identifier_result = false
         end
 
-        uri.each do |uri_r|
+        id_uri.each do |uri_r|
           uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
         end
 
@@ -518,8 +523,13 @@ module DRI
           date_result = true unless curr_date.blank?
         end
 
+        mods_type_collection.each do |type_value|
+          type_collection = true unless type_value.blank?
+        end
+
         errors[:mods_id_local] = "not present." unless identifier_result == true
-        errors[:uri] = "Invalid URI present" unless uri.empty? || uri_result == true
+        errors[:mods_type_collection] = "not present" unless type_collection == true
+        errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
         errors[:rights] = "can't be blank" if rights_result == false
