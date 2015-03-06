@@ -1,10 +1,8 @@
 module DRI
 class Batch < ActiveFedora::Base
-  include ActiveFedora::Auditable
   include Sufia::ModelMethods
   include Sufia::Noid
   include Sufia::GenericFile::Export
-  include Sufia::GenericFile::ReloadOnSave
   include DRI::ModelSupport::Properties
   include DRI::ModelSupport::Permissions
   include DRI::ModelSupport::InterchangeableMetadata
@@ -38,7 +36,7 @@ class Batch < ActiveFedora::Base
     begin
       DRI::Batch.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
-      DRI::Batch.create({pid: pid})
+      DRI::Batch.create({id: pid})
     end
   end
 
@@ -48,9 +46,8 @@ class Batch < ActiveFedora::Base
     @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
   end
 
-  def assert_content_model
-    add_relationship(:has_model, self.class.to_class_uri)
-    add_relationship(:has_model, self.class.superclass.to_class_uri)
+  def indexer
+    DRI::BatchIndexingService
   end
 
   # Updates the metadata class of the current digital object in case we are now working
@@ -68,25 +65,8 @@ class Batch < ActiveFedora::Base
     return true
   end
 
-  # Performs the indexing of this object into Solr
-  # @param solr_doc []
-  def to_solr(solr_doc={}, opts={})
-    solr_doc = super(solr_doc, opts)
-
-    solr_doc[Solrizer.solr_name('noid', noid_indexer)] = noid
-
-    solr_doc.merge!collections_to_solr
-    solr_doc.merge!object_types_to_solr
-    solr_doc.merge!file_metadata_to_solr
-
-    solr_doc.merge!('all_text_timv' => full_text)
-
-    return solr_doc
-  end
-
   # Indexing object types as a hierarchical tree
   def object_types_to_solr(solr_doc=Hash.new)
-
     object_types = []
 
     self.descMetadata.type.each do | curr_category |
@@ -106,4 +86,22 @@ class Batch < ActiveFedora::Base
   end
 
 end
+
+class BatchIndexingService < ActiveFedora::IndexingService
+
+  # Performs the indexing of this object into Solr
+  def generate_solr_document
+    super.tap do |solr_doc|
+      solr_doc[SolrQueryBuilder.solr_name('noid', object.noid_indexer)] = noid
+
+      solr_doc.merge!object.collections_to_solr
+      solr_doc.merge!object.object_types_to_solr
+      solr_doc.merge!object.file_metadata_to_solr
+
+      solr_doc.merge!('all_text_timv' => object.full_text)
+    end
+  end
+
+end
+
 end

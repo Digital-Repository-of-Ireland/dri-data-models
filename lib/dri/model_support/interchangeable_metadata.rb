@@ -164,7 +164,7 @@ module DRI
 
         if (ds != nil)
           ds.instance_variable_set :@dsid, "descMetadata"
-          self.add_datastream ds
+          self.attach_file ds, "descMetadata"
         end
         @metadata_class = descMetadata.class
         # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora

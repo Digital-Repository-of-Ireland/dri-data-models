@@ -28,7 +28,7 @@ module DRI
         new_object.depositor = self.depositor
         new_object.status = self.status
         new_object.update_metadata xml
-        new_object.datastreams['rightsMetadata'].content = self.rightsMetadata.content
+        new_object.permissions =  self.permissions
 
         MetadataHelpers.checksum_metadata(new_object)
 

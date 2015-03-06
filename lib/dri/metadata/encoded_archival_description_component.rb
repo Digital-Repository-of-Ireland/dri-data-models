@@ -414,9 +414,9 @@ module DRI
       end
 
       def get_field_from_parent(field_name)
-        fedora_object = DRI::EncodedArchivalDescription.find(pid)
+        fedora_object = DRI::EncodedArchivalDescription.find(id)
 
-        solr_query = "id:\"#{fedora_object.governing_collection.pid.to_s}\""
+        solr_query = "id:\"#{fedora_object.governing_collection.id.to_s}\""
         docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         parent_field = docs.first[Solrizer.solr_name(field_name, :stored_searchable, type: :string)]
@@ -567,7 +567,7 @@ module DRI
                                             " text()=#{identifier}]")
         # Queue synchronization between parent and grandparent
         if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
-          Sufia.queue.push(SynchronizeMetadata.new(parent.pid))
+          Sufia.queue.push(SynchronizeMetadata.new(parent.id))
         end
       end #synchronize_children_to_metadata
 

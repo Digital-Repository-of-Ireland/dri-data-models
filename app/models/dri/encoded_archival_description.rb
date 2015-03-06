@@ -76,7 +76,7 @@ module DRI
       begin
         DRI::EncodedArchivalDescription.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::EncodedArchivalDescription.create({pid: pid})
+        DRI::EncodedArchivalDescription.create({id: pid})
       end
     end
 
@@ -184,7 +184,7 @@ module DRI
       yield
 
       if content_changed && !new_record?
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
+        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
       end
     end
 

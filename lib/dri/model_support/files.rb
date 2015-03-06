@@ -104,7 +104,7 @@ module DRI
         end
 
         # TODO - AMG check generic_file to batch rel is indexed properly
-        solr_query = "is_part_of_ssim:info:fedora/#{pid}"
+        solr_query = "is_part_of_ssim:info:fedora/#{id}"
         results = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if results != nil
@@ -254,7 +254,7 @@ module DRI
         if (self.descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent)
           if content_changed && self.generic_files.empty? &&
             !self.dao_href.empty? && !new_record?
-            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
+            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
           end
         elsif (self.descMetadata.is_a? DRI::Metadata::EncodedArchivalDescription)
           # For EAD collection, generate cover image

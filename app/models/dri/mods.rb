@@ -15,7 +15,7 @@ module DRI
       begin
         DRI::Mods.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::Mods.create({pid: pid})
+        DRI::Mods.create({id: pid})
       end
     end
   end # class

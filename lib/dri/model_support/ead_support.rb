@@ -24,9 +24,9 @@ module DRI
           #else
             # Find the first child (child not preceded by another child) of the current object
             # Changed way of retrieving children from Solr. Exact match query by collection_id needed
-            solr_query = "collection_id_tesim:\"#{pid.to_s}\" AND is_first_sibling_tesim:1"
+            solr_query = "collection_id_tesim:\"#{id.to_s}\" AND is_first_sibling_tesim:1"
             # The query service returns back a set of Solr Documents, therefore need to be casted later on
-            child_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+            child_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax", :qf => "id")
             # Add type: :string to solr_name
             #child_obj = EncodedArchivalDescription.find(solr_name('collection_id', :stored_searchable, type: :string) => pid.to_s, solr_name('is_first_sibling', :stored_searchable) => "1")
             # Important! - added pid.to_s to the query above to ensure a Solr exact match query.
@@ -64,7 +64,7 @@ module DRI
             # Find all the objects for which the ancestor is the current EAD object
             # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
             # Changed way of retrieving children from Solr. Exact match query by ancestor_id needed
-            solr_query = "ancestor_id_tesim:\"#{pid.to_s}\""
+            solr_query = "ancestor_id_tesim:\"#{id.to_s}\""
 
             # Line below uncommented if using EAD.find
             # EncodedArchivalDescription.find(solr_name('ancestor_id', :stored_searchable) => self.pid.to_s).each do |obj|
@@ -126,10 +126,10 @@ module DRI
               new_child.update_metadata metadata_children[metadata_child_index].to_xml
               new_child.previous_sibling = prev_obj
               new_child.governing_collection = self
-              # Add depositor, status and rightsMetadata from parent
+              # Add depositor, status and permissions from parent
               new_child.depositor = self.depositor
               new_child.status = self.status
-              new_child.datastreams['rightsMetadata'].content = self.rightsMetadata.content
+              new_child.permissions = self.permissions
               # ingest_files_from_metadata
               new_child.ingest_files_from_metadata = ingest_files_from_metadata
               #new_child.private_metadata="0"
@@ -191,7 +191,7 @@ module DRI
             to_delete = child_obj
             child_obj = child_obj.next_sibling
 
-            solr_query = "ancestor_id_tesim:\"#{to_delete.pid.to_s}\""
+            solr_query = "ancestor_id_tesim:\"#{to_delete.id.to_s}\""
 
             # Important! - added pid.to_s to the query below to ensure a Solr exact match query.
             # Line below uncommented if using EAD.find

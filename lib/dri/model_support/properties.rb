@@ -1,6 +1,6 @@
 module DRI
   module ModelSupport
-  	module Properties
+    module Properties
       extend ActiveSupport::Concern
 
       included do

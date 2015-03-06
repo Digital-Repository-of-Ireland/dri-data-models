@@ -64,7 +64,7 @@ module DRI
         # TODO - Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
         while (curr_gov_collection != nil)
           ancestor_titles << curr_gov_collection.title[0]
-          ancestor_ids << curr_gov_collection.pid
+          ancestor_ids << curr_gov_collection.id
           curr_gov_collection = curr_gov_collection.governing_collection
         end
 
@@ -86,8 +86,8 @@ module DRI
           # This must be a root collection
           solr_doc.merge!(solr_name('root_collection', :facetable) => [title.first])
           solr_doc.merge!(solr_name('root_collection', :stored_searchable) => [title.first])
-          solr_doc.merge!(solr_name('root_collection_id', :facetable) => [pid])
-          solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => [pid])
+          solr_doc.merge!(solr_name('root_collection_id', :facetable) => [id])
+          solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => [id])
         end
 
         # Overriden in encoded_archival_collection.rb
