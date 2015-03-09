@@ -146,8 +146,11 @@ module DRI
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
         solr_query = "#{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
-        collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
-        unless collection_objects_docs.empty?
+
+        # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+        query = Solr::Query.new(solr_query)
+        while (query.has_more?)
+          collection_objects_docs = query.pop
           collection_objects_docs.each do |obj_doc|
             doc = SolrDocument.new(obj_doc)
             object = DRI::Mods.find(doc.id)
@@ -220,6 +223,9 @@ module DRI
             if (rels_name.equal?(:constituents))
               mods_obj.send("#{:host}=", self)
               mods_obj.save if mods_obj.valid?
+            elsif rels_name.equal?(:host)
+              self.send("#{rels_name}=", mods_obj)
+              self.governing_collection = mods_obj
             else
               self.send("#{rels_name}=", mods_obj)
             end

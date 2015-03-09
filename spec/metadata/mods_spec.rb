@@ -39,7 +39,7 @@ describe 'Mods' do
   it "should validate the presence of the type attribute" do
     # <typeOfResource collection="yes" />
     @mods_col.should be_valid
-    @mods_col.mods_type_collection = ""
+    @mods_col.mods_type_collection = nil
     @mods_col.should_not be_valid
   end
 

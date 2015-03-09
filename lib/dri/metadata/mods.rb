@@ -534,7 +534,7 @@ module DRI
         errors = Hash.new
         identifier_result = false
         uri_result = true
-        rel_item_ids_result = true
+        #rel_item_ids_result = true
         title_result = false
         description_result = false
         rights_result = false
@@ -542,7 +542,7 @@ module DRI
         date_result = false
 
         # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
-        if (mods_id_local.size == 1 && [""].include?(mods_id_local.first))
+        if (mods_id_local.size == 1 && mods_id_local.first == "")
           identifier_result = false
         end
 
@@ -569,6 +569,11 @@ module DRI
         creation_date.each do |curr_date|
           date_result = true unless curr_date.blank?
         end
+        if (!date_result)
+          published_date.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
 
         errors[:mods_id_local] = "not present." unless identifier_result == true
         errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
@@ -577,7 +582,6 @@ module DRI
         errors[:rights] = "can't be blank" if rights_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:creation_date] = "can't be blank" if date_result == false
-
         return errors
       end
       # Load terminology

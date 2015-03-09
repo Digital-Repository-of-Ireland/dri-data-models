@@ -115,9 +115,7 @@ module DRI
             }
           }
 
-          t.type_resource(:path => "typeOfResource", :namespace_prefix => MODS_NS_PREFIX) {
-            t.collection_at(:path => {:attribute=>"collection"})
-          }
+          t.type_resource(:path => "typeOfResource", :attributes=>{:collection=>"yes"}, :namespace_prefix => MODS_NS_PREFIX)
 
           t.genre(:path => "genre", :namespace_prefix => MODS_NS_PREFIX) {
             t.type(:path => {:attribute => "type"})
@@ -244,7 +242,7 @@ module DRI
           t.mods_id_local(:path => "/mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.related_items_ids(:path => "relatedItem/mods:identifier[@type='local']", :namespace_prefix => MODS_NS_PREFIX)
 
-          t.mods_type_collection(:proxy => [:mods, :type_resource, :collection_at])
+          t.mods_type_collection(:proxy => [:mods, :type_resource])
 
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
@@ -486,7 +484,7 @@ module DRI
         errors = Hash.new
         identifier_result = true
         uri_result = true
-        rel_item_ids_result = true
+        #rel_item_ids_result = true
         title_result = false
         description_result = false
         rights_result = false
@@ -495,7 +493,7 @@ module DRI
         type_collection = false
 
         # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
-        if (mods_id_local.size == 1 && [""].include?(mods_id_local.first))
+        if (mods_id_local.size == 1 && mods_id_local.first == "")
           identifier_result = false
         end
 
@@ -524,7 +522,7 @@ module DRI
         end
 
         mods_type_collection.each do |type_value|
-          type_collection = true unless type_value.blank?
+          type_collection = true unless type_value.nil?
         end
 
         errors[:mods_id_local] = "not present." unless identifier_result == true

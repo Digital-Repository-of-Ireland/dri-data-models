@@ -5,7 +5,9 @@
   xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd"
   version="3.5">
   <!-- identifier will be used for relationships valid URI here -->
-  <mods:identifier type="local">http://example.org/collection/2#</mods:identifier>
+  <mods:identifier type="local">MODS-ID-1234</mods:identifier>
+  <mods:identifier type="uri">http://example.org/collection/2#</mods:identifier>
+  <mods:identifier type="doi">MS11182-030_1</mods:identifier>
   <!-- The title of the collection -->
   <mods:titleInfo>
     <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
