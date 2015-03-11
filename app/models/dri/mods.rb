@@ -56,8 +56,8 @@ module DRI
     # Relationships
     has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
                     datastream: :descMetadata, multiple: true
-
-    around_save :create_multiple_records
+    # TODO Disabled for now
+    #around_save :create_multiple_records
 
     # Initialize - mods collection | mods record
     def initialize(type, args = {})
@@ -162,7 +162,9 @@ module DRI
           end
         end
       else
-        Logger.error("The object #{self.pid} is not a collection container.")
+        # Only process the object's relationships
+        Sufia.queue.push(CreateModsRelationshipsJob.new(self.pid))
+        # Logger.error("The object #{self.pid} is not a collection container.")
       end
     end # end add_relationships
 

@@ -205,9 +205,18 @@ module DRI
                                                                          Descriptors.cleaned_displayable],
                            :namespace_prefix => MODS_NS_PREFIX)
           # Creation_date
-          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
-                                                                         Descriptors.cleaned_displayable],
+          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable],
                           :namespace_prefix => MODS_NS_PREFIX)
+
+          t.creation_date_start(:path => "mods/mods:originInfo/mods:dateCreated", :attributes=>{:point=>"start"},
+                                :namespace_prefix => MODS_NS_PREFIX) {
+            t.encoding_at(:path => {:attribute => "encoding"})
+          }
+
+          t.creation_date_end(:path => "mods/mods:originInfo/mods:dateCreated", :attributes=>{:point=>"end"},
+                                :namespace_prefix => MODS_NS_PREFIX) {
+            t.encoding_at(:path => {:attribute => "encoding"})
+          }
 
           # Coverage
           # temporal_coverage
@@ -240,7 +249,6 @@ module DRI
 
           # MODS Terms
           t.mods_id_local(:path => "/mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.related_items_ids(:path => "relatedItem/mods:identifier[@type='local']", :namespace_prefix => MODS_NS_PREFIX)
 
           t.mods_type_collection(:proxy => [:mods, :type_resource])
 
@@ -260,10 +268,14 @@ module DRI
 
           # Subject: temporal, date
           t.subject_temporal(:path => "subject/mods:temporal", :namespace_prefix => MODS_NS_PREFIX)
-          t.subject_date_start(:path => "subject/mods:temporal", :attributes=>{:encoding=>"w3cdtf", :point=>"start"},
-                               :namespace_prefix => MODS_NS_PREFIX)
-          t.subject_date_end(:path => "subject/mods:temporal", :attributes=>{:encoding=>"w3cdtf", :point=>"end"},
-                             :namespace_prefix => MODS_NS_PREFIX)
+          t.subject_date_start(:path => "subject/mods:temporal", :attributes=>{:point=>"start"},
+                               :namespace_prefix => MODS_NS_PREFIX) {
+            t.encoding_at(:path => {:attribute => "encoding"})
+          }
+          t.subject_date_end(:path => "subject/mods:temporal", :attributes=>{:point=>"end"},
+                             :namespace_prefix => MODS_NS_PREFIX) {
+            t.encoding_at(:path => {:attribute => "encoding"})
+          }
           t.date(:proxy => [:name, :date])
           t.date_captured(:proxy => [:origin_info, :date_captured])
           t.date_other(:proxy => [:origin_info, :date_other])
@@ -467,11 +479,11 @@ module DRI
         return builder.doc
       end
 
-      # The same as for EAD - we need to update the individual records within a MODS collection
+      # FIXME This is probably not needed anymore
       def synchronize_metadata_on_save
-        @synchronize_metadata_on_save || true
+        false
       end
-
+      # FIXME This is probably not needed anymore
       def interchangeable?
         false
       end

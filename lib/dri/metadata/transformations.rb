@@ -112,7 +112,7 @@ module DRI
       #					end
       #				else
       #					parsed_start = Chronic.parse(range[0], :guess => false, :context => "past")
-      #					parsed_fnish = Chronic.parse(range[1], :guess => false, :context => "past")
+      #					parsed_finish = Chronic.parse(range[1], :guess => false, :context => "past")
 
       #					if parsed_start.kind_of? Chronic::Span
       #						curr_start = parsed_start.begin

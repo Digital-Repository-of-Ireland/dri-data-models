@@ -229,7 +229,7 @@ module DRI
                                                    Descriptors.cleaned_displayable,  :sortable],
                     :namespace_prefix => MODS_NS_PREFIX)
           # Contributor
-          t.contributor(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = 'ctb']/mods:namePart",
+          t.contributor(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('ctb' or 'rcp')]/mods:namePart",
                         :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                     Descriptors.cleaned_displayable,  :sortable],
                         :namespace_prefix => MODS_NS_PREFIX)
@@ -253,10 +253,12 @@ module DRI
                                                                  Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Type
-          t.type(:proxy => [:mods, :type_resource], :index_as=>[Descriptors.cleaned_facetable,
+          t.type(:path => "mods/mods:typeOfResource", :index_as=>[Descriptors.cleaned_facetable,
                                            Descriptors.cleaned_searchable,
                                            Descriptors.cleaned_displayable],
                  :namespace_prefix => MODS_NS_PREFIX)
+
+          t.type_collection(:path => "mods/mods:typeOfResource[@collection='yes']", :namespace_prefix => MODS_NS_PREFIX)
 
           # Rights - needs special indexing
           t.rights(:path => "mods/mods:accessCondition", :index_as=>[Descriptors.cleaned_searchable,
@@ -275,6 +277,8 @@ module DRI
           t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
                                                                               Descriptors.cleaned_displayable],
                           :namespace_prefix => MODS_NS_PREFIX)
+
+
 
           # Coverage
           # temporal_coverage
@@ -312,8 +316,6 @@ module DRI
 
           t.mods_type_collection(:proxy => [:mods, :type_resource, :collection_at])
 
-          t.related_items_ids(:path => "relatedItem/mods:identifier[@type='local']", :namespace_prefix => MODS_NS_PREFIX)
-
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
           t.abstract(:path => "abstract", :index_as => [Descriptors.cleaned_searchable,
@@ -350,17 +352,18 @@ module DRI
         end
 
       end
-
+      # FIXME This is probably not needed anymore
       def synchronize_metadata_on_save
         false
       end
-
+      # FIXME This is probably not needed anymore
       def interchangeable?
         false
       end
 
+      # If the /mods/mods:typeOfResource[@collection="yes"] return true
       def collection?
-        false
+        !type_collection.nil? ? true : false
       end
 
       def metadata_path field
@@ -542,8 +545,8 @@ module DRI
         date_result = false
 
         # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
-        if (mods_id_local.size == 1 && mods_id_local.first == "")
-          identifier_result = false
+        if (mods_id_local.size == 1 && mods_id_local.first != "")
+          identifier_result = true
         end
 
         id_uri.each do |uri_r|
@@ -578,10 +581,21 @@ module DRI
         errors[:mods_id_local] = "not present." unless identifier_result == true
         errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
         errors[:title] = "can't be blank" if title_result == false
-        errors[:description] = "can't be blank" if description_result == false
-        errors[:rights] = "can't be blank" if rights_result == false
         errors[:type] = "can't be blank" if type_result == false
-        errors[:creation_date] = "can't be blank" if date_result == false
+        # If this is a collection then validate:
+        if (!type_collection.nil?)
+          errors[:description] = "can't be blank" if description_result == false
+          errors[:rights] = "can't be blank" if rights_result == false
+          errors[:creation_date] = "can't be blank" if date_result == false
+        end
+
+        #errors[:mods_id_local] = "not present." unless identifier_result == true
+        #errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
+        #errors[:title] = "can't be blank" if title_result == false
+        #errors[:description] = "can't be blank" if description_result == false
+        #errors[:rights] = "can't be blank" if rights_result == false
+        #errors[:type] = "can't be blank" if type_result == false
+        #errors[:creation_date] = "can't be blank" if date_result == false
         return errors
       end
       # Load terminology

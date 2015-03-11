@@ -68,14 +68,14 @@
     :related_reference: references
     :related_review: isReviewOf
   # DC RDF relationships
-  # Relation, IsPartOf, IsReferencedBy, References, Source, IsVersionOf, HasVersion
+  # Relation, IsPartOf, IsReferencedBy, References, Source??, IsVersionOf, HasVersion, isFormatOf
   http://purl.org/dc/terms/:
     :dcterms_relation: isRelatedTo
     :dcterms_is_part_of: isPartOf
+    :dcterms_has_part: hasPart
     :dcterms_is_referenced_by: isReferencedBy
-    :dcterms_references: isReferencendBy
-    :dcterms_has_source: hasSource
+    :dcterms_references: references
     :dcterms_is_version_of: isVersionOf
     :dcterms_has_version: hasVersion
     :dcterms_is_format_of: isFormatOf
-
+    #:dcterms_has_source: hasSource
