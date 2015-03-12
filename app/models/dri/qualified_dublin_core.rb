@@ -16,7 +16,7 @@ class QualifiedDublinCore < DRI::Batch
   has_attributes :geocode_point, datastream: :descMetadata, multiple: true
   has_attributes :geocode_box, datastream: :descMetadata, multiple: true
   has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                                 multiple: true         
+                               multiple: true         
 
   def initialize(args = {})
     args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -38,4 +38,5 @@ class QualifiedDublinCore < DRI::Batch
   end
       
 end
+
 end

@@ -153,13 +153,13 @@ module DRI
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
-          old_digital_object = descMetadata.digital_object
+          #old_digital_object = descMetadata.digital_object
           unless (ds_class == nil)
             ds = ds_class.constantize.from_xml descMetadata.to_xml
           else
             ds = DRI::Metadata::QualifiedDublinCore.new
           end
-          ds.digital_object = old_digital_object
+          #ds.digital_object = old_digital_object
         end
 
         if (ds != nil)

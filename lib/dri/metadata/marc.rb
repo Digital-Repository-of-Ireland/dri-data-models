@@ -101,14 +101,14 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
-        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type)
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
 
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -116,11 +116,11 @@ module DRI
           all_metadata += text_node.text
           all_metadata += " "
         end
-        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
-        solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
-        solr_doc.merge!(Solrizer.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
-        solr_doc.merge!(Solrizer.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
 
         # Split facets into different languages based on xml:lang
         # faceted_language_indexes = Hash.new

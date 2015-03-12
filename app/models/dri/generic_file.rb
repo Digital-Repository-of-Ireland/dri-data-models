@@ -39,42 +39,29 @@ class GenericFile < ActiveFedora::Base
   def milliseconds
     characterization.milliseconds.blank? ? characterization.video_milliseconds : characterization.milliseconds
   end
-
-  # Unstemmed, searchable, stored
-  def noid_indexer
-    @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
-  end 
-
-  def indexer
-    DRI::GenericFileIndexer
-  end
-
-end
-
-class GenericFileIndexer < ActiveFedora::IndexingService
-
-  def generate_solr_document
-    solr_doc[SolrQueryBuilder.solr_name('noid', object.noid_indexer)] = noid
-
-    solr_doc.merge!(solr_name('file_size', :stored_sortable, type: :integer) => [object.file_size[0]]) unless object.file_size.empty?
-    solr_doc.merge!(solr_name('width', :stored_sortable, type: :integer) => [object.width[0]]) unless object.width.empty?
-    solr_doc.merge!(solr_name('height', :stored_sortable, type: :integer) => [object.height[0]]) unless object.height.empty?
+  
+  def to_solr(solr_doc={}, opts={})
+    super(solr_doc, opts)
+    
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [object.width[0]]) unless width.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer) => [object.height[0]]) unless height.empty?
     if (!width.empty? && !height.empty?)
-      solr_doc.merge!(solr_name('area', :stored_sortable, type: :integer) => [object.width[0].to_i*object.height[0].to_i])
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer) => [object.width[0].to_i*height[0].to_i])
     end
 
-    solr_doc.merge!(solr_name('duration', :stored_sortable, type: :integer) => [object.milliseconds[0]]) unless object.milliseconds.empty?
-    solr_doc.merge!(solr_name('channels', :stored_sortable, type: :integer) => [object.channels[0]]) unless object.channels.empty?
-    solr_doc.merge!(solr_name('sample_rate', :stored_sortable, type: :integer) => [object.sample_rate[0]]) unless object.sample_rate.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
    
     file_type = []
-    file_type.push "audio" if object.audio?
-    file_type.push "video" if object.video?
-    file_type.push "image" if object.image?
-    file_type.push "text" if object.text?
-    solr_doc.merge!(solr_name('file_type', :stored_searchable) => file_type)
-    solr_doc.merge!(solr_name('file_type', :facetable) => file_type)
+    file_type.push "audio" if audio?
+    file_type.push "video" if video?
+    file_type.push "image" if image?
+    file_type.push "text" if text?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type)
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type)
   end
-end
 
+end
 end

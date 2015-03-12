@@ -40,16 +40,10 @@ class Batch < ActiveFedora::Base
     end
   end
 
-  # Initialises the Solr index field (and its type) for this object
-  def noid_indexer
-    # Unstemmed, searchable, stored
-    @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
+  def self.attached_files
+    self.generic_files
   end
-
-  def indexer
-    DRI::BatchIndexingService
-  end
-
+   
   # Updates the metadata class of the current digital object in case we are now working
   # with a different metadata standard
   # @param[String,File] xml_text xml metadata content or a File
@@ -65,6 +59,22 @@ class Batch < ActiveFedora::Base
     return true
   end
 
+  def to_solr(solr_doc=Hash.new, opts={})
+    solr_doc = super(solr_doc, opts)
+
+    solr_doc.merge!collections_to_solr
+    solr_doc.merge!object_types_to_solr
+    solr_doc.merge!file_metadata_to_solr
+
+    self.metadata_streams.each do |m|
+      solr_doc.merge!m.to_solr
+    end
+
+    solr_doc.merge!('all_text_timv' => full_text)
+
+    solr_doc
+  end
+  
   # Indexing object types as a hierarchical tree
   def object_types_to_solr(solr_doc=Hash.new)
     object_types = []
@@ -76,32 +86,14 @@ class Batch < ActiveFedora::Base
     if object_types.count < 1
       object_types.push "Unknown"
     end
-    solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-    solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
     if rights.empty?
-      solr_doc.merge!(solr_name('rights', :stored_searchable) => ['No rights statement'])
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('rights', :stored_searchable) => ['No rights statement'])
     end
 
     solr_doc
   end
 
 end
-
-class BatchIndexingService < ActiveFedora::IndexingService
-
-  # Performs the indexing of this object into Solr
-  def generate_solr_document
-    super.tap do |solr_doc|
-      solr_doc[SolrQueryBuilder.solr_name('noid', object.noid_indexer)] = noid
-
-      solr_doc.merge!object.collections_to_solr
-      solr_doc.merge!object.object_types_to_solr
-      solr_doc.merge!object.file_metadata_to_solr
-
-      solr_doc.merge!('all_text_timv' => object.full_text)
-    end
-  end
-
-end
-
 end

@@ -69,25 +69,25 @@ module DRI
         end
 
         if (!ancestor_ids.empty?)
-          solr_doc.merge!(solr_name('ancestor_title', :facetable) => ancestor_titles)
-          solr_doc.merge!(solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
-          solr_doc.merge!(solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
-          solr_doc.merge!(solr_name('ancestor_id', :facetable) => ancestor_ids)
-          solr_doc.merge!(solr_name('governing_id', :facetable) => [ancestor_ids.first]) # needed for user_group gem!!!
-          solr_doc.merge!(solr_name('collection_id', :facetable) => [ancestor_ids.first])
-          solr_doc.merge!(solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
-          solr_doc.merge!(solr_name('collection', :facetable) => [ancestor_titles.first])
-          solr_doc.merge!(solr_name('collection', :stored_searchable) => [ancestor_titles.first])
-          solr_doc.merge!(solr_name('root_collection_id', :facetable) => [ancestor_ids.last])
-          solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
-          solr_doc.merge!(solr_name('root_collection', :facetable) => [ancestor_titles.last])
-          solr_doc.merge!(solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_title', :facetable) => ancestor_titles)
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :facetable) => ancestor_ids)
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('governing_id', :facetable) => [ancestor_ids.first]) # needed for user_group gem!!!
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :facetable) => [ancestor_ids.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('collection', :facetable) => [ancestor_titles.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('collection', :stored_searchable) => [ancestor_titles.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :facetable) => [ancestor_ids.last])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :facetable) => [ancestor_titles.last])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
         else
           # This must be a root collection
-          solr_doc.merge!(solr_name('root_collection', :facetable) => [title.first])
-          solr_doc.merge!(solr_name('root_collection', :stored_searchable) => [title.first])
-          solr_doc.merge!(solr_name('root_collection_id', :facetable) => [id])
-          solr_doc.merge!(solr_name('root_collection_id', :stored_searchable) => [id])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :facetable) => [title.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :stored_searchable) => [title.first])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :facetable) => [id])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable) => [id])
         end
 
         # Overriden in encoded_archival_collection.rb
@@ -95,8 +95,8 @@ module DRI
         #  solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
         #end
 
-        solr_doc.merge!(solr_name('is_collection', :facetable) => is_collection?)
-        solr_doc.merge!(solr_name('is_collection', :stored_searchable) => is_collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :facetable) => is_collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :stored_searchable) => is_collection?)
 
         solr_doc
       end #collections_to_solr

@@ -1,5 +1,7 @@
 module DRI
+
   module Metadata
+
     class EncodedArchivalDescription < DRI::Metadata::Base
 
       # OM (Opinionated Metadata) terminology mapping to an EAD Collection
@@ -286,6 +288,141 @@ module DRI
         return builder.doc
       end #xml_template
 
+      def to_solr(solr_doc=Hash.new)
+        solr_doc = super(solr_doc)
+
+        # Title_sorted - A SOLR index for sorting titles
+        if (title.length > 0)
+
+          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+
+          if (sorted_title != "")
+            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+          end
+        end
+
+        # Type
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type)
+
+        # EAD has several "name" tags, so we merge them together into the SOLR document
+        person_array = person_array_for_index()
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+
+        # all_metadata - A SOLR index of all the text contained in the XML document
+        all_metadata = ""
+        ng_xml.xpath("//text()").each do |text_node|
+          all_metadata += text_node.text
+          all_metadata += " "
+        end
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+
+        # Description
+        description_array = description_for_index()
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('description', :stored_searchable, type: :string) => description_array)
+
+        # Subject: generic, name and place
+        subject_array = subject_for_index()
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :stored_searchable) => subject_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :facetable) => subject_array)
+
+        subject_name_array = subject_name_for_index()
+        subject_place_array = subject_place_for_index()
+        subject_temporal_array = subject_temporal_for_index()
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :stored_searchable) => subject_name_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :facetable) => subject_name_array)
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+
+        # Published Date
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => published_date) unless published_date == []
+
+        # Publisher
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
+
+        # Licence
+        licence_array = licence_for_index()
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
+
+        # Type
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable, type: :string) => "Collection")
+
+        # Institute and sponsor/Depositing Institute: archdesc/did/repository
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :facetable) => institute) unless institute == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :stored_searchable, type: :string) => institute) unless institute == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute) unless institute == []
+
+        solr_doc
+      end #solr_doc
+
+      # Index Helper Methods
+      def person_array_for_index()
+        return name_coverage | persname_coverage | corpname_coverage | creator | persname | corpname | name
+      end
+
+      def language_for_index()
+        return language | language_did
+      end
+      # Mapping to UI description attribute from EAD: scopecontent, abstract
+      def description_for_index()
+        return description unless description == []
+        return abstract unless abstract == []
+        #return bioghist unless bioghist == []
+        #return dao_desc unless dao_desc == []
+        #return note unless note == []
+        return []
+        # No concatenation, instead use the order of precedence above
+        # return abstract | scope_content | bioghist | dao_desc | note
+      end
+
+      # Mapping to UI Rights / License ? userestrict or accessrestrict
+      def rights_for_index()
+        (rights != [] && !rights.first.include?("CC-BY")) ? rights : ['No rights statement']
+      end
+
+      def licence_for_index()
+        if (licence != [])
+          (licence.first.include?("CC-BY")) ? licence : ['Please see rights statement']
+        else
+          return ['Please see rights statement']
+        end
+      end
+
+      # Mapping to UI subjects: controlaccess/subject or subject
+      # These are generic subjects similar to dc:coverage
+      def subject_for_index()
+        return subject | subject_archdesc
+      end
+
+      # These are DRI Subject(Name)
+      def subject_name_for_index()
+        # Format persname to include role
+        persname_roles = persname.collect!.with_index do |name, idx|
+          name = (persname.role[idx].nil?) ? name : (name + " (#{persname.role[idx]})")
+        end
+
+        return name | persname_roles | corpname
+      end
+
+      # These are DRI Subject(Place)
+      def subject_place_for_index()
+        return geographic_name
+      end
+
+      # These are DRI Subject(Place)
+      def subject_temporal_for_index()
+        return temporal_coverage | date
+      end
+
       def metadata_path field
         case field
           when :title
@@ -368,10 +505,6 @@ module DRI
             []
         end
       end #metadata_path
-
-      def indexer
-        DRI::Metadata::EadIndexingService
-      end
 
       def interchangeable?
         false
@@ -478,141 +611,6 @@ module DRI
       end #custom_validations
 
     end #class
-
-    class EadIndexingService
-
-      def generate_solr_document
-        # Title_sorted - A SOLR index for sorting titles
-        if (object.title.length > 0)
-
-          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(object.title[0])
-
-          if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
-          end
-        end
-
-        # Type
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => object.type)
-        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => object.type)
-
-        # EAD has several "name" tags, so we merge them together into the SOLR document
-        person_array = person_array_for_index()
-
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
-
-        # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ""
-        object.ng_xml.xpath("//text()").each do |text_node|
-          all_metadata += text_node.text
-          all_metadata += " "
-        end
-        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
-
-        # Description
-        description_array = description_for_index()
-
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
-
-        # Subject: generic, name and place
-        subject_array = subject_for_index()
-
-        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject_array)
-        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_array)
-
-        subject_name_array = subject_name_for_index()
-        subject_place_array = subject_place_for_index()
-        subject_temporal_array = subject_temporal_for_index()
-
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_array)
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_array)
-
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_array)
-
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
-
-        # Published Date
-        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => object.published_date) unless object.published_date == []
-
-        # Publisher
-        solr_doc.merge!(Solrizer.solr_name('publisher', :stored_searchable) => object.publisher) unless object.publisher == []
-
-        # Licence
-        licence_array = licence_for_index()
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
-
-        # Type
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
-
-        # Institute and sponsor/Depositing Institute: archdesc/did/repository
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :facetable) => object.institute) unless object.institute == []
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :stored_searchable, type: :string) => object.institute) unless object.institute == []
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :stored_searchable, type: :string) => object.institute) unless object.institute == []
-      end #solr_doc
-
-      # Index Helper Methods
-      def person_array_for_index()
-        return object.name_coverage | object.persname_coverage | object.corpname_coverage | object.creator | object.persname | object.corpname | object.name
-      end
-
-      def language_for_index()
-        return object.language | object.language_did
-      end
-      # Mapping to UI description attribute from EAD: scopecontent, abstract
-      def description_for_index()
-        return object.description unless object.description == []
-        return object.abstract unless object.abstract == []
-        #return bioghist unless bioghist == []
-        #return dao_desc unless dao_desc == []
-        #return note unless note == []
-        return []
-        # No concatenation, instead use the order of precedence above
-        # return abstract | scope_content | bioghist | dao_desc | note
-      end
-
-      # Mapping to UI Rights / License ? userestrict or accessrestrict
-      def rights_for_index()
-        (object.rights != [] && !object.rights.first.include?("CC-BY")) ? object.rights : ['No rights statement']
-      end
-
-      def licence_for_index()
-        if (object.licence != [])
-          (object.licence.first.include?("CC-BY")) ? object.licence : ['Please see rights statement']
-        else
-          return ['Please see rights statement']
-        end
-      end
-
-      # Mapping to UI subjects: controlaccess/subject or subject
-      # These are generic subjects similar to dc:coverage
-      def subject_for_index()
-        return object.subject | object.subject_archdesc
-      end
-
-      # These are DRI Subject(Name)
-      def subject_name_for_index()
-        # Format persname to include role
-        persname_roles = object.persname.collect!.with_index do |name, idx|
-          name = (object.persname.role[idx].nil?) ? name : (name + " (#{persname.role[idx]})")
-        end
-
-        return name | persname_roles | object.corpname
-      end
-
-      # These are DRI Subject(Place)
-      def subject_place_for_index()
-        return object.geographic_name
-      end
-
-      # These are DRI Subject(Place)
-      def subject_temporal_for_index()
-        return object.temporal_coverage | object.date
-      end
-
-    end #indexer
 
   end #module
 
