@@ -4,7 +4,7 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-      	has_metadata :name => "properties", :type => DRI::Metadata::Properties
+      	contains "properties", class_name: "DRI::Metadata::Properties"
 
         has_attributes :status, datastream: :properties, multiple: false
         has_attributes :object_type, datastream: :properties, multiple: true

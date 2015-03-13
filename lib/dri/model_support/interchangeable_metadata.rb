@@ -5,13 +5,12 @@ module DRI
 
       included do
         attr_accessor :desc_metadata_class
-
         attr_accessor :trigger_update
 
         # Descriptive metadata datastream
-        has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
+        contains "descMetadata", class_name: "DRI::Metadata::Base"
         # Complete metadata record datastream
-        has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
+        contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
 
         after_initialize :load_attributes
         after_save :reset_metadata_check
