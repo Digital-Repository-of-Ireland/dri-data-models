@@ -40,8 +40,8 @@ class Batch < ActiveFedora::Base
     end
   end
 
-  def self.attached_files
-    self.generic_files
+  def assert_content_model
+    self.has_model = [self.class.to_s, self.class.superclass.to_s]
   end
    
   # Updates the metadata class of the current digital object in case we are now working
