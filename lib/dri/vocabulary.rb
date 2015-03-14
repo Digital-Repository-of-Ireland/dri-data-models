@@ -331,5 +331,19 @@ module DRI
         "reviewOf"
       ]
     end
+
+    # QDC Relationship Types
+    def self.qdcRelationshipTypes
+      [
+          "isRelatedTo",
+          "isPartOf",
+          "hasPart",
+          "isReferencedBy",
+          "references",
+          "isVersionOf",
+          "hasVersion",
+          "isFormatOf"
+      ]
+    end
   end
 end

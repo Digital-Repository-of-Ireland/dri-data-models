@@ -11,11 +11,11 @@ module DRI
     # whenever a host relationship is added
     has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
     belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    belongs_to :version, :property=>:related_version, :class_name => "DRI::Mods"
-    belongs_to :format, :property=>:related_format, :class_name => "DRI::Mods"
-    belongs_to :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
-    belongs_to :references, :property=>:related_reference, :class_name => "DRI::Mods"
-    belongs_to :review, :property=>:related_review, :class_name => "DRI::Mods"
+    has_many :version, :property=>:related_version, :class_name => "DRI::Mods"
+    has_many :format, :property=>:related_format, :class_name => "DRI::Mods"
+    has_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
+    has_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
+    has_many :review, :property=>:related_review, :class_name => "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -168,24 +168,24 @@ module DRI
       end
     end # end add_relationships
 
-    def process_mods_relationships()
-      add_mods_relationship(related_items_ids_preceding, :preceding)
-      add_mods_relationship(related_items_ids_succeeding, :succeeding)
-      add_mods_relationship(related_items_ids_original, :original)
-      add_mods_relationship(related_items_ids_host, :host)
-      add_mods_relationship(related_items_ids_constituent, :constituents)
-      add_mods_relationship(related_items_ids_series, :series)
-      add_mods_relationship(related_items_ids_otherVersion, :version)
-      add_mods_relationship(related_items_ids_otherFormat, :format)
-      add_mods_relationship(related_items_ids_references, :references)
-      add_mods_relationship(related_items_ids_isReferencedBy, :referenced_by)
-      add_mods_relationship(related_items_ids_reviewOf, :review)
+    def process_relationships()
+      add_dm_relationship(related_items_ids_preceding, :preceding)
+      add_dm_relationship(related_items_ids_succeeding, :succeeding)
+      add_dm_relationship(related_items_ids_original, :original)
+      add_dm_relationship(related_items_ids_host, :host)
+      add_dm_relationship(related_items_ids_constituent, :constituents)
+      add_dm_relationship(related_items_ids_series, :series)
+      add_dm_relationship(related_items_ids_otherVersion, :version)
+      add_dm_relationship(related_items_ids_otherFormat, :format)
+      add_dm_relationship(related_items_ids_references, :references)
+      add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
+      add_dm_relationship(related_items_ids_reviewOf, :review)
     end
 
     # Process a specific mods relationship for the object
     # @return true if successful; false otherwise
     #
-    def add_mods_relationship(rels_array, rels_name)
+    def add_dm_relationship(rels_array, rels_name)
       if rels_array.empty?
         return true
       end
@@ -229,7 +229,11 @@ module DRI
               self.send("#{rels_name}=", mods_obj)
               self.governing_collection = mods_obj
             else
-              self.send("#{rels_name}=", mods_obj)
+              if self.send("#{rels_name}").respond_to?("push")
+                self.send("#{rels_name}").push mods_obj
+              else
+                self.send("#{rels_name}=", mods_obj)
+              end
             end
           end
         end
@@ -243,6 +247,21 @@ module DRI
         return false
       end
     end # end add_mods_relationship
+
+    def get_relationships_names
+      return {:preceding => "Is Preceded By",
+              :succeeding => "Is Succeeded By",
+              :original => "Has Original",
+              :host => "Host",
+              :constituents => "Constituents",
+              :series => "Has Series",
+              :version => "Is Version Of",
+              :format => "Is Format Of",
+              :referenced_by => "Is Referenced By",
+              :references => "References",
+              :review => "Is Review Of"
+      }
+    end
 
     def create_multiple_records
       yield # Do save the object
@@ -269,5 +288,5 @@ module DRI
         end
       end # end if
     end # end create_multiple_records
-  end # class
-end # module
+  end # Class Mods
+end # Module DRI

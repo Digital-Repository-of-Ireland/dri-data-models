@@ -33,8 +33,8 @@ module DRI
           t.format(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          # No need to index, but useful for editing
           t.identifier(:namespace_prefix=>"dc")
+          t.qdc_id(:ref => :identifier, :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -53,6 +53,12 @@ module DRI
             t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
           end
 
+          # Relationships for QDC
+          DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
+            t.send "relation_ids_" + rel,
+                   :path=>rel,
+                   :namespace_prefix => "dcterms"
+          end
         end
 
       end
@@ -62,7 +68,7 @@ module DRI
       end
 
       def metadata_path field
-          recognised_attributes = [ :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
+          recognised_attributes = [:title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
                                     :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
                                     :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
                                     :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]

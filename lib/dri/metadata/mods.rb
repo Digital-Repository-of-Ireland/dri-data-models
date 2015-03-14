@@ -224,17 +224,17 @@ module DRI
           t.title(:proxy => [:mods, :title_info, :main_title], :index_as => [Descriptors.cleaned_searchable,
                                                                Descriptors.cleaned_displayable])
           # Creator
-          t.creator(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('cre' or 'aut')]/mods:namePart",
+          t.creator(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'cre' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'aut' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'art')]/mods:namePart",
                     :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                                    Descriptors.cleaned_displayable,  :sortable],
                     :namespace_prefix => MODS_NS_PREFIX)
           # Contributor
-          t.contributor(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = ('ctb' or 'rcp')]/mods:namePart",
+          t.contributor(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and (mods:role/mods:roleTerm = 'ctb' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'rcp' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'pat')]/mods:namePart",
                         :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                     Descriptors.cleaned_displayable,  :sortable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Description: abstract, tableOfContents, or note
-          t.description(:path => "mods/mods:abstract", :index_as => [Descriptors.cleaned_searchable,
+          t.description(:path => "mods/mods:abstract | mods[not(mods:abstract)]/mods:note", :index_as => [Descriptors.cleaned_searchable,
                                                            Descriptors.cleaned_displayable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Subject: defaults to subject/topic
@@ -249,7 +249,7 @@ module DRI
 
           # Source
           # TODO - decide the preference: place for location, dates for temporal
-          t.source(:path => "mods/mods:originInfo/mods:place/mods:placeTerm", :index_as=>[Descriptors.cleaned_displayable,
+          t.source(:path => "mods/mods:relatedItem[@type='original']/mods:location/mods:physicalLocation | mods/mods:relatedItem[@type='original' and not(mods:location)]/mods:titleInfo/mods:title", :index_as=>[Descriptors.cleaned_displayable,
                                                                  Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Type
@@ -299,7 +299,7 @@ module DRI
 
           # Roles proxy, similar to QDC
           DRI::Vocabulary::marcRelators.each do |role|
-            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\']/mods:namePart",
+            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat')]/mods:namePart",
                    :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX
           end
