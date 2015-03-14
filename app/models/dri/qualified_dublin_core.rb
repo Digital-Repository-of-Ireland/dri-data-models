@@ -64,7 +64,6 @@ module DRI
       end
     end
 
-    # [For root collections only]
     # Iterate over every collection's object and process relationships
     #
     def process_collection_relationships
@@ -83,7 +82,7 @@ module DRI
             begin
               Sufia.queue.push(CreateQdcRelationshipsJob.new(object.pid))
             rescue Exception => e
-              Logger.error(e.message)
+              logger.error(e.message)
             end
           end
         end
@@ -119,7 +118,7 @@ module DRI
       solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if (solr_docs == nil || solr_docs == [])
-        Logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+        logger.error("Solr document for object with PID #{self.pid} not found in Solr")
         return false
       end
 
@@ -127,7 +126,7 @@ module DRI
       root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
-        Logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+        logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
         return false
       end
 
@@ -138,7 +137,7 @@ module DRI
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if qdc_item.empty?
-          Logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+          logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
           return false
         else
           doc = SolrDocument.new(qdc_item[0])
