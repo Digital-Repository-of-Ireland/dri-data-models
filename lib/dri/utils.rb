@@ -47,5 +47,16 @@ module DRI
 
       return dcmi_point_hash
     end
+
+    # Apply XSLT transformation to input XML. It is currently used to transform existing
+    # descriptive metadata (DC, MODS, EAD) into oai_dc metadata
+    # @param[String] xslt_path relative path to the XSLT directory
+    # @param[Nokogiri::Document] xml the source xml to be transformed
+    # @return Nokogiri::XML the resulting xml after XSLT transformation
+    #
+    def self.apply_xslt_transformation(xslt_path, xml)
+      template = Nokogiri::XSLT(File.read(File.join(__dir__, xslt_path)))
+      return template.transform(xml)
+    end
   end # Module Utils
 end # Module DRI
