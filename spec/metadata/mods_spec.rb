@@ -5,7 +5,7 @@ describe 'Mods' do
   before(:each) do
 
     @collection_xml = fixture("mods/ns/mods-collection.xml")
-    @mods_col = DRI::Mods.new :collection #DRI::Mods
+    @mods_col = DRI::Mods.new #DRI::Mods
     @mods_col.update_metadata DRI::Metadata::ModsCollection.from_xml(@collection_xml).to_xml
   end
 

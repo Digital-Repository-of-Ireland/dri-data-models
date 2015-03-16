@@ -38,8 +38,6 @@ module DRI
     has_attributes :date, datastream: :descMetadata, multiple: true
     has_attributes :date_captured, datastream: :descMetadata, multiple: true
     has_attributes :date_other, datastream: :descMetadata, multiple: true
-    # TODO - Ask Marta, Physical Description - Optional in the guidelines
-    #has_attributes :physical_description, datastream: :descMetadata, multiple: true
 
     has_attributes :name_coverage, datastream: :descMetadata, multiple: true
     # Geographical, temporal
@@ -59,16 +57,9 @@ module DRI
     # TODO Disabled for now
     #around_save :create_multiple_records
 
-    # Initialize - mods collection | mods record
-    def initialize(type, args = {})
-      case type
-        when :collection
-          metadata_class = "DRI::Metadata::ModsCollection"
-        else
-          metadata_class = "DRI::Metadata::Mods"
-      end
-      args[:desc_metadata_class] = metadata_class
-
+    # Initialize - mods record
+    def initialize(args = {})
+      args[:desc_metadata_class] = "DRI::Metadata::Mods"
       super(args)
     end
 
@@ -97,6 +88,10 @@ module DRI
       # object = split_xml xml_without_blanks.remove_namespaces!
       object = split_xml xml_without_blanks
       descMetadata.ng_xml = object
+
+      # Apply XSLT MODS 2 OAI_DC, and store it in Fedora's DC datastream
+      oai_dc_xml = DRI::Utils.apply_xslt_transformation('xslt/mods2oai_dc.xsl', object)
+      self.datastreams['DC'].content = oai_dc_xml.to_s
 
       return true
     end

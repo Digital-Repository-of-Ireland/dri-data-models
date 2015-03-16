@@ -4,7 +4,7 @@ describe 'Mods' do
   # Before each test create test objects
   before(:each) do
     @mods_xml = fixture("mods/ns/sample-mods.xml")
-    @mods_record = DRI::Mods.new :record
+    @mods_record = DRI::Mods.new
     @mods_record.update_metadata DRI::Metadata::Mods.from_xml(@mods_xml).to_xml
   end
 
@@ -26,14 +26,14 @@ describe 'Mods' do
 
   # Title
   it "should validate the presence of title attribute" do
-    @mods_record = DRI::Mods.new :record
+    @mods_record = DRI::Mods.new
     @no_title = fixture("mods/ns/sample-mods-notitle.xml")
     @mods_record.update_metadata DRI::Metadata::Mods.from_xml(@no_title).to_xml
     @mods_record.should_not be_valid
   end
 
   xit "should add create mods records if modsCollection is used in metadata" do
-    @mods_record = DRI::Mods.new :record
+    @mods_record = DRI::Mods.new
 
   end
 

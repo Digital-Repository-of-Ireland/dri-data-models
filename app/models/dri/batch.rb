@@ -29,10 +29,8 @@ module DRI
          EncodedArchivalDescription.new(:collection, args)
        when :ead_component
          EncodedArchivalDescription.new(:component, args)
-       when :mods_collection
-         Mods.new(:collection, args)
-       when :mods_record
-         Mods.new(:record, args)
+       when :mods
+         Mods.new(args)
        else
          QualifiedDublinCore.new(args)
      end
