@@ -195,7 +195,7 @@ module DRI
 
           # Related Item
           t.related_item(:path => "relatedItem", :namespace_prefix => MODS_NS_PREFIX) {
-            t.identifier_(:path => "identifier", :attributes => {:type => "local"}, :namespace_prefix => MODS_NS_PREFIX)
+            t.identifier_(:path => "identifier", :namespace_prefix => MODS_NS_PREFIX)
             t.title_info(:ref => [:title_info])
             t.name_(:ref => [:name])
             t.type_resource_item(:ref => [:type_resource])
@@ -217,6 +217,43 @@ module DRI
             t.recordInfo(:ref => [:record_info])
           }
 
+          # Terms for external relatedItems
+          t.related_references(:path=> "relatedItem", :attributes => {"type" => "references"},
+                       :namespace_prefix => MODS_NS_PREFIX) {
+            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
+              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
+                t.display_label(:path => {:attribute => "displayLabel"})
+              }
+            }
+          }
+
+          t.related_referenced_by(:path=> "relatedItem", :attributes => {"type" => "isReferencedBy"},
+                               :namespace_prefix => MODS_NS_PREFIX) {
+            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
+              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
+                t.display_label(:path => {:attribute => "displayLabel"})
+              }
+            }
+          }
+
+          t.related_original(:path=> "relatedItem", :attributes => {"type" => "original"},
+                                  :namespace_prefix => MODS_NS_PREFIX) {
+            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
+              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
+                t.display_label(:path => {:attribute => "displayLabel"})
+              }
+            }
+          }
+
+          t.related_version(:path=> "relatedItem", :attributes => {"type" => "otherVersion"},
+                             :namespace_prefix => MODS_NS_PREFIX) {
+            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
+              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
+                t.display_label(:path => {:attribute => "displayLabel"})
+              }
+            }
+          }
+
           # ----------------------------------------------------------------------------------------------------------
           # Term proxies definition: must be absolute paths, avoid picking relatedItem elements
 
@@ -234,7 +271,8 @@ module DRI
                                     Descriptors.cleaned_displayable,  :sortable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Description: abstract, tableOfContents, or note
-          t.description(:path => "mods/mods:abstract | mods[not(mods:abstract)]/mods:note", :index_as => [Descriptors.cleaned_searchable,
+          # TODO Check this XPath
+          t.description(:path => "mods/mods:abstract | mods[not(mods:abstract)]/mods:tableOfContents | mods[not(mods:abstract) and not(mods:tableOfContents)]/mods:note", :index_as => [Descriptors.cleaned_searchable,
                                                            Descriptors.cleaned_displayable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Subject: defaults to subject/topic
@@ -248,7 +286,6 @@ module DRI
                                                                            Descriptors.language_facetable])
 
           # Source
-          # TODO - decide the preference: place for location, dates for temporal
           t.source(:path => "mods/mods:relatedItem[@type='original']/mods:location/mods:physicalLocation | mods/mods:relatedItem[@type='original' and not(mods:location)]/mods:titleInfo/mods:title", :index_as=>[Descriptors.cleaned_displayable,
                                                                  Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
@@ -258,7 +295,7 @@ module DRI
                                            Descriptors.cleaned_displayable],
                  :namespace_prefix => MODS_NS_PREFIX)
 
-          t.type_collection(:path => "mods/mods:typeOfResource[@collection='yes']", :namespace_prefix => MODS_NS_PREFIX)
+          t.mods_type_collection(:path => "mods/mods:typeOfResource[@collection='yes']", :namespace_prefix => MODS_NS_PREFIX)
 
           # Rights - needs special indexing
           t.rights(:path => "mods/mods:accessCondition", :index_as=>[Descriptors.cleaned_searchable,
@@ -314,8 +351,6 @@ module DRI
           # MODS Terms
           t.mods_id_local(:path => "mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          t.mods_type_collection(:proxy => [:mods, :type_resource, :collection_at])
-
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
           t.abstract(:path => "abstract", :index_as => [Descriptors.cleaned_searchable,
@@ -349,6 +384,14 @@ module DRI
 
           # language, specific to a terms of the MODS record: e.g. language for abstract
           t.language_object_part(:ref => [:language_any_object_part])
+
+          # Add TERMS for External relationships
+          # //relatedItem[@type='*' and not(mods:identifier[@type='local'])]
+          DRI::Vocabulary::modsRelationshipTypes.each do |rel|
+            t.send "ext_" + rel,
+                   :ref=>:related_item, :attributes => {"type" => "#{rel}"}, :default_path => "mods:location/mods:url",
+                   :namespace_prefix => MODS_NS_PREFIX
+          end
         end
 
       end
@@ -363,11 +406,11 @@ module DRI
 
       # If the /mods/mods:typeOfResource[@collection="yes"] return true
       def collection?
-        !type_collection.nil? ? true : false
+        !mods_type_collection.nil? ? true : false
       end
 
       def metadata_path field
-        recognised_attributes = [ :title, :rights, :description, :language, :subject, :contributor,
+        recognised_attributes = [:title, :rights, :description, :language, :subject, :contributor,
                                   :source, :publisher, :creator, :type, :identifier, :published_date, :creation_date,
                                   :geographical_coverage, :geographical_coverage_lang, :temporal_coverage,
                                   :temporal_coverage_lang]
@@ -433,7 +476,6 @@ module DRI
         return builder.doc
       end
 
-      # TODO - Override OM method
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
@@ -488,12 +530,21 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array == []
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
+        # Indices for external relationships (to be displayed as URL)
+        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_").to_sym})
+
+        external_rels.each do |elem|
+          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
+        end
+
+
         solr_doc
       end
 
       # Indexing Methods
       # --------------------------------------------------------------------------------------------------------------
       def description_for_index
+        # TODO Test that this is being indexed correctly
         return abstract if !abstract.empty?
         return toc if !toc.empty?
         unless (note_mods_type.empty? && note_mods_no_type.empty?)
@@ -504,6 +555,10 @@ module DRI
         end
 
         return []
+      end
+
+      def related_references_for_index
+        return references
       end
 
       def person_array_for_index()
@@ -583,7 +638,7 @@ module DRI
         errors[:title] = "can't be blank" if title_result == false
         errors[:type] = "can't be blank" if type_result == false
         # If this is a collection then validate:
-        if (!type_collection.nil?)
+        if (!mods_type_collection.nil?)
           errors[:description] = "can't be blank" if description_result == false
           errors[:rights] = "can't be blank" if rights_result == false
           errors[:creation_date] = "can't be blank" if date_result == false

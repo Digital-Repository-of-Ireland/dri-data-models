@@ -62,7 +62,7 @@ module DRI
         ancestor_ids = []
 
         curr_gov_collection = governing_collection
-        # TODO - Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
+        # TODO - Issue XXX Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
         while (curr_gov_collection != nil)
           ancestor_titles << curr_gov_collection.title[0]
           ancestor_ids << curr_gov_collection.pid

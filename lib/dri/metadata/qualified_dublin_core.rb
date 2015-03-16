@@ -59,6 +59,14 @@ module DRI
                    :path=>rel,
                    :namespace_prefix => "dcterms"
           end
+
+          # External relationships (contain uri to a resource external to DRI)
+          DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
+            t.send "ext_" + rel,
+                   :path=>rel,
+                   :attributes=>{"xsi:type" => "dcterms:URI"},
+                   :namespace_prefix => "dcterms"
+          end
         end
 
       end
@@ -178,6 +186,13 @@ module DRI
         faceted_language_indexes.each do | key, value |
           solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
           solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
+        end
+
+        # Indices for external relationships (to be displayed as URL)
+        external_rels = *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_").to_sym})
+
+        external_rels.each do |elem|
+          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
         end
 
         # Split date ranges into separate indexes

@@ -505,7 +505,6 @@ module DRI
         end
       end #synchronize_children_to_metadata
 
-      # FIXME Check DRI validations (mandatory recommended)
       def custom_validations
         errors = Hash.new
 

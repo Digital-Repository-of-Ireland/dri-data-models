@@ -23,6 +23,11 @@ module DRI
     # Relationships
     has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("relation_ids_").to_sym}),
                     datastream: :descMetadata, multiple: true
+
+    # External relationships (contain a URI to resources external to DRI)
+    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_").to_sym}),
+                   datastream: :descMetadata, multiple: true
+
     # QDC Relationships
     has_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
     has_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"

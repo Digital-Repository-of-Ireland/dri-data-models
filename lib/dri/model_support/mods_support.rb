@@ -3,7 +3,7 @@ module DRI
     module ModsSupport
       extend ActiveSupport::Concern
 
-      # TODO Implement Mods-specific helper functions
+      # Implement Mods-specific helper functions
       def create_mods_records
         if self.new_record?
           return
