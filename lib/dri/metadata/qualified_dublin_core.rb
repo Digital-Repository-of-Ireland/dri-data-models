@@ -29,6 +29,7 @@ module DRI
             t.coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.relation(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.external_relation(:path=>"relation", :namespace_prefix=>"dc", :attributes => {"xsi:type"=>"dcterms:URI"}, :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
           t.creator(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
           t.format(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -62,7 +63,7 @@ module DRI
 
           # External relationships (contain uri to a resource external to DRI)
           DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
-            t.send "ext_" + rel,
+            t.send "ext_related_items_ids_" + rel,
                    :path=>rel,
                    :attributes=>{"xsi:type" => "dcterms:URI"},
                    :namespace_prefix => "dcterms"
@@ -189,7 +190,7 @@ module DRI
         end
 
         # Indices for external relationships (to be displayed as URL)
-        external_rels = *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_").to_sym})
+        external_rels = *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
 
         external_rels.each do |elem|
           solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
@@ -256,6 +257,7 @@ module DRI
       def custom_validations
         errors = Hash.new
 
+        uri_result = true
         title_result = false
         description_result = false
         rights_result = false
@@ -294,8 +296,14 @@ module DRI
           end
         end
 
+        # Check that for external relationships terms, the specified URIs are valid
+        external_relation.each do |uri_r|
+          uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
+        end
+
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
+        errors[:external_relation] = "Includes invalid URI" if uri_result = false
         errors[:rights] = "can't be blank" if rights_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:date] = "can't be blank" if date_result == false

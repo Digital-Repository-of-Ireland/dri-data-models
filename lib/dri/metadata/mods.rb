@@ -217,43 +217,6 @@ module DRI
             t.recordInfo(:ref => [:record_info])
           }
 
-          # Terms for external relatedItems
-          t.related_references(:path=> "relatedItem", :attributes => {"type" => "references"},
-                       :namespace_prefix => MODS_NS_PREFIX) {
-            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
-              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
-                t.display_label(:path => {:attribute => "displayLabel"})
-              }
-            }
-          }
-
-          t.related_referenced_by(:path=> "relatedItem", :attributes => {"type" => "isReferencedBy"},
-                               :namespace_prefix => MODS_NS_PREFIX) {
-            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
-              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
-                t.display_label(:path => {:attribute => "displayLabel"})
-              }
-            }
-          }
-
-          t.related_original(:path=> "relatedItem", :attributes => {"type" => "original"},
-                                  :namespace_prefix => MODS_NS_PREFIX) {
-            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
-              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
-                t.display_label(:path => {:attribute => "displayLabel"})
-              }
-            }
-          }
-
-          t.related_version(:path=> "relatedItem", :attributes => {"type" => "otherVersion"},
-                             :namespace_prefix => MODS_NS_PREFIX) {
-            t.location(:path => "location", :namespace_prefix => MODS_NS_PREFIX) {
-              t.url(:path => "url", :namespace_prefix => MODS_NS_PREFIX) {
-                t.display_label(:path => {:attribute => "displayLabel"})
-              }
-            }
-          }
-
           # ----------------------------------------------------------------------------------------------------------
           # Term proxies definition: must be absolute paths, avoid picking relatedItem elements
 
@@ -261,7 +224,7 @@ module DRI
           t.title(:proxy => [:mods, :title_info, :main_title], :index_as => [Descriptors.cleaned_searchable,
                                                                Descriptors.cleaned_displayable])
           # Creator
-          t.creator(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'cre' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'aut' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'art')]/mods:namePart",
+          t.creator(:path => "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'cre' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'aut' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'art' or mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] = 'att')]/mods:namePart",
                     :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                                    Descriptors.cleaned_displayable,  :sortable],
                     :namespace_prefix => MODS_NS_PREFIX)
@@ -336,7 +299,7 @@ module DRI
 
           # Roles proxy, similar to QDC
           DRI::Vocabulary::marcRelators.each do |role|
-            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat')]/mods:namePart",
+            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'att')]/mods:namePart",
                    :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX
           end
@@ -386,10 +349,12 @@ module DRI
           t.language_object_part(:ref => [:language_any_object_part])
 
           # Add TERMS for External relationships
+          t.related_items_digital(:path => "relatedItem/mods:location/mods:url", :namespace_prefix => MODS_NS_PREFIX)
+
           # //relatedItem[@type='*' and not(mods:identifier[@type='local'])]
           DRI::Vocabulary::modsRelationshipTypes.each do |rel|
-            t.send "ext_" + rel,
-                   :ref=>:related_item, :attributes => {"type" => "#{rel}"}, :default_path => "mods:location/mods:url",
+            t.send "ext_related_items_ids_" + rel,
+                   :path => "relatedItem[@type='#{rel}']/mods:location/mods:url | relatedItem[@type='#{rel}']/mods:location/mods:physicalLocation",
                    :namespace_prefix => MODS_NS_PREFIX
           end
         end
@@ -427,6 +392,8 @@ module DRI
         end
       end
 
+      #
+      #
       def update_indexed_attributes(params={}, opts={})
         # if the params are just keys, not an array, make then into an array.
         new_params = {}
@@ -440,6 +407,8 @@ module DRI
         super(new_params, opts)
       end
 
+      #
+      #
       def roles= roles
         if roles.is_a? Hash
           if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
@@ -476,6 +445,9 @@ module DRI
         return builder.doc
       end
 
+      # Overriden. Solr indexing of custom fields
+      # @param[SolrDocument] solr_doc the Solr document to be merged
+      #
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
@@ -531,12 +503,16 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
         # Indices for external relationships (to be displayed as URL)
-        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_").to_sym})
+        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
 
         external_rels.each do |elem|
           solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
         end
 
+        # Type
+        if collection?
+          solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
+        end
 
         solr_doc
       end
@@ -592,7 +568,7 @@ module DRI
         errors = Hash.new
         identifier_result = false
         uri_result = true
-        #rel_item_ids_result = true
+        ext_uri_result = true
         title_result = false
         description_result = false
         rights_result = false
@@ -606,6 +582,11 @@ module DRI
 
         id_uri.each do |uri_r|
           uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
+        end
+
+        # Check that for external relationships terms, the specified URIs are valid
+        related_items_digital.each do |uri_r|
+          ext_uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
         end
 
         title.each do |curr_title|
@@ -634,9 +615,11 @@ module DRI
         end
 
         errors[:mods_id_local] = "not present." unless identifier_result == true
-        errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
+        errors[:id_uri] = "Invalid URI present" unless uri_result == true
+        errors[:related_items_digital] = "Invalid URI present" unless ext_uri_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:type] = "can't be blank" if type_result == false
+
         # If this is a collection then validate:
         if (!mods_type_collection.nil?)
           errors[:description] = "can't be blank" if description_result == false
@@ -644,15 +627,9 @@ module DRI
           errors[:creation_date] = "can't be blank" if date_result == false
         end
 
-        #errors[:mods_id_local] = "not present." unless identifier_result == true
-        #errors[:id_uri] = "Invalid URI present" unless id_uri.empty? || uri_result == true
-        #errors[:title] = "can't be blank" if title_result == false
-        #errors[:description] = "can't be blank" if description_result == false
-        #errors[:rights] = "can't be blank" if rights_result == false
-        #errors[:type] = "can't be blank" if type_result == false
-        #errors[:creation_date] = "can't be blank" if date_result == false
         return errors
-      end
+      end # custom_validations
+
       # Load terminology
       load_inherited_terminology      
     end # class

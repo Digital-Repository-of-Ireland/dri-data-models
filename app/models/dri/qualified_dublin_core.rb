@@ -6,6 +6,7 @@ module DRI
     # All DC elements added to the DM - Simple DC Ingest form
     has_attributes :date, datastream: :descMetadata, multiple: true
     has_attributes :relation, datastream: :descMetadata, multiple: true
+    has_attributes :external_relation, datastream: :descMetadata, multiple: true
     has_attributes :source, datastream: :descMetadata, multiple: true
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
@@ -20,12 +21,12 @@ module DRI
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                                    multiple: true
 
-    # Relationships
+    # Internal Relationships
     has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("relation_ids_").to_sym}),
                     datastream: :descMetadata, multiple: true
 
     # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_").to_sym}),
+    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships

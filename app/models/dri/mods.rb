@@ -48,15 +48,15 @@ module DRI
     has_attributes :subject_temporal, datastream: :descMetadata, multiple: true
 
     # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_").to_sym}),
+    has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
                    datastream: :descMetadata, multiple: true
+    # Internal Relationships
+    has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
+                    datastream: :descMetadata, multiple: true
+
     # Roles
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
-
-    # Relationships
-    has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
-                    datastream: :descMetadata, multiple: true
 
     # TODO Disabled for now
     #around_save :create_multiple_records

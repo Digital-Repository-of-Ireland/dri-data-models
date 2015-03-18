@@ -13,7 +13,6 @@ module DRI
 
         return true
       rescue URI::InvalidURIError => e
-        logger.error("Error valid_uri?: #{new_uri}, #{e}")
         return false
       end
     end
