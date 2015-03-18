@@ -303,7 +303,7 @@ module DRI
 
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
-        errors[:external_relation] = "Includes invalid URI" if uri_result = false
+        errors[:external_relation] = "Includes invalid URI" if uri_result == false
         errors[:rights] = "can't be blank" if rights_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:date] = "can't be blank" if date_result == false
