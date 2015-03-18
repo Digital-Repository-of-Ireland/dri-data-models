@@ -100,7 +100,7 @@ module DRI
     end # end add_relationships
 
     def process_relationships()
-      add_dm_relationship(relation_ids_isRelatedTo, :related)
+      add_dm_relationship(relation_ids_relation, :related)
       add_dm_relationship(relation_ids_isPartOf, :container)
       add_dm_relationship(relation_ids_hasPart, :parts)
       add_dm_relationship(relation_ids_isReferencedBy, :referenced)
