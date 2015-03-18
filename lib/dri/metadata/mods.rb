@@ -274,7 +274,7 @@ module DRI
                                                                               Descriptors.cleaned_displayable],
                            :namespace_prefix => MODS_NS_PREFIX)
           # Creation_date
-          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated", :index_as=>[Descriptors.cleaned_searchable,
+          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated | mods/mods:originInfo[not(mods:dateCreated)]/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
                                                                               Descriptors.cleaned_displayable],
                           :namespace_prefix => MODS_NS_PREFIX)
 
