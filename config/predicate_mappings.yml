@@ -70,7 +70,7 @@
   # DC RDF relationships
   # Relation, IsPartOf, IsReferencedBy, References, Source??, IsVersionOf, HasVersion, isFormatOf
   http://purl.org/dc/terms/:
-    :dcterms_relation: isRelatedTo
+    :dcterms_relation: relation
     :dcterms_is_part_of: isPartOf
     :dcterms_has_part: hasPart
     :dcterms_is_referenced_by: isReferencedBy

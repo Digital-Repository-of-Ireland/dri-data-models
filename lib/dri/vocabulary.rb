@@ -335,7 +335,7 @@ module DRI
     # QDC Relationship Types
     def self.qdcRelationshipTypes
       [
-          "isRelatedTo",
+          "relation",
           "isPartOf",
           "hasPart",
           "isReferencedBy",
