@@ -39,10 +39,6 @@ class Batch < ActiveFedora::Base
       DRI::Batch.create({id: pid})
     end
   end
-
-  def assert_content_model
-    self.has_model = [self.class.to_s, self.class.superclass.to_s]
-  end
    
   # Updates the metadata class of the current digital object in case we are now working
   # with a different metadata standard
