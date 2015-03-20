@@ -14,7 +14,8 @@ class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile::VirusCheck
   include Sufia::GenericFile::FullTextIndexing
 
-  belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+  #belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: DRI::Batch
+  belongs_to :batch, :class_name => "DRI::Batch", property: :is_part_of
   # Declare a 'dri_properties' DS, of the following type
   contains "dri_properties", class_name: "DRI::Metadata::FileProperties"
 
@@ -28,10 +29,11 @@ class GenericFile < ActiveFedora::Base
   def update_file_reference(dsid, opts)
     options = {}
     if opts.has_key?(:mimeType)
-      options[:mimeType] = opts[:mimeType]
+      options[:mime_type] = opts[:mimeType]
     end
 
-    add_file(opts[:url], dsid, options)
+    options[:path] = dsid
+    add_file(opts[:url], options)
    
     true
   end
@@ -41,7 +43,7 @@ class GenericFile < ActiveFedora::Base
   end
   
   def to_solr(solr_doc={}, opts={})
-    super(solr_doc, opts)
+    solr_doc = super(solr_doc, opts)
     
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [object.width[0]]) unless width.empty?
@@ -61,6 +63,8 @@ class GenericFile < ActiveFedora::Base
     file_type.push "text" if text?
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type)
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type)
+
+    solr_doc
   end
 
 end
