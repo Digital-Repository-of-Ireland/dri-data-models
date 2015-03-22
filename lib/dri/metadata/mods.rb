@@ -152,7 +152,7 @@ module DRI
           t.part(:path => "part", :namespace_prefix => MODS_NS_PREFIX) {
             t.detail(:namespace_prefix => MODS_NS_PREFIX)
             t.extent(:namespace_prefix => MODS_NS_PREFIX)
-            t.date(:ref => [:date])
+            t.date_part(:path => "date", :namespace_prefix => MODS_NS_PREFIX)
             t.text(:namespace_prefix => MODS_NS_PREFIX)
           }
 
@@ -370,6 +370,15 @@ module DRI
           t.captured_date_end(:path => "mods/mods:originInfo/mods:dateCaptured[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
                               :namespace_prefix => MODS_NS_PREFIX)
           t.date_other(:proxy => [:origin_info, :date_other], :attributes => {"point" => :none})
+          t.date_other_start(:path => "mods/mods:originInfo/mods:dateOther[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                                :namespace_prefix => MODS_NS_PREFIX)
+          t.date_other_end(:path => "mods/mods:originInfo/mods:dateOther[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                              :namespace_prefix => MODS_NS_PREFIX)
+          t.part_date(:path => "part/mods:date[not(@point)]", :attributes => {"point" => :none}, :namespace_prefix => MODS_NS_PREFIX)
+          t.part_date_start(:path => "part/mods:date[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                                :namespace_prefix => MODS_NS_PREFIX)
+          t.part_date_end(:path => "part/mods:date[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                              :namespace_prefix => MODS_NS_PREFIX)
         end
 
       end
@@ -580,8 +589,12 @@ module DRI
       def subject_temporal_for_index()
         return display_single_date_for_index(temporal_coverage) |
             display_single_date_for_index(date) |
+            display_single_date_for_index(date_other) |
+            display_single_date_for_index(part_date) |
             display_date_range_for_index(subject_date_start, subject_date_end) |
-            display_date_range_for_index(date_start, date_end)
+            display_date_range_for_index(date_start, date_end) |
+            display_date_range_for_index(date_other_start, date_other_end) |
+            display_date_range_for_index(part_date_start, part_date_end)
       end
 
       # No date ranges here, single date display (just the year)
@@ -621,12 +634,20 @@ module DRI
         date_array = date_start.collect!.with_index do |name, idx|
           name = (idx <= (date_end.length - 1)) ? ("#{name}/#{date_end[idx]}") : name
         end
+        date_other_array = date_other_start.collect!.with_index do |name, idx|
+          name = (idx <= (date_other_end.length - 1)) ? ("#{name}/#{date_other_end[idx]}") : name
+        end
+        part_date_array = part_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (part_date_end.length - 1)) ? ("#{name}/#{part_date_end[idx]}") : name
+        end
 
         dates_hash["creation_date"] = creation_date_array | creation_date
         dates_hash["captured_date"] = captured_date_array | captured_date
         dates_hash["issued_date"] = issued_date_array | published_date
         dates_hash["subject_date"] = subject_date_array | temporal_coverage
         dates_hash["date"] = date_array | date
+        dates_hash["date_other"] = date_other_array | date_other
+        dates_hash["part_date"] = part_date_array | part_date
 
         return dates_hash
       end
