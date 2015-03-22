@@ -156,10 +156,10 @@ module DRI
             t.text(:namespace_prefix => MODS_NS_PREFIX)
           }
 
-          t.date(:path => "date", :namespace_prefix => MODS_NS_PREFIX) {
-            t.encoding_at(:path => {:attribute => "encoding"})
-            t.point_at(:path => {:attribute => "point"})
-          }
+          #t.date(:path => "date", :namespace_prefix => MODS_NS_PREFIX) {
+          #  t.encoding_at(:path => {:attribute => "encoding"})
+          #  t.point_at(:path => {:attribute => "point"})
+          #}
 
           # recordInfo
           t.record_info(:path => "recordInfo", :namespace_prefix => MODS_NS_PREFIX) {
@@ -235,9 +235,8 @@ module DRI
                         :namespace_prefix => MODS_NS_PREFIX)
           # Description: abstract, tableOfContents, or note
           # TODO Check this XPath
-          t.description(:path => "mods/mods:abstract | mods[not(mods:abstract)]/mods:tableOfContents | mods[not(mods:abstract) and not(mods:tableOfContents)]/mods:note", :index_as => [Descriptors.cleaned_searchable,
-                                                           Descriptors.cleaned_displayable],
-                        :namespace_prefix => MODS_NS_PREFIX)
+          t.description(:path => "//mods:mods/mods:abstract | //mods:mods[not(mods:abstract)]/mods:note | //mods:mods[not(mods:abstract) and not(mods:note)]/mods:tableOfContents | //mods:mods[not(mods:abstract) and not(mods:note) and not(mods:tableOfContents)]/mods:physicalDescription/mods:note", :index_as => [Descriptors.cleaned_searchable,
+                                                           Descriptors.cleaned_displayable])
           # Subject: defaults to subject/topic
           t.subject_(:path => "mods/mods:subject/mods:topic", :index_as=>[Descriptors.cleaned_searchable,
                                                             Descriptors.cleaned_facetable,
@@ -270,36 +269,40 @@ module DRI
                                                                           Descriptors.cleaned_displayable],
                       :namespace_prefix => MODS_NS_PREFIX)
           # Published_date
-          t.published_date(:path => "mods/mods:originInfo/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
-                                                                              Descriptors.cleaned_displayable],
+          t.published_date(:path => "mods/mods:originInfo/mods:dateIssued", :attributes => {"point" => :none},
                            :namespace_prefix => MODS_NS_PREFIX)
+
+          # Issued (Published) date ranges
+          t.issued_date_start(:path => "mods/mods:originInfo/mods:dateIssued[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                              :namespace_prefix => MODS_NS_PREFIX)
+          t.issued_date_end(:path => "mods/mods:originInfo/mods:dateIssued[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                            :namespace_prefix => MODS_NS_PREFIX)
+
           # Creation_date
-          t.creation_date(:path => "mods/mods:originInfo/mods:dateCreated | mods/mods:originInfo[not(mods:dateCreated)]/mods:dateIssued", :index_as=>[Descriptors.cleaned_searchable,
-                                                                              Descriptors.cleaned_displayable],
-                          :namespace_prefix => MODS_NS_PREFIX)
-
-
+          t.creation_date(:path => "//mods:mods/mods:originInfo/mods:dateCreated[not(@point)] | //mods:mods/mods:originInfo[not(mods:dateCreated)]/mods:dateIssued[not(@point)] | mods/mods:originInfo[not(mods:dateCreated) and not(mods:dateIssued)]/mods:dateCaptured[not(@point)]")
+          # Creation date ranges
+          t.creation_date_start(:path => "mods/mods:originInfo/mods:dateCreated[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                                :namespace_prefix => MODS_NS_PREFIX)
+          t.creation_date_end(:path => "mods/mods:originInfo/mods:dateCreated[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                              :namespace_prefix => MODS_NS_PREFIX)
 
           # Coverage
           # temporal_coverage
-          t.temporal_coverage(:path => "subject/mods:temporal", :index_as=>[Descriptors.cleaned_searchable,
-                                                                           Descriptors.cleaned_facetable,
-                                                                           Descriptors.cleaned_displayable],
-                              :namespace_prefix => MODS_NS_PREFIX)
+          t.temporal_coverage(:path => "subject/mods:temporal[not(@point)]", :namespace_prefix => MODS_NS_PREFIX)
+
           t.temporal_coverage_lang(:path => "subject/mods:temporal/@lang")
 
           # geographical_coverage
-          t.geographical_coverage(:path => "subject/mods:geographic", :index_as=>[Descriptors.cleaned_searchable,
-                                                                                 Descriptors.cleaned_facetable,
-                                                                                 Descriptors.cleaned_displayable],
-                                  :namespace_prefix => MODS_NS_PREFIX)
+          t.geographical_coverage(:path => "subject/mods:geographic", :namespace_prefix => MODS_NS_PREFIX,
+                                  :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable,
+                                              Descriptors.cleaned_displayable])
           t.geographical_coverage_lang(:path => "subject/mods:geographic/@lang")
 
           t.geographic_code(:proxy => [:main_subject, :geographic_code])
 
           # Roles proxy, similar to QDC
           DRI::Vocabulary::marcRelators.each do |role|
-            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'att')]/mods:namePart",
+            t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'att')]/mods:namePart[not(@type='date')]",
                    :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX
           end
@@ -328,16 +331,6 @@ module DRI
           # Subject name
           t.name_coverage(:proxy => [:main_subject, :name_topic])
 
-          # Subject: temporal, date
-          t.subject_temporal(:path => "subject/mods:temporal", :namespace_prefix => MODS_NS_PREFIX)
-          t.subject_date_start(:path => "subject/mods:temporal", :attributes=>{:encoding=>"w3cdtf", :point=>"start"},
-                               :namespace_prefix => MODS_NS_PREFIX)
-          t.subject_date_end(:path => "subject/mods:temporal", :attributes=>{:encoding=>"w3cdtf", :point=>"end"},
-                             :namespace_prefix => MODS_NS_PREFIX)
-          t.date(:proxy => [:name, :date])
-          t.date_captured(:proxy => [:origin_info, :date_captured])
-          t.date_other(:proxy => [:origin_info, :date_other])
-
           # Other mappings to geographical/temporal
           t.hierarchical_geographic(:path => "subject/mods:hierarchicalGeographic", :namespace_prefix => MODS_NS_PREFIX)
           t.hierarchical_geographic_lang(:path => "subject/mods:hierarchicalGeographic/@lang")
@@ -357,6 +350,26 @@ module DRI
                    :path => "relatedItem[@type='#{rel}']/mods:location/mods:url | relatedItem[@type='#{rel}']/mods:location/mods:physicalLocation",
                    :namespace_prefix => MODS_NS_PREFIX
           end
+
+          # Proxies definition for temporal elements
+
+          # Subject: temporal, date range (@point attribute)
+          t.subject_date_start(:path => "subject/mods:temporal[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                               :namespace_prefix => MODS_NS_PREFIX)
+          t.subject_date_end(:path => "subject/mods:temporal[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                             :namespace_prefix => MODS_NS_PREFIX)
+          t.date(:path => "name/mods:namePart[@type='date' and not(@point)]", :namespace_prefix => MODS_NS_PREFIX)
+          t.date_start(:path => "name/mods:namePart[@type='date' and (@encoding='w3cdtf' or @encoding='iso8601')]", :attributes=>{:point=>"start"},
+                               :namespace_prefix => MODS_NS_PREFIX)
+          t.date_end(:path => "name/mods:namePart[@type='date' and (@encoding='w3cdtf' or @encoding='iso8601')]", :attributes=>{:point=>"end"},
+                             :namespace_prefix => MODS_NS_PREFIX)
+          t.captured_date(:proxy => [:origin_info, :date_captured], :attributes => {"point" => :none})
+          # Captured date ranges
+          t.captured_date_start(:path => "mods/mods:originInfo/mods:dateCaptured[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
+                                :namespace_prefix => MODS_NS_PREFIX)
+          t.captured_date_end(:path => "mods/mods:originInfo/mods:dateCaptured[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
+                              :namespace_prefix => MODS_NS_PREFIX)
+          t.date_other(:proxy => [:origin_info, :date_other], :attributes => {"point" => :none})
         end
 
       end
@@ -466,7 +479,7 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
         solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
 
-        # EAD has several "name" tags, so we merge them together into the SOLR document
+        # MODS has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index()
 
         solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
@@ -481,9 +494,9 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
         # Description
-        description_array = description_for_index()
+        #description_array = description_for_index()
 
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Subject
         solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject) unless subject == []
@@ -514,6 +527,21 @@ module DRI
           solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
         end
 
+        # Index creation_date
+        unless creation_date == [] && creation_date_start == []
+          solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_single_date_for_index(creation_date) |
+                              display_date_range_for_index(creation_date_start, creation_date_end))
+        end
+        # Index Published Date
+        unless published_date == [] && issued_date_start == []
+          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
+          display_date_range_for_index(issued_date_start, issued_date_end))
+        end
+        # Index date ranges
+        # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
+        date_ranges = Transformations.transform_date_ranges(date_ranges_for_index())
+        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => date_ranges) unless date_ranges == []
+
         solr_doc
       end
 
@@ -533,10 +561,6 @@ module DRI
         return []
       end
 
-      def related_references_for_index
-        return references
-      end
-
       def person_array_for_index()
         return creator | contributor
       end
@@ -554,13 +578,60 @@ module DRI
 
       # These are DRI Subject(Place)
       def subject_temporal_for_index()
-        # Extract temporal ranges
-        dates_range_array = subject_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (subject_date_end.length - 1)) ? ("#{name} - #{subject_date_end[idx]}") : name
+        return display_single_date_for_index(temporal_coverage) |
+            display_single_date_for_index(date) |
+            display_date_range_for_index(subject_date_start, subject_date_end) |
+            display_date_range_for_index(date_start, date_end)
+      end
+
+      # No date ranges here, single date display (just the year)
+      def display_single_date_for_index(date_field=[])
+        date_field.collect! do| value |
+          value[0] == '-' ? value[0, 5] << " BC" : value[0, 4]
+        end
+      end
+
+      # Display of date ranges: start_year - end_year
+      def display_date_range_for_index(date_start=[], date_end=[])
+        date_range_display = date_start.collect!.with_index do |name, idx|
+          name = (idx <= (date_end.length - 1)) ? ("#{name[0] == '-' ? name[0,5] : name[0,4]} - #{date_end[idx][0] == '-' ? date_end[idx][0,5] : date_end[idx][0,4]}") : (name[0] == '-' ? name[0,5] : name[0,4])
         end
 
-        return temporal_coverage | dates_range_array | date
+        return date_range_display
       end
+
+      # Return all date ranges formatted in the right format for indexing and single dates
+      # Format: start_date/end_date (ISO8601)
+      # @return Hash with all the dates present in the metadata to be indexed as date ranges
+      def date_ranges_for_index()
+        dates_hash = Hash.new
+
+        creation_date_array = creation_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (creation_date_end.length - 1)) ? ("#{name}/#{creation_date_end[idx]}") : name
+        end
+        captured_date_array = captured_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (captured_date_end.length - 1)) ? ("#{name}/#{captured_date_end[idx]}") : name
+        end
+        issued_date_array = issued_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (issued_date_end.length - 1)) ? ("#{name}/#{issued_date_end[idx]}") : name
+        end
+        subject_date_array = subject_date_start.collect!.with_index do |name, idx|
+          name = (idx <= (subject_date_end.length - 1)) ? ("#{name}/#{subject_date_end[idx]}") : name
+        end
+        date_array = date_start.collect!.with_index do |name, idx|
+          name = (idx <= (date_end.length - 1)) ? ("#{name}/#{date_end[idx]}") : name
+        end
+
+        dates_hash["creation_date"] = creation_date_array | creation_date
+        dates_hash["captured_date"] = captured_date_array | captured_date
+        dates_hash["issued_date"] = issued_date_array | published_date
+        dates_hash["subject_date"] = subject_date_array | temporal_coverage
+        dates_hash["date"] = date_array | date
+
+        return dates_hash
+      end
+
+
 
       # --------------------------------------------------------------------------------------------------------------
 
@@ -576,8 +647,8 @@ module DRI
         date_result = false
 
         # This is the mods identifier used internally in DRI: uniquely identify a record/relationships management
-        if (mods_id_local.size == 1 && mods_id_local.first != "")
-          identifier_result = true
+        mods_id_local.each do |curr_local_id|
+          identifier_result = true unless curr_local_id.blank?
         end
 
         id_uri.each do |uri_r|
@@ -593,7 +664,7 @@ module DRI
           title_result = true unless curr_title.blank?
         end
 
-        description_for_index().each do |curr_description|
+        description.each do |curr_description|
           description_result = true unless curr_description.blank?
         end
 
@@ -605,11 +676,26 @@ module DRI
           type_result = true unless curr_type.blank?
         end
 
+        # Creation date can either be: dateCreated, dateIssued, dateCaptured (in this priority order)
         creation_date.each do |curr_date|
           date_result = true unless curr_date.blank?
         end
+
+        # If no single creation date check whether there is a range for dateCreated
         if (!date_result)
-          published_date.each do |curr_date|
+          creation_date_start.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+        # If no single creation date check whether there is a range for dateIssued
+        if (!date_result)
+          issued_date_start.each do |curr_date|
+            date_result = true unless curr_date.blank?
+          end
+        end
+        # If no single creation date check whether there is a range for dateCaptured
+        if (!date_result)
+          captured_date_start.each do |curr_date|
             date_result = true unless curr_date.blank?
           end
         end

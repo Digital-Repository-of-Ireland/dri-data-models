@@ -36,7 +36,7 @@ module DRI
     has_attributes :source, datastream: :descMetadata, multiple: true
     # Dates
     has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :date_captured, datastream: :descMetadata, multiple: true
+    has_attributes :captured_date, datastream: :descMetadata, multiple: true
     has_attributes :date_other, datastream: :descMetadata, multiple: true
 
     has_attributes :name_coverage, datastream: :descMetadata, multiple: true
@@ -45,7 +45,6 @@ module DRI
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
     has_attributes :subject_date_start, datastream: :descMetadata, multiple: true
     has_attributes :subject_date_end, datastream: :descMetadata, multiple: true
-    has_attributes :subject_temporal, datastream: :descMetadata, multiple: true
 
     # External relationships (contain a URI to resources external to DRI)
     has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
@@ -123,7 +122,7 @@ module DRI
         end
 
         # Return the first record
-        return new_xml.to_xml
+        return Nokogiri::XML(new_xml.to_xml)
       end
       # This is an individual record, therefore return all XML
       return xml_text
