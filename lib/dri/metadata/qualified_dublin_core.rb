@@ -198,8 +198,13 @@ module DRI
 
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
-        date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
-        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => date_ranges) unless date_ranges == []
+        cdate_ranges = Transformations.transform_date_ranges({ "creation_date" => creation_date})
+        pdate_ranges = Transformations.transform_date_ranges({ "published_date" => published_date})
+        sdate_ranges = Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
+
+        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
+        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
+        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
 
 
         # Split date ranges into separate indexes

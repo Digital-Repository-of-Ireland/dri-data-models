@@ -279,7 +279,7 @@ module DRI
                             :namespace_prefix => MODS_NS_PREFIX)
 
           # Creation_date
-          t.creation_date(:path => "//mods:mods/mods:originInfo/mods:dateCreated[not(@point)] | //mods:mods/mods:originInfo[not(mods:dateCreated)]/mods:dateIssued[not(@point)] | mods/mods:originInfo[not(mods:dateCreated) and not(mods:dateIssued)]/mods:dateCaptured[not(@point)]")
+          t.creation_date(:path => "//mods:mods/mods:originInfo/mods:dateCreated[not(@point)] | //mods:mods/mods:originInfo[not(mods:dateCreated)]/mods:dateIssued[not(@point)] | //mods:mods/mods:originInfo[not(mods:dateCreated) and not(mods:dateIssued)]/mods:dateCaptured[not(@point)]")
           # Creation date ranges
           t.creation_date_start(:path => "mods/mods:originInfo/mods:dateCreated[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
                                 :namespace_prefix => MODS_NS_PREFIX)
@@ -342,7 +342,7 @@ module DRI
           t.language_object_part(:ref => [:language_any_object_part])
 
           # Add TERMS for External relationships
-          t.related_items_digital(:path => "relatedItem/mods:location/mods:url", :namespace_prefix => MODS_NS_PREFIX)
+          t.related_items_digital(:path => "//mods:mods/mods:relatedItem/mods:location/mods:url | //mods:mods/mods:location/mods:url")
 
           # //relatedItem[@type='*' and not(mods:identifier[@type='local'])]
           DRI::Vocabulary::modsRelationshipTypes.each do |rel|
@@ -358,12 +358,9 @@ module DRI
                                :namespace_prefix => MODS_NS_PREFIX)
           t.subject_date_end(:path => "subject/mods:temporal[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
                              :namespace_prefix => MODS_NS_PREFIX)
-          t.date(:path => "name/mods:namePart[@type='date' and not(@point)]", :namespace_prefix => MODS_NS_PREFIX)
-          t.date_start(:path => "name/mods:namePart[@type='date' and (@encoding='w3cdtf' or @encoding='iso8601')]", :attributes=>{:point=>"start"},
-                               :namespace_prefix => MODS_NS_PREFIX)
-          t.date_end(:path => "name/mods:namePart[@type='date' and (@encoding='w3cdtf' or @encoding='iso8601')]", :attributes=>{:point=>"end"},
-                             :namespace_prefix => MODS_NS_PREFIX)
-          t.captured_date(:proxy => [:origin_info, :date_captured], :attributes => {"point" => :none})
+          t.date(:path => "name/mods:namePart[@type='date']", :namespace_prefix => MODS_NS_PREFIX)
+
+          t.captured_date(:path => "mods/mods:originInfo/mods:dateCaptured[not(@point)]", :namespace_prefix => MODS_NS_PREFIX)
           # Captured date ranges
           t.captured_date_start(:path => "mods/mods:originInfo/mods:dateCaptured[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"start"},
                                 :namespace_prefix => MODS_NS_PREFIX)
@@ -393,7 +390,7 @@ module DRI
 
       # If the /mods/mods:typeOfResource[@collection="yes"] return true
       def collection?
-        !mods_type_collection.nil? ? true : false
+        (!mods_type_collection.nil? && !mods_type_collection.empty?) ? true : false
       end
 
       def metadata_path field
@@ -537,35 +534,55 @@ module DRI
         end
 
         # Index creation_date
-        unless creation_date == [] && creation_date_start == []
-          solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_single_date_for_index(creation_date) |
-                              display_date_range_for_index(creation_date_start, creation_date_end))
-        end
+        creation_date_idx = creation_date_for_index()
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_idx)
+
         # Index Published Date
         unless published_date == [] && issued_date_start == []
           solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
           display_date_range_for_index(issued_date_start, issued_date_end))
         end
+
         # Index date ranges
-        # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
-        date_ranges = Transformations.transform_date_ranges(date_ranges_for_index())
-        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => date_ranges) unless date_ranges == []
+        date_ranges = date_ranges_for_index() # ALL the date ranges
+
+        # Creation date dateRange index
+        cdate_ranges = date_ranges.select {|key, value| ["creation_date", "captured_date"].include?(key)}
+        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+
+        # Published date dateRange index
+        pdate_ranges = date_ranges.select {|key, value| ["issued_date"].include?(key)}
+        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
+
+        # Subject date dateRange index
+        sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date", "date_other", "part_date"].include?(key)}
+        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
 
         solr_doc
       end
 
       # Indexing Methods
       # --------------------------------------------------------------------------------------------------------------
-      def description_for_index
-        # TODO Test that this is being indexed correctly
-        return abstract if !abstract.empty?
-        return toc if !toc.empty?
-        unless (note_mods_type.empty? && note_mods_no_type.empty?)
-          note_formatted = note_mods_type.collect!.with_index do |name, idx|
-            name = "#{name} [#{note_mods_type.type_at[idx]}]"
-          end
-          return note_formatted | note_mods_no_type
-        end
+      # description_for_index NOT NEEDED as indexed in the terminology
+      #def description_for_index
+      #  return abstract if !abstract.empty?
+      #  return toc if !toc.empty?
+      #  unless (note_mods_type.empty? && note_mods_no_type.empty?)
+      #    note_formatted = note_mods_type.collect!.with_index do |name, idx|
+      #      name = "#{name} [#{note_mods_type.type_at[idx]}]"
+      #    end
+      #    return note_formatted | note_mods_no_type
+      #  end
+      #
+      #  return []
+      #end
+
+      def creation_date_for_index()
+        return display_single_date_for_index(creation_date) unless creation_date == []
+        # Cases below needed as creation_date only holds single dates and there are 3 possible fields for this date
+        return display_date_range_for_index(creation_date_start, creation_date_end) unless creation_date_start == []
+        return display_date_range_for_index(issued_date_start, issued_date_end) unless issued_date_start == []
+        return display_date_range_for_index(captured_date_start, captured_date_end) unless captured_date_start == []
 
         return []
       end
@@ -587,12 +604,10 @@ module DRI
 
       # These are DRI Subject(Place)
       def subject_temporal_for_index()
-        return display_single_date_for_index(temporal_coverage) |
-            display_single_date_for_index(date) |
+        return display_single_date_for_index(temporal_coverage) | date |
             display_single_date_for_index(date_other) |
             display_single_date_for_index(part_date) |
             display_date_range_for_index(subject_date_start, subject_date_end) |
-            display_date_range_for_index(date_start, date_end) |
             display_date_range_for_index(date_other_start, date_other_end) |
             display_date_range_for_index(part_date_start, part_date_end)
       end
@@ -600,14 +615,35 @@ module DRI
       # No date ranges here, single date display (just the year)
       def display_single_date_for_index(date_field=[])
         date_field.collect! do| value |
-          value[0] == '-' ? value[0, 5] << " BC" : value[0, 4]
+          begin
+            d = DateTime.parse(value)
+            d.strftime("%b %d, %Y")
+          rescue ArgumentError => e
+            value[0] == '-' ? value[0, 5] << " BC" : value[0, 4]
+          end
         end
       end
 
       # Display of date ranges: start_year - end_year
       def display_date_range_for_index(date_start=[], date_end=[])
         date_range_display = date_start.collect!.with_index do |name, idx|
-          name = (idx <= (date_end.length - 1)) ? ("#{name[0] == '-' ? name[0,5] : name[0,4]} - #{date_end[idx][0] == '-' ? date_end[idx][0,5] : date_end[idx][0,4]}") : (name[0] == '-' ? name[0,5] : name[0,4])
+          begin
+            d_start = DateTime.parse(name)
+            if idx <= (date_end.length - 1)
+              d_end = DateTime.parse(date_end[idx])
+              d_start.strftime("%b %d, %Y") << " - " << d_end.strftime("%b %d, %Y")
+            else
+              d_start.strftime("%b %d, %Y")
+            end
+          rescue ArgumentError => e
+            if idx <= date_end.length - 1
+              dstart = name[0] == '-' ? "#{name[1,5]} BC" : name[0,4]
+              dend = date_end[idx][0] == '-' ? "#{date_end[idx][1,5]} BC" : date_end[idx][0,4]
+              dstart << " - " << dend
+            else
+              name[0] == '-' ? "#{name[1,5]} BC" : name[0,4]
+            end
+          end
         end
 
         return date_range_display
@@ -631,9 +667,6 @@ module DRI
         subject_date_array = subject_date_start.collect!.with_index do |name, idx|
           name = (idx <= (subject_date_end.length - 1)) ? ("#{name}/#{subject_date_end[idx]}") : name
         end
-        date_array = date_start.collect!.with_index do |name, idx|
-          name = (idx <= (date_end.length - 1)) ? ("#{name}/#{date_end[idx]}") : name
-        end
         date_other_array = date_other_start.collect!.with_index do |name, idx|
           name = (idx <= (date_other_end.length - 1)) ? ("#{name}/#{date_other_end[idx]}") : name
         end
@@ -645,7 +678,7 @@ module DRI
         dates_hash["captured_date"] = captured_date_array | captured_date
         dates_hash["issued_date"] = issued_date_array | published_date
         dates_hash["subject_date"] = subject_date_array | temporal_coverage
-        dates_hash["date"] = date_array | date
+        dates_hash["date"] = date
         dates_hash["date_other"] = date_other_array | date_other
         dates_hash["part_date"] = part_date_array | part_date
 

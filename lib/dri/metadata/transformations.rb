@@ -3,7 +3,9 @@ module DRI
     module Transformations
       #require 'chronic'
 
-      DATE_RANGE_SOLR_FIELD = "dateRange"
+      CREATION_DATE_RANGE_SOLR_FIELD = "cdateRange"
+      PUBLISHED_DATE_RANGE_SOLR_FIELD = "pdateRange"
+      SUBJECT_DATE_RANGE_SOLR_FIELD = "sdateRange"
 
 	    # A function to convert an array of names that conform to archiving formatting standards into human-readable names
       # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
