@@ -52,6 +52,12 @@ module DRI
     # Institute
     has_attributes :institute, datastream: :descMetadata, multiple: true
 
+    # Related Material
+    has_attributes :related_material, datastream: :descMetadata, multiple: true
+
+    # Alternative Form Available
+    has_attributes :alternative_form, datastream: :descMetadata, multiple: true
+
     around_save :synchronize_if_changed
 
     def initialize(type, args = {})

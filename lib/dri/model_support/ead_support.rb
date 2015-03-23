@@ -226,7 +226,7 @@ module DRI
         country_code_attr = nil
 
         # Get the text value for unitid
-        metadata_id = elem.xpath('did/unitid')[0].text
+        metadata_id = !elem.xpath('did/unitid')[0].text.nil? ? elem.xpath('did/unitid')[0].text : ""
 
         # Get the value of unitid/@repositorycode
         if elem.xpath('did/unitid/@repositorycode')[0] != nil
