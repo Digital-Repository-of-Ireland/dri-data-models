@@ -118,7 +118,7 @@ module DRI
           result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
           result = "DRI::Metadata::EncodedArchivalDescription"
-        elsif ['c', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12'].include? root_name
+        elsif ['c', 'c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'c09', 'c10', 'c11', 'c12'].include? root_name
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
         elsif ['marc'].include? root_name
           result = "DRI::Metadata::Marc"
