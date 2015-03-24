@@ -618,8 +618,9 @@ module DRI
           begin
             d = DateTime.parse(value)
             d.strftime("%b %d, %Y")
+            Transformations.create_dcmi_point(d.strftime("%b %d, %Y"), value)
           rescue ArgumentError => e
-            value[0] == '-' ? value[0, 5] << " BC" : value[0, 4]
+            Transformations.create_dcmi_point(value[0] == '-' ? value[0, 5] << " BC" : value[0, 4], value)
           end
         end
       end
@@ -631,17 +632,17 @@ module DRI
             d_start = DateTime.parse(name)
             if idx <= (date_end.length - 1)
               d_end = DateTime.parse(date_end[idx])
-              d_start.strftime("%b %d, %Y") << " - " << d_end.strftime("%b %d, %Y")
+              Transformations.create_dcmi_point(d_start.strftime("%b %d, %Y") << " - " << d_end.strftime("%b %d, %Y"), name, date_end[idx])
             else
-              d_start.strftime("%b %d, %Y")
+              Transformations.create_dcmi_point(d_start.strftime("%b %d, %Y"), name)
             end
           rescue ArgumentError => e
             if idx <= date_end.length - 1
               dstart = name[0] == '-' ? "#{name[1,5]} BC" : name[0,4]
               dend = date_end[idx][0] == '-' ? "#{date_end[idx][1,5]} BC" : date_end[idx][0,4]
-              dstart << " - " << dend
+              Transformations.create_dcmi_point(dstart << " - " << dend, name, date_end[idx])
             else
-              name[0] == '-' ? "#{name[1,5]} BC" : name[0,4]
+              Transformations.create_dcmi_point(name[0] == '-' ? "#{name[1,5]} BC" : name[0,4], name)
             end
           end
         end

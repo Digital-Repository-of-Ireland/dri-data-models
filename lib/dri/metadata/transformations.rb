@@ -224,6 +224,9 @@ module DRI
         end
       end
 
+      def self.create_dcmi_point(name, sdate, edate="", scheme="")
+        return "name=#{name}; start=#{sdate};#{edate != '' ? ' end=' << edate << ';' :''}#{scheme != '' ? ' scheme=' << scheme << ';' :''}"
+      end
       # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and
