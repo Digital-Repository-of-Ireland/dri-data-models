@@ -555,7 +555,7 @@ module DRI
         solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
 
         # Subject date dateRange index
-        sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date", "date_other", "part_date"].include?(key)}
+        sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date_other", "part_date"].include?(key)}
         solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
 
         solr_doc
@@ -604,7 +604,7 @@ module DRI
 
       # These are DRI Subject(Place)
       def subject_temporal_for_index()
-        return display_single_date_for_index(temporal_coverage) | date |
+        return display_single_date_for_index(temporal_coverage) |
             display_single_date_for_index(date_other) |
             display_single_date_for_index(part_date) |
             display_date_range_for_index(subject_date_start, subject_date_end) |
@@ -679,7 +679,7 @@ module DRI
         dates_hash["captured_date"] = captured_date_array | captured_date
         dates_hash["issued_date"] = issued_date_array | published_date
         dates_hash["subject_date"] = subject_date_array | temporal_coverage
-        dates_hash["date"] = date
+        # dates_hash["date"] = date # Date as namePart[@type='date'] not being indexed as it is not a subject date
         dates_hash["date_other"] = date_other_array | date_other
         dates_hash["part_date"] = part_date_array | part_date
 
