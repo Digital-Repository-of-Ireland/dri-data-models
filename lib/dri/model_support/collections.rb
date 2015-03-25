@@ -6,8 +6,8 @@ module DRI
       included do
       	attr_accessor :collection
 
-        belongs_to :governing_collection, :property=>:is_governed_by, :class_name => 'DRI::Batch'
-        has_many :governed_items, :property=>:is_governed_by, :class_name => 'DRI::Batch'
+        belongs_to :governing_collection, property: :is_governed_by, class_name: 'DRI::Batch'
+        has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection
 
         # Two relationships below are used to manage a collection's structure
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'

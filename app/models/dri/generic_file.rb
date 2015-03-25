@@ -11,10 +11,10 @@ class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile::Trophies
   include Sufia::GenericFile::Metadata
   include Sufia::GenericFile::Versions
+  include Sufia::GenericFile::Content
   include Sufia::GenericFile::VirusCheck
   include Sufia::GenericFile::FullTextIndexing
 
-  #belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: DRI::Batch
   belongs_to :batch, :class_name => "DRI::Batch", property: :is_part_of
   # Declare a 'dri_properties' DS, of the following type
   contains "dri_properties", class_name: "DRI::Metadata::FileProperties"
@@ -33,7 +33,7 @@ class GenericFile < ActiveFedora::Base
     end
 
     options[:path] = dsid
-    add_file(opts[:url], options)
+    self.attach_file(opts[:url], dsid, options)
    
     true
   end
@@ -46,10 +46,10 @@ class GenericFile < ActiveFedora::Base
     solr_doc = super(solr_doc, opts)
     
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
-    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [object.width[0]]) unless width.empty?
-    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer) => [object.height[0]]) unless height.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
+    solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
     if (!width.empty? && !height.empty?)
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer) => [object.width[0].to_i*height[0].to_i])
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
     end
 
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?

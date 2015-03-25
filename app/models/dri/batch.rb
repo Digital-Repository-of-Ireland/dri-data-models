@@ -9,8 +9,8 @@ class Batch < ActiveFedora::Base
   include DRI::ModelSupport::Files
   include DRI::ModelSupport::Collections
 
-  has_many :generic_files, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-  
+  has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of, :as => 'batch'
+
   # Declare a 'extracted' DS, of the following type
   contains "extracted", class_name: 'DRI::Metadata::Extracted'
 
