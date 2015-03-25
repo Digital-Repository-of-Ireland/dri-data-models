@@ -2,6 +2,7 @@ module DRI
   module Metadata
     module Transformations
       #require 'chronic'
+      require 'iso8601'
 
       CREATION_DATE_RANGE_SOLR_FIELD = "cdateRange"
       PUBLISHED_DATE_RANGE_SOLR_FIELD = "pdateRange"
@@ -123,21 +124,11 @@ module DRI
           (k,v) = component.split(/\s*=\s*/)
           begin
             if k.eql?('start')
-              str = Solrizer::DefaultDescriptors.iso8601_date(v)[0, Solrizer::DefaultDescriptors.iso8601_date(v).index('T')]
-              if str[0] == "-"
-                range['start'] = str[0, 5]
-              else
-                range['start'] = str[0, 4]
-              end
+              range['start'] = ISO8601::DateTime.new(v).year
             elsif k.eql?('end')
-              str = Solrizer::DefaultDescriptors.iso8601_date(v)[0, Solrizer::DefaultDescriptors.iso8601_date(v).index('T')]
-              if str[0] == "-"
-                range['end'] = str[0, 5]
-              else
-                range['end'] = str[0, 4]
-              end
+              range['end'] = ISO8601::DateTime.new(v).year
             end
-          rescue
+          rescue ISO8601::Errors::UnknownPattern => e
             Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601!!")
             return {}
           end
@@ -166,14 +157,9 @@ module DRI
           dates = range.collect!.each do |dat|
             begin
               unless dat.include?('/')
-                str = Solrizer::DefaultDescriptors.iso8601_date(dat)[0, Solrizer::DefaultDescriptors.iso8601_date(dat).index('T')]
-                if str[0] == "-"
-                  str[0, 5]
-                else
-                  str[0, 4]
-                end
+                ISO8601::DateTime.new(dat).year
               end
-            rescue
+            rescue ISO8601::Errors::UnknownPattern => e
               Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601!!")
               return []
             end
@@ -181,13 +167,8 @@ module DRI
         else
           begin
             # Single date, therefore end date = start date (for correct date range indexing)
-            str = Solrizer::DefaultDescriptors.iso8601_date(val)[0, Solrizer::DefaultDescriptors.iso8601_date(val).index('T')]
-            if str[0] == "-"
-              dates[0] = dates[1] = str[0, 5] # date_end = date_start
-            else
-              dates[0] = dates[1] = str[0, 4]
-            end
-          rescue
+            dates[0] = dates[1] = ISO8601::DateTime.new(val).year
+          rescue ISO8601::Errors::UnknownPattern => e
             Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601!!")
             return []
           end
@@ -196,36 +177,22 @@ module DRI
         dates
       end # transform_date
 
-      def self.w3cdtf(date)
-        if /\A\s*
-            (-?\d+)-(\d\d)-(\d\d)
-            (?:T
-            (\d\d):(\d\d)(?::(\d\d))?
-            (\.\d+)?
-            (Z|[+-]\d\d:\d\d)?)?
-            \s*\z/x =~ date and (($5 and $8) or (!$5 and !$8))
-          datetime = [$1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i, $6.to_i]
-          usec = 0
-          usec = $7.to_f * 1000000 if $7
-          zone = $8
-          if zone
-            off = zone_offset(zone, datetime[0])
-            datetime = apply_offset(*(datetime + [off]))
-            datetime << usec
-            time = Time.utc(*datetime)
-            time.localtime unless zone_utc?(zone)
-            time
-          else
-            datetime << usec
-            Time.local(*datetime)
+      def self.iso8601?(value)
+        begin
+          if value.is_a?(Date) || value.is_a?(Time)
+            ISO8601::DateTime.new(value.to_s).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+          elsif !value.empty?
+            ISO8601::DateTime.new(value).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
           end
-        else
-          raise ArgumentError.new("invalid date: #{date.inspect}")
+          return true
+        rescue ISO8601::Errors::UnknownPattern => e
+          Rails.logger.error("Unable to parse `#{value}' as a date-time object")
+          return false
         end
       end
 
-      def self.create_dcmi_point(name, sdate, edate="", scheme="")
-        return "name=#{name}; start=#{sdate};#{edate != '' ? ' end=' << edate << ';' :''}#{scheme != '' ? ' scheme=' << scheme << ';' :''}"
+      def self.create_dcmi_point(name, sdate="", edate="", scheme="")
+        return "name=#{name}; #{edate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
       end
       # Split date ranges into separate _start and _end SOLR indexes
       #
