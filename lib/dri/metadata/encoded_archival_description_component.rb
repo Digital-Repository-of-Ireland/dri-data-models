@@ -325,7 +325,7 @@ module DRI
         #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
         #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
-        # Creation date
+        # Display of Creation Date
         creation_date_array = creation_date_for_index()
         solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array
         solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
@@ -352,9 +352,6 @@ module DRI
         subject_temporal_array = subject_temporal_for_index()
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
-
-        # Display of Creation Date
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_for_index())
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
         solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent("creation_date_idx"))
