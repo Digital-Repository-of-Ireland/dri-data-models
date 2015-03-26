@@ -36,8 +36,16 @@ module DRI
     has_attributes :source, datastream: :descMetadata, multiple: true
     # Dates
     has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date, datastream: :descMetadata, multiple: true
     has_attributes :date_other, datastream: :descMetadata, multiple: true
+    has_attributes :date_other_start, datastream: :descMetadata, multiple: true
+    has_attributes :date_other_end, datastream: :descMetadata, multiple: true
+    has_attributes :captured_date, datastream: :descMetadata, multiple: true
+    has_attributes :captured_date_start, datastream: :descMetadata, multiple: true
+    has_attributes :captured_date_end, datastream: :descMetadata, multiple: true
+    has_attributes :issued_date_start, datastream: :descMetadata, multiple: true
+    has_attributes :issued_date_end, datastream: :descMetadata, multiple: true
+    has_attributes :creation_date_start, datastream: :descMetadata, multiple: true
+    has_attributes :creation_date_end, datastream: :descMetadata, multiple: true
 
     has_attributes :name_coverage, datastream: :descMetadata, multiple: true
     # Geographical, temporal

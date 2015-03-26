@@ -548,15 +548,15 @@ module DRI
 
         # Creation date dateRange index
         cdate_ranges = date_ranges.select {|key, value| ["creation_date", "captured_date"].include?(key)}
-        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select {|key, value| ["issued_date"].include?(key)}
-        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
+        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date_other", "part_date"].include?(key)}
-        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
+        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
 
         solr_doc
       end
@@ -579,7 +579,7 @@ module DRI
 
       def creation_date_for_index()
         return display_single_date_for_index(creation_date) unless creation_date == []
-        # Cases below needed as creation_date only holds single dates and there are 3 possible fields for this date
+        # Cases below needed as creation_date not only holds single dates and there are 3 possible fields for this date
         return display_date_range_for_index(creation_date_start, creation_date_end) unless creation_date_start == []
         return display_date_range_for_index(issued_date_start, issued_date_end) unless issued_date_start == []
         return display_date_range_for_index(captured_date_start, captured_date_end) unless captured_date_start == []
@@ -616,11 +616,10 @@ module DRI
       def display_single_date_for_index(date_field=[])
         date_field.collect! do| value |
           begin
-            d = DateTime.parse(value)
-            d.strftime("%b %d, %Y")
-            Transformations.create_dcmi_point(d.strftime("%b %d, %Y"), value)
-          rescue ArgumentError => e
-            Transformations.create_dcmi_point(value[0] == '-' ? value[0, 5] << " BC" : value[0, 4], value)
+            display_date = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
+            DRI::Metadata::Transformations.create_dcmi_point(display_date, value)
+          rescue ISO8601::Errors::UnknownPattern => e
+            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
           end
         end
       end
@@ -629,21 +628,16 @@ module DRI
       def display_date_range_for_index(date_start=[], date_end=[])
         date_range_display = date_start.collect!.with_index do |name, idx|
           begin
-            d_start = DateTime.parse(name)
+            d_start = ISO8601::DateTime.new(name).strftime("%b %d, %Y")
+
             if idx <= (date_end.length - 1)
-              d_end = DateTime.parse(date_end[idx])
-              Transformations.create_dcmi_point(d_start.strftime("%b %d, %Y") << " - " << d_end.strftime("%b %d, %Y"), name, date_end[idx])
+              d_end = ISO8601::DateTime.new(date_end[idx]).strftime("%b %d, %Y")
+              DRI::Metadata::Transformations.create_dcmi_point(d_start << " - " << d_end, name, date_end[idx])
             else
-              Transformations.create_dcmi_point(d_start.strftime("%b %d, %Y"), name)
+              Transformations.create_dcmi_point(d_start, name)
             end
-          rescue ArgumentError => e
-            if idx <= date_end.length - 1
-              dstart = name[0] == '-' ? "#{name[1,5]} BC" : name[0,4]
-              dend = date_end[idx][0] == '-' ? "#{date_end[idx][1,5]} BC" : date_end[idx][0,4]
-              Transformations.create_dcmi_point(dstart << " - " << dend, name, date_end[idx])
-            else
-              Transformations.create_dcmi_point(name[0] == '-' ? "#{name[1,5]} BC" : name[0,4], name)
-            end
+          rescue ISO8601::Errors::UnknownPattern => e
+            DRI::Metadata::Transformations.create_dcmi_point(name) # DCMI Period 'name' is the md value
           end
         end
 
