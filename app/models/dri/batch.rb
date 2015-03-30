@@ -8,7 +8,8 @@ class Batch < ActiveFedora::Base
   include DRI::ModelSupport::InterchangeableMetadata
   include DRI::ModelSupport::Files
   include DRI::ModelSupport::Collections
-
+  
+  has_many_versions
   has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of, :as => 'batch'
 
   # Declare a 'extracted' DS, of the following type
