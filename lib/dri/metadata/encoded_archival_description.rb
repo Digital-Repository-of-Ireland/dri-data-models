@@ -16,7 +16,7 @@ module DRI
           t.role(:path => {:attribute=>"role"})
         }
         t.corpname_(:path=>"corpname")
-        t.date_(:path=>"date[not(parent::creation)]") {
+        t.date_(:path=>"date[not(parent::creation) and not(parent::publicationstmt)]") {
           t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
         }
@@ -44,7 +44,7 @@ module DRI
               t.publicationstmt {
                 t.p_(:ref => [:p])
                 t.publisher()
-                t.date_publ(:ref => [:date])
+                t.date_(:path => "date")
               }
               # Also added from recommendation
               t.notestmt {
@@ -167,7 +167,7 @@ module DRI
         t.publisher(:proxy => [:ead, :eadheader, :filedesc, :publicationstmt, :publisher], :index_as=>[Descriptors.cleaned_searchable, :sortable])
         # Published Date (collection-level, DRI pre-populated)
         # TODO Add published_date field to the terminology. What's the mapped EAD term?
-        t.published_date(:proxy => [:ead, :eadheader, :filedesc, :publicationstmt, :date_publ], :attributes => {"normal" => :none})
+        t.published_date(:path =>"ead/eadheader/filedesc/publicationstmt/date", :attributes => {"normal" => :none})
         # Creation Date, now with generic xpath query: @datechar="creation" is now case-insensitive
         t.creation_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and not(@normal)]')
         # ORIGINAL - t.creation_date(:proxy => [:ead, :archdesc, :did, :creation_date], :index_as=>[Descriptors.cleaned_searchable])
@@ -243,9 +243,13 @@ module DRI
         t.alternative_form(:proxy => [:ead, :archdesc, :alternative_form, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
-        t.published_date_idx(:proxy => [:ead, :eadheader, :filedesc, :publicationstmt, :date_publ, :normal])
-        t.temporal_coverage_idx(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation"))]]/@normal')
+        t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')
+        t.published_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")]]/@normal')
+        t.published_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")] and @normal]')
+        t.temporal_coverage_idx(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
+        t.temporal_coverage_idx_d(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and @normal]')
         t.date_idx(:proxy => [:date, :normal])
+        t.date_idx_d(:path => "date[not(parent::creation) and not(parent::publicationstmt) and @normal]")
 
       end # set_terminology
 
@@ -376,14 +380,14 @@ module DRI
           cdate_array = creation_date.collect! do |value|
             DRI::Metadata::Transformations.create_dcmi_point(value)
           end
-          solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date_idx) | cdate_array)
+          solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date_idx, creation_date_idx_d) | cdate_array)
         end
         # Display of Published Date
         unless published_date_idx == [] && published_date == []
           pdate_array = published_date.collect! do |value|
             DRI::Metadata::Transformations.create_dcmi_point(value)
           end
-          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date_idx) | pdate_array)
+          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date_idx, published_date_idx_d) | pdate_array)
         end
         # Index date ranges
         solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx) unless creation_date_idx == []
@@ -467,8 +471,8 @@ module DRI
         tcoverage_array = temporal_coverage.collect! do |value|
           DRI::Metadata::Transformations.create_dcmi_point(value)
         end
-        return display_date_for_index(temporal_coverage_idx) |
-            display_date_for_index(date_idx) |
+        return display_date_for_index(temporal_coverage_idx, temporal_coverage_idx_d) |
+            display_date_for_index(date_idx, date_idx_d) |
             tcoverage_array |
             dtext_array
       end
@@ -486,22 +490,33 @@ module DRI
         return dates_hash
       end
 
-      def display_date_for_index(date_field=[])
-        date_field.collect! do| value |
+      def display_date_for_index(date_field=[], date_field_d=[])
+        date_field.collect!.with_index do |value, idx|
           begin
             # Date range in ISO8601 format: YYYYmmdd/YYYYmmdd
             if (value.include?('/'))
               range = value.split("/")
               sdate = ISO8601::DateTime.new(range[0]).strftime("%b %d, %Y") #start date
               edate = ISO8601::DateTime.new(range[1]).strftime("%b %d, %Y") #end date
-
-              DRI::Metadata::Transformations.create_dcmi_point(sdate << ' - ' << edate, range[0], range[1])
+              if idx <= (date_field_d.length - 1)
+                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], range[0], range[1])
+              else
+                DRI::Metadata::Transformations.create_dcmi_point(sdate << ' - ' << edate, range[0], range[1])
+              end
             else
-              sdate = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
-              DRI::Metadata::Transformations.create_dcmi_point(sdate, value)
+              if idx <= (date_field_d.length - 1)
+                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], value)
+              else
+                sdate = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
+                DRI::Metadata::Transformations.create_dcmi_point(sdate, value)
+              end
             end
           rescue ISO8601::Errors::UnknownPattern => e
-            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+            if idx <= (date_field_d.length - 1)
+              DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx]) # DCMI Period 'name' is the md value
+            else
+              DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+            end
           end
         end
       end
@@ -532,10 +547,10 @@ module DRI
             [:ead, :eadheader, :filedesc, :publicationstmt, :publisher]
           when :creation_date
             [:creation_date]
+          when :published_date
+            [:published_date]
           when :creation_date_profiledesc
             [:ead, :eadheader, :profiledesc, :creation, :date]
-          when :published_date
-            [:ead, :eadheader, :filedesc, :publicationstmt, :date_publ]
           when :name_coverage
             [:ead, :archdesc,  :name_coverage]
           when :geographical_coverage
