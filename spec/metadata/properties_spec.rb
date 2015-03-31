@@ -10,7 +10,7 @@ describe "DRI::Metadata::Properties" do
 
   it "should expose system metadata for DRI digital objects" do
     @ds.status.should == ["published"]
-    @ds.model_version.should == ["2.0.3"]
+    @ds.model_version.should == ["0.1.0"]
   end
 
 end
