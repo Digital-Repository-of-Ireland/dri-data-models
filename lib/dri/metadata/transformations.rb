@@ -180,9 +180,9 @@ module DRI
       def self.iso8601?(value)
         begin
           if value.is_a?(Date) || value.is_a?(Time)
-            ISO8601::DateTime.new(value.to_s).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+            ISO8601::DateTime.new(value.to_s)
           elsif !value.empty?
-            ISO8601::DateTime.new(value).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+            ISO8601::DateTime.new(value)
           end
           return true
         rescue ISO8601::Errors::UnknownPattern => e
@@ -191,8 +191,20 @@ module DRI
         end
       end
 
+      def self.dcmi_point?(value)
+        result = false
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+
+          if k.eql?('name') || k.eql?('start') || k.eql?('end') || k.eql?('scheme')
+            result = true
+          end
+        end
+        return result
+      end
+
       def self.create_dcmi_point(name, sdate="", edate="", scheme="")
-        return "name=#{name}; #{edate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
+        return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
       end
       # Split date ranges into separate _start and _end SOLR indexes
       #
