@@ -96,9 +96,7 @@ module DRI
               t.unit_title(:path => "unittitle", :namespace_prefix => nil) {
                 t.geographical_title(:ref => [:geographic_name])
               }
-              t.abstract {
-                t.p_(:ref => [:p])
-              }
+              t.abstract
               # TODO Decide the preference order for language: within eadheader or within did
               # Language within did
               t.langmaterial {
@@ -156,7 +154,8 @@ module DRI
         # Title (collection-level, M)
         t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Description (collection-level, M)
-        t.description(:proxy => [:ead, :archdesc, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        #t.description(:proxy => [:ead, :archdesc, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.description(:path => "/ead/archdesc/scopecontent/p | /ead/archdesc[not(scopecontent)]/did/abstract", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Language //archdesc/did/langmaterial/language (collection-level, R best practice) but for NIVAL... use langusage in the eadHeader
         t.language(:proxy => [:ead, :eadheader, :profiledesc, :langusage, :language], :index_as=>[Descriptors.cleaned_searchable,  Descriptors.language_facetable])
         # Creator (collection-level, M)
@@ -331,9 +330,9 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
         # Description
-        description_array = description_for_index()
+        #description_array = description_for_index()
 
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Subject: generic, name and place
         subject_array = subject_for_index()
@@ -418,16 +417,16 @@ module DRI
         return language | language_did
       end
       # Mapping to UI description attribute from EAD: scopecontent, abstract
-      def description_for_index()
-        return description unless description == []
-        return abstract unless abstract == []
+      #def description_for_index()
+        #return description unless description == []
+        #return abstract unless abstract == []
         #return bioghist unless bioghist == []
         #return dao_desc unless dao_desc == []
         #return note unless note == []
-        return []
+        #return []
         # No concatenation, instead use the order of precedence above
         # return abstract | scope_content | bioghist | dao_desc | note
-      end
+      #end
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
