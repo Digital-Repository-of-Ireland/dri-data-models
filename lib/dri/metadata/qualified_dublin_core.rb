@@ -15,7 +15,9 @@ module DRI
           t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+            t.description_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.language(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
           t.subject(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
@@ -23,7 +25,9 @@ module DRI
           t.subject_lang(:proxy=>[:subject, :subject_lang])
           t.date(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable]) {
+            t.source_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.coverage(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.coverage_lang(:path=>{:attribute=> "xml:lang"})
@@ -48,6 +52,9 @@ module DRI
           }
           t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.name_coverage(:path => "dpc", :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+           t.name_coverage_lang(:path=>{:attribute=> "xml:lang"})
+          }
 
           # Generate MARC Relators fields from the MARC Relators vocabulary
           DRI::Vocabulary::marcRelators.each do |role|
@@ -182,7 +189,10 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages("subject")
         faceted_language_indexes.merge! split_array_into_languages("coverage")
         faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
-        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage") 
+        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
+        faceted_language_indexes.merge! split_array_into_languages("description")
+        faceted_language_indexes.merge! split_array_into_languages("source")
+        faceted_language_indexes.merge! split_array_into_languages("name_coverage")
 
         faceted_language_indexes.each do | key, value |
           solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)

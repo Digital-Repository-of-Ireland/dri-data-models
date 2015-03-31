@@ -10,6 +10,7 @@ module DRI
     has_attributes :source, datastream: :descMetadata, multiple: true
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :name_coverage, datastream: :descMetadata, multiple: true
     has_attributes :type, datastream: :descMetadata, multiple: true
     has_attributes :format, datastream: :descMetadata, multiple: true
     has_attributes :coverage, datastream: :descMetadata, multiple: true
