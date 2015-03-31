@@ -14,7 +14,7 @@ module Solr
 
       result = ActiveFedora::SolrService.query(@query, query_args)
 
-      if result['response']['numFound'].to_i < @chunk
+      if result['response']['numFound'].to_i <= @chunk
         @has_more = false
       end
 
