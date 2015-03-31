@@ -48,6 +48,11 @@ module DRI
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :date_text, datastream: :descMetadata, multiple: true
+    has_attributes :temporal_coverage_idx, datastream: :descMetadata, multiple: true
+    has_attributes :creation_date_idx, datastream: :descMetadata, multiple: true
+    has_attributes :published_date_idx, datastream: :descMetadata, multiple: true
+    has_attributes :date_idx, datastream: :descMetadata, multiple: true
 
     # Institute
     has_attributes :institute, datastream: :descMetadata, multiple: true

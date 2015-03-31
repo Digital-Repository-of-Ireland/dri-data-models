@@ -114,6 +114,7 @@ module DRI
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
           result = "DRI::Metadata::Mods"
+          # result = (!xml.xpath("/mods:mods/mods:typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
@@ -122,6 +123,11 @@ module DRI
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
         elsif ['marc'].include? root_name
           result = "DRI::Metadata::Marc"
+        elsif ['mods'].include?(root_name)
+          result = "DRI::Metadata::Mods"
+        #elsif ['modsCollection'].include?(root_name)
+          # Check whether the first record is a collection
+        #  result = (!xml.xpath("/modsCollection/mods[1]/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         end
 
         return result

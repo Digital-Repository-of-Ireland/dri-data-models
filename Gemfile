@@ -20,6 +20,8 @@ gem "sqlite3"
 
 # iso-639 is used to convert between different language codes
 gem 'iso-639'
+# iso8601 is used to fulfil the deficiencies of the standard Date and Datetime native Ruby libraries
+gem 'iso8601'
 #gem 'chronic'
 
 group :development, :test do
