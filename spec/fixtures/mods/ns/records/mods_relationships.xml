@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mods:mods xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+           xmlns:mods="http://www.loc.gov/mods/v3"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 mods-3-5.xsd">
+  <mods:identifier type="local">0103280</mods:identifier>
+  <mods:identifier type="asset">MS11182-1352_1</mods:identifier>
+  <mods:titleInfo type="uniform">
+    <mods:title>Saint Catherine of Siena</mods:title>
+  </mods:titleInfo>
+  <mods:abstract>Preparatory design for stained glass window at the chapel of Saint Mary?s Dominican convent in Dun Laoghaire, Co. Dublin. Saint Catherine of Siena holding lilies and encircled by roses; crown of thorns and lantern at base.
+    Inscriptions: Design notes on right hand side, supplied by Prioress Sister M. Ignatius: ?separate tints. 1-head covering and wimple white linen. 2- Scapular cream. 3-undergarment. Hand turned up a little (not so dead like as in sketch. Sleeve same colour as undergarment. Scapular longer (down to x). Lantern bigger as in Father Heuston sketch. Crown disappears behind lantern.Signature: Bottom right corner: Clarke Studios, Dublin.
+
+    Related to: See IE TCD MS 6056, folio 943 (order no 2363)</mods:abstract>
+  <mods:typeOfResource>still image</mods:typeOfResource>
+  <mods:physicalDescription>
+    <mods:extent>38.1x20.1</mods:extent>
+    <mods:form type="material">cardboard</mods:form>
+    <mods:form type="material">watercolor (paint)</mods:form>
+    <mods:form type="material">gouache (paint)</mods:form>
+    <mods:form type="material">pens (drawing and writing)</mods:form>
+    <mods:form type="material">pencils (drawing and writing equipment)</mods:form>
+    <mods:form type="material">ink</mods:form>
+  </mods:physicalDescription>
+  <mods:accessCondition>
+    <copyrightMD:copyright>
+      <copyrightMD:general.note>Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</copyrightMD:general.note>
+    </copyrightMD:copyright>
+  </mods:accessCondition>
+  <mods:subject authority="lcsh">
+    <mods:topic>Irish</mods:topic>
+    <mods:topic>Christian saints</mods:topic>
+    <mods:topic>Women saints</mods:topic>
+    <mods:topic>Drawings, Irish</mods:topic>
+    <mods:topic>Crown of thorns</mods:topic>
+    <mods:topic>Lanterns</mods:topic>
+    <mods:topic>Roses</mods:topic>
+    <mods:topic>Dublin (Ireland : County)</mods:topic>
+  </mods:subject>
+  <mods:relatedItem type="host">
+    <mods:identifier type="local">0114314</mods:identifier>
+    <mods:titleInfo type="uniform">
+      <mods:title>Clarke Stained Glass Studios Collection</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
+  <mods:relatedItem type="host">
+    <mods:identifier type="local">0114321</mods:identifier>
+    <mods:titleInfo type="uniform">
+      <mods:title>Clarke Studios: Designs &amp; Plans</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
+  <mods:originInfo>
+    <mods:dateIssued encoding="w3cdtf">19510604</mods:dateIssued>
+  </mods:originInfo>
+  <mods:name authority="local" type="personal">
+    <mods:namePart>Harry Clarke Stained Glass Ltd. (Irish stained glass firm,1930-1973)</mods:namePart>
+    <mods:role>
+      <mods:roleTerm authority="marcrelator" type="code">cre</mods:roleTerm>
+      <mods:roleTerm authority="marcrelator" type="text">Creator</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <mods:name authority="local" type="personal">
+    <mods:namePart>Dowling, Willliam J., 1907-1980</mods:namePart>
+    <mods:role>
+      <mods:roleTerm authority="marcrelator" type="code">art</mods:roleTerm>
+      <mods:roleTerm authority="marcrelator" type="text">Artist</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <mods:name authority="local" type="personal">
+    <mods:namePart>Ignatius, Sister M., Prioress, Dominican Convent, Dun Laoghaire</mods:namePart>
+    <mods:role>
+      <mods:roleTerm authority="marcrelator" type="code">pat</mods:roleTerm>
+      <mods:roleTerm authority="marcrelator" type="text">Patron</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <mods:classification>IE TCD MS 11182</mods:classification>
+  <mods:identifier type="DRIS_FOLDER">2744</mods:identifier>
+  <mods:note type="acquisition">Acquired by Trinity College Library from David Clarke, October 2002</mods:note>
+  <mods:genre authority="aat">drawings (visual works)</mods:genre>
+  <mods:subject>
+    <mods:name authority="naf">
+      <mods:namePart>Catherine, of Siena, Saint, 1347-1380</mods:namePart>
+    </mods:name>
+  </mods:subject>
+  <mods:subject authority="local">
+    <mods:topic>watercolour (paint)</mods:topic>
+    <mods:topic>Dun Laoghaire, Co. Dublin: Dominican Convent of St. Mary?s</mods:topic>
+    <mods:topic/>
+  </mods:subject>
+  <mods:genre authority="gmgpc">Drawings</mods:genre>
+  <mods:relatedItem type="references">
+    <mods:location>
+      <mods:url displayLabel="Sample reference for this collection">http://example.org/mods-collection/</mods:url>
+    </mods:location>
+  </mods:relatedItem>
+</mods:mods>

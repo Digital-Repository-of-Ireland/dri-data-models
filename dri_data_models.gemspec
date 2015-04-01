@@ -27,4 +27,5 @@ Gem::Specification.new do |s|
   s.add_dependency "hydra-collections"
   s.add_dependency "iso-639"
   s.add_dependency "sufia-models", ">= 6.0.0.rc4"
+  s.add_dependency "iso8601"
 end

@@ -42,7 +42,8 @@ module DRI
         t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"] | //record/datafield[@tag="740"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
         t.subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="650" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         t.contributor(:path => 'record/datafield[@tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
+        # TODO Add mapping to Source
+        t.source(:path => 'record/datafield[@tag="830" or @tag="490"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # marc fields
         t.leader(:proxy => [:record, :leader])
 

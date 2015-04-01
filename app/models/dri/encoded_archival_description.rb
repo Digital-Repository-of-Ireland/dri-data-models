@@ -48,6 +48,11 @@ module DRI
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :date_text, datastream: :descMetadata, multiple: true
+    has_attributes :temporal_coverage_idx, datastream: :descMetadata, multiple: true
+    has_attributes :creation_date_idx, datastream: :descMetadata, multiple: true
+    has_attributes :published_date_idx, datastream: :descMetadata, multiple: true
+    has_attributes :date_idx, datastream: :descMetadata, multiple: true
 
     # Institute
     has_attributes :institute, datastream: :descMetadata, multiple: true
@@ -89,6 +94,25 @@ module DRI
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
         solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+      end
+      solr_doc
+    end
+
+    # Override from files.rb adding EAD-specific solr additions
+    def file_metadata_to_solr(solr_doc=Hash.new)
+      solr_doc = super(solr_doc)
+
+      file_type = []
+      file_type_display = []
+
+      if is_collection?
+        file_type.push "collection"
+
+        if !is_root_collection? && !ead_level.blank?
+          file_type_display.push ead_level.strip.capitalize
+        else
+          file_type_display.push "Collection"
+        end
       end
       solr_doc
     end

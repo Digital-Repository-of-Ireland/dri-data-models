@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
+  xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd"
+  version="3.5">
+  <!-- identifier will be used for relationships valid URI here -->
+  <mods:identifier type="local">MODS-ID-1234</mods:identifier>
+  <mods:identifier type="uri">http://example.org/collection/2#</mods:identifier>
+  <mods:identifier type="doi">MS11182-030_1</mods:identifier>
+  <!-- The title of the collection -->
+  <mods:titleInfo>
+    <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
+    <!-- Alternative title not allowed in 3.5 <mods:title type="alternative">Saint Agnes of Montepulciano</mods:title> -->
+  </mods:titleInfo>
+  <!-- The description of the collection -->
+  <mods:abstract>This is test abstract for the collection: Saint Agnes of Montepulciano.</mods:abstract>
+  <!-- Second mapping for the description of the collection -->
+  <mods:physicalDescription>
+    <mods:extent>This collection comprises 150 records.</mods:extent>
+  </mods:physicalDescription>
+  <!-- The creator of the collection -->
+  <mods:name type="personal">
+    <mods:namePart>Harry Clarke Stained Glass Ltd. (Irish stained glass firm, 1930-1973)</mods:namePart>
+    <mods:role>
+      <mods:roleTerm authority="marcrelator" type="code">cre</mods:roleTerm>
+      <mods:roleTerm authority="marcrelator" type="text">UNKNOWN</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <!-- The contributor of the collection -->
+  <mods:name type="corporate" authority="naf">
+    <mods:namePart>Clarke family</mods:namePart>
+    <mods:role>
+      <mods:roleTerm authority="marcrelator" type="code">ctb</mods:roleTerm>
+      <mods:roleTerm authority="marcrelator" type="text">contributor</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <!-- The language of the collection, multiple languages -->
+  <mods:language>
+    <mods:languageTerm type="text">English</mods:languageTerm>
+    <mods:languageTerm authority="iso639-2b">en</mods:languageTerm>
+  </mods:language>
+  <!-- The type: Collection -->
+  <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+  <!-- Additional type of the collection: Collection -->
+  <mods:genre type="dct">Collection</mods:genre>
+  <!-- The Rights of the collection -->
+  <mods:accessCondition>
+    <copyrightMD:copyright copyright.status="copyrighted">
+      <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
+      <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
+    </copyrightMD:copyright>
+  </mods:accessCondition>
+  <!-- The subjects of the collection -->
+  <mods:subject>
+    <mods:topic>This is a general topic for the collection</mods:topic>
+  </mods:subject>
+  <mods:subject>
+    <mods:geographic></mods:geographic>
+  </mods:subject>
+  <mods:subject>
+    <mods:temporal encoding="w3cdtf" point="start">1980</mods:temporal>
+    <mods:temporal encoding="w3cdtf" point="end">1990</mods:temporal>
+  </mods:subject>
+  <!-- Creation date, Published date -->
+  <mods:originInfo>
+    <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+    <mods:dateIssued encoding="w3cdtf">2000</mods:dateIssued>
+    <mods:publisher>UNKNOWN</mods:publisher>
+  </mods:originInfo>
+  <!-- hasPart: expressing sub-collections, use relatedItem[@type="constituent"] -->
+  <mods:relatedItem type="constituent">
+    <mods:identifier type="local">http://example.org/image/2#</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>This is the title of the first sub-collection.</mods:title>
+    </mods:titleInfo>
+    <mods:typeOfResource>still image</mods:typeOfResource>
+  </mods:relatedItem>
+  <mods:relatedItem type="constituent">
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>This is the title of the first sub-collection.</mods:title>
+    </mods:titleInfo>
+    <mods:typeOfResource>still image</mods:typeOfResource>
+  </mods:relatedItem>
+</mods:mods>

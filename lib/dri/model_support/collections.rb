@@ -10,10 +10,11 @@ module DRI
         has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection
 
         # Two relationships below are used to manage a collection's structure
+        # (!) ONLY FOR COLLECTIONS
+        belongs_to :parent_collection, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
         has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :items, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
 
-        # Additional relationships to keep track of sibling order, important for EAD and similar standards (e.g. MODS)
+        # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
         belongs_to :next_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
 
@@ -61,7 +62,7 @@ module DRI
         ancestor_ids = []
 
         curr_gov_collection = governing_collection
-        # TODO - Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
+        # TODO - Issue XXX Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
         while (curr_gov_collection != nil)
           ancestor_titles << curr_gov_collection.title[0]
           ancestor_ids << curr_gov_collection.id

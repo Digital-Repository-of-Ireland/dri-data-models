@@ -2,8 +2,13 @@ module DRI
   module Metadata
     module Transformations
       #require 'chronic'
+      require 'iso8601'
 
-	  # A function to convert an array of names that conform to archiving formatting standards into human-readable names
+      CREATION_DATE_RANGE_SOLR_FIELD = "cdateRange"
+      PUBLISHED_DATE_RANGE_SOLR_FIELD = "pdateRange"
+      SUBJECT_DATE_RANGE_SOLR_FIELD = "sdateRange"
+
+	    # A function to convert an array of names that conform to archiving formatting standards into human-readable names
       # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
       # "Valera, Éamon, de" is "Éamon de Valera"
       def self.transform_name(names=Array.new)
@@ -81,18 +86,137 @@ module DRI
         return title_string
       end
 
+      #---------------------------------------------------------------------------------------------------------------
+      # Date, Time transformations for indexing
+      #---------------------------------------------------------------------------------------------------------------
 
-      # Split date ranges into seperate _start and _end SOLR indexes
+      # Parse dates sourced from the metadata into properly formatted date ranges for indexing into Solr
+      # @param[Hash] dates hash containing all the dates values from the metadata
+      # @return Array of formatted dates for indexing (start_date end_date)
+      #
+      def self.transform_date_ranges(dates={})
+        results = []
+        dates.each do | key, value |
+          value.each do | date_string |
+            range = get_date_range date_string
+            if range.has_key?('start') && range.has_key?('end')
+              results << "#{range['start']} #{range['end']}"
+            elsif range.has_key?('start')
+              results << "#{range['start']} #{range['start']}"
+            end
+          end
+        end
+        return results
+      end
+
+      # Parse a date string into an appropriate format for indexing
+      # It supports parsing of DCMI Point encoded string as well as ISO8601 string-encoded dates
+      # If the date is not in a valid format it will be ignored
+      # @param[String]
+      # @return Hash hash containing start and date fields, with their values
+      def self.get_date_range value
+        return {} if value.nil?
+
+        range = Hash.new
+
+        # DCMI Point?
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+          begin
+            if k.eql?('start')
+              range['start'] = ISO8601::DateTime.new(v).year
+            elsif k.eql?('end')
+              range['end'] = ISO8601::DateTime.new(v).year
+            end
+          rescue ISO8601::Errors::UnknownPattern => e
+            Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601!!")
+            return {}
+          end
+        end
+
+        if !range.empty?
+          if range.has_key?('start') && !range.has_key?('end')
+            range['end'] = range['start'] # date_end = date_start
+          end
+        else
+          # Is it a ISO8601 date range (start/end)?
+          date_array = transform_date value
+          unless (date_array.empty?)
+            range['start'] = date_array[0]
+            range['end'] = date_array[1]
+          end
+        end
+
+        return range
+      end
+
+      def self.transform_date(val="")
+        dates = []
+        if (val.include?("/"))
+          range = val.split("/")
+          dates = range.collect!.each do |dat|
+            begin
+              unless dat.include?('/')
+                ISO8601::DateTime.new(dat).year
+              end
+            rescue ISO8601::Errors::UnknownPattern => e
+              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601!!")
+              return []
+            end
+          end
+        else
+          begin
+            # Single date, therefore end date = start date (for correct date range indexing)
+            dates[0] = dates[1] = ISO8601::DateTime.new(val).year
+          rescue ISO8601::Errors::UnknownPattern => e
+            Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601!!")
+            return []
+          end
+        end
+
+        dates
+      end # transform_date
+
+      def self.iso8601?(value)
+        begin
+          if value.is_a?(Date) || value.is_a?(Time)
+            ISO8601::DateTime.new(value.to_s)
+          elsif !value.empty?
+            ISO8601::DateTime.new(value)
+          end
+          return true
+        rescue ISO8601::Errors::UnknownPattern => e
+          Rails.logger.error("Unable to parse `#{value}' as a date-time object")
+          return false
+        end
+      end
+
+      def self.dcmi_point?(value)
+        result = false
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+
+          if k.eql?('name') || k.eql?('start') || k.eql?('end') || k.eql?('scheme')
+            result = true
+          end
+        end
+        return result
+      end
+
+      def self.create_dcmi_point(name, sdate="", edate="", scheme="")
+        return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
+      end
+      # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and
       # will have to be updated.
       #def self.transform_date_ranges(dates={})
 
-     # 	results = Hash.new
-#
+      # 	results = Hash.new
+      #
       #	dates.each do | key, value |
-     # 		start = []
-     # 		finish = []
+      # 		start = []
+      # 		finish = []
 
       #		value.each do | date_string |
       #			range = date_string.split("/")
@@ -112,7 +236,7 @@ module DRI
       #					end
       #				else
       #					parsed_start = Chronic.parse(range[0], :guess => false, :context => "past")
-      #					parsed_fnish = Chronic.parse(range[1], :guess => false, :context => "past")
+      #					parsed_finish = Chronic.parse(range[1], :guess => false, :context => "past")
 
       #					if parsed_start.kind_of? Chronic::Span
       #						curr_start = parsed_start.begin

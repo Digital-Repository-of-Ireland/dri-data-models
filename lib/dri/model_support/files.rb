@@ -95,12 +95,11 @@ module DRI
 
         if is_collection?
           file_type.push "collection"
-
-          if !is_root_collection? && !ead_level.blank?
-            file_type_display.push ead_level.strip.capitalize
-          else
-            file_type_display.push "Collection"
-          end
+          # Moved to EAD Class - this is only EAD specific
+          #if !is_root_collection? && !ead_level.blank?
+          #  file_type_display.push ead_level.strip.capitalize
+          #else
+          file_type_display.push "Collection"
         end
 
         # TODO - AMG check generic_file to batch rel is indexed properly

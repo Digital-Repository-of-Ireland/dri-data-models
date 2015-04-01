@@ -15,7 +15,9 @@ module DRI
           t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+            t.description_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.language(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
           t.subject(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
@@ -23,18 +25,21 @@ module DRI
           t.subject_lang(:proxy=>[:subject, :subject_lang])
           t.date(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable]) {
+            t.source_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.publisher(:path=>"publisher", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.coverage(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.relation(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.external_relation(:path=>"relation", :namespace_prefix=>"dc", :attributes => {"xsi:type"=>"dcterms:URI"}, :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
           t.creator(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
           t.format(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.type(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-          # No need to index, but useful for editing
           t.identifier(:namespace_prefix=>"dc")
+          t.qdc_id(:ref => :identifier, :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Qualified Dublin Core fields
           t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -47,12 +52,29 @@ module DRI
           }
           t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.geocode_box(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Box"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.name_coverage(:path => "dpc", :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+           t.name_coverage_lang(:path=>{:attribute=> "xml:lang"})
+          }
 
           # Generate MARC Relators fields from the MARC Relators vocabulary
           DRI::Vocabulary::marcRelators.each do |role|
             t.send "role_"+role, :path=>role, :namespace_prefix=>"marcrel", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
           end
 
+          # Relationships for QDC
+          DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
+            t.send "relation_ids_" + rel,
+                   :path=>rel,
+                   :namespace_prefix => "dcterms"
+          end
+
+          # External relationships (contain uri to a resource external to DRI)
+          DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
+            t.send "ext_related_items_ids_" + rel,
+                   :path=>rel,
+                   :attributes=>{"xsi:type" => "dcterms:URI"},
+                   :namespace_prefix => "dcterms"
+          end
         end
 
       end
@@ -62,7 +84,7 @@ module DRI
       end
 
       def metadata_path field
-          recognised_attributes = [ :title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
+          recognised_attributes = [:title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
                                     :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
                                     :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
                                     :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
@@ -166,12 +188,33 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages("subject")
         faceted_language_indexes.merge! split_array_into_languages("coverage")
         faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
-        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage") 
+        faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
+        faceted_language_indexes.merge! split_array_into_languages("description")
+        faceted_language_indexes.merge! split_array_into_languages("source")
+        faceted_language_indexes.merge! split_array_into_languages("name_coverage")
 
         faceted_language_indexes.each do | key, value |
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :text) => value)
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :facetable, type: :text) => value)
         end
+
+        # Indices for external relationships (to be displayed as URL)
+        external_rels = *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
+
+        external_rels.each do |elem|
+          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
+        end
+
+
+        # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
+        cdate_ranges = Transformations.transform_date_ranges({ "creation_date" => creation_date})
+        pdate_ranges = Transformations.transform_date_ranges({ "published_date" => published_date})
+        sdate_ranges = Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
+
+        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
+        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
+        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
+
 
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
@@ -234,6 +277,7 @@ module DRI
       def custom_validations
         errors = Hash.new
 
+        uri_result = true
         title_result = false
         description_result = false
         rights_result = false
@@ -272,8 +316,14 @@ module DRI
           end
         end
 
+        # Check that for external relationships terms, the specified URIs are valid
+        external_relation.each do |uri_r|
+          uri_result = false unless (!uri_r.blank? && Utils.valid_uri?(uri_r))
+        end
+
         errors[:title] = "can't be blank" if title_result == false
         errors[:description] = "can't be blank" if description_result == false
+        errors[:external_relation] = "Includes invalid URI" if uri_result == false
         errors[:rights] = "can't be blank" if rights_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:date] = "can't be blank" if date_result == false

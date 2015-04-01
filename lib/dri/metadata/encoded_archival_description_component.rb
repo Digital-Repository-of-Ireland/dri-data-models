@@ -21,6 +21,8 @@ module DRI
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
         }
 
+        t.date_text(:ref => [:date], :attributes => {"normal" => :none})
+
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
           t.other(:path => {:attribute=>"otherlevel"}, :namespace_prefix => nil)
@@ -151,7 +153,7 @@ module DRI
         # Userestrict / Licence
         t.licence(:proxy => [:c, :userestrict, :p], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
         # Creation Date, now with generic xpath query: @datechar="creation" is now case-insensitive
-        t.creation_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.creation_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and not(@normal)]')
 
         # DRI Common fields
         # Language
@@ -160,7 +162,7 @@ module DRI
         t.publisher(:proxy => [:c, :did, :repository], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Published Date
         # TODO Add published_date field to the terminology. What's the mapped EAD term?
-        t.published_date(:ref => [:creation_date], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.published_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")] and not(@normal)]')
         # Subject
         t.subject(:proxy => [:c, :controlaccess, :subject_c], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Contributor
@@ -187,7 +189,7 @@ module DRI
         t.corpname_coverage(:proxy => [:c, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:c, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Generic xpath query: @datechar="creation" is now case-insensitive
-        t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation"))]]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and not(@normal)]')
 
         t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.type(:proxy => [:c, :did, :physdesc, :type], :index_as=>[:stored_searchable])
@@ -212,6 +214,15 @@ module DRI
         t.related_material(:proxy => [:c, :related_material, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Alternative Form Available
         t.alternative_form(:proxy => [:c, :alternative_form, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
+        t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')
+        t.published_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")]]/@normal')
+        t.published_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")] and @normal]')
+        t.temporal_coverage_idx(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
+        t.temporal_coverage_idx_d(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and @normal]')
+        t.date_idx(:proxy => [:date, :normal])
+        t.date_idx_d(:path => "date[@normal]")
 
       end # set_terminology
 
@@ -255,7 +266,7 @@ module DRI
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
           if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
@@ -307,7 +318,7 @@ module DRI
 
         subject_name_array = subject_name_for_index()
         subject_place_array = subject_place_for_index()
-        subject_temporal_array = subject_temporal_for_index()
+        #subject_temporal_array = subject_temporal_for_index()
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :stored_searchable) => subject_name_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :facetable) => subject_name_array)
@@ -315,21 +326,22 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
-        # Creation date
-        creation_date_array = creation_date_for_index
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_array)
-        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creation_date", :stored_searchable)].present?
+        # Display of Creation Date
+        creation_date_array = creation_date_for_index()
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array == []
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
 
         # Language
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('language', :stored_searchable) => language)
 
         # Geographical Coverage
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
+
         # Temporal Coverage
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
+        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
 
         # Institute and sponsor/Depositing Institute: archdesc/did/repository
         institute_array = institute_for_index
@@ -338,6 +350,41 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
         # depositing_institute_ssm - the dri_app looks for this type of indexed field at object-level display
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
+
+        # Indexing dates for display + COOL date range
+        # Display of Subject(Temporal)
+        subject_temporal_array = subject_temporal_for_index()
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+
+        # Creation_date_idx field is necessary for inheriting the date from the parent if not present
+        if (creation_date_idx != [])
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
+        else
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent("creation_date_idx"))
+        end
+        # Display of Creation Date
+        unless published_date_idx == [] && published_date == []
+          pdate_array = published_date.collect! do |value|
+            DRI::Metadata::Transformations.create_dcmi_point(value)
+          end
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date_idx, published_date_idx_d) | pdate_array)
+        end
+        # Index date ranges
+        date_ranges = date_ranges_for_index() # ALL the date ranges
+
+        # Creation date dateRange index
+        cdate_ranges = date_ranges.select {|key, value| ["creation_date"].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+
+        # Published date dateRange index
+        pdate_ranges = date_ranges.select {|key, value| ["published_date"].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
+
+        # Subject date dateRange index
+        sdate_ranges = date_ranges.select {|key, value| ["subject_date"].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
+
 
         solr_doc
       end #to_solr
@@ -384,11 +431,14 @@ module DRI
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
       def creation_date_for_index
-        if (creation_date != [])
-          return creation_date
+        if (creation_date_idx != [] || creation_date != [])
+          cdate_array = creation_date.collect! do |value|
+            DRI::Metadata::Transformations.create_dcmi_point(value)
+          end
+          return display_date_for_index(creation_date_idx, creation_date_idx_d) | cdate_array
         else
           # Inherit the information
-          get_field_from_parent("creation_date")
+          return get_field_from_parent("creation_date")
         end
       end
 
@@ -449,7 +499,60 @@ module DRI
 
       # These are DRI Subject(Place)
       def subject_temporal_for_index()
-        return temporal_coverage | date
+        dtext_array = date_text.collect! do |value|
+          DRI::Metadata::Transformations.create_dcmi_point(value)
+        end
+        tcoverage_array = temporal_coverage.collect! do |value|
+          DRI::Metadata::Transformations.create_dcmi_point(value)
+        end
+        return display_date_for_index(temporal_coverage_idx, temporal_coverage_idx_d) |
+            display_date_for_index(date_idx, date_idx_d) |
+            tcoverage_array |
+            dtext_array
+      end
+
+      # Return all date ranges formatted in the right format for indexing and single dates
+      # Format: start_date/end_date (ISO8601)
+      # @return Hash with all the dates present in the metadata to be indexed as date ranges
+      def date_ranges_for_index()
+        dates_hash = Hash.new
+
+        dates_hash["creation_date"] = creation_date_idx == [] ? get_field_from_parent("creation_date_idx") : creation_date_idx
+        dates_hash["published_date"] = published_date_idx
+        dates_hash["subject_date"] = temporal_coverage_idx | date_idx
+
+        return dates_hash
+      end
+
+      def display_date_for_index(date_field=[], date_field_d=[])
+        date_field.collect!.with_index do |value, idx|
+          begin
+            # Date range in ISO8601 format: YYYYmmdd/YYYYmmdd
+            if (value.include?('/'))
+              range = value.split("/")
+              sdate = ISO8601::DateTime.new(range[0]).strftime("%b %d, %Y") #start date
+              edate = ISO8601::DateTime.new(range[1]).strftime("%b %d, %Y") #end date
+              if idx <= (date_field_d.length - 1)
+                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], range[0], range[1])
+              else
+                DRI::Metadata::Transformations.create_dcmi_point(sdate << ' - ' << edate, range[0], range[1])
+              end
+            else
+              if idx <= (date_field_d.length - 1)
+                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], value)
+              else
+                sdate = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
+                DRI::Metadata::Transformations.create_dcmi_point(sdate, value)
+              end
+            end
+          rescue ISO8601::Errors::UnknownPattern => e
+            if idx <= (date_field_d.length - 1)
+              DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx]) # DCMI Period 'name' is the md value
+            else
+              DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+            end
+          end
+        end
       end
 
       # Mapping to UI subjects: //c/archdesc/@level or type
@@ -482,8 +585,10 @@ module DRI
           # FIXME Check the mapping for publisher, for components!
           when :publisher
             [:c, :did, :repository]
-          when :creation_date, :published_date
+          when :creation_date
             [:creation_date]
+          when :published_date
+            [:published_date]
           when :subject
             [:c, :control_access, :subject_c]
           when :subject_archdesc

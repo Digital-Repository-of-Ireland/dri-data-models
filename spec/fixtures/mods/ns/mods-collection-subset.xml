@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:modsCollection xmlns:mods="http://www.loc.gov/mods/v3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+  xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:mods version="3.5">
+    <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
+    <mods:titleInfo type="uniform" authority="dlfaqcoll">
+      <mods:title>A Celebration of Women Writers: Americana</mods:title>
+    </mods:titleInfo>
+    <mods:abstract>A Celebration of Women Writers recognizes the contributions of women writers throughout history. The goal is to promote awareness of the breadth and variety of women's writing by providing easy access to available on-line information. The repository provides a comprehensive listing of links to biographical and bibliographical information about women writers, and complete published books written by women.</mods:abstract>
+    <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+    <mods:genre type="dct">Collection</mods:genre>
+    <mods:physicalDescription>
+      <mods:extent>249 records</mods:extent>
+    </mods:physicalDescription>
+    <mods:name type="personal">
+      <mods:namePart>Mark Ockerbloom, Mary, 1961-</mods:namePart>
+      <mods:role>
+        <mods:roleTerm type="code" authority="marcrelator">cre</mods:roleTerm>
+        <mods:roleTerm type="text" authority="marcrelator">Creator</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <mods:originInfo>
+      <mods:dateCreated encoding="w3cdtf">1961</mods:dateCreated>
+    </mods:originInfo>
+    <mods:language>
+      <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+    </mods:language>
+    <mods:accessCondition>
+      <copyrightMD:copyright copyright.status="copyrighted">Mary Mark Ockerbloom</copyrightMD:copyright>
+      <copyrightMD:general.note>The Celebration of Women Writers listing is copyrighted.</copyrightMD:general.note>
+    </mods:accessCondition>
+    <mods:subject authority="lcsh">
+      <mods:topic>Language Arts. Literature</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Children's literature--Women authors</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Fiction--Women authors</mods:topic>
+    </mods:subject>
+    <mods:relatedItem type="constituent">
+      <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>Subcollection 1</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+  </mods:mods>
+  <mods:mods>
+    <!-- identifier will be used for relationships valid URI here -->
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+    <!-- The title of the collection -->
+    <mods:titleInfo>
+      <mods:title>Subcollection 1</mods:title>
+      <!-- Alternative title not allowed in 3.5 <mods:title type="alternative">Saint Agnes of Montepulciano</mods:title> -->
+    </mods:titleInfo>
+    <!-- The description of the collection -->
+    <mods:abstract>This is test abstract for the subcollection: 1</mods:abstract>
+    <!-- The creator of the collection -->
+    <mods:name type="personal">
+      <mods:namePart>AMG</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">cre</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">UNKNOWN</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The contributor of the collection -->
+    <mods:name type="corporate" authority="naf">
+      <mods:namePart>AMG</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">ctb</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">contributor</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The language of the collection, multiple languages -->
+    <mods:language>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+      <mods:languageTerm authority="iso639-2b">en</mods:languageTerm>
+    </mods:language>
+    <!-- The type: Collection -->
+    <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+    <!-- Additional type of the collection: Collection -->
+    <mods:genre type="dct">Collection</mods:genre>
+    <!-- The Rights of the collection -->
+    <mods:accessCondition>
+      <copyrightMD:copyright copyright.status="copyrighted">
+        <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
+        <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
+      </copyrightMD:copyright>
+    </mods:accessCondition>
+    <!-- The subjects of the collection -->
+    <mods:subject>
+      <mods:topic></mods:topic>
+    </mods:subject>
+    <mods:subject>
+      <mods:geographic></mods:geographic>
+    </mods:subject>
+    <mods:subject>
+      <mods:temporal></mods:temporal>
+    </mods:subject>
+    <!-- Creation date, Published date -->
+    <mods:originInfo>
+      <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+    </mods:originInfo>
+    <mods:relatedItem type="host">
+      <mods:identifier type="uri">http://digital.library.upenn.edu/women/</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>A Celebration of Women Writers: Americana</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+  </mods:mods>
+  <mods:mods>
+    <mods:identifier type="local">http://example.org/gettysburg#</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative</mods:title>
+    </mods:titleInfo>
+    <mods:abstract>TEST ABSTRACT</mods:abstract>
+    <mods:name type="personal">
+      <mods:namePart>Alleman, Tillie Pierce [1848-1914]</mods:namePart>
+      <mods:role>
+        <mods:roleTerm type="code" authority="marcrelator">aut</mods:roleTerm>
+        <mods:roleTerm type="text" authority="marcrelator">Author</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <mods:typeOfResource>text</mods:typeOfResource>
+    <mods:genre type="dct">Text</mods:genre>
+    <mods:originInfo>
+      <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+      <mods:place>
+        <mods:placeTerm type="text">New York</mods:placeTerm>
+      </mods:place>
+      <mods:publisher>W. Lake Borland</mods:publisher>
+      <mods:dateIssued keyDate="yes" encoding="w3cdtf">1889</mods:dateIssued>
+    </mods:originInfo>
+    <mods:language>
+      <mods:languageTerm authority="iso639-2b">eng</mods:languageTerm>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+    </mods:language>
+    <mods:physicalDescription>
+      <mods:internetMediaType>text/html</mods:internetMediaType>
+      <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+    </mods:physicalDescription>
+    <mods:subject authority="lcsh">
+      <mods:topic >Gettysburg, Battle of, Gettysburg, Pa., 1863</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Gettysburg (Pa.) -- History -- Civil War, 1861-1865</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>United States -- History -- Civil War, 1861-1865 -- Campaigns</mods:topic>
+    </mods:subject>
+    <mods:classification authority="lcc">E475.53 .A42</mods:classification>
+    <mods:location>
+      <mods:url usage="primary display" access="object in context">http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html</mods:url>
+    </mods:location>
+    <mods:accessCondition> Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.
+    </mods:accessCondition>
+    <mods:recordInfo>
+      <mods:recordContentSource>University of Pennsylvania Digital Library</mods:recordContentSource>
+      <mods:recordOrigin> MODS auto-converted from a simple Online Books Page metadata record. For details, see http://onlinebooks.library.upenn.edu/mods.html </mods:recordOrigin>
+      <mods:languageOfCataloging>
+        <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
+      </mods:languageOfCataloging>
+    </mods:recordInfo>
+    <mods:relatedItem type="isReferencedBy">
+      <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>A Celebration of Women Writers: Americana</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+  </mods:mods>
+</mods:modsCollection>
