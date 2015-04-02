@@ -153,7 +153,7 @@ module DRI
       end
 
       # merge in special facets (e.g. person) into solr document
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
         solr_doc = remove_null_values(solr_doc, "date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("date", :stored_searchable)].present?

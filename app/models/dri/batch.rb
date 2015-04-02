@@ -59,7 +59,7 @@ module DRI
     end
 
     def to_solr(solr_doc=Hash.new, opts={})
-      solr_doc = super(solr_doc, opts)
+      solr_doc = super(solr_doc)
 
       solr_doc.merge!collections_to_solr
       solr_doc.merge!object_types_to_solr
