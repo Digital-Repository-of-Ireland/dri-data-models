@@ -145,12 +145,13 @@ module DRI
     end
 
     # Iterate over every collection's object and process relationships
-    #
+    # Recursive: if object is collection then process collection relationships
+    # Once all the current object's children's rels have been process then process the current rels
     def process_collection_relationships
-      if self.is_root_collection?
+      if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -162,14 +163,16 @@ module DRI
             begin
               Sufia.queue.push(CreateModsRelationshipsJob.new(object.pid))
             rescue Exception => e
-              logger.error(e.message)
+              Rails.logger.error(e.message)
             end
           end
         end
+        # Once we've processed all the children, then process this object
+        process_relationships()
       else
         # Only process the object's relationships
-        Sufia.queue.push(CreateModsRelationshipsJob.new(self.pid))
-        # logger.error("The object #{self.pid} is not a collection container.")
+        process_relationships()
+        # Rails.logger.error("The object #{self.pid} is not a collection container.")
       end
     end # end add_relationships
 
@@ -188,11 +191,10 @@ module DRI
     end
 
     # Process a specific mods relationship for the object
-    # @return true if successful; false otherwise
     #
     def add_dm_relationship(rels_array, rels_name)
       if rels_array.empty?
-        return true
+        return
       end
 
       # Get Root collection
@@ -201,8 +203,8 @@ module DRI
       solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if (solr_docs == nil || solr_docs == [])
-        logger.error("Solr document for object with PID #{self.pid} not found in Solr")
-        return false
+        Rails.logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+        return
       end
 
       doc = SolrDocument.new(solr_docs[0])
@@ -210,18 +212,18 @@ module DRI
 
       if (root_collection == nil)
         logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
-        return false
+        return
       end
 
       rels_array.each do |item_id|
+        # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\" "+
-            "AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\""
+        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
-          logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
-          return false
+          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
         else
           doc = SolrDocument.new(mods_item[0])
           # Cast the solr document to its corresponding Fedora object
@@ -229,7 +231,6 @@ module DRI
           unless mods_obj == nil
             if (rels_name.equal?(:constituents))
               mods_obj.send("#{:host}=", self)
-              mods_obj.save if mods_obj.valid?
             elsif rels_name.equal?(:host)
               self.send("#{rels_name}=", mods_obj)
               self.governing_collection = mods_obj
@@ -240,16 +241,12 @@ module DRI
                 self.send("#{rels_name}=", mods_obj)
               end
             end
+
+            mods_obj.save if mods_obj.valid?
+            # Save object, if valid
+            self.save if self.valid?
           end
         end
-      end
-
-      # Save object, if valid
-      if self.valid?
-        self.save
-        return true
-      else
-        return false
       end
     end # end add_mods_relationship
 

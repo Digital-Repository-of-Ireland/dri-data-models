@@ -14,13 +14,14 @@ module Solr
 
       result = ActiveFedora::SolrService.query(@query, query_args)
 
-      if result['response']['numFound'].to_i <= @chunk
+      result_docs = result['response']['docs']
+
+      nextCursorMark = result['nextCursorMark']
+      if @cursor_mark == nextCursorMark
         @has_more = false
       end
 
-      result_docs = result['response']['docs']
-
-      @cursor_mark = result['response']['nextCursorMark']
+      @cursor_mark = nextCursorMark
 
       result_docs
     end

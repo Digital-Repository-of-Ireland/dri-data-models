@@ -12,9 +12,12 @@ module DRI
           t.root(:path=>"*") # Selects the root node of the XML document
 
           # Simple Dublin Core Fields
-          t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
-          t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.title(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]){
+            t.title_lang(:path=>{:attribute=> "xml:lang"})
+          }
+          t.rights(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]){
+            t.rights_lang(:path=>{:attribute=> "xml:lang"})
+          }
           t.description(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.description_lang(:path=>{:attribute=> "xml:lang"})
           }
@@ -23,7 +26,7 @@ module DRI
             t.subject_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.subject_lang(:proxy=>[:subject, :subject_lang])
-          t.date(:namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.date(:namespace_prefix=>"dc")
           t.contributor(:path=>"contributor", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
           t.source(:path=>"source", :namespace_prefix=>"dc", :index_as=>[Descriptors.cleaned_displayable, Descriptors.cleaned_facetable]) {
             t.source_lang(:path=>{:attribute=> "xml:lang"})
@@ -42,12 +45,12 @@ module DRI
           t.qdc_id(:ref => :identifier, :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Qualified Dublin Core fields
-          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.published_date(:path=>"issued", :namespace_prefix=>"dcterms")
+          t.creation_date(:path=>"created", :namespace_prefix=>"dcterms")
           t.geographical_coverage(:path=>"spatial", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])  {
             t.geographical_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
-          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
+          t.temporal_coverage(:path=>"temporal", :namespace_prefix=>"dcterms") {
             t.temporal_coverage_lang(:path=>{:attribute=> "xml:lang"})
           }
           t.geocode_point(:ref=>:geographical_coverage, :attributes=> {"xsi:type"=>"dcterms:Point"}, :index_as=> [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -64,7 +67,7 @@ module DRI
           # Relationships for QDC
           DRI::Vocabulary::qdcRelationshipTypes.each do |rel|
             t.send "relation_ids_" + rel,
-                   :path=>rel,
+                   :path=>"#{rel}[not(@xsi:type='dcterms:URI')]",
                    :namespace_prefix => "dcterms"
           end
 
@@ -157,6 +160,12 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         solr_doc = super(solr_doc)
 
+        # Index dates here, for display
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
+        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
+        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
+
         solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[Solrizer.solr_name("published_date", :stored_searchable)].present?
@@ -186,6 +195,8 @@ module DRI
 
         # Split facets into different languages based on xml:lang
         faceted_language_indexes = Hash.new
+        faceted_language_indexes.merge! split_array_into_languages("title")
+        faceted_language_indexes.merge! split_array_into_languages("rights")
         faceted_language_indexes.merge! split_array_into_languages("subject")
         faceted_language_indexes.merge! split_array_into_languages("coverage")
         faceted_language_indexes.merge! split_array_into_languages("temporal_coverage")
@@ -222,6 +233,22 @@ module DRI
         #solr_doc.merge!(date_ranges)
 
         solr_doc
+      end
+
+      def display_date_for_index(date_field=[])
+        date_field.collect! do |value|
+          begin
+            if DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
+              value
+            else
+              # Date range in ISO8601 format?
+              sdate = ISO8601::DateTime.new(value).strftime("%Y-%m-%d")
+              DRI::Metadata::Transformations.create_dcmi_point(value, sdate)
+            end
+          rescue ISO8601::Errors::UnknownPattern => e
+            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+          end
+        end
       end
 
       # Some indexes may need to be split up into different languages

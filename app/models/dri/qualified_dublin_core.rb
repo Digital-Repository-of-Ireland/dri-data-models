@@ -74,10 +74,10 @@ module DRI
     # Iterate over every collection's object and process relationships
     #
     def process_collection_relationships
-      if self.is_root_collection?
+      if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -89,14 +89,16 @@ module DRI
             begin
               Sufia.queue.push(CreateQdcRelationshipsJob.new(object.pid))
             rescue Exception => e
-              logger.error(e.message)
+              Rails.logger.error(e.message)
             end
           end
+          # Once we've processed all the children, then process this object
+          process_relationships()
         end
       else
         # Only process the object's relationships
-        Sufia.queue.push(CreateQdcRelationshipsJob.new(self.pid))
-        # Logger.error("The object #{self.pid} is not a collection container.")
+        process_relationships()
+        # Rails.logger.error("The object #{self.pid} is not a collection container.")
       end
     end # end add_relationships
 
@@ -111,41 +113,40 @@ module DRI
       add_dm_relationship(relation_ids_isFormatOf, :format_of)
     end
 
-    # Process a specific mods relationship for the object
-    # @return true if successful; false otherwise
+    # Process a specific qdc relationship for the objectå
     #
     def add_dm_relationship(rels_array, rels_name)
       if rels_array.empty?
-        return true
+        return
       end
 
-      # Get Root collection
+      # Get Root collection of current object.
+      # This is to restrict relationship processing only within the given collection
       solr_query = "id:\"#{pid.to_s}\""
       # The query service returns back a set of Solr Documents, therefore need to be casted later on
       solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if (solr_docs == nil || solr_docs == [])
-        logger.error("Solr document for object with PID #{self.pid} not found in Solr")
-        return false
+        Rails.logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+        return
       end
 
       doc = SolrDocument.new(solr_docs[0])
       root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
-        logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
-        return false
+        Rails.logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+        return
       end
 
       rels_array.each do |item_id|
         # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-        solr_query = "qdc_id_tesim:\"#{item_id.to_s}\" "+
-            "AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query = "qdc_id_tesim:\"#{item_id.to_s}\""
+        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if qdc_item.empty?
-          logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
-          return false
+          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
         else
           doc = SolrDocument.new(qdc_item[0])
           # Cast the solr document to its corresponding Fedora object
@@ -153,7 +154,6 @@ module DRI
           unless qdc_obj == nil
             if (rels_name.equal?(:parts))
               qdc_obj.send("#{:container}=", self)
-              qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
               self.governing_collection = qdc_obj
@@ -164,16 +164,10 @@ module DRI
                 self.send("#{rels_name}=", qdc_obj)
               end
             end
+            qdc_obj.save if qdc_obj.valid?
+            self.save if self.valid?
           end
         end
-      end
-
-      # Save object, if valid
-      if self.valid?
-        self.save
-        return true
-      else
-        return false
       end
     end # end add_dm_relationship
 
