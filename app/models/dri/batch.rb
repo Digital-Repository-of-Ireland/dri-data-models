@@ -89,10 +89,10 @@ module DRI
       if object_types.count < 1
         object_types.push "Unknown"
       end
-      solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
       if rights.empty?
-        solr_doc.merge!(solr_name('rights', :stored_searchable) => ['No rights statement'])
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('rights', :stored_searchable) => ['No rights statement'])
       end
 
       solr_doc
