@@ -58,6 +58,10 @@ module DRI
       return true
     end
 
+    def assert_content_model
+      self.has_model = [self.class.to_s, self.class.superclass.to_s]
+    end
+
     def to_solr(solr_doc=Hash.new, opts={})
       solr_doc = super(solr_doc)
 
