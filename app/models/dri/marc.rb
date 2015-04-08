@@ -34,7 +34,7 @@ class Marc < DRI::Batch
     end
 
     fullMetadata.ng_xml = xml_without_blanks
-    object = split_xml xml_without_blanks
+    object = split_xml xml_without_blanks.remove_namespaces!
     descMetadata.ng_xml = object
 
     return true

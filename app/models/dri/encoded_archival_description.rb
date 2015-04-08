@@ -179,6 +179,8 @@ module DRI
       else
         xml = Nokogiri::XML xml_text
       end
+      # Remove namespaces from XML - handle EAD XSD (EAD data model is namespace-free)
+      xml.remove_namespaces!
 
       if (xml_type == "DRI::Metadata::EncodedArchivalDescription")
         xml.xpath("/ead/archdesc/dsc/*").remove

@@ -7,8 +7,8 @@ module DRI
         if self.new_record?
           return
         end
-
-        xml_without_blanks = Nokogiri::XML.parse(self.fullMetadata.ng_xml.to_xml) do |config|
+        xml_no_namespaces = self.fullMetadata.ng_xml.clone
+        xml_without_blanks = Nokogiri::XML.parse(xml_no_namespaces.remove_namespaces!.to_xml) do |config|
           config.noblanks
         end
         collection = xml_without_blanks.search("//collection")
