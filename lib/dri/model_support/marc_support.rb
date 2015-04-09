@@ -8,7 +8,8 @@ module DRI
           return
         end
         xml_no_namespaces = self.fullMetadata.ng_xml.clone
-        xml_without_blanks = Nokogiri::XML.parse(xml_no_namespaces.remove_namespaces!.to_xml) do |config|
+        xml_no_namespaces.remove_namespaces!
+        xml_without_blanks = Nokogiri::XML.parse(xml_no_namespaces.to_xml) do |config|
           config.noblanks
         end
         collection = xml_without_blanks.search("//collection")

@@ -62,7 +62,10 @@ class Marc < DRI::Batch
 
   def create_multiple_records
     yield
-    if !new_record? && self.fullMetadata.ng_xml.search("//record").count > 1
+
+    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
+    full_metadata_no_ns.remove_namespaces!
+    if !new_record? && full_metadata_no_ns.search("//record").count > 1
       begin
         Sufia.queue.push(CreateMarcRecordsJob.new(self.pid))
       rescue Exception => e
