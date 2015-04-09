@@ -182,7 +182,7 @@ describe 'EncodedArchivalDescription' do
   end
 
   it "should handle all variations of the EAD component node" do
-    variations = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12']
+    variations = ['c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'c09', 'c10', 'c11', 'c12']
     variations.each do | curr_node_name |
       file_xml2 = fixture("ead/components/component_file.xml")
       curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml

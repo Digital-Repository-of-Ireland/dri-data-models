@@ -252,6 +252,33 @@ module DRI
         "t" => "Manuscript language material"}
     end
 
+    def self.marcType_leader_6
+      {"a" => "Language material",
+       "c" => "Notated music",
+       "d" => "Manuscript notated music",
+       "e" => "Cartographic material",
+       "f" => "Manuscript cartographic material",
+       "g" => "Projected medium",
+       "i" => "Nonmusical sound recording",
+       "j" => "Musical sound recording",
+       "k" => "Two-dimensional nonprojectable graphic",
+       "m" => "Computer File",
+       "o" => "Kit",
+       "p" => "Mixed materials",
+       "r" => "Three-dimensional artifact or naturally occurring object",
+       "t" => "Manuscript language material"}
+    end
+
+    def self.marcType_leader_7
+      {"a" => "Monographic component part",
+       "b" => "Serial component part",
+       "c" => "Collection",
+       "d" => "Subunit",
+       "i" => "Integrating resource",
+       "m" => "Monograph/Item",
+       "s" => "Serial"}
+    end
+
     # Array [ Decimal Classification Number (R), First Indicator, Second Indicator, Subfield Code ]
     # :code = datafield no, :ind1 = indicator1, :ind2 = indicator2, :sf = subfield
     # Below you shove in any sf except the mandatory fields
@@ -315,15 +342,34 @@ module DRI
       ]
     end
 
-    # FIXME List extracted from NIVAL collection. Look for recommended controlled vocabularies
-    def self.eadRoles
+    # MODS Relationship Types
+    def self.modsRelationshipTypes
       [
-          "publisher",
-          "contributor",
-          "institution",
-          "business",
-          "designer",
-          "photographer"
+        "preceding",
+        "succeeding",
+        "original",
+        "host",
+        "constituent",
+        "series",
+        "otherVersion",
+        "otherFormat",
+        "isReferencedBy",
+        "references",
+        "reviewOf"
+      ]
+    end
+
+    # QDC Relationship Types
+    def self.qdcRelationshipTypes
+      [
+          "relation",
+          "isPartOf",
+          "hasPart",
+          "isReferencedBy",
+          "references",
+          "isVersionOf",
+          "hasVersion",
+          "isFormatOf"
       ]
     end
   end

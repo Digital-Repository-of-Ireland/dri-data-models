@@ -10,6 +10,7 @@ module DRI
     autoload :FileProperties, 'dri/metadata/file_properties'
     autoload :FullMetadata, 'dri/metadata/full_metadata'
     autoload :Mods, 'dri/metadata/mods'
+    autoload :ModsCollection, 'dri/metadata/mods_collection'
     autoload :Properties, 'dri/metadata/properties'
     autoload :Extracted, 'dri/metadata/extracted'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'

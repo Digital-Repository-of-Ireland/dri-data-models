@@ -33,6 +33,15 @@ describe 'Marc' do
     @marc_item.should_not be_valid
   end
 
+  it "should have namespaces removed from the marc datastream" do
+    @marc_item = DRI::Marc.new
+    @item_xml = fixture("marc/sandburg_qualified.xml")
+    @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
+
+    marc_namespace = {"xmlns:marc" => "http://www.loc.gov/MARC21/slim"}
+    expect(@marc_item.descMetadata.ng_xml.namespaces).not_to include(marc_namespace)
+  end
+
   after(:each) do
     unless @marc_item.new_record?
       @marc_item.delete
