@@ -2121,6 +2121,11 @@
           :label: "Source of term"
           :multivalue: NO
           :required: NO
+        "a":
+          :code: "a"
+          :label: "Focus term"
+          :multivalue: YES
+          :required: NO
         "b":
           :code: "b"
           :label: "Non-focus term"
