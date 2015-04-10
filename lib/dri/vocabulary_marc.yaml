@@ -722,6 +722,11 @@
           :label: "Date of publication, distribution, etc"
           :multivalue: YES
           :required: NO
+        "f":
+          :code: "f"
+          :label: "Manufacturer"
+          :multivalue: YES
+          :required: NO
     "264":
       :tag: "264"
       :label: "PRODUCTION, PUBLICATION, DISTRIBUTION, MANUFACTURE STATEMENTS"
