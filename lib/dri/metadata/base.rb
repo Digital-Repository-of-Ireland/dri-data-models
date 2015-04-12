@@ -44,7 +44,7 @@ module DRI
       def remove_null_values solr_doc, field
         [:stored_searchable, :facetable].each do |index_type|
           if solr_doc[Solrizer.solr_name(field, index_type)].present?
-            solr_doc[Solrizer.solr_name(field, index_type)].delete_if{|v| /^null$/i.match(v)}
+            solr_doc[Solrizer.solr_name(field, index_type)].delete_if{|v| /^null$/i.match(v) || (!v.nil? && v.empty?)}
           end
         end
 

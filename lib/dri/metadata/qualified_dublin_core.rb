@@ -166,9 +166,10 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
         solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[Solrizer.solr_name("published_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "temporal_coverage") if solr_doc[Solrizer.solr_name("temporal_coverage", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[Solrizer.solr_name("creator", :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
@@ -219,13 +220,13 @@ module DRI
 
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
-        cdate_ranges = Transformations.transform_date_ranges({ "creation_date" => creation_date})
-        pdate_ranges = Transformations.transform_date_ranges({ "published_date" => published_date})
-        sdate_ranges = Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
+        cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "creation_date" => creation_date})
+        pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "published_date" => published_date})
+        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
 
-        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
-        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
-        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
 
 
         # Split date ranges into separate indexes
@@ -238,7 +239,8 @@ module DRI
       def display_date_for_index(date_field=[])
         date_field.collect! do |value|
           begin
-            if DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
+            if value.empty? || DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
+              # If value.empty? is cleaned afterwards
               value
             else
               # Date range in ISO8601 format?
@@ -260,6 +262,8 @@ module DRI
         end
         
         array_values = send index_name
+        # Remove empty values from the source metadata: e.g. remove <dc:subject/>
+        array_values = array_values.reject(&:empty?)
 
         array_values.each_with_index do |value, i|
           value_lang = send(index_name, i).send(index_name+"_lang")

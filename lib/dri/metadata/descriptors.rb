@@ -57,7 +57,7 @@ module DRI
               if clean_val.downcase == "n/a"
                 "N/A"
               else
-                clean_val
+                !clean_val.empty? ? clean_val : nil
               end
             rescue
               nil
@@ -69,7 +69,7 @@ module DRI
       def standardise_facet(val="")
         clean_val = val.strip
 
-        if clean_val.blank? || clean_val.downcase == "n/a"
+        if clean_val.blank? || clean_val.downcase == "n/a" || clean_val.empty?
           nil
         else
           clean_val.capitalize
