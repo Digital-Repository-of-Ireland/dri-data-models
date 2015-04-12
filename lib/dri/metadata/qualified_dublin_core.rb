@@ -245,7 +245,7 @@ module DRI
               sdate = ISO8601::DateTime.new(value).strftime("%Y-%m-%d")
               DRI::Metadata::Transformations.create_dcmi_point(value, sdate)
             end
-          rescue ISO8601::Errors::UnknownPattern => e
+          rescue ISO8601::Errors::StandardError
             DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
           end
         end
