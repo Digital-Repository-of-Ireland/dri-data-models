@@ -510,7 +510,7 @@ module DRI
                 DRI::Metadata::Transformations.create_dcmi_point(sdate, value)
               end
             end
-          rescue ISO8601::Errors::UnknownPattern => e
+          rescue ISO8601::Errors::StandardError
             if idx <= (date_field_d.length - 1)
               DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx]) # DCMI Period 'name' is the md value
             else

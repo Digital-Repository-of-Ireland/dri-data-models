@@ -128,8 +128,8 @@ module DRI
             elsif k.eql?('end')
               range['end'] = ISO8601::DateTime.new(v).year
             end
-          rescue ISO8601::Errors::UnknownPattern => e
-            Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601!!")
+          rescue ISO8601::Errors::StandardError => e
+            Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return {}
           end
         end
@@ -159,8 +159,8 @@ module DRI
               unless dat.include?('/')
                 ISO8601::DateTime.new(dat).year
               end
-            rescue ISO8601::Errors::UnknownPattern => e
-              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601!!")
+            rescue ISO8601::Errors::StandardError => e
+              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
               return []
             end
           end
@@ -168,8 +168,8 @@ module DRI
           begin
             # Single date, therefore end date = start date (for correct date range indexing)
             dates[0] = dates[1] = ISO8601::DateTime.new(val).year
-          rescue ISO8601::Errors::UnknownPattern => e
-            Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601!!")
+          rescue ISO8601::Errors::StandardError => e
+            Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return []
           end
         end
@@ -185,8 +185,8 @@ module DRI
             ISO8601::DateTime.new(value)
           end
           return true
-        rescue ISO8601::Errors::UnknownPattern => e
-          Rails.logger.error("Unable to parse `#{value}' as a date-time object")
+        rescue ISO8601::Errors::StandardError => e
+          Rails.logger.error("Unable to parse `#{value}' as a date-time object. Error: #{e.to_s}.")
           return false
         end
       end
@@ -206,6 +206,7 @@ module DRI
       def self.create_dcmi_point(name, sdate="", edate="", scheme="")
         return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
       end
+
       # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and

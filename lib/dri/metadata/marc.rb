@@ -8,11 +8,11 @@ module DRI
       # df=datafield, sf=subfield,
       set_terminology do |t|
         t.root(:path=>"collection", :namespace_prefix => nil)
-        
+
          t.record(:path=>"record", :namespace_prefix=>nil) {
 
             t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-            
+
             t.controlfield {
               t.controlfield_tag(:path=>{:attribute=>"tag"})
             }
