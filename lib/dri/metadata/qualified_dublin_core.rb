@@ -237,6 +237,7 @@ module DRI
       end
 
       def display_date_for_index(date_field=[])
+        date_field = date_field.delete_if{|v| /^null$/i.match(v)}
         date_field.collect! do |value|
           begin
             if value.empty? || DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
