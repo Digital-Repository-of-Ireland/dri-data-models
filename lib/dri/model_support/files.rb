@@ -48,32 +48,6 @@ module DRI
         end
       end # add_file_from_url
 
-      # FIXME Create collection cover_image from a given URL
-      def add_cover_image_from_url file_url
-        file_name = File.basename(URI(file_url).path)
-        begin
-          # We have a copy of the remote file for processing
-          temp_file = Tempfile.new([file_name, File.extname(file_name)])
-          temp_file.binmode
-          open(file_url) { |data| temp_file.write data.read}
-          temp_file.close
-
-          unless Storage::CoverImages.validate_from_tempfile(temp_file, self)
-            logger.error("Creating EAD Collection cover image: invalid Image file")
-          end
-
-          true
-        rescue Exception => e
-          logger.error "Error loading url: #{e.message}\n"
-          logger.error e.backtrace.join("\n")
-          false
-        ensure
-          # Explicitly close the temp file
-          temp_file.close unless temp_file.nil?
-          temp_file.unlink unless temp_file.nil?
-        end
-      end # add_cover_image_from_url
-
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
       def file_metadata_to_solr(solr_doc=Hash.new)
@@ -238,7 +212,6 @@ module DRI
       private
 
       def ingest_files_if_changed
-
         content_changed = false
 
         if (self.ingest_files_from_metadata == "true" && self.trigger_update)
@@ -248,25 +221,10 @@ module DRI
         # Does the actual collection/file save
         yield
 
-        # FIXME For now, workaround to allow for cover images EAD XML ingest
-        # For EAD component, trigger IngestFilesFromMetadata
-        if (self.descMetadata.is_a? DRI::Metadata::EncodedArchivalDescriptionComponent)
-          if content_changed && self.generic_files.empty? &&
-            !self.dao_href.empty? && !new_record?
-            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
-          end
-        elsif (self.descMetadata.is_a? DRI::Metadata::EncodedArchivalDescription)
-          # For EAD collection, generate cover image
-          # If archdesc[level=fonds]/did/dao/@href, then this is the collection cover image
-          unless (self.ead_level != "fonds")
-            if (content_changed && !self.dao_href.empty? && !new_record?)
-              result = add_cover_image_from_url(self.dao_href.first)
-              if !result
-                logger.error("Error creating cover image for collection")
-              end
-            end
-          end
-        end # End else - only for EAD (Finding Aid, root collection)
+        if content_changed && self.generic_files.empty? &&
+          !self.dao_href.empty? && !new_record?
+          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
+        end
       end # ingest_files_if_changed
 
     end # module

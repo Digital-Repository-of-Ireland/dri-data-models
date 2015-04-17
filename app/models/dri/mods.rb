@@ -3,9 +3,18 @@ module DRI
     include DRI::ModelSupport::ModsSupport
 
     # MODS relationships
+    # To express the bi-directionality of the sequencing relationships
+    # belongs_to means that the foreign key is in the table for this class.
+    # So belongs_to can ONLY go in the class that holds the foreign key
+    # has_one means that there is a foreign key in another table that references this class.
+    # So has_one can ONLY go in a class that is referenced by a column in another table.
+    # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
+    # so we need to validate that there is only one!!
     belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Mods"
-    belongs_to :succeeding, :property=>:related_succeeding, :class_name => "DRI::Mods"
+    has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Mods"
+
     belongs_to :original, :property=>:related_original, :class_name => "DRI::Mods"
+
     belongs_to :host, :property=>:related_host, :class_name => "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
@@ -231,6 +240,7 @@ module DRI
           unless mods_obj == nil
             if (rels_name.equal?(:constituents))
               mods_obj.send("#{:host}=", self)
+              mods_obj.save if mods_obj.valid?
             elsif rels_name.equal?(:host)
               self.send("#{rels_name}=", mods_obj)
               self.governing_collection = mods_obj
@@ -242,7 +252,6 @@ module DRI
               end
             end
 
-            mods_obj.save if mods_obj.valid?
             # Save object, if valid
             self.save if self.valid?
           end
