@@ -154,6 +154,7 @@ module DRI
           unless qdc_obj == nil
             if (rels_name.equal?(:parts))
               qdc_obj.send("#{:container}=", self)
+              qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
               self.governing_collection = qdc_obj
@@ -164,7 +165,7 @@ module DRI
                 self.send("#{rels_name}=", qdc_obj)
               end
             end
-            qdc_obj.save if qdc_obj.valid?
+
             self.save if self.valid?
           end
         end

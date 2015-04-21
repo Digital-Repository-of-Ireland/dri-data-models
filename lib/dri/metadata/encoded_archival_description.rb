@@ -237,9 +237,9 @@ module DRI
         t.institute(:proxy => [:ead, :archdesc, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # Related Material
-        t.related_material(:proxy => [:ead, :archdesc, :related_material, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Alternative Form Available
-        t.alternative_form(:proxy => [:ead, :archdesc, :alternative_form, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.alternative_form(:path => "extref/@href[ancestor::altformavail]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
         t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')

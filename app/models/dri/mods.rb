@@ -260,11 +260,11 @@ module DRI
     end # end add_mods_relationship
 
     def get_relationships_names
-      return {:preceding => "Is Preceded By",
-              :succeeding => "Is Succeeded By",
+      return {:preceding => "Preceding",
+              :succeeding => "Succeeding",
               :original => "Has Original",
-              :host => "Host",
-              :constituents => "Constituents",
+              :host => "Is Part Of",
+              :constituents => "Has Parts",
               :series => "Has Series",
               :version => "Is Version Of",
               :format => "Is Format Of",

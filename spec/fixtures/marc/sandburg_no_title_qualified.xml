@@ -13,6 +13,11 @@
       <marc:subfield code="a">0152038655 :</marc:subfield>
       <marc:subfield code="c">$15.95</marc:subfield>
     </marc:datafield>
+    <!-- AMG Added below (tag 024) to test the management of relationships -->
+    <marc:datafield tag="024" ind1="7" ind2=" ">
+      <marc:subfield code="a">0123456789</marc:subfield>
+      <marc:subfield code="2">local</marc:subfield>
+    </marc:datafield>
     <marc:datafield tag="040" ind1=" " ind2=" ">
       <marc:subfield code="a">DLC</marc:subfield>
       <marc:subfield code="c">DLC</marc:subfield>

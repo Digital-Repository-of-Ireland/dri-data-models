@@ -82,6 +82,28 @@ module DRI
         # Date Indices
         t.creation_date_idx(:path => "//record/controlfield[@tag='008']")
 
+        # marc_id is used as a local, unique identifier for the record and is used for internal DRI relationships specified in the metadata
+        # we map it to 024 - Other Standard Identifier (R)
+        # Standard number or code published on an item which cannot be accommodated in another field
+        # The type of standard number or code is identified in the first indicator position or in subfield $2 (Source of number or code)
+        # Full map: tag 024; first indicator 7 (Source specified in subfield $2), subfield $2 contains a value of 'local' (from http://www.loc.gov/standards/sourcelist/standard-identifier.html)
+        # value of the identifier comes then from subfield $a
+        # Example: 024 	7#$a0A3200912B4A1057$2local http://www.loc.gov/marc/marc2dc.html#unqualifiedlist
+        t.marc_id(:path => "record/datafield[@tag='024' and @ind1='7' and subfield[@code='2']='local']/subfield[@code='a']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        # Relationships terms (Crosswalk MARC to QDC: http://www.loc.gov/marc/marc2dc.html#qualifiedlist)
+        # Tag 775 - Other Edition Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_isVersionOf(:path => 'record/datafield[@tag="775"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 776 - Additional Physical Form Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_isFormatOf(:path => 'record/datafield[@tag="776"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 787 - Other Relationship Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_relation(:path => 'record/datafield[@tag="787"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        #t.related_material(:path => "record/datafield[@tag='544' and @ind1='0']/subfield[@code='a']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # FIXME Related Material for now is also mapped to alternative_form, as allows to specify a URL
+        t.related_material(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # MARC field 530, subfield $u for a URL to an alternative form available of this resource
+        t.alternative_form(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
 
       # From: Appendix 2 - Conversion rules for Leader06 - dc:Type mapping
@@ -196,6 +218,7 @@ module DRI
         creator_result = false
         rights_result = false
         creation_date_result = false
+        #local_identifier_result = false
 
 
         # Join all elements in array, get rid of carriage returns from the form (squish) and validate
@@ -205,6 +228,10 @@ module DRI
         creator_result = true unless creator.join.squish == ""
         rights_result = true unless rights.join.squish == ""
         creation_date_result = true unless creation_date.join.squish == ""
+
+        #marc_id.each do |curr_id|
+        #  local_identifier_result = true unless curr_id.blank?
+        #end
 
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
@@ -230,6 +257,8 @@ module DRI
           creation_date_result = true unless curr_creation_date.blank?
         end
 
+        # TODO Do we require a marc_id?
+        #errors[:marc_id] = "not present." unless local_identifier_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:description] = "can't be blank" if description_result == false
