@@ -211,9 +211,9 @@ module DRI
         t.institute(:proxy => [:c, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # Related Material
-        t.related_material(:proxy => [:c, :related_material, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Alternative Form Available
-        t.alternative_form(:proxy => [:c, :alternative_form, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.alternative_form(:path => "extref/@href[ancestor::altformavail]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
         t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')
@@ -258,7 +258,6 @@ module DRI
       def to_solr(solr_doc=Hash.new)
         super(solr_doc)
 
-        # FIXME - Index metadata terms that are required for the UI Solr search: title, description, check what else
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title', :stored_searchable, type: :string) => title)
         # Title
         # title_sorted - A SOLR index for sorting titles
@@ -350,6 +349,10 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
         # depositing_institute_ssm - the dri_app looks for this type of indexed field at object-level display
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
+
+        # Index related_material and alternative_form_available
+        solr_doc.merge!(Solrizer.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
+        solr_doc.merge!(Solrizer.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
 
         # Indexing dates for display + COOL date range
         # Display of Subject(Temporal)
