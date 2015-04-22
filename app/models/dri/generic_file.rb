@@ -44,7 +44,7 @@ class GenericFile < ActiveFedora::Base
   end
   
   def to_solr(solr_doc={}, opts={})
-    solr_doc = super(solr_doc, opts)
+    solr_doc = super(solr_doc)
     
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
     solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
