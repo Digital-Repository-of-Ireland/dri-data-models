@@ -48,16 +48,16 @@ module DRI
           metadata_children = []
 
           # Remove Ead namespaces
-          #fullMetadataNoNs = self.fullMetadata.ng_xml.clone
+          fullMetadataNoNs = self.fullMetadata.ng_xml.clone
+          fullMetadataNoNs.remove_namespaces!
           if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
-            #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/ead/archdesc/dsc/*")
-            metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
+            #metadata_children = self.fullMetadata.ng_xml.xpath("/ead/archdesc/dsc/*")
+            metadata_children = fullMetadataNoNs.xpath("/ead/archdesc/dsc/*")
           else
             #metadata_children = fullMetadataNoNs.remove_namespaces!.xpath("/*/dsc/*")
             # FIXME Original statement - this only works for components under dsc.
-            #metadata_children = self.fullMetadata.ng_xml.xpath("/*/dsc/*")
-
-            metadata_children = get_ead_children_components(self.fullMetadata.ng_xml)
+            #metadata_children = get_ead_children_components(self.fullMetadata.ng_xml)
+            metadata_children = get_ead_children_components(fullMetadataNoNs)
           end
 
           if metadata_children.empty?
@@ -99,7 +99,12 @@ module DRI
 
               # fullMetadata automatically adds an XML header to the start and an extra "\n" at the end.
               # we have to undo these modifications in order to do the comparison
-              clean_fullMetadata = child_obj.fullMetadata.ng_xml.to_s[22..-1]
+              #clean_fullMetadata = child_obj.fullMetadata.ng_xml.to_s[22..-1]
+
+              cfullMetadataNoNs = child_obj.fullMetadata.ng_xml.clone
+              cfullMetadataNoNs.remove_namespaces!
+              #clean_fullMetadata = child_obj.fullMetadata.ng_xml.to_s[22..-1]
+              clean_fullMetadata = cfullMetadataNoNs.to_s[22..-1]
               clean_fullMetadata = clean_fullMetadata[0..-2]
 
               # now we can do the comparison
@@ -119,7 +124,7 @@ module DRI
 
             elsif child_obj != nil
               # TODO: DELETE child
-              logger.info("Delete child needed")
+              Rails.logger.info("Delete child needed")
             else
               # Create a new child
               new_child = EncodedArchivalDescription.new :component
@@ -132,21 +137,23 @@ module DRI
               new_child.permissions = self.permissions
               # ingest_files_from_metadata
               new_child.ingest_files_from_metadata = ingest_files_from_metadata
+              # FIXME Need to call checksum method below but this method is implemented in dri_app
+              # MetadataHelpers.checksum_metadata(new_child)
               #new_child.private_metadata="0"
               #new_child.master_file="1"
 
               # Don't add new node if it's invalid
               if new_child.valid?
-                logger.info("EAD_SAVE: #{new_child.title} is valid!")
+                Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
                 new_child.save
 
                 # add to queue
                 prev_obj = new_child
               else
                 # TODO Notify DRI App that there are invalid objects!!
-                logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
+                Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
                 new_child.errors.messages.each do |key, value|
-                  logger.error("#{key}: #{value}")
+                  Rails.logger.error("#{key}: #{value}")
                 end
               end
 

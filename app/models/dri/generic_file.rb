@@ -23,6 +23,7 @@ class GenericFile < ActiveFedora::Base
   has_attributes :checksum_md5, datastream: :dri_properties, multiple: false
   has_attributes :checksum_sha256, datastream: :dri_properties, multiple: false
   has_attributes :checksum_rmd160, datastream: :dri_properties, multiple: false
+  has_attributes :preservation_only, datastream: :dri_properties, multiple: false
 
   # DRI is not storing files in Fedora (which would be too slow to be of practical use),
   # instead a datastream will link to a URL in the DRI storage system.

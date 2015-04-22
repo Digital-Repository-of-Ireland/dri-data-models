@@ -116,11 +116,11 @@ module DRI
           # result = (!xml.xpath("/mods:mods/mods:typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
-        elsif xml.internal_subset != nil && xml.internal_subset.name == 'ead'
+        elsif (xml.internal_subset != nil && xml.internal_subset.name == 'ead') || ['ead'].include?(root_name)
           result = "DRI::Metadata::EncodedArchivalDescription"
         elsif ['c', 'c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'c09', 'c10', 'c11', 'c12'].include? root_name
           result = "DRI::Metadata::EncodedArchivalDescriptionComponent"
-        elsif ['marc'].include? root_name
+        elsif ['collection', 'record'].include? root_name
           result = "DRI::Metadata::Marc"
         elsif ['mods'].include?(root_name)
           result = "DRI::Metadata::Mods"
@@ -173,6 +173,10 @@ module DRI
           self.attach_file ds, "descMetadata"
         end
         @metadata_class = descMetadata.class
+        # FIXME Check whether desc_metadata_class has to be set here as well
+        # This is causing problems when updating EAD descMetadata datastream as desc_metadata_class is nil when
+        # loading an existing EAD object
+        #@desc_metadata_class = descMetadata.class
         # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
         # self.descMetadata.save if self.descMetadata.changed?
 
