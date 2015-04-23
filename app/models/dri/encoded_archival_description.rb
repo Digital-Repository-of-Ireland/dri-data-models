@@ -64,6 +64,8 @@ module DRI
     # Alternative Form Available
     has_attributes :alternative_form, datastream: :descMetadata, multiple: true
 
+    has_attributes :type, datastream: :descMetadata, multiple: true
+
     around_save :synchronize_if_changed
 
     def initialize(type, args = {})
@@ -145,8 +147,8 @@ module DRI
       if object_types.count < 1
         object_types.push "Unknown"
       end
-      solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
 
       # TODO Implementing rights inheritance from parent collections if not present
       #if rights.empty?
