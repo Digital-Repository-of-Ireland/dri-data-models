@@ -31,18 +31,18 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    has_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    has_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    has_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    has_many :related, property: :dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
+    has_many :referenced, property: :dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
+    has_many :references, property: :dcterms_references, :class_name => "DRI::QualifiedDublinCore"
 
-    belongs_to :container, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
-    # hasPart is managed through the isPartOf relationship. This automatically adds the child isPartOf
-    # whenever a hasPart relationship is added
-    has_many :parts, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
+    belongs_to :container, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
+    has_many :parts, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore", as: :container
 
-    has_many :version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :versions, :property=>:dcterms_has_version, :class_name => "DRI::QualifiedDublinCore"
-    has_many :format_of, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    belongs_to :is_version, property: :dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+    has_many :has_versions, property: :dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore", as: :is_version
+
+    belongs_to :is_format, property: :dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    has_many :has_format, property: :dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore", as: :is_format
 
     def initialize(args = {})
       args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -85,7 +85,7 @@ module DRI
           collection_objects_docs = query.pop
           collection_objects_docs.each do |obj_doc|
             doc = SolrDocument.new(obj_doc)
-            object = DRI::Mods.find(doc.id)
+            object = DRI::QualifiedDublinCore.find(doc.id)
             begin
               Sufia.queue.push(CreateQdcRelationshipsJob.new(object.id))
             rescue Exception => e
@@ -105,12 +105,13 @@ module DRI
     def process_relationships()
       add_dm_relationship(relation_ids_relation, :related)
       add_dm_relationship(relation_ids_isPartOf, :container)
-      add_dm_relationship(relation_ids_hasPart, :parts)
+      #add_dm_relationship(relation_ids_hasPart, :parts)
       add_dm_relationship(relation_ids_isReferencedBy, :referenced)
       add_dm_relationship(relation_ids_references, :references)
-      add_dm_relationship(relation_ids_isVersionOf, :version)
-      add_dm_relationship(relation_ids_hasVersion, :versions)
-      add_dm_relationship(relation_ids_isFormatOf, :format_of)
+      add_dm_relationship(relation_ids_isVersionOf, :is_version)
+      #add_dm_relationship(relation_ids_hasVersion, :has_versions)
+      add_dm_relationship(relation_ids_isFormatOf, :is_format)
+      #add_dm_relationship(relation_ids_hasFormat, :has_format)
     end
 
     # Process a specific qdc relationship for the objectå
@@ -178,9 +179,10 @@ module DRI
               :references => "References",
               :container => "Is Part Of",
               :parts => "Has Part",
-              :version => "Is Version Of",
-              :versions => "Has Version",
-              :format_of => "Is Format Of"
+              :is_version => "Is Version Of",
+              :has_versions => "Has Version",
+              :is_format => "Is Format Of",
+              :has_format => "Has Format"
       }
     end
       

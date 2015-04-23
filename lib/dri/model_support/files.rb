@@ -50,7 +50,7 @@ module DRI
 
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
-      def file_metadata_to_solr(solr_doc=Hash.new)
+      def file_metadata_to_solr(solr_doc=Hash.new, opts={})
         file_type = []
         file_type_display = []
         file_count = 0
@@ -223,7 +223,7 @@ module DRI
 
         if content_changed && self.generic_files.empty? &&
           !self.dao_href.empty? && !new_record?
-          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.pid))
+          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
         end
       end # ingest_files_if_changed
 

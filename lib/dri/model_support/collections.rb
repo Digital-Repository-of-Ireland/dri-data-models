@@ -59,7 +59,7 @@ module DRI
       #
       # @param[Hash]
       #
-      def collections_to_solr(solr_doc=Hash.new)
+      def collections_to_solr(solr_doc=Hash.new, opts={})
         # Add title metadata from parent collections
         ancestor_titles = []
         ancestor_ids = []

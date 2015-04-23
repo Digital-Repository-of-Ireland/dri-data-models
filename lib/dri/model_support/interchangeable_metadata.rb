@@ -7,7 +7,7 @@ module DRI
         attr_accessor :desc_metadata_class
         attr_accessor :trigger_update
 
-        # Descriptive metadata datastream
+        # Descriptive metadata datastream - F4 uses "File attachments" instead of datas
         contains "descMetadata", class_name: "DRI::Metadata::Base"
         # Complete metadata record datastream
         contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
