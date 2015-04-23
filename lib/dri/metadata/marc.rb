@@ -135,7 +135,7 @@ module DRI
         return builder.doc
       end
 
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type)
