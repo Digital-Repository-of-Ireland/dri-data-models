@@ -22,7 +22,7 @@ module DRI
         # Description (collection-level)
         has_attributes :description, datastream: :descMetadata, multiple: true
         # ADDED TYPE, it is compulsory
-        has_attributes :type, datastream: :descMetadata, multiple: true
+        #has_attributes :type, datastream: :descMetadata, multiple: true
         # Rights (collection-level)
         has_attributes :rights, datastream: :descMetadata, multiple: true
         # Creator (collection-level)
