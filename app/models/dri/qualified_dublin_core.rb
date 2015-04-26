@@ -31,9 +31,9 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    has_many :related, property: :dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    has_many :referenced, property: :dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    has_many :references, property: :dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :related, property: :dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :referenced, property: :dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :references, property: :dcterms_references, :class_name => "DRI::QualifiedDublinCore"
 
     belongs_to :container, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
     has_many :parts, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore", as: :container
@@ -77,7 +77,7 @@ module DRI
       if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
+        solr_query = "#{ActiveFedora::SolrService.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -117,6 +117,15 @@ module DRI
     # Process a specific qdc relationship for the objectå
     #
     def add_dm_relationship(rels_array, rels_name)
+      # Reset previous relationships
+      if self.send("#{rels_name}").respond_to?("push")
+        self.send("#{rels_name}").clear
+      else
+        self.send("#{rels_name}=", nil)
+      end
+
+      self.save if self.valid?
+
       if rels_array.empty?
         return
       end
@@ -133,7 +142,7 @@ module DRI
       end
 
       doc = SolrDocument.new(solr_docs[0])
-      root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+      root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
         Rails.logger.error("Root collection ID for object with PID #{self.id} not found in Solr")
@@ -142,8 +151,8 @@ module DRI
 
       rels_array.each do |item_id|
         # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-        solr_query = "qdc_id_tesim:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if qdc_item.empty?

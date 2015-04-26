@@ -266,8 +266,8 @@ module DRI
       #		end
 
       #		if start.length > 0
-      #			results.merge!(Solrizer.solr_name(key+"_start", :dateable) => start)
-      #			results.merge!(Solrizer.solr_name(key+"_end", :dateable) => finish)
+      #			results.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key+"_start", :dateable) => start)
+      #			results.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key+"_end", :dateable) => finish)
       #		end
       #	end
 

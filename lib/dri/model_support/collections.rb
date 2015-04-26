@@ -11,8 +11,8 @@ module DRI
 
         # Two relationships below are used to manage a collection's structure
         # (!) ONLY FOR COLLECTIONS
-        belongs_to :parent_collection, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
+        belongs_to :parent_collection, property: :is_member_of_collection, :class_name => 'DRI::Batch'
+        has_many :collections, property: :is_member_of_collection, :class_name => 'DRI::Batch', as: :parent_collection
 
         # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
@@ -24,9 +24,10 @@ module DRI
         def collection= collection
           if @collection == collection
           	@collection = collection
-          elsif (collection == true) && (generic_files.count == 0)
+          # FIXME Possible Bug: obj.count returns random number even if empty?
+          elsif (collection == true) && (generic_files.size == 0)
         	  @collection = collection
-          elsif (collection == false) && (governed_items.count == 0) && (items.count == 0)
+          elsif (collection == false) && (governed_items.size == 0) && (items.size == 0)
           	@collection = collection
           end
         end
@@ -44,14 +45,17 @@ module DRI
       	# It is a collection if we set it as a collection either through the metadata
       	# or using the collection accessor and it has no GenericFiles
       	# to the object.
-        (descMetadata.collection? || properties.collection?) && (generic_files.count == 0)
+        # FIXME Possible Bug: generic_files.count returns random number even if empty?
+        # Replaced to size instead
+        (descMetadata.collection? || properties.collection?) && (generic_files.size == 0)
       end
 
       def is_root_collection?
       	# It is a root collection if it is already defined to be a collection; it has
       	# been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
-        (!new_record?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
+        # FIXME Possible Bug: obj.count returns random number even if empty?
+        (!new_record?) && is_collection? && (governing_collection == nil) && (collections.size == 0)
       end
 
       private
@@ -59,7 +63,7 @@ module DRI
       #
       # @param[Hash]
       #
-      def collections_to_solr(solr_doc=Hash.new, opts={})
+      def collections_to_solr(solr_doc=Hash.new)
         # Add title metadata from parent collections
         ancestor_titles = []
         ancestor_ids = []

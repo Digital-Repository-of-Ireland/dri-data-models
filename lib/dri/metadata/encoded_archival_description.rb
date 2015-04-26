@@ -298,7 +298,7 @@ module DRI
         return builder.doc
       end #xml_template
 
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
         # Title_sorted - A SOLR index for sorting titles
@@ -350,8 +350,8 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Publisher
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []

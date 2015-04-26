@@ -467,7 +467,7 @@ module DRI
       # Overriden. Solr indexing of custom fields
       # @param[SolrDocument] solr_doc the Solr document to be merged
       #
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
 
@@ -477,19 +477,19 @@ module DRI
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
           if (sorted_title != "")
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
         # Type
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
-        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type)
 
         # MODS has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index()
 
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -497,7 +497,7 @@ module DRI
           all_metadata += text_node.text
           all_metadata += " "
         end
-        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
         # Description
         #description_array = description_for_index()
@@ -505,41 +505,41 @@ module DRI
         #solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
 
         # Subject
-        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject) unless subject == []
-        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject) unless subject == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :stored_searchable) => subject) unless subject == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :facetable) => subject) unless subject == []
 
         subject_name_array = subject_name_for_index()
         subject_place_array = subject_place_for_index()
         subject_temporal_array = subject_temporal_for_index()
 
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_array) unless subject_name_array == []
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_array) unless subject_name_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :stored_searchable) => subject_name_array) unless subject_name_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :facetable) => subject_name_array) unless subject_name_array == []
 
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array == []
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array == []
 
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array == []
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
 
         external_rels.each do |elem|
-          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
         end
 
         # Type
         if collection?
-          solr_doc.merge!(ActiveFedora::SolrService.solr_name('type', :stored_searchable, type: :string) => "Collection")
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable, type: :string) => "Collection")
         end
 
         # Index creation_date
         creation_date_idx = creation_date_for_index()
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_idx)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_idx)
 
         # Index Published Date
         unless published_date == [] && issued_date_start == []
-          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
           display_date_range_for_index(issued_date_start, issued_date_end))
         end
 

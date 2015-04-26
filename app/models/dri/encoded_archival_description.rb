@@ -96,7 +96,7 @@ module DRI
     def collections_to_solr(solr_doc=Hash.new)
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-        solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => "1")
       end
       solr_doc
     end

@@ -167,8 +167,8 @@ module DRI
         # faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
 
         # faceted_language_indexes.each do | key, value |
-        #   solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
-        #   solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
+        #   solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :text) => value)
+        #   solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :facetable, type: :text) => value)
         # end
 
         # Split date ranges into separate indexes

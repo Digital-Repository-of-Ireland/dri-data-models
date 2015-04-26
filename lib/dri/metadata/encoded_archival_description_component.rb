@@ -255,8 +255,8 @@ module DRI
          terminology.xpath_for(:title)
       end
 
-      def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+      def to_solr(solr_doc=Hash.new, opts = {})
+        solr_doc = super(solr_doc)
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title', :stored_searchable, type: :string) => title)
         # Title
@@ -282,7 +282,7 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # Creator
-        creator_array = creator_for_index
+        creator_array = creator_for_index()
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :facetable) => creator_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable, type: :text) => DRI::Metadata::Transformations.transform_name(creator_array))
@@ -325,13 +325,13 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Display of Creation Date
         creation_date_array = creation_date_for_index()
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array == []
-        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creation_date", :stored_searchable)].present?
 
         # Language
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('language', :stored_searchable) => language)
@@ -340,10 +340,10 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
 
         # Temporal Coverage
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
 
-        # Institute and sponsor/Depositing Institute: archdesc/did/repository
-        institute_array = institute_for_index
+        # FIXME - To be removed once the workflow is implemented Institute and sponsor/Depositing Institute: archdesc/did/repository
+        institute_array = institute_for_index()
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :facetable) => institute_array) unless institute_array == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
@@ -351,8 +351,8 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
 
         # Index related_material and alternative_form_available
-        solr_doc.merge!(Solrizer.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
-        solr_doc.merge!(Solrizer.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
 
         # Indexing dates for display + COOL date range
         # Display of Subject(Temporal)
@@ -433,7 +433,7 @@ module DRI
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creation_date_for_index
+      def creation_date_for_index()
         if (creation_date_idx != [] || creation_date != [])
           cdate_array = creation_date.collect! do |value|
             DRI::Metadata::Transformations.create_dcmi_point(value)
@@ -447,7 +447,7 @@ module DRI
 
       # Maps to origination/persname, if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creator_for_index
+      def creator_for_index()
         if (creator != [])
           return creator
         else
@@ -457,7 +457,7 @@ module DRI
       end
 
       # Get the Institute Information from the parent collection
-      def institute_for_index
+      def institute_for_index()
         if (institute != [])
           return institute
         else
@@ -467,13 +467,16 @@ module DRI
       end
 
       def get_field_from_parent(field_name)
+        uri_terms = uri.split("/")
+        id = uri_terms[uri_terms.size()-2] # get the object's id
         fedora_object = DRI::EncodedArchivalDescription.find(id)
 
         solr_query = "id:\"#{fedora_object.governing_collection.id.to_s}\""
         docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
-        parent_field = docs.first[Solrizer.solr_name(field_name, :stored_searchable, type: :string)]
-        if parent_field != nil
+        parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
+
+        if !parent_field.nil?
           return parent_field
         else
           return []

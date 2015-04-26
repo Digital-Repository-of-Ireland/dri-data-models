@@ -10,21 +10,22 @@ module DRI
     # So has_one can ONLY go in a class that is referenced by a column in another table.
     # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
     # so we need to validate that there is only one!!
-    belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Mods"
-    has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Mods"
+    belongs_to :preceding, property: :related_preceding, :class_name => "DRI::Mods"
+    has_many :succeeding, property: :related_preceding, :class_name => "DRI::Mods", as: :preceding
 
-    belongs_to :original, :property=>:related_original, :class_name => "DRI::Mods"
+    belongs_to :original, property: :related_original, :class_name => "DRI::Mods"
 
-    belongs_to :host, :property=>:related_host, :class_name => "DRI::Mods"
+    belongs_to :host, property: :related_host, :class_name => "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
-    has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
-    belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    has_many :version, :property=>:related_version, :class_name => "DRI::Mods"
-    has_many :format, :property=>:related_format, :class_name => "DRI::Mods"
-    has_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
-    has_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
-    has_many :review, :property=>:related_review, :class_name => "DRI::Mods"
+    has_many :constituents, property: :related_host, :class_name => "DRI::Mods", as: :host
+
+    belongs_to :series, property: :related_series, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :version, property: :related_version, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :format, property: :related_format, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :referenced_by, property: :related_referenced_by, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :references, property: :related_reference, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :review, property: :related_review, :class_name => "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -74,6 +75,8 @@ module DRI
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
 
+    has_attributes :type, datastream: :descMetadata, multiple: true
+
     # TODO Disabled for now
     #around_save :create_multiple_records
 
@@ -111,7 +114,8 @@ module DRI
 
       # Apply XSLT MODS 2 OAI_DC, and store it in Fedora's DC datastream
       oai_dc_xml = DRI::Utils.apply_xslt_transformation('xslt/mods2oai_dc.xsl', object)
-      self.datastreams['DC'].content = oai_dc_xml.to_s
+      # FIXME F4 deprecated below
+      # self.datastreams['DC'].content = oai_dc_xml.to_s
 
       return true
     end
@@ -160,7 +164,7 @@ module DRI
       if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -187,10 +191,10 @@ module DRI
 
     def process_relationships()
       add_dm_relationship(related_items_ids_preceding, :preceding)
-      add_dm_relationship(related_items_ids_succeeding, :succeeding)
+      #add_dm_relationship(related_items_ids_succeeding, :succeeding)
       add_dm_relationship(related_items_ids_original, :original)
       add_dm_relationship(related_items_ids_host, :host)
-      add_dm_relationship(related_items_ids_constituent, :constituents)
+      #add_dm_relationship(related_items_ids_constituent, :constituents)
       add_dm_relationship(related_items_ids_series, :series)
       add_dm_relationship(related_items_ids_otherVersion, :version)
       add_dm_relationship(related_items_ids_otherFormat, :format)
@@ -202,6 +206,15 @@ module DRI
     # Process a specific mods relationship for the object
     #
     def add_dm_relationship(rels_array, rels_name)
+      # Reset previous relationships
+      if self.send("#{rels_name}").respond_to?("push")
+        self.send("#{rels_name}").clear
+      else
+        self.send("#{rels_name}=", nil)
+      end
+
+      self.save if self.valid?
+
       if rels_array.empty?
         return
       end
@@ -217,7 +230,7 @@ module DRI
       end
 
       doc = SolrDocument.new(solr_docs[0])
-      root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+      root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
         logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
@@ -227,8 +240,8 @@ module DRI
       rels_array.each do |item_id|
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
