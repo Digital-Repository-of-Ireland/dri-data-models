@@ -237,7 +237,6 @@ module DRI
       end
 
       rels_array.each do |item_id|
-        binding.pry
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
         solr_query = "#{Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
