@@ -19,12 +19,13 @@ module DRI
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
     has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
+
     belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    has_many :version, :property=>:related_version, :class_name => "DRI::Mods"
-    has_many :format, :property=>:related_format, :class_name => "DRI::Mods"
-    has_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
-    has_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
-    has_many :review, :property=>:related_review, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :version, :property=>:related_version, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :format, :property=>:related_format, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :review, :property=>:related_review, :class_name => "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -73,6 +74,8 @@ module DRI
     # Roles
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
+
+    has_attributes :type, datastream: :descMetadata, multiple: true
 
     # TODO Disabled for now
     #around_save :create_multiple_records
@@ -187,10 +190,10 @@ module DRI
 
     def process_relationships()
       add_dm_relationship(related_items_ids_preceding, :preceding)
-      add_dm_relationship(related_items_ids_succeeding, :succeeding)
+      #add_dm_relationship(related_items_ids_succeeding, :succeeding)
       add_dm_relationship(related_items_ids_original, :original)
       add_dm_relationship(related_items_ids_host, :host)
-      add_dm_relationship(related_items_ids_constituent, :constituents)
+      #add_dm_relationship(related_items_ids_constituent, :constituents)
       add_dm_relationship(related_items_ids_series, :series)
       add_dm_relationship(related_items_ids_otherVersion, :version)
       add_dm_relationship(related_items_ids_otherFormat, :format)
@@ -202,6 +205,15 @@ module DRI
     # Process a specific mods relationship for the object
     #
     def add_dm_relationship(rels_array, rels_name)
+      # Reset previous relationships
+      if self.send("#{rels_name}").respond_to?("push")
+        self.send("#{rels_name}").clear
+      else
+        self.send("#{rels_name}=", nil)
+      end
+
+      self.save if self.valid?
+
       if rels_array.empty?
         return
       end
@@ -227,7 +239,7 @@ module DRI
       rels_array.each do |item_id|
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\""
+        solr_query = "#{Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
         solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 

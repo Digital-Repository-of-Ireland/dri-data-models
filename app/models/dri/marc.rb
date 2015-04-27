@@ -10,11 +10,13 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  has_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_many :version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_many :format_of, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
@@ -91,16 +93,16 @@ class Marc < DRI::Batch
         collection_objects_docs = query.pop
         collection_objects_docs.each do |obj_doc|
           doc = SolrDocument.new(obj_doc)
-          object = DRI::Mods.find(doc.id)
+          object = DRI::Marc.find(doc.id)
           begin
             Sufia.queue.push(CreateMarcRelationshipsJob.new(object.pid))
           rescue Exception => e
             Rails.logger.error(e.message)
           end
         end
-        # Once we've processed all the children, then process this object
-        process_relationships()
       end
+      # Once we've processed all the children, then process this object
+      process_relationships()
     else
       # Only process the object's relationships
       process_relationships()
@@ -110,13 +112,24 @@ class Marc < DRI::Batch
 
   def process_relationships()
     add_dm_relationship(relation_ids_relation, :related)
-    add_dm_relationship(relation_ids_isVersionOf, :version)
-    add_dm_relationship(relation_ids_isFormatOf, :format_of)
+    add_dm_relationship(relation_ids_isVersionOf, :is_version)
+    #add_dm_relationship(relation_ids_isVersionOf, :has_versions)
+    add_dm_relationship(relation_ids_isFormatOf, :is_format)
+    #add_dm_relationship(relation_ids_hasFormat, :has_format)
   end
 
   # Process a specific qdc relationship for the object
   #
   def add_dm_relationship(rels_array, rels_name)
+    # Reset previous relationships
+    if self.send("#{rels_name}").respond_to?("push")
+      self.send("#{rels_name}").clear
+    else
+      self.send("#{rels_name}=", nil)
+    end
+
+    self.save if self.valid?
+
     if rels_array.empty?
       return
     end
@@ -142,7 +155,7 @@ class Marc < DRI::Batch
 
     rels_array.each do |item_id|
       # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-      solr_query = "marc_id_tesim:\"#{item_id.to_s}\""
+      solr_query = "#{Solrizer.solr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
       solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
@@ -167,8 +180,10 @@ class Marc < DRI::Batch
 
   def get_relationships_names
     return {:related => "Is Related To",
-            :version => "Is Version Of",
-            :format_of => "Is Format Of"
+            :is_version => "Is Version Of",
+            :has_versions => "Has Version",
+            :is_format => "Is Format Of",
+            :has_format => "Has Format"
     }
   end
 

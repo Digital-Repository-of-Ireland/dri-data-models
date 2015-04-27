@@ -31,18 +31,22 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    has_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    has_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    has_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
 
     belongs_to :container, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
     # hasPart is managed through the isPartOf relationship. This automatically adds the child isPartOf
     # whenever a hasPart relationship is added
     has_many :parts, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
 
-    has_many :version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :versions, :property=>:dcterms_has_version, :class_name => "DRI::QualifiedDublinCore"
-    has_many :format_of, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+    has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+
+    belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+
+    belongs_to :source_rel, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
 
     def initialize(args = {})
       args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -85,16 +89,16 @@ module DRI
           collection_objects_docs = query.pop
           collection_objects_docs.each do |obj_doc|
             doc = SolrDocument.new(obj_doc)
-            object = DRI::Mods.find(doc.id)
+            object = DRI::QualifiedDublinCore.find(doc.id)
             begin
               Sufia.queue.push(CreateQdcRelationshipsJob.new(object.pid))
             rescue Exception => e
               Rails.logger.error(e.message)
             end
           end
-          # Once we've processed all the children, then process this object
-          process_relationships()
         end
+        # Once we've processed all the children, then process this object
+        process_relationships()
       else
         # Only process the object's relationships
         process_relationships()
@@ -105,17 +109,28 @@ module DRI
     def process_relationships()
       add_dm_relationship(relation_ids_relation, :related)
       add_dm_relationship(relation_ids_isPartOf, :container)
-      add_dm_relationship(relation_ids_hasPart, :parts)
+      #add_dm_relationship(relation_ids_hasPart, :parts)
       add_dm_relationship(relation_ids_isReferencedBy, :referenced)
       add_dm_relationship(relation_ids_references, :references)
-      add_dm_relationship(relation_ids_isVersionOf, :version)
-      add_dm_relationship(relation_ids_hasVersion, :versions)
-      add_dm_relationship(relation_ids_isFormatOf, :format_of)
+      add_dm_relationship(relation_ids_isVersionOf, :is_version)
+      #add_dm_relationship(relation_ids_hasVersion, :has_versions)
+      add_dm_relationship(relation_ids_isFormatOf, :is_format)
+      #add_dm_relationship(relation_ids_hasFormat, :has_format)
+      add_dm_relationship(relation_ids_source, :source_rel)
     end
 
     # Process a specific qdc relationship for the objectå
     #
     def add_dm_relationship(rels_array, rels_name)
+      # Reset previous relationships
+      if self.send("#{rels_name}").respond_to?("push")
+        self.send("#{rels_name}").clear
+      else
+        self.send("#{rels_name}=", nil)
+      end
+
+      self.save if self.valid?
+
       if rels_array.empty?
         return
       end
@@ -141,7 +156,7 @@ module DRI
 
       rels_array.each do |item_id|
         # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-        solr_query = "qdc_id_tesim:\"#{item_id.to_s}\""
+        solr_query = "#{Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
         solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
@@ -178,9 +193,11 @@ module DRI
               :references => "References",
               :container => "Is Part Of",
               :parts => "Has Part",
-              :version => "Is Version Of",
-              :versions => "Has Version",
-              :format_of => "Is Format Of"
+              :is_version => "Is Version Of",
+              :has_versions => "Has Version",
+              :is_format => "Is Format Of",
+              :has_format => "Has Format",
+              :source_rel => "Source"
       }
     end
       
