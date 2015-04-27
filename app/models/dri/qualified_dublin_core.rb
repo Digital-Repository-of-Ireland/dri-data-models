@@ -157,7 +157,7 @@ module DRI
       rels_array.each do |item_id|
         # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
         solr_query = "#{Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if qdc_item.empty?
