@@ -47,6 +47,7 @@ module DRI
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :famname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
     has_attributes :date_text, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage_idx, datastream: :descMetadata, multiple: true

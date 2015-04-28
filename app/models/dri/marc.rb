@@ -98,9 +98,9 @@ class Marc < DRI::Batch
             Rails.logger.error(e.message)
           end
         end
-        # Once we've processed all the children, then process this object
-        process_relationships()
       end
+      # Once we've processed all the children, then process this object
+      process_relationships()
     else
       # Only process the object's relationships
       process_relationships()
@@ -152,7 +152,7 @@ class Marc < DRI::Batch
     rels_array.each do |item_id|
       # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
       solr_query = "#{ActiveFedora::SolrQueryBuildersolr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-      solr_query << " AND #{ActiveFedora::SolrQueryBuildersolr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+      solr_query << " AND #{ActiveFedora::SolrQueryBuildersolr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if marc_item.empty?

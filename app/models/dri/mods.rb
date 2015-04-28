@@ -241,7 +241,7 @@ module DRI
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
         solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
