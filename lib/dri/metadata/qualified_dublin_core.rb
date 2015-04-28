@@ -160,16 +160,16 @@ module DRI
         solr_doc = super(solr_doc)
 
         # Index dates here, for display
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
-        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
-        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[Solrizer.solr_name("published_date", :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, "temporal_coverage") if solr_doc[Solrizer.solr_name("temporal_coverage", :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[Solrizer.solr_name("creator", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creation_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("published_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "temporal_coverage") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("temporal_coverage", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creator", :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
@@ -214,7 +214,7 @@ module DRI
         external_rels = *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
 
         external_rels.each do |elem|
-          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
         end
 
 

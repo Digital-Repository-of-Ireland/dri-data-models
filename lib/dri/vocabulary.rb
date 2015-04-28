@@ -370,7 +370,8 @@ module DRI
           "isVersionOf",
           "hasVersion",
           "isFormatOf",
-          "hasFormat"
+          "hasFormat",
+          "source"
       ]
     end
   end

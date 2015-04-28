@@ -47,6 +47,7 @@ module DRI
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :famname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
     has_attributes :date_text, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage_idx, datastream: :descMetadata, multiple: true
@@ -96,7 +97,7 @@ module DRI
     def collections_to_solr(solr_doc=Hash.new)
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-        solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => "1")
       end
       solr_doc
     end

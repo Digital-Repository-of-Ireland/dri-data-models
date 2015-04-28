@@ -10,12 +10,22 @@ module DRI
         # Elements that can occur nested within other elements: multiple options
         t.p(:path => "p", :namespace_prefix => nil)
         # They can be used as subjects or even in the title
-        t.geographic_name(:path=>"geogname")
-        t.name_(:path=>"name")
+        t.geographic_name(:path=>"geogname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.name_(:path=>"name") {
+          t.role(:path => {:attribute=>"role"})
+        }
         t.persname_(:path=>"persname[not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
           t.role(:path => {:attribute=>"role"})
         }
-        t.corpname_(:path=>"corpname")
+        t.corpname_(:path=>"corpname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.famname_(:path=>"famname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+
         t.date_(:path=>"date[not(parent::creation) and not(parent::publicationstmt)]") {
           t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
@@ -71,20 +81,6 @@ module DRI
               t.head
               t.p_(:ref =>[:p])
             }
-            # Subject can be
-            t.controlaccess {
-              t.head
-              t.p_(:ref => [:p])
-              # Preferred subject from the guidelines
-              t.subject_a(:path=>"subject")
-              # Name, Personal, Corporate Name
-              t.name_coverage(:ref => [:name])
-              t.persname_coverage(:ref => [:persname])
-              t.corpname_coverage(:ref => [:corpname])
-              # Geographical coverage
-              t.geographical_coverage(:ref => [:geographic_name])
-            }
-            t.subject_b(:path=>"subject")
 
             t.name_archdesc(:ref => [:name])
             t.persname_archdesc(:ref => [:persname])
@@ -131,6 +127,22 @@ module DRI
                 }
               }
             }
+            # Subject can be
+            t.controlaccess {
+              t.head
+              t.p_(:ref => [:p])
+              # Preferred subject from the guidelines
+              t.subject_a(:path=>"subject")
+              # Name, Personal, Corporate Name
+              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
+              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
+              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
+              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
+              # Geographical coverage
+              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
+            }
+            t.subject_b(:path=>"subject")
+
             t.bioghist {
               t.p_(:ref => [:p])
             }
@@ -228,6 +240,7 @@ module DRI
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
         t.persname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.famname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :famname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:ead, :archdesc, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation"))] and not(@normal)]')
         # EAD Elements
@@ -298,7 +311,7 @@ module DRI
         return builder.doc
       end #xml_template
 
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
         # Title_sorted - A SOLR index for sorting titles
@@ -350,8 +363,8 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Publisher
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
@@ -551,7 +564,9 @@ module DRI
           when :creation_date_profiledesc
             [:ead, :eadheader, :profiledesc, :creation, :date]
           when :name_coverage
-            [:ead, :archdesc,  :name_coverage]
+            [:ead, :archdesc, :controlaccess, :name_coverage]
+          when :famname_coverage
+            [:ead, :archdesc, :controlaccess, :famname_coverage]
           when :geographical_coverage
             [:ead, :archdesc, :controlaccess, :geographical_coverage]
           when :corpname_coverage

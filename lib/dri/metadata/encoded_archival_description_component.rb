@@ -10,12 +10,21 @@ module DRI
         # Elements that can occur nested within other elements: multiple options
         t.p(:path => "p", :namespace_prefix => nil)
         # They can be used as subjects or even in the title
-        t.geographic_name(:path=>"geogname")
-        t.name_(:path=>"name")
+        t.geographic_name(:path=>"geogname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.name_(:path=>"name") {
+          t.role(:path => {:attribute=>"role"})
+        }
         t.persname_(:path=>"persname[not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
           t.role(:path => {:attribute=>"role"})
         }
-        t.corpname_(:path=>"corpname")
+        t.corpname_(:path=>"corpname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.famname_(:path=>"famname") {
+          t.role(:path => {:attribute=>"role"})
+        }
         t.date_(:path=>"date") {
           t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
@@ -35,11 +44,12 @@ module DRI
               t.head
               # Preferred subject from the guidelines
               t.subject_a(:path=>"subject")
-              # Name, Personal, Corporate Name
-              t.name_archdesc(:ref => [:name])
-              t.persname_archdesc(:ref => [:persname])
-              t.corpname_archdesc(:ref => [:corpname])
-              t.geographical_archdesc(:ref => [:geographic_name])
+              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
+              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
+              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
+              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
+              # Geographical coverage
+              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
             }
             # Or just subject within archdesc
             t.subject_archdesc(:path=>"subject")
@@ -114,10 +124,11 @@ module DRI
             # Or just subject within controlaccess as immediate child of c
             t.subject_c(:path=>"subject")
             # Name, Personal, Corporate Name
-            t.name_coverage(:ref => [:name])
-            t.persname_coverage(:ref => [:persname])
-            t.corpname_coverage(:ref => [:corpname])
-            t.geographical_coverage(:ref => [:geographic_name])
+            t.name_coverage(:ref => [:name], :attributes => {:role => "subject"})
+            t.persname_coverage(:ref => [:persname], :attributes => {:role => "subject"})
+            t.corpname_coverage(:ref => [:corpname], :attributes => {:role => "subject"})
+            t.famname_coverage(:ref => [:famname], :attributes => {:role => "subject"})
+            t.geographical_coverage(:ref => [:geographic_name], :attributes => {:role => "subject"})
           }
           t.bioghist {
             t.p_(:ref => [:p])
@@ -187,6 +198,7 @@ module DRI
         t.name_coverage(:proxy => [:c, :controlaccess, :name_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.persname_coverage(:proxy => [:c, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:c, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.famname_coverage(:proxy => [:c, :controlaccess, :famname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:c, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # Generic xpath query: @datechar="creation" is now case-insensitive
         t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and not(@normal)]')
@@ -255,8 +267,8 @@ module DRI
          terminology.xpath_for(:title)
       end
 
-      def to_solr(solr_doc=Hash.new)
-        super(solr_doc)
+      def to_solr(solr_doc=Hash.new, opts = {})
+        solr_doc = super(solr_doc)
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title', :stored_searchable, type: :string) => title)
         # Title
@@ -282,7 +294,7 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # Creator
-        creator_array = creator_for_index
+        creator_array = creator_for_index()
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :facetable) => creator_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable, type: :text) => DRI::Metadata::Transformations.transform_name(creator_array))
@@ -325,13 +337,13 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Display of Creation Date
         creation_date_array = creation_date_for_index()
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array == []
-        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creation_date", :stored_searchable)].present?
 
         # Language
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('language', :stored_searchable) => language)
@@ -340,10 +352,10 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
 
         # Temporal Coverage
-        #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
 
-        # Institute and sponsor/Depositing Institute: archdesc/did/repository
-        institute_array = institute_for_index
+        # FIXME - To be removed once the workflow is implemented Institute and sponsor/Depositing Institute: archdesc/did/repository
+        institute_array = institute_for_index()
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :facetable) => institute_array) unless institute_array == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
@@ -351,8 +363,8 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
 
         # Index related_material and alternative_form_available
-        solr_doc.merge!(Solrizer.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
-        solr_doc.merge!(Solrizer.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
 
         # Indexing dates for display + COOL date range
         # Display of Subject(Temporal)
@@ -433,7 +445,7 @@ module DRI
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creation_date_for_index
+      def creation_date_for_index()
         if (creation_date_idx != [] || creation_date != [])
           cdate_array = creation_date.collect! do |value|
             DRI::Metadata::Transformations.create_dcmi_point(value)
@@ -447,7 +459,7 @@ module DRI
 
       # Maps to origination/persname, if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creator_for_index
+      def creator_for_index()
         if (creator != [])
           return creator
         else
@@ -457,7 +469,7 @@ module DRI
       end
 
       # Get the Institute Information from the parent collection
-      def institute_for_index
+      def institute_for_index()
         if (institute != [])
           return institute
         else
@@ -467,13 +479,16 @@ module DRI
       end
 
       def get_field_from_parent(field_name)
+        uri_terms = uri.split("/")
+        id = uri_terms[uri_terms.size()-2] # get the object's id
         fedora_object = DRI::EncodedArchivalDescription.find(id)
 
         solr_query = "id:\"#{fedora_object.governing_collection.id.to_s}\""
         docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
-        parent_field = docs.first[Solrizer.solr_name(field_name, :stored_searchable, type: :string)]
-        if parent_field != nil
+        parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
+
+        if !parent_field.nil?
           return parent_field
         else
           return []
@@ -600,6 +615,8 @@ module DRI
             [:c, :archdesc, :controlaccess, :subject_a]
           when :name_coverage
             [:c, :controlaccess, :name_coverage]
+          when :famname_coverage
+            [:c, :controlaccess, :famname_coverage]
           when :persname_coverage
             [:c, :controlaccess, :persname_coverage]
           when :corpname_coverage

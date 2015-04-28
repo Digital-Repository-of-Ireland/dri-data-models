@@ -34,7 +34,6 @@ module DRI
           open(file_url) { |data| temp_file.write data.read}
           temp_file.close
 
-          # TODO AMG - add_file should create the content DS and also relate the generic_file to the MD object
           add_file temp_file, "content", file_name
           true
         rescue Exception => e
@@ -50,7 +49,7 @@ module DRI
 
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
-      def file_metadata_to_solr(solr_doc=Hash.new, opts={})
+      def file_metadata_to_solr(solr_doc=Hash.new)
         file_type = []
         file_type_display = []
         file_count = 0
@@ -69,10 +68,6 @@ module DRI
 
         if is_collection?
           file_type.push "collection"
-          # Moved to EAD Class - this is only EAD specific
-          #if !is_root_collection? && !ead_level.blank?
-          #  file_type_display.push ead_level.strip.capitalize
-          #else
           file_type_display.push "Collection"
         end
 
@@ -198,16 +193,6 @@ module DRI
 
         solr_doc
       end # file_metadata_to_solr
-
-      # Ingest a file into a GenericFile and add it to the Batch object
-      # This method is implemented in dri-app/config/initializers/batch_files_support.rb
-      def add_file file, dsid="content", file_name
-        # FIXME At present add_file is implemented in the DRI App
-        #gf = GenericFile.new(:pid => Sufia::IdService.mint)
-        #gf.batch = self
-        # ...
-        #gf.save
-      end
 
       private
 

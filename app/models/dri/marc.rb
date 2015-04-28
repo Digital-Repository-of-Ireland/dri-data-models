@@ -10,11 +10,11 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  has_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :related, property: :dcterms_relation, :class_name => "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_many :version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :version, property: :dcterms_is_version_of, :class_name => "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_many :format_of, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :format_of, property: :dcterms_is_format_of, :class_name => "DRI::Marc"
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
@@ -84,23 +84,23 @@ class Marc < DRI::Batch
     if self.is_collection?
       # Get all the collection's objects
       # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+      solr_query = "#{ActiveFedora::SolrService.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
 
       query = Solr::Query.new(solr_query)
       while (query.has_more?)
         collection_objects_docs = query.pop
         collection_objects_docs.each do |obj_doc|
           doc = SolrDocument.new(obj_doc)
-          object = DRI::Mods.find(doc.id)
+          object = DRI::Marc.find(doc.id)
           begin
             Sufia.queue.push(CreateMarcRelationshipsJob.new(object.pid))
           rescue Exception => e
             Rails.logger.error(e.message)
           end
         end
-        # Once we've processed all the children, then process this object
-        process_relationships()
       end
+      # Once we've processed all the children, then process this object
+      process_relationships()
     else
       # Only process the object's relationships
       process_relationships()
@@ -117,6 +117,15 @@ class Marc < DRI::Batch
   # Process a specific qdc relationship for the object
   #
   def add_dm_relationship(rels_array, rels_name)
+    # Reset previous relationships
+    if self.send("#{rels_name}").respond_to?("push")
+      self.send("#{rels_name}").clear
+    else
+      self.send("#{rels_name}=", nil)
+    end
+
+    self.save if self.valid?
+
     if rels_array.empty?
       return
     end
@@ -133,7 +142,7 @@ class Marc < DRI::Batch
     end
 
     doc = SolrDocument.new(solr_docs[0])
-    root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+    root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
     if (root_collection == nil)
       Rails.logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
@@ -142,8 +151,8 @@ class Marc < DRI::Batch
 
     rels_array.each do |item_id|
       # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-      solr_query = "marc_id_tesim:\"#{item_id.to_s}\""
-      solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+      solr_query = "#{ActiveFedora::SolrQueryBuildersolr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+      solr_query << " AND #{ActiveFedora::SolrQueryBuildersolr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if marc_item.empty?
