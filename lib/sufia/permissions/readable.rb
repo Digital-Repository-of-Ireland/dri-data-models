@@ -8,6 +8,8 @@ module Sufia
 
         while governing_object.master_file_access.nil? || governing_object.master_file_access == "inherit" 
           governing_object = governing_object.governing_collection
+
+          return false if governing_object.nil?
         end        
 
         governing_object.master_file_access == "public"
