@@ -29,9 +29,7 @@ module DRI
         new_object.depositor = self.depositor
         new_object.status = self.status
         new_object.update_metadata xml
-        self.permissions.each do |p|
-          new_object.permissions << p
-        end
+        new_object.permissions = self.permissions.to_a
 
         MetadataHelpers.checksum_metadata(new_object)
 

@@ -38,9 +38,8 @@ module DRI
             # Add depositor, status and permissions from parent
             new_child.depositor = self.depositor
             new_child.status = self.status
-            self.permissions.each do |p|
-              new_child.permissions << p
-            end
+            new_child.permissions = self.permissions.to_a
+            
             # ingest_files_from_metadata
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
             # FIXME Need to call checksum method below but this method is implemented in dri_app
