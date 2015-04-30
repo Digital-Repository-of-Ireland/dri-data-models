@@ -10,7 +10,10 @@ module DRI
     include DRI::ModelSupport::Collections
   
     has_many_versions
-    has_many :generic_files, property: :is_part_of, :class_name => "DRI::GenericFile", as: :batch
+
+    has_many :generic_files, class_name: "DRI::GenericFile", as: :batch
+
+    has_many :documentation_objects, class_name: "DRI::Documentation", as: :documentation_for
 
     # Declare a 'extracted' DS, of the following type
     contains "extracted", class_name: 'DRI::Metadata::Extracted'

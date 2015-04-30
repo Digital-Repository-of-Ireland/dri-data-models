@@ -9,25 +9,25 @@ module DRI
         belongs_to :governing_collection, property: :is_governed_by, class_name: 'DRI::Batch'
         has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection
 
-        # Two relationships below are used to manage a collection's structure
+        # NOT USED - Two relationships below for managing a collection's collections
         # (!) ONLY FOR COLLECTIONS
-        belongs_to :parent_collection, property: :is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :collections, property: :is_member_of_collection, :class_name => 'DRI::Batch', as: :parent_collection
+        belongs_to :parent_collection, property: :is_member_of_collection, class_name: 'DRI::Batch'
+        has_many :member_collections, property: :is_member_of_collection, class_name: 'DRI::Batch', as: :parent_collection
 
         # Additional relationships to keep track of sibling order, important for EAD
-        belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
+        belongs_to :previous_sibling, property: :is_preceded_by, class_name: 'DRI::Batch'
         # Updated so this is the equivalent of a :has_one relationship (similar to what we do in MODS with preceding/succeeding)
         # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
         # FIXME below needs to be updated to :has_many as opposed to :belongs_to
-        belongs_to :next_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
+        belongs_to :next_sibling, property: :is_preceded_by, class_name: 'DRI::Batch'
 
         def collection= collection
           if @collection == collection
           	@collection = collection
           # FIXME Possible Bug: obj.count returns random number even if empty?
-          elsif (collection == true) && (generic_files.size == 0)
+          elsif (collection == true) && (self.id.nil? || generic_files.count == 0)
         	  @collection = collection
-          elsif (collection == false) && (governed_items.size == 0) && (items.size == 0)
+          elsif (collection == false) && (self.id.nil? || governed_items.count == 0) && (self.id.nil? || member_collections.count == 0)
           	@collection = collection
           end
         end
@@ -45,9 +45,9 @@ module DRI
       	# It is a collection if we set it as a collection either through the metadata
       	# or using the collection accessor and it has no GenericFiles
       	# to the object.
-        # FIXME Possible Bug: generic_files.count returns random number even if empty?
-        # Replaced to size instead
-        (descMetadata.collection? || properties.collection?) && (generic_files.size == 0)
+        # FIXME Possible Bug in active-fedora: generic_files.count/empty?/any? returns > 0 for new objects with id: nil
+        # Temporarily added self.id.nil? to solve the issue
+        (self.descMetadata.collection? || self.properties.collection?) && (self.id.nil? || self.generic_files.count == 0)
       end
 
       def is_root_collection?
@@ -55,7 +55,7 @@ module DRI
       	# been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME Possible Bug: obj.count returns random number even if empty?
-        (!new_record?) && is_collection? && (governing_collection == nil) && (collections.size == 0)
+        (!new_record?) && is_collection? && (governing_collection == nil) && (self.id.nil? || self.collections.count == 0)
       end
 
       private

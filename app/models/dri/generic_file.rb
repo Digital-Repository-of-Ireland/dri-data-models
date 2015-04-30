@@ -15,7 +15,7 @@ class GenericFile < ActiveFedora::Base
   include Sufia::GenericFile::VirusCheck
   include Sufia::GenericFile::FullTextIndexing
 
-  belongs_to :batch, :class_name => "DRI::Batch", property: :is_part_of
+  belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: "DRI::Batch"
   # Declare a 'dri_properties' DS, of the following type
   contains "dri_properties", class_name: "DRI::Metadata::FileProperties"
 
