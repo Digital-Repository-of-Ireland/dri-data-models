@@ -228,6 +228,10 @@ module DRI
         solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
         solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
 
+        # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
+        geospatial_array = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
+
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_array) unless geospatial_array == []
 
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
@@ -240,16 +244,16 @@ module DRI
         date_field = date_field.delete_if{|v| /^null$/i.match(v)}
         date_field.collect! do |value|
           begin
-            if value.empty? || DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) # return value for display as it is
               # If value.empty? is cleaned afterwards
               value
             else
               # Date range in ISO8601 format?
               sdate = ISO8601::DateTime.new(value).strftime("%Y-%m-%d")
-              DRI::Metadata::Transformations.create_dcmi_point(value, sdate)
+              DRI::Metadata::Transformations.create_dcmi_period(value, sdate)
             end
           rescue ISO8601::Errors::StandardError
-            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+            DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
           end
         end
       end

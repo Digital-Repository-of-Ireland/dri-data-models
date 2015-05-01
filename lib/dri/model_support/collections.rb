@@ -12,7 +12,7 @@ module DRI
         # Two relationships below are used to manage a collection's structure
         # (!) ONLY FOR COLLECTIONS
         belongs_to :parent_collection, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
-        has_many :collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
+        has_many :member_collections, :property=>:is_member_of_collection, :class_name => 'DRI::Batch'
 
         # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, :property=>:is_preceded_by, :class_name => 'DRI::Batch'
@@ -26,7 +26,7 @@ module DRI
           	@collection = collection
           elsif (collection == true) && (generic_files.count == 0)
         	  @collection = collection
-          elsif (collection == false) && (governed_items.count == 0) && (items.count == 0)
+          elsif (collection == false) && (governed_items.count == 0) && (member_collections.count == 0)
           	@collection = collection
           end
         end
@@ -51,7 +51,7 @@ module DRI
       	# It is a root collection if it is already defined to be a collection; it has
       	# been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
-        (!new_record?) && is_collection? && (governing_collection == nil) && (collections.count == 0)
+        (!new_record?) && is_collection? && (governing_collection == nil) && (member_collections.count == 0)
       end
 
       private

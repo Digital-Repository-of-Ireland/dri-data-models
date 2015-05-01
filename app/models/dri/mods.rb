@@ -29,6 +29,8 @@ module DRI
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
+    # MODS record asset identifier used to sort pages/sequenced items
+    has_attributes :mods_id_asset, datastream: :descMetadata, multiple: false
     # MODS rest of identifiers are repeatable
     has_attributes :identifier, datastream: :descMetadata, multiple: true
     has_attributes :id_doi, datastream: :descMetadata, multiple: true
