@@ -55,7 +55,7 @@ module DRI
       	# been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME Possible Bug: obj.count returns random number even if empty?
-        (!new_record?) && is_collection? && (governing_collection == nil) && (self.id.nil? || self.collections.count == 0)
+        (!new_record?) && is_collection? && (governing_collection == nil) && (self.id.nil? || self.member_collections.count == 0)
       end
 
       private
