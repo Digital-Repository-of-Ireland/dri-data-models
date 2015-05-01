@@ -16,7 +16,7 @@ module DRI
         t.name_(:path=>"name") {
           t.role(:path => {:attribute=>"role"})
         }
-        t.persname_(:path=>"persname[not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
+        t.persname_(:path=>"persname[parent::origination[not(@label='Creator:')] and not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
           t.role(:path => {:attribute=>"role"})
         }
         t.corpname_(:path=>"corpname") {
