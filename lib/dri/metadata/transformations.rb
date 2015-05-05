@@ -8,6 +8,8 @@ module DRI
       PUBLISHED_DATE_RANGE_SOLR_FIELD = "pdateRange"
       SUBJECT_DATE_RANGE_SOLR_FIELD = "sdateRange"
       GEOSPATIAL_SOLR_FIELD = "geospatial"
+      GEOJSON_SOLR_FIELD = "geojson_ssim" # Solrizer only creates _tesim; for BL Maps we need _ssim
+      PLACENAME_SOLR_FIELD = "placename_field"
 
 	    # A function to convert an array of names that conform to archiving formatting standards into human-readable names
       # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
@@ -92,20 +94,27 @@ module DRI
       # @return Array of formatted coordinates or bbox for indexing
       #
       def self.transform_geospatial(geodata={})
-        results = []
+        results = Hash.new
+        results[:coords] = []
+        results[:name] = []
+        results[:json] = []
         geodata.each do | key, value |
           value.each do | geo_string |
             if (dcmi_point? geo_string)
               point = get_geo_point(geo_string)
               # [east_long north_lat]
-              if point.has_key?('east') && point.has_key?('north')
-                results << "#{point['east']} #{point['north']}"
+              if point.has_key?('east') && point.has_key?('north') && point.has_key?('name')
+                results[:coords] << "#{point['east']} #{point['north']}"
+                results[:name] << point['name']
+                results[:json] << geojson_string_from_coords(point['name'], "#{point['east']} #{point['north']}")
               end
             elsif (dcmi_box? geo_string)
               box = get_geo_box(geo_string)
               # [west_long south_lat east_long north_lat]
-              if box.has_key?('eastlimit') && box.has_key?('northlimit') && box.has_key?('westlimit') && box.has_key?('southlimit')
-                results << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
+              if box.has_key?('name') && box.has_key?('eastlimit') && box.has_key?('northlimit') && box.has_key?('westlimit') && box.has_key?('southlimit')
+                results[:coords] << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
+                results[:name] << box['name']
+                results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
               end
             end
           end
@@ -125,6 +134,8 @@ module DRI
             point['east'] = v.strip
           elsif k.eql?('north')
             point['north'] = v.strip
+          elsif k.eql?('name')
+            point['name'] = v.strip
           end
         end
 
@@ -146,6 +157,8 @@ module DRI
             box['southlimit'] = v.strip
           elsif k.eql?('westlimit')
             box['westlimit'] = v.strip
+          elsif k.eql?('name')
+            box['name'] = v.strip
           end
         end
 
@@ -299,6 +312,36 @@ module DRI
 
       def self.create_dcmi_period(name, sdate="", edate="", scheme="")
         return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
+      end
+
+      # Taken from maps_controller and adapted
+      def self.geojson_string_from_coords(name, coords)
+        geojson_hash = {type: "Feature", geometry: {}, properties: {}}
+        if coords.scan(/[\s]/).length == 3 # bbox
+          coords_array = coords.split(' ').map { |v| v.to_f }
+          geojson_hash[:bbox] = coords_array
+          geojson_hash[:geometry][:type] = "Polygon"
+          geojson_hash[:geometry][:coordinates] = [[[coords_array[0],coords_array[1]],
+                                                    [coords_array[2],coords_array[1]],
+                                                    [coords_array[2],coords_array[3]],
+                                                    [coords_array[0],coords_array[3]],
+                                                    [coords_array[0],coords_array[1]]]]
+        elsif coords.match(/^[-]?[\d]*[\.]?[\d]*[ ,][-]?[\d]*[\.]?[\d]*$/) # point
+          geojson_hash[:geometry][:type] = "Point"
+          if coords.match(/,/)
+            coords_array = coords.split(',').reverse
+          else
+            coords_array = coords.split(' ')
+          end
+          geojson_hash[:geometry][:coordinates] = coords_array.map { |v| v.to_f }
+        else
+          Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
+        end
+        geojson_hash[:properties] = {}
+        geojson_hash[:properties][:placename] = name
+
+        # Return as a JSON String for blacklight-maps
+        geojson_hash.to_json.to_s
       end
 
       # Split date ranges into separate _start and _end SOLR indexes
