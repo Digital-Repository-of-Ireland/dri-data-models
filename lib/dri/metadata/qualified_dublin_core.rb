@@ -228,9 +228,12 @@ module DRI
         solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
-        geospatial_array = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
 
-        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_array) unless geospatial_array == []
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
         #solr_doc.merge!(date_ranges)
