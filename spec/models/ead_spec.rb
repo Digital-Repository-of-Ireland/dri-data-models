@@ -3,6 +3,7 @@ require 'spec_helper'
 describe 'EncodedArchivalDescription' do
   # Before each test create test objects
   before(:each) do
+    # FIXME Replace the xml file with one that has namespaces
     @header_xml = fixture("ead/collections/ead_header_dtd.xml")
     @ead_header = DRI::EncodedArchivalDescription.new :collection
     @ead_header.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml
@@ -17,9 +18,13 @@ describe 'EncodedArchivalDescription' do
     @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
   end
 
-  xit "should have namespaces removed from the ead datastream" do
+  it "should have namespaces removed from the ead datastream" do
+    @ead_header = DRI::EncodedArchivalDescription.new :collection
+    @header_xml = fixture("ead/collections/ead_header.xml")
+    @ead_header.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml
+
     ead_namespace = {"xmlns:ead" => "urn:isbn:1-931666-22-9"}
-    expect(@ead_header.descMetadata.ng_xml.xpath("/ead:ead", ead_namespace)).to be_empty
+    expect(@ead_header.descMetadata.ng_xml.namespaces).not_to include(ead_namespace)
   end
 
   # DRI elements tests

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mods="http://www.loc.gov/mods/v3"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:identifier type="local">12345-678-9</mods:identifier>
+  <mods:titleInfo>
+    <mods:title/>
+  </mods:titleInfo>
+  <mods:name type="personal">
+    <mods:namePart type="family">King</mods:namePart>
+    <mods:namePart type="given">Richard</mods:namePart>
+    <mods:namePart type="date">1907-1974</mods:namePart>
+    <mods:role>
+      <mods:roleTerm type="code" authority="marcrelator">att</mods:roleTerm>
+      <mods:roleTerm type="text" authority="marcrelator">Attributed name</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <mods:originInfo>
+    <mods:dateCreated encoding="w3cdtf" point="start">1931-01-01</mods:dateCreated>
+    <mods:dateCreated encoding="w3cdtf" point="end">1973-12-31</mods:dateCreated>
+  </mods:originInfo>
+  <mods:abstract>Colour scheme for a single light stained glass window featuring St. Brendan holding his church, with his ship depicted in a lozenge to his left, and a sea monster entwined around his legs.</mods:abstract>
+  <mods:accessCondition>Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</mods:accessCondition>
+  <mods:typeOfResource>still image</mods:typeOfResource>
+  <mods:subject authority="lcsh">
+    <mods:topic>Drawings, Irish</mods:topic>
+  </mods:subject>
+  <mods:subject authority="lcsh">
+    <mods:topic>Christian saints</mods:topic>
+  </mods:subject>
+  <mods:subject>
+    <mods:name type="personal" authority="naf">
+      <mods:namePart type="given">Brendan</mods:namePart>
+      <mods:namePart type="termsOfAddress">Saint</mods:namePart>
+      <mods:description>The Voyager</mods:description>
+      <!-- mods:date element is no longer available within mods:name -->
+      <!-- <mods:date>approximately 483-577</mods:date> -->
+      <mods:displayForm>Brendan, Saint, the Voyager, approximately 483­577</mods:displayForm>
+    </mods:name>
+  </mods:subject>
+  <mods:identifier type="local">IE TCD MS 11182</mods:identifier>
+  <mods:physicalDescription>
+    <mods:form authority="​gmgpc">Drawings</mods:form>
+    <mods:form type="material" authority="aat">paper (fiber product)</mods:form>
+    <mods:form type="material" authority="aat">canvas</mods:form>
+    <mods:form type="material" authority="aat">pencils (drawing and writing equipment)</mods:form>
+    <mods:form type="material" authority="aat">gouache (paint)</mods:form>
+    <mods:note>Pencil and gouache on paper, with canvas backing adhered overall</mods:note>
+  </mods:physicalDescription>
+  <mods:originInfo>
+    <mods:publisher>Digital Repository of Ireland</mods:publisher>
+  </mods:originInfo>
+</mods:mods>

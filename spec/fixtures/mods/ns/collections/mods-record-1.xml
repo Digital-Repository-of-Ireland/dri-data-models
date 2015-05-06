@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:mods version="3.5" xmlns:mods="http://www.loc.gov/mods/v3"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+  xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <mods:identifier type="local">http://example.org/gettysburg#</mods:identifier>
+  <mods:titleInfo>
+    <mods:title>At Gettysburg, or, What a Girl Saw and Heard of the Battle: A True Narrative</mods:title>
+  </mods:titleInfo>
+  <mods:abstract>TEST ABSTRACT</mods:abstract>
+  <mods:name type="personal">
+    <mods:namePart>Alleman, Tillie Pierce [1848-1914]</mods:namePart>
+    <mods:role>
+      <mods:roleTerm type="code" authority="marcrelator">aut</mods:roleTerm>
+      <mods:roleTerm type="text" authority="marcrelator">Author</mods:roleTerm>
+    </mods:role>
+  </mods:name>
+  <mods:typeOfResource>text</mods:typeOfResource>
+  <mods:genre type="dct">Text</mods:genre>
+  <mods:originInfo>
+    <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+    <mods:place>
+      <mods:placeTerm type="text">New York</mods:placeTerm>
+    </mods:place>
+    <mods:publisher>W. Lake Borland</mods:publisher>
+    <mods:dateIssued keyDate="yes" encoding="w3cdtf">1889</mods:dateIssued>
+  </mods:originInfo>
+  <mods:language>
+    <mods:languageTerm authority="iso639-2b">eng</mods:languageTerm>
+    <mods:languageTerm type="text">English</mods:languageTerm>
+  </mods:language>
+  <mods:physicalDescription>
+    <mods:internetMediaType>text/html</mods:internetMediaType>
+    <mods:digitalOrigin>reformatted digital</mods:digitalOrigin>
+  </mods:physicalDescription>
+  <mods:subject authority="lcsh">
+    <mods:topic >Gettysburg, Battle of, Gettysburg, Pa., 1863</mods:topic>
+  </mods:subject>
+  <mods:subject authority="lcsh">
+    <mods:topic>Gettysburg (Pa.) -- History -- Civil War, 1861-1865</mods:topic>
+  </mods:subject>
+  <mods:subject authority="lcsh">
+    <mods:topic>United States -- History -- Civil War, 1861-1865 -- Campaigns</mods:topic>
+  </mods:subject>
+  <mods:classification authority="lcc">E475.53 .A42</mods:classification>
+  <mods:location>
+    <mods:url usage="primary display" access="object in context">http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html</mods:url>
+  </mods:location>
+  <mods:accessCondition> Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.
+  </mods:accessCondition>
+  <mods:recordInfo>
+    <mods:recordContentSource>University of Pennsylvania Digital Library</mods:recordContentSource>
+    <mods:recordOrigin> MODS auto-converted from a simple Online Books Page metadata record. For details, see http://onlinebooks.library.upenn.edu/mods.html </mods:recordOrigin>
+    <mods:languageOfCataloging>
+      <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
+    </mods:languageOfCataloging>
+  </mods:recordInfo>
+  <mods:relatedItem type="isReferencedBy">
+    <mods:identifier type="local">http://digital.library.upenn.edu/women/</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>A Celebration of Women Writers: Americana</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
+  <mods:relatedItem type="host">
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>Subcollection 1</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
+</mods:mods>
+
+

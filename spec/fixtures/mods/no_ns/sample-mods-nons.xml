@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.loc.gov/mods/v3"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd">
+  <titleInfo>
+    <title>St Brendan the navigator holding his church</title>
+  </titleInfo>
+  <name type="personal">
+    <namePart type="family">King</namePart>
+    <namePart type="given">Richard</namePart>
+    <namePart type="date">1907-1974</namePart>
+    <role>
+      <roleTerm type="code" authority="marcrelator">att</roleTerm>
+      <roleTerm type="text" authority="marcrelator">Attributed name</roleTerm>
+    </role>
+  </name>
+  <originInfo>
+    <dateCreated encoding="w3cdtf" point="start">1931-01-01</dateCreated>
+    <dateCreated encoding="w3cdtf" point="end">1973-12-31</dateCreated>
+  </originInfo>
+  <abstract>Colour scheme for a single light stained glass window featuring St. Brendan holding his church, with his ship depicted in a lozenge to his left, and a sea monster entwined around his legs.</abstract>
+  <accessCondition>Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</accessCondition>
+  <typeOfResource>still image</typeOfResource>
+  <subject authority="lcsh">
+    <topic>Drawings, Irish</topic>
+  </subject>
+  <subject authority="lcsh">
+    <topic>Christian saints</topic>
+  </subject>
+  <subject>
+    <name type="personal" authority="naf">
+      <namePart type="given">Brendan</namePart>
+      <namePart type="termsOfAddress">Saint</namePart>
+      <description>The Voyager</description>
+      <!-- date element is no longer available within name -->
+      <!-- <date>approximately 483-577</date> -->
+      <displayForm>Brendan, Saint, the Voyager, approximately 483­577</displayForm>
+    </name>
+  </subject>
+  <identifier type="local">IE TCD MS 11182</identifier>
+  <physicalDescription>
+    <form authority="​gmgpc">Drawings</form>
+    <form type="material" authority="aat">paper (fiber product)</form>
+    <form type="material" authority="aat">canvas</form>
+    <form type="material" authority="aat">pencils (drawing and writing equipment)</form>
+    <form type="material" authority="aat">gouache (paint)</form>
+    <note>Pencil and gouache on paper, with canvas backing adhered overall</note>
+  </physicalDescription>
+  <originInfo>
+    <publisher>Digital Repository of Ireland</publisher>
+  </originInfo>
+</mods>

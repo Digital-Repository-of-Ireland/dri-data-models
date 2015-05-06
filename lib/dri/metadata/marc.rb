@@ -42,7 +42,8 @@ module DRI
         t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"] | //record/datafield[@tag="740"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
         t.subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="650" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         t.contributor(:path => 'record/datafield[@tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
+        # TODO Add mapping to Source
+        t.source(:path => 'record/datafield[@tag="830" or @tag="490"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # marc fields
         t.leader(:proxy => [:record, :leader])
 
@@ -78,7 +79,21 @@ module DRI
         t.author_facet(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111" or @tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         t.subject_name_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
+        # Date Indices
+        t.creation_date_idx(:path => "//record/controlfield[@tag='008']")
+
       end # set_terminology
+
+      # From: Appendix 2 - Conversion rules for Leader06 - dc:Type mapping
+      # http://www.loc.gov/marc/marc2dc.html
+      def collection?
+        # Leader/06 value for "dcmitype:collection": p (mixed materials)
+        # Leader/07 value for "dcmitype:collection": c, s (collection or serial respectively)
+        # Position 7 for 6th character and position 8 for 7th as Xpath substring first position is 1 rather that 0)
+        leader_6_type = ng_xml.xpath('substring(//record/leader, 7, 1)')
+        leader_7_type = ng_xml.xpath('substring(//record/leader, 8, 1)')
+        ["p"].include?(leader_6_type) || ["c", "s"].include?(leader_7_type) ? true : false
+      end
 
       # Build the xml doc
       def self.xml_template
@@ -138,12 +153,38 @@ module DRI
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
         #solr_doc.merge!(date_ranges)
 
+        date_ranges = get_creation_date_for_index() # ALL the date ranges
+
+        # Creation date dateRange index
+        cdate_ranges = date_ranges.select {|key, value| ["creation_date"].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+
         solr_doc
       end
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
           contributor | creator | publisher
+      end
+
+      #
+      # return Hash with creation_date array
+      #
+      def get_creation_date_for_index()
+        dates_hash = Hash.new
+
+        unless creation_date_idx == []
+          dates_array = creation_date_idx.collect! do |value|
+            date_s = value.slice(7, 4)
+            date_e = value.slice(11, 4)
+            if (!["\\\\", "    ", "####"].include?(date_s))
+              !["\\\\", "    ", "####"].include?(date_e) ? "#{date_s}/#{date_e}" : date_s
+            end
+          end
+          dates_hash['creation_date'] = dates_array unless dates_array == []
+        end
+
+        return dates_hash
       end
 
       def custom_validations
@@ -157,7 +198,7 @@ module DRI
         creation_date_result = false
 
 
-        # Join all elements in arrar, get rid of carriege returns from the form (squish) and validate
+        # Join all elements in array, get rid of carriage returns from the form (squish) and validate
         title_result = true unless title.join.squish == ""
         type_result = true unless type.join.squish == ""
         description_result = true unless description.join.squish == ""
@@ -204,7 +245,9 @@ module DRI
       end
 
       def type
-        [DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
+        #[DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
+        # Position 7 (for 6th character as substring starts positions in 1 rather that 0)
+        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
       end
 
       def add_datafields(datafields)
