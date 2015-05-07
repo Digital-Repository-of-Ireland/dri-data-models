@@ -6,21 +6,32 @@ class Marc < DRI::Batch
   has_attributes :leader, datastream: :descMetadata, multiple: false
   has_attributes :controlfield, :controlfield_tag, datastream: :descMetadata, multiple: true
   has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
+
+  # MARC record identifier used for internal relationships target, not multi-valued
   has_attributes :marc_id, datastream: :descMetadata, multiple: false
+  # MARC record asset identifier used to sort pages/sequenced items
+  has_attributes :marc_id_asset, datastream: :descMetadata, multiple: false
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
   has_and_belongs_to_many :related, property: :dcterms_relation, :class_name => "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_and_belongs_to_many :version, property: :dcterms_is_version_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_version, property: :dcterms_is_version_of, :class_name => "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_and_belongs_to_many :format_of, property: :dcterms_is_format_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_format, property: :dcterms_is_format_of, :class_name => "DRI::Marc"
+
+  # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
+  belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
+  has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Marc", as: :preceding
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
   has_attributes  :relation_ids_isVersionOf, datastream: :descMetadata, multiple: true
   has_attributes  :relation_ids_isFormatOf, datastream: :descMetadata, multiple: true
   has_attributes  :relation_ids_relation, datastream: :descMetadata, multiple: true
+
+  has_attributes  :relation_ids_preceding, datastream: :descMetadata, multiple: true
+  has_attributes  :relation_ids_succeeding, datastream: :descMetadata, multiple: true
 
   has_attributes :related_material, datastream: :descMetadata, multiple: true
   has_attributes :alternative_form, datastream: :descMetadata, multiple: true
@@ -59,14 +70,18 @@ class Marc < DRI::Batch
   end
 
   def split_xml xml_text
+    # If collection wrapper present, the first object will have
+    # the first marc:record and we then process the rest when saving
     collection = xml_text.search("//collection")
-    records = collection.children
-    record = records[0]
 
-    collection[0].children.remove
-    collection[0].add_child(record)
-    
-    return collection[0].to_xml
+    if (!collection.empty?)
+      records = collection.children
+      record = records[0]
+    else
+      record = xml_text
+    end
+
+    return record.to_xml
   end
 
   def attributes=(properties)
@@ -109,9 +124,10 @@ class Marc < DRI::Batch
   end # end add_relationships
 
   def process_relationships()
+    add_dm_relationship(relation_ids_preceding, :preceding)
     add_dm_relationship(relation_ids_relation, :related)
-    add_dm_relationship(relation_ids_isVersionOf, :version)
-    add_dm_relationship(relation_ids_isFormatOf, :format_of)
+    add_dm_relationship(relation_ids_isVersionOf, :is_version)
+    add_dm_relationship(relation_ids_isFormatOf, :is_format)
   end
 
   # Process a specific qdc relationship for the object
@@ -123,6 +139,7 @@ class Marc < DRI::Batch
     else
       self.association(rels_name.to_sym).replace(nil)
     end
+
     self.save if self.valid?
 
     if rels_array.empty?
@@ -150,8 +167,8 @@ class Marc < DRI::Batch
 
     rels_array.each do |item_id|
       # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{ActiveFedora::SolrQueryBuildersolr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-      solr_query << " AND #{ActiveFedora::SolrQueryBuildersolr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
+      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+      solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if marc_item.empty?
@@ -160,7 +177,7 @@ class Marc < DRI::Batch
         doc = SolrDocument.new(marc_item[0])
         # Cast the solr document to its corresponding Fedora object
         marc_obj = DRI::Marc.find(doc.id)
-        unless qdc_obj == nil
+        unless marc_obj == nil
           if self.send("#{rels_name}").respond_to?("push")
             self.send("#{rels_name}").push marc_obj
           else
@@ -175,8 +192,10 @@ class Marc < DRI::Batch
 
   def get_relationships_names
     return {:related => "Is Related To",
-            :version => "Is Version Of",
-            :format_of => "Is Format Of"
+            :is_version => "Is Version Of",
+            :is_format => "Is Format Of",
+            :preceding => "Preceding",
+            :succeeding => "Succeeding"
     }
   end
 
@@ -187,7 +206,7 @@ class Marc < DRI::Batch
     full_metadata_no_ns.remove_namespaces!
     if !new_record? && full_metadata_no_ns.search("//record").count > 1
       begin
-        Sufia.queue.push(CreateMarcRecordsJob.new(self.pid))
+        Sufia.queue.push(CreateMarcRecordsJob.new(self.id))
       rescue Exception => e
       end
     end
