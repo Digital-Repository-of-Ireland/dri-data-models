@@ -622,6 +622,8 @@ module DRI
             [:c, :controlaccess, :persname_coverage]
           when :corpname_coverage
             [:c, :controlaccess, :corpname_coverage]
+          when :famname_coverage
+            [:c, :controlaccess, :famname_coverage]
           when :geographical_coverage
             [:c, :controlaccess, :geographical_coverage]
           when :temporal_coverage

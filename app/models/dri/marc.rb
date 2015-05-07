@@ -110,8 +110,10 @@ class Marc < DRI::Batch
 
   def process_relationships()
     add_dm_relationship(relation_ids_relation, :related)
-    add_dm_relationship(relation_ids_isVersionOf, :version)
-    add_dm_relationship(relation_ids_isFormatOf, :format_of)
+    add_dm_relationship(relation_ids_isVersionOf, :is_version)
+    #add_dm_relationship(relation_ids_isVersionOf, :has_versions)
+    add_dm_relationship(relation_ids_isFormatOf, :is_format)
+    #add_dm_relationship(relation_ids_hasFormat, :has_format)
   end
 
   # Process a specific qdc relationship for the object
@@ -175,8 +177,10 @@ class Marc < DRI::Batch
 
   def get_relationships_names
     return {:related => "Is Related To",
-            :version => "Is Version Of",
-            :format_of => "Is Format Of"
+            :is_version => "Is Version Of",
+            :has_versions => "Has Version",
+            :is_format => "Is Format Of",
+            :has_format => "Has Format"
     }
   end
 
