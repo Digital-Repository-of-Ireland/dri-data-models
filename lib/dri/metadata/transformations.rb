@@ -116,6 +116,17 @@ module DRI
                 results[:name] << box['name']
                 results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
               end
+            elsif (geo_string =~ /\A#{URI::regexp(['http', 'https'])}\z/)
+              ld = DRI::LinkedData.where(source: geo_string)
+              if ld.present?
+                geojson = ld.first.spatial
+                geojson.each do |geo|
+                  geojson_hash = JSON.parse(geo, symbolize_names: true)
+                  results[:json] << geo
+                  results[:name] << geojson_hash[:properties][:placename]
+                  results[:coords] << "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
+                end 
+              end
             end
           end
         end
