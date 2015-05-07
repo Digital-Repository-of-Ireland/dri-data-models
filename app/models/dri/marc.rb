@@ -16,11 +16,9 @@ class Marc < DRI::Batch
   # 787: Other Relationship Entry; Mapped to DC: relation
   has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
-  has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
-  has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
   belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
@@ -129,9 +127,7 @@ class Marc < DRI::Batch
     add_dm_relationship(relation_ids_preceding, :preceding)
     add_dm_relationship(relation_ids_relation, :related)
     add_dm_relationship(relation_ids_isVersionOf, :is_version)
-    #add_dm_relationship(relation_ids_isVersionOf, :has_versions)
     add_dm_relationship(relation_ids_isFormatOf, :is_format)
-    #add_dm_relationship(relation_ids_hasFormat, :has_format)
   end
 
   # Process a specific qdc relationship for the object
@@ -181,7 +177,7 @@ class Marc < DRI::Batch
         doc = SolrDocument.new(marc_item[0])
         # Cast the solr document to its corresponding Fedora object
         marc_obj = DRI::Marc.find(doc.id)
-        unless qdc_obj == nil
+        unless marc_obj == nil
           if self.send("#{rels_name}").respond_to?("push")
             self.send("#{rels_name}").push marc_obj
           else
@@ -197,9 +193,7 @@ class Marc < DRI::Batch
   def get_relationships_names
     return {:related => "Is Related To",
             :is_version => "Is Version Of",
-            :has_versions => "Has Version",
             :is_format => "Is Format Of",
-            :has_format => "Has Format",
             :preceding => "Preceding",
             :succeeding => "Succeeding"
     }
