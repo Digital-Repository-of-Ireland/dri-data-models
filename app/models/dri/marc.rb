@@ -84,7 +84,7 @@ class Marc < DRI::Batch
     if self.is_collection?
       # Get all the collection's objects
       # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{ActiveFedora::SolrService.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
       query = Solr::Query.new(solr_query)
       while (query.has_more?)
@@ -121,9 +121,8 @@ class Marc < DRI::Batch
     if self.send("#{rels_name}").respond_to?("push")
       self.send("#{rels_name}").clear
     else
-      self.send("#{rels_name}=", nil)
+      self.association(rels_name.to_sym).replace(nil)
     end
-
     self.save if self.valid?
 
     if rels_array.empty?

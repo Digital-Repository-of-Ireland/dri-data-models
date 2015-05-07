@@ -79,7 +79,7 @@ module DRI
       if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{ActiveFedora::SolrService.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -117,16 +117,15 @@ module DRI
       add_dm_relationship(relation_ids_source, :source_rel)
     end
 
-    # Process a specific qdc relationship for the objectå
+    # Process a specific qdc relationship for the object
     #
     def add_dm_relationship(rels_array, rels_name)
       # Reset previous relationships
       if self.send("#{rels_name}").respond_to?("push")
         self.send("#{rels_name}").clear
       else
-        self.send("#{rels_name}=", nil)
+        self.association(rels_name.to_sym).replace(nil)
       end
-
       self.save if self.valid?
 
       if rels_array.empty?
@@ -170,7 +169,7 @@ module DRI
               qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
-              self.governing_collection = qdc_obj
+              self.association(:governing_collection).replace(qdc_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push qdc_obj
@@ -179,6 +178,7 @@ module DRI
               end
             end
 
+            # Save object, if valid
             self.save if self.valid?
           end
         end

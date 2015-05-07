@@ -25,9 +25,9 @@ module DRI
           if @collection == collection
           	@collection = collection
           # FIXME Possible Bug: obj.count returns random number even if empty?
-          elsif (collection == true) && (self.id.nil? || generic_files.count == 0)
+          elsif (collection == true) && (self.id.nil? || self.generic_files.count == 0)
         	  @collection = collection
-          elsif (collection == false) && (self.id.nil? || governed_items.count == 0) && (self.id.nil? || member_collections.count == 0)
+          elsif (collection == false) && (self.id.nil? || self.governed_items.count == 0) && (self.id.nil? || self.member_collections.count == 0)
           	@collection = collection
           end
         end
@@ -54,8 +54,8 @@ module DRI
       	# It is a root collection if it is already defined to be a collection; it has
       	# been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
-        # FIXME Possible Bug: obj.count returns random number even if empty?
-        (!new_record?) && is_collection? && (governing_collection == nil) && (self.id.nil? || self.member_collections.count == 0)
+        # FIXME Possible Bug: obj.relation.count returns > 0 for has_many associations if id=nil (foreign_key nil)
+        (!self.new_record?) && self.is_collection? && (self.governing_collection == nil) && (self.id.nil? || self.member_collections.count == 0)
       end
 
       private
@@ -68,9 +68,9 @@ module DRI
         ancestor_titles = []
         ancestor_ids = []
 
-        curr_gov_collection = governing_collection
-        # TODO - Issue XXX Check whether col-to-sub-col rels are kept via 'isGovernedBy' We use isMemberOfCollection as well
-        while (curr_gov_collection != nil)
+        curr_gov_collection = self.governing_collection
+
+        while (!curr_gov_collection.nil?)
           ancestor_titles << curr_gov_collection.title[0]
           ancestor_ids << curr_gov_collection.id
           curr_gov_collection = curr_gov_collection.governing_collection

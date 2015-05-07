@@ -212,9 +212,8 @@ module DRI
       if self.send("#{rels_name}").respond_to?("push")
         self.send("#{rels_name}").clear
       else
-        self.send("#{rels_name}=", nil)
+        self.association(rels_name.to_sym).replace(nil)
       end
-
       self.save if self.valid?
 
       if rels_array.empty?
@@ -258,7 +257,7 @@ module DRI
               mods_obj.save if mods_obj.valid?
             elsif rels_name.equal?(:host)
               self.send("#{rels_name}=", mods_obj)
-              self.governing_collection = mods_obj
+              self.association(:governing_collection).replace(mods_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push mods_obj
