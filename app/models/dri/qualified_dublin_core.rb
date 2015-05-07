@@ -126,7 +126,7 @@ module DRI
       if self.send("#{rels_name}").respond_to?("push")
         self.send("#{rels_name}").clear
       else
-        self.send("#{rels_name}=", nil)
+        self.association(rels_name.to_sym).replace(nil)
       end
 
       self.save if self.valid?
@@ -172,7 +172,7 @@ module DRI
               qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
-              self.governing_collection = qdc_obj
+              self.association(:governing_collection).replace(qdc_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push qdc_obj
@@ -181,6 +181,7 @@ module DRI
               end
             end
 
+            # Save object, if valid
             self.save if self.valid?
           end
         end

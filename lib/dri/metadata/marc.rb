@@ -7,27 +7,27 @@ module DRI
       # OM (Opinionated Metadata) terminology mapping to an Marc Collection
       # df=datafield, sf=subfield,
       set_terminology do |t|
-        t.root(:path=>"collection", :namespace_prefix => nil)
+        t.root(:path=>"record", :namespace_prefix => nil)
 
-         t.record(:path=>"record", :namespace_prefix=>nil) {
+        t.record(:path=>"record", :namespace_prefix=>nil) {
 
-            t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-            t.controlfield {
-              t.controlfield_tag(:path=>{:attribute=>"tag"})
+          t.controlfield {
+            t.controlfield_tag(:path=>{:attribute=>"tag"})
+          }
+
+          t.datafield {
+            t.tag(:path=>{:attribute=>"tag"})
+            t.ind1(:path=>{:attribute=>"ind1"})
+            t.ind2(:path=>{:attribute=>"ind2"})
+            t.subfield(:path => "subfield") {
+              t.code(:path=>{:attribute=>"code"})
             }
-
-            t.datafield {
-              t.tag(:path=>{:attribute=>"tag"})
-              t.ind1(:path=>{:attribute=>"ind1"})
-              t.ind2(:path=>{:attribute=>"ind2"})
-              t.subfield(:path => "subfield") {
-                t.code(:path=>{:attribute=>"code"})
-              }
-            }
-
+          }
         }
 
+        # TERM PROXIES and mappings
         # Mandatory fields
         t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a" or @code="b" or @code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -90,6 +90,9 @@ module DRI
         # value of the identifier comes then from subfield $a
         # Example: 024 	7#$a0A3200912B4A1057$2local http://www.loc.gov/marc/marc2dc.html#unqualifiedlist
         t.marc_id(:path => "record/datafield[@tag='024' and @ind1='7' and subfield[@code='2']='local']/subfield[@code='a']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # marc_asset - Used for sorting sequenced items
+        # we map it to 024 - Other Standard Identifier (R); indicator1 = 8 (Unspecified type of standard number or code)
+        t.marc_id_asset(:path => "record/datafield[@tag='024' and @ind1='8']/subfield[@code='a']", :index_as => [:stored_sortable])
 
         # Relationships terms (Crosswalk MARC to QDC: http://www.loc.gov/marc/marc2dc.html#qualifiedlist)
         # Tag 775 - Other Edition Entry (R); Subfield $o - Other item identifier (R)
@@ -99,8 +102,13 @@ module DRI
         # Tag 787 - Other Relationship Entry (R); Subfield $o - Other item identifier (R)
         t.relation_ids_relation(:path => 'record/datafield[@tag="787"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
+        # Tag 780 - Preceding Entry (R); Subfield $o - Preceding item identifier (R)
+        t.relation_ids_preceding(:path => 'record/datafield[@tag="780"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 785 - Succeeding Entry (R); Subfield $o - Succeeding item identifier (R)
+        t.relation_ids_succeeding(:path => 'record/datafield[@tag="785"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
         #t.related_material(:path => "record/datafield[@tag='544' and @ind1='0']/subfield[@code='a']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # FIXME Related Material for now is also mapped to alternative_form, as allows to specify a URL
+        #FIXME Related Material for now is also mapped to alternative_form, as allows to specify a URL
         t.related_material(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # MARC field 530, subfield $u for a URL to an alternative form available of this resource
         t.alternative_form(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])

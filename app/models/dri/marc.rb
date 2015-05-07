@@ -6,7 +6,11 @@ class Marc < DRI::Batch
   has_attributes :leader, datastream: :descMetadata, multiple: false
   has_attributes :controlfield, :controlfield_tag, datastream: :descMetadata, multiple: true
   has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
+
+  # MARC record identifier used for internal relationships target, not multi-valued
   has_attributes :marc_id, datastream: :descMetadata, multiple: false
+  # MARC record asset identifier used to sort pages/sequenced items
+  has_attributes :marc_id_asset, datastream: :descMetadata, multiple: false
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
@@ -18,11 +22,18 @@ class Marc < DRI::Batch
   belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
   has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
 
+  # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
+  belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
+  has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Marc"
+
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
   has_attributes  :relation_ids_isVersionOf, datastream: :descMetadata, multiple: true
   has_attributes  :relation_ids_isFormatOf, datastream: :descMetadata, multiple: true
   has_attributes  :relation_ids_relation, datastream: :descMetadata, multiple: true
+
+  has_attributes  :relation_ids_preceding, datastream: :descMetadata, multiple: true
+  has_attributes  :relation_ids_succeeding, datastream: :descMetadata, multiple: true
 
   has_attributes :related_material, datastream: :descMetadata, multiple: true
   has_attributes :alternative_form, datastream: :descMetadata, multiple: true
@@ -61,14 +72,18 @@ class Marc < DRI::Batch
   end
 
   def split_xml xml_text
+    # If collection wrapper present, the first object will have
+    # the first marc:record and we then process the rest when saving
     collection = xml_text.search("//collection")
-    records = collection.children
-    record = records[0]
 
-    collection[0].children.remove
-    collection[0].add_child(record)
+    if (!collection.empty?)
+      records = collection.children
+      record = records[0]
+    else
+      record = xml_text
+    end
     
-    return collection[0].to_xml
+    return record.to_xml
   end
 
   def attributes=(properties)
@@ -111,6 +126,7 @@ class Marc < DRI::Batch
   end # end add_relationships
 
   def process_relationships()
+    add_dm_relationship(relation_ids_preceding, :preceding)
     add_dm_relationship(relation_ids_relation, :related)
     add_dm_relationship(relation_ids_isVersionOf, :is_version)
     #add_dm_relationship(relation_ids_isVersionOf, :has_versions)
@@ -125,7 +141,7 @@ class Marc < DRI::Batch
     if self.send("#{rels_name}").respond_to?("push")
       self.send("#{rels_name}").clear
     else
-      self.send("#{rels_name}=", nil)
+      self.association(rels_name.to_sym).replace(nil)
     end
 
     self.save if self.valid?
@@ -183,7 +199,9 @@ class Marc < DRI::Batch
             :is_version => "Is Version Of",
             :has_versions => "Has Version",
             :is_format => "Is Format Of",
-            :has_format => "Has Format"
+            :has_format => "Has Format",
+            :preceding => "Preceding",
+            :succeeding => "Succeeding"
     }
   end
 
