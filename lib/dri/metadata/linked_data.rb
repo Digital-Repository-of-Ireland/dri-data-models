@@ -62,5 +62,9 @@ module DRI::Metadata
       index.as :stored_searchable
     end
 
+    def apply_prefix(name, file_path)
+      "#{name}"
+    end
+
   end
 end 

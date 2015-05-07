@@ -118,7 +118,7 @@ module DRI
               end
             elsif (geo_string =~ /\A#{URI::regexp(['http', 'https'])}\z/)
               ld = DRI::LinkedData.where(source: geo_string)
-              if ld.present?
+              unless ld.empty?
                 geojson = ld.first.spatial
                 geojson.each do |geo|
                   geojson_hash = JSON.parse(geo, symbolize_names: true)

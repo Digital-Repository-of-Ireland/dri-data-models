@@ -2,7 +2,7 @@ module DRI
   class LinkedData < ActiveFedora::Base
     include Sufia::Noid
 
-    contains "descMetadata", class_name: DRI::Metadata::LinkedData
+    contains "descMetadata", class_name: "DRI::Metadata::LinkedData"
 
     has_attributes :creator, :identifier, :source,
                    :contributor, :title, :tag, :description, 
@@ -19,7 +19,7 @@ module DRI
       begin
         DRI::LinkedData.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::LinkedData.create({pid: pid})
+        DRI::LinkedData.create({id: pid})
       end
     end
 
