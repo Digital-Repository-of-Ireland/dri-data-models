@@ -230,8 +230,15 @@ module DRI
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
+
         uris = geographical_coverage.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
-        geospatial_hash.merge!(DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => uris}))
+        if uris.present?
+          linked_data = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => uris})
+  
+          geospatial_hash[:coords].concat(linked_data[:coords])
+          geospatial_hash[:name].concat(linked_data[:name])
+          geospatial_hash[:json].concat(linked_data[:json])
+        end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
         solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
