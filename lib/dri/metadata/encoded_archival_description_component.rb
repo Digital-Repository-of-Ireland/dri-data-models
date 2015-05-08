@@ -45,10 +45,12 @@ module DRI
               # Preferred subject from the guidelines
               t.subject_a(:path=>"subject")
               # Name, Personal, Corporate Name
-              t.name_archdesc(:ref => [:name])
-              t.persname_archdesc(:ref => [:persname])
-              t.corpname_archdesc(:ref => [:corpname])
-              t.geographical_archdesc(:ref => [:geographic_name])
+              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
+              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
+              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
+              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
+              # Geographical coverage
+              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
             }
             # Or just subject within archdesc
             t.subject_archdesc(:path=>"subject")

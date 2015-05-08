@@ -563,7 +563,7 @@ module DRI
           when :creation_date_profiledesc
             [:ead, :eadheader, :profiledesc, :creation, :date]
           when :name_coverage
-            [:ead, :archdesc,  :name_coverage]
+            [:ead, :archdesc, :controlaccess, :name_coverage]
           when :geographical_coverage
             [:ead, :archdesc, :controlaccess, :geographical_coverage]
           when :corpname_coverage
