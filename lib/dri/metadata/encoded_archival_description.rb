@@ -33,6 +33,8 @@ module DRI
 
         t.date_text(:ref => [:date], :attributes => {"normal" => :none})
 
+        t.subject_anywhere(:path=>"subject")
+
         t.ead(:path=>"*", :namespace_prefix => nil) {
           t.eadheader {
             # We need to keep track of the unitid in order to sync this XML snippet to the correct
@@ -456,7 +458,7 @@ module DRI
       # Mapping to UI subjects: controlaccess/subject or subject
       # These are generic subjects similar to dc:coverage
       def subject_for_index()
-        return subject | subject_archdesc
+        return subject | subject_archdesc | subject_anywhere
       end
 
       # These are DRI Subject(Name)
