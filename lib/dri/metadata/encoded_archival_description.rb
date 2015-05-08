@@ -81,8 +81,6 @@ module DRI
               t.head
               t.p_(:ref =>[:p])
             }
-<<<<<<< HEAD
-=======
             # Subject can be
             t.controlaccess {
               t.head
@@ -98,7 +96,6 @@ module DRI
               t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
             }
             t.subject_b(:path=>"subject")
->>>>>>> develop
 
             t.name_archdesc(:ref => [:name])
             t.persname_archdesc(:ref => [:persname])
@@ -145,22 +142,6 @@ module DRI
                 }
               }
             }
-            # Subject can be
-            t.controlaccess {
-              t.head
-              t.p_(:ref => [:p])
-              # Preferred subject from the guidelines
-              t.subject_a(:path=>"subject")
-              # Name, Personal, Corporate Name
-              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
-              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
-              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
-              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
-              # Geographical coverage
-              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
-            }
-            t.subject_b(:path=>"subject")
-
             t.bioghist {
               t.p_(:ref => [:p])
             }
@@ -583,8 +564,6 @@ module DRI
             [:ead, :eadheader, :profiledesc, :creation, :date]
           when :name_coverage
             [:ead, :archdesc, :controlaccess, :name_coverage]
-          when :famname_coverage
-            [:ead, :archdesc, :controlaccess, :famname_coverage]
           when :geographical_coverage
             [:ead, :archdesc, :controlaccess, :geographical_coverage]
           when :corpname_coverage

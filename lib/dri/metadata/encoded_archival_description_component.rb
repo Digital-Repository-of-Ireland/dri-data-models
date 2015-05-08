@@ -124,11 +124,12 @@ module DRI
             # Or just subject within controlaccess as immediate child of c
             t.subject_c(:path=>"subject")
             # Name, Personal, Corporate Name
-            t.name_coverage(:ref => [:name], :attributes => {:role => "subject"})
-            t.persname_coverage(:ref => [:persname], :attributes => {:role => "subject"})
-            t.corpname_coverage(:ref => [:corpname], :attributes => {:role => "subject"})
-            t.famname_coverage(:ref => [:famname], :attributes => {:role => "subject"})
-            t.geographical_coverage(:ref => [:geographic_name], :attributes => {:role => "subject"})
+            t.name_coverage(:path => "name", :attributes => {:role => "subject"})
+            t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
+            t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
+            t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
+            # Geographical coverage
+            t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
           }
           t.bioghist {
             t.p_(:ref => [:p])
@@ -616,8 +617,6 @@ module DRI
             [:c, :archdesc, :controlaccess, :subject_a]
           when :name_coverage
             [:c, :controlaccess, :name_coverage]
-          when :famname_coverage
-            [:c, :controlaccess, :famname_coverage]
           when :persname_coverage
             [:c, :controlaccess, :persname_coverage]
           when :corpname_coverage
