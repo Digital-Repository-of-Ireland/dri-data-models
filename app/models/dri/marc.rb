@@ -80,7 +80,11 @@ class Marc < DRI::Batch
     else
       record = xml_text
     end
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> develop
     return record.to_xml
   end
 
