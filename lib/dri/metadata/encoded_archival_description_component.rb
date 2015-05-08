@@ -30,31 +30,13 @@ module DRI
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
         }
 
+        t.subject_anywhere(:path=>"subject")
+
         t.date_text(:ref => [:date], :attributes => {"normal" => :none})
 
         t.c(:path=>"*", :namespace_prefix => nil) {
           t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
           t.other(:path => {:attribute=>"otherlevel"}, :namespace_prefix => nil)
-          t.archdesc{
-            # Recommendation from DC to EAD crosswalk: archdesc with att level for type
-            t.c_level_attr(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-            # Subject can be within controlaccess
-            t.controlaccess {
-              t.p_(:ref => [:p])
-              t.head
-              # Preferred subject from the guidelines
-              t.subject_a(:path=>"subject")
-              # Name, Personal, Corporate Name
-              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
-              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
-              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
-              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
-              # Geographical coverage
-              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
-            }
-            # Or just subject within archdesc
-            t.subject_archdesc(:path=>"subject")
-          }
           t.did {
             t.unittitle {
               t.geographical_title(:ref => [:geographic_name])
@@ -125,12 +107,12 @@ module DRI
             # Or just subject within controlaccess as immediate child of c
             t.subject_c(:path=>"subject")
             # Name, Personal, Corporate Name
-            t.name_coverage(:path => "name", :attributes => {:role => "subject"})
-            t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
-            t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
-            t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
+            t.name_coverage(:path => "name")
+            t.persname_coverage(:path => "persname")
+            t.corpname_coverage(:path => "corpname")
+            t.famname_coverage(:path => "famname")
             # Geographical coverage
-            t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
+            t.geographical_coverage(:path => "geogname")
           }
           t.bioghist {
             t.p_(:ref => [:p])
@@ -193,9 +175,6 @@ module DRI
         t.scope_content(:proxy => [:c, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable])
         # Accessrestrict - access conditions
         t.access_restrict(:proxy => [:c, :accessrestrict, :p], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
-        # Subject
-        t.subject_archdesc(:proxy => [:c, :archdesc, :subject_archdesc], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.subject_archdesc_controlaccess(:proxy => [:c, :archdesc, :controlaccess, :subject_a], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
         t.name_coverage(:proxy => [:c, :controlaccess, :name_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.persname_coverage(:proxy => [:c, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
@@ -494,9 +473,9 @@ module DRI
         end
       end
 
-      # Mapping to UI subjects: archdesc/controlaccess/subject or subject or controlaccess/subject
+      # Mapping to UI subjects: controlaccess/subject
       def subject_for_index()
-        return subject | subject_archdesc | subject_archdesc_controlaccess
+        return subject | subject_anywhere
       end
 
       # These are DRI Subject(Name)
@@ -572,7 +551,7 @@ module DRI
         end
       end
 
-      # Mapping to UI subjects: //c/archdesc/@level or type
+      # Mapping to UI subjects: //c@level or type
       def type_for_index()
         return type_ead.map(&:capitalize) | ead_level_other.map(&:capitalize) | type
       end
@@ -608,10 +587,6 @@ module DRI
             [:published_date]
           when :subject
             [:c, :control_access, :subject_c]
-          when :subject_archdesc
-            [:c, :archdesc, :subject_archdesc]
-          when :subject_archdesc_controlaccess
-            [:c, :archdesc, :controlaccess, :subject_a]
           when :name_coverage
             [:c, :controlaccess, :name_coverage]
           when :persname_coverage

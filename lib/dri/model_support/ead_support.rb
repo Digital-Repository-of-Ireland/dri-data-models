@@ -272,7 +272,7 @@ module DRI
         # For Xpath 2.0
         # return metadata.xpath("/*/*[matches(local-name(), 'c[01-12]')]") unless metadata.xpath("/*/*[matches(local-name(),'c[01-12]')]").empty?
         # For Xpath 1.0
-        return metadata.xpath("/*/*[starts-with(local-name(), 'c')]")
+        return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
       end
     end # module
   end # module
