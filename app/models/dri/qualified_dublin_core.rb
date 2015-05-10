@@ -115,6 +115,9 @@ module DRI
       add_dm_relationship(relation_ids_isFormatOf, :is_format)
       #add_dm_relationship(relation_ids_hasFormat, :has_format)
       add_dm_relationship(relation_ids_source, :source_rel)
+
+      # After processing all the relationships for the object, save
+      self.save if self.valid?
     end
 
     # Process a specific qdc relationship for the object
@@ -126,7 +129,6 @@ module DRI
       else
         self.association(rels_name.to_sym).replace(nil)
       end
-      self.save if self.valid?
 
       if rels_array.empty?
         return
@@ -179,7 +181,7 @@ module DRI
             end
 
             # Save object, if valid
-            self.save if self.valid?
+            #self.save if self.valid?
           end
         end
       end

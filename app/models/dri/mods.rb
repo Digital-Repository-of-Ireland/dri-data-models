@@ -30,7 +30,7 @@ module DRI
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
     # MODS record asset identifier used to sort pages/sequenced items
-    has_attributes :mods_id_asset, datastream: :descMetadata, multiple: false
+    has_attributes :id_asset, datastream: :descMetadata, multiple: false
     # MODS rest of identifiers are repeatable
     has_attributes :identifier, datastream: :descMetadata, multiple: true
     has_attributes :id_doi, datastream: :descMetadata, multiple: true
@@ -203,6 +203,9 @@ module DRI
       add_dm_relationship(related_items_ids_references, :references)
       add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
       add_dm_relationship(related_items_ids_reviewOf, :review)
+
+      # After processing all the relationships for the object, save
+      self.save if self.valid?
     end
 
     # Process a specific mods relationship for the object
@@ -214,7 +217,6 @@ module DRI
       else
         self.association(rels_name.to_sym).replace(nil)
       end
-      self.save if self.valid?
 
       if rels_array.empty?
         return
@@ -267,7 +269,7 @@ module DRI
             end
 
             # Save object, if valid
-            self.save if self.valid?
+            #self.save if self.valid?
           end
         end
       end
