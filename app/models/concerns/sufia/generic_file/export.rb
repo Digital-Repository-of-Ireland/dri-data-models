@@ -70,6 +70,69 @@ module Sufia
         export_text.join('&') unless export_text.blank?
       end
 
+      def export_as_dri_citation
+        text = ''
+       
+        authors_list = []
+        authors_list_final = []
+         
+        authors = get_author_list
+        authors.each do |author|
+          next if author.blank?
+          authors_list.push(author)
+        end
+        authors_list.each do |author|
+          if author == authors_list.first #first
+            authors_list_final.push(author.strip)
+          elsif author == authors_list.last #last
+            authors_list_final.push(", &amp; " + author.strip)
+          else #all others
+            authors_list_final.push(", " + author.strip)
+          end
+        end
+        text << authors_list_final.join
+
+        unless text.blank?
+          if text[-1,1] != "."
+            text << ". "
+          else
+            text << " "
+          end
+        end 
+        
+        # Get Pub Date
+        text << "(" + setup_pub_date("dri") + ") " unless setup_pub_date("dri").nil?
+
+        title_info = ""
+        title.each do |t|
+          title_info << clean_end_punctuation(CGI::escapeHTML(t)).strip + ", "
+        end
+
+        text << title_info unless title_info.blank?
+
+        # Set database name
+        text << setup_database_name 
+
+        # Set depositing institute
+        depositing_institute = self.depositing_institute
+
+        if depositing_institute.nil?
+          gov = self
+          while depositing_institute.nil?
+            gov = gov.governing_collection
+            break if gov.nil?
+            depositing_institute = gov.depositing_institute
+          end
+        end
+        text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.nil?
+
+        text << ", DOI: #{self.doi}" unless self.doi.nil? 
+        
+        text << "."
+ 
+        text.html_safe
+      end
+
       def export_as_apa_citation
         text = ''
         authors_list = []
@@ -253,7 +316,7 @@ module Sufia
       private
 
       def setup_database_name
-        " <i>Digital Repository of Ireland</i>."
+        "Digital Repository of Ireland [Distributer]"
       end
 
       def access_date_mla
