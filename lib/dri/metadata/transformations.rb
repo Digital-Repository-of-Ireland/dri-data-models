@@ -355,6 +355,42 @@ module DRI
         geojson_hash.to_json.to_s
       end
 
+      def self.get_spatial_coordinates geo_string
+        coordinates = lat = long = eastlimit = northlimit = westlimit = southlimit = ""
+
+        if DRI::Metadata::Transformations.dcmi_point?(geo_string)
+          geo_string.split(/\s*;\s*/).each do |component|
+            (k,v) = component.split(/\s*=\s*/)
+            if k.eql?('east')
+              lat = v.strip
+            elsif k.eql?('north')
+              long = v.strip
+            end
+          end
+          if (!lat.empty? && !long.empty?)
+            coordinates = "#{lat} #{long}"
+          end
+        elsif DRI::Metadata::Transformations.dcmi_box?(geo_string)
+          geo_string.split(/\s*;\s*/).each do |component|
+            (k,v) = component.split(/\s*=\s*/)
+            if k.eql?('eastlimit')
+              eastlimit = v.strip
+            elsif k.eql?('northlimit')
+              northlimit = v.strip
+            elsif k.eql?('westlimit')
+              westlimit = v.strip
+            elsif k.eql?('southlimit')
+              southlimit = v.strip
+            end
+          end
+          if (!eastlimit.empty? && !northlimit.empty? && !westlimit.empty? && !southlimit.empty?)
+            coordinates = "#{westlimit} #{southlimit} #{eastlimit} #{northlimit}"
+          end
+        end
+
+        return coordinates
+      end
+
       # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and

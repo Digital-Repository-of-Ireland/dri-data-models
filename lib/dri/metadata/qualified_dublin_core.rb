@@ -117,7 +117,6 @@ module DRI
         super(new_params, opts)
       end
 
-
       def roles= roles
         if roles.is_a? Hash
           if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
@@ -244,7 +243,6 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
         solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
         solr_doc.merge!(DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
-
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
         #solr_doc.merge!(date_ranges)
@@ -309,14 +307,14 @@ module DRI
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
-          people = contributor | publisher
-          people |= creator.reject{|c| /^null$/i.match(c)}  
+        people = contributor | publisher
+        people |= creator.reject{|c| /^null$/i.match(c)}
 
-          DRI::Vocabulary::marcRelators.each do |role|
-            people |= send("role_"+role)
-          end
+        DRI::Vocabulary::marcRelators.each do |role|
+          people |= send("role_"+role)
+        end
 
-          return people
+        people
       end
 
       def collection?

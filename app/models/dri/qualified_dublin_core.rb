@@ -117,9 +117,12 @@ module DRI
       add_dm_relationship(relation_ids_isFormatOf, :is_format)
       #add_dm_relationship(relation_ids_hasFormat, :has_format)
       add_dm_relationship(relation_ids_source, :source_rel)
+
+      # After processing all the relationships for the object, save
+      self.save if self.valid?
     end
 
-    # Process a specific qdc relationship for the objectå
+    # Process a specific qdc relationship for the object
     #
     def add_dm_relationship(rels_array, rels_name)
       # Reset previous relationships
@@ -128,8 +131,6 @@ module DRI
       else
         self.association(rels_name.to_sym).replace(nil)
       end
-
-      self.save if self.valid?
 
       if rels_array.empty?
         return
@@ -172,7 +173,7 @@ module DRI
               qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
-              self.association(:governing_collection).replace(qdc_obj)
+              #self.association(:governing_collection).replace(qdc_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push qdc_obj
@@ -182,7 +183,7 @@ module DRI
             end
 
             # Save object, if valid
-            self.save if self.valid?
+            #self.save if self.valid?
           end
         end
       end

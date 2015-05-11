@@ -10,7 +10,7 @@ class Marc < DRI::Batch
   # MARC record identifier used for internal relationships target, not multi-valued
   has_attributes :marc_id, datastream: :descMetadata, multiple: false
   # MARC record asset identifier used to sort pages/sequenced items
-  has_attributes :marc_id_asset, datastream: :descMetadata, multiple: false
+  has_attributes :id_asset, datastream: :descMetadata, multiple: false
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
@@ -36,7 +36,8 @@ class Marc < DRI::Batch
   has_attributes :related_material, datastream: :descMetadata, multiple: true
   has_attributes :alternative_form, datastream: :descMetadata, multiple: true
 
-  around_save :create_multiple_records
+  # Disabled below - metadata object update triggers the creation of duplicated objects
+  # around_save :create_multiple_records
 
   def initialize(params = {})
     params[:desc_metadata_class] = "DRI::Metadata::Marc"
@@ -80,7 +81,7 @@ class Marc < DRI::Batch
     else
       record = xml_text
     end
-    
+
     return record.to_xml
   end
 
@@ -128,6 +129,9 @@ class Marc < DRI::Batch
     add_dm_relationship(relation_ids_relation, :related)
     add_dm_relationship(relation_ids_isVersionOf, :is_version)
     add_dm_relationship(relation_ids_isFormatOf, :is_format)
+
+    # After processing all the relationships for the object, save
+    self.save if self.valid?
   end
 
   # Process a specific qdc relationship for the object
@@ -139,8 +143,6 @@ class Marc < DRI::Batch
     else
       self.association(rels_name.to_sym).replace(nil)
     end
-
-    self.save if self.valid?
 
     if rels_array.empty?
       return
@@ -184,7 +186,7 @@ class Marc < DRI::Batch
             self.send("#{rels_name}=", marc_obj)
           end
 
-          self.save if self.valid?
+          #self.save if self.valid?
         end
       end
     end
