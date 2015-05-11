@@ -1,36 +1,35 @@
 module DRI
   class Documentation < ActiveFedora::Base
-    include Sufia::ModelMethods
     include Sufia::Noid
-    include Sufia::GenericFile::Export
-    include DRI::ModelSupport::Properties
-    include DRI::ModelSupport::Permissions
+
+    contains "descMetadata", class_name: "DRI::Metadata::Documentation"
 
     belongs_to :documentation_for, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, class_name: "DRI::Batch"
 
-    # It supports all the DRI Compulsory elements
-    property :title, predicate: ::RDF::DC.title, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    # Full Simple DC Title, Creator, Subject, Description, Contributor, Publisher, Date, Type,
+    # Format, Identifier, Source, Language, Relation, Coverage, Rights
+    has_attributes :creator, :title, :subject, :description, :contributor, :publisher, :language,
+                   :date, :relation, :source, :geographical_coverage, :temporal_coverage,
+                   :type, :format, :coverage, :rights, :identifier, :geocode_point,
+                   :geocode_box, datastream: :descMetadata, multiple: true
+
+    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
+                    multiple: true
+
+    def attributes=(properties)
+      super(properties)
     end
 
-    property :creator, predicate: ::RDF::DC.creator, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    def self.find_or_create(pid)
+      begin
+        DRI::Documentation.find(pid)
+      rescue ActiveFedora::ObjectNotFoundError
+        DRI::Documentation.create({id: pid})
+      end
     end
 
-    property :description, predicate: ::RDF::DC.description, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-
-    property :rights, predicate: ::RDF::DC.rights, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-
-    property :language, predicate: ::RDF::DC.language, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable,DRI::Metadata:: Descriptors.language_facetable
-    end
-
-    property :created, predicate: ::RDF::DC.created, multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    def to_solr(solr_doc={}, opts={})
+      super(solr_doc, opts)
     end
 
   end

@@ -6,4 +6,6 @@ module DRI
   autoload :Vocabulary, "dri/vocabulary"
   autoload :Utils, "dri/utils"
   autoload :Solr, "solr/query"
+  autoload :DriRelsVocabulary, "rdf_vocabularies/dri_rels_vocabulary"
+  autoload :ModsRelsVocabulary, "rdf_vocabularies/mods_rels_vocabulary"
 end

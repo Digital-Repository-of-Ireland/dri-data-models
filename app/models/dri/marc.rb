@@ -14,15 +14,15 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  has_and_belongs_to_many :related, property: :dcterms_relation, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_and_belongs_to_many :is_version, property: :dcterms_is_version_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_and_belongs_to_many :is_format, property: :dcterms_is_format_of, :class_name => "DRI::Marc"
+  has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  belongs_to :preceding, property: :related_preceding, :class_name => "DRI::Marc"
-  has_many :succeeding, property: :related_preceding, :class_name => "DRI::Marc", as: :preceding
+  belongs_to :preceding, predicate: ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
+  has_many :succeeding, predicate: ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships

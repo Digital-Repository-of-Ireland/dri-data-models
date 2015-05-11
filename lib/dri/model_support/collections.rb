@@ -11,8 +11,8 @@ module DRI
 
         # NOT USED - Two relationships below for managing a collection's collections
         # (!) ONLY FOR COLLECTIONS
-        belongs_to :parent_collection, property: :is_member_of_collection, class_name: 'DRI::Batch'
-        has_many :member_collections, property: :is_member_of_collection, class_name: 'DRI::Batch', as: :parent_collection
+        belongs_to :parent_collection, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection, class_name: 'DRI::Batch'
+        has_many :member_collections, class_name: 'DRI::Batch', as: :parent_collection
 
         # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, property: :is_preceded_by, class_name: 'DRI::Batch'

@@ -10,22 +10,22 @@ module DRI
     # So has_one can ONLY go in a class that is referenced by a column in another table.
     # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
     # so we need to validate that there is only one!!
-    belongs_to :preceding, property: :related_preceding, :class_name => "DRI::Mods"
-    has_many :succeeding, property: :related_preceding, :class_name => "DRI::Mods", as: :preceding
+    belongs_to :preceding, predicate: ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods"
+    has_many :succeeding, predicate: ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods", as: :preceding
 
-    belongs_to :original, property: :related_original, :class_name => "DRI::Mods"
+    belongs_to :original, predicate: ModsRelsVocabulary.relatedOriginal, class_name: "DRI::Mods"
 
-    belongs_to :host, property: :related_host, :class_name => "DRI::Mods"
+    belongs_to :host, predicate: ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
-    has_many :constituents, property: :related_host, :class_name => "DRI::Mods", as: :host
+    has_many :constituents, predicate: ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods", as: :host
 
-    belongs_to :series, property: :related_series, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :version, property: :related_version, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :format, property: :related_format, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :referenced_by, property: :related_referenced_by, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :references, property: :related_reference, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :review, property: :related_review, :class_name => "DRI::Mods"
+    belongs_to :series, predicate: ModsRelsVocabulary.relatedSeries, class_name: "DRI::Mods"
+    has_and_belongs_to_many :version, predicate: ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
+    has_and_belongs_to_many :format, predicate: ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
+    has_and_belongs_to_many :referenced_by, predicate: ModsRelsVocabulary.relatedReferencedBy, class_name: "DRI::Mods"
+    has_and_belongs_to_many :references, predicate: ModsRelsVocabulary.relatedReference, class_name: "DRI::Mods"
+    has_and_belongs_to_many :review, predicate: ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -259,7 +259,7 @@ module DRI
               mods_obj.save if mods_obj.valid?
             elsif rels_name.equal?(:host)
               self.send("#{rels_name}=", mods_obj)
-              self.association(:governing_collection).replace(mods_obj)
+              #self.association(:governing_collection).replace(mods_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push mods_obj

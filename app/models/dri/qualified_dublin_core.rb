@@ -31,20 +31,20 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    has_and_belongs_to_many :related, property: :dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    has_and_belongs_to_many :referenced, property: :dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    has_and_belongs_to_many :references, property: :dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :referenced, predicate: ::RDF::DC.isReferencedBy, class_name: "DRI::QualifiedDublinCore"
+    has_and_belongs_to_many :references, predicate: ::RDF::DC.references, class_name: "DRI::QualifiedDublinCore"
 
-    belongs_to :container, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :parts, property: :dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore", as: :container
+    belongs_to :container, predicate: ::RDF::DC.isPartOf, class_name: "DRI::QualifiedDublinCore"
+    has_many :parts, predicate: ::RDF::DC.isPartOf, class_name: "DRI::QualifiedDublinCore", as: :container
 
-    belongs_to :is_version, property: :dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :has_versions, property: :dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore", as: :is_version
+    belongs_to :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::QualifiedDublinCore"
+    has_many :has_versions, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::QualifiedDublinCore", as: :is_version
 
-    belongs_to :is_format, property: :dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :has_format, property: :dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore", as: :is_format
+    belongs_to :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::QualifiedDublinCore"
+    has_many :has_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::QualifiedDublinCore", as: :is_format
 
-    belongs_to :source_rel, property: :dcterms_source, :class_name => "DRI::QualifiedDublinCore"
+    belongs_to :source_rel, predicate: ::RDF::DC.source, class_name: "DRI::QualifiedDublinCore"
 
     def initialize(args = {})
       args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -171,7 +171,7 @@ module DRI
               qdc_obj.save if qdc_obj.valid?
             elsif rels_name.equal?(:container)
               self.send("#{rels_name}=", qdc_obj)
-              self.association(:governing_collection).replace(qdc_obj)
+              #self.association(:governing_collection).replace(qdc_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push qdc_obj
