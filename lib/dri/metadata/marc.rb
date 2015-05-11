@@ -92,7 +92,7 @@ module DRI
         t.marc_id(:path => "record/datafield[@tag='024' and @ind1='7' and subfield[@code='2']='local']/subfield[@code='a']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # marc_asset - Used for sorting sequenced items
         # we map it to 024 - Other Standard Identifier (R); indicator1 = 8 (Unspecified type of standard number or code)
-        t.marc_id_asset(:path => "record/datafield[@tag='024' and @ind1='8']/subfield[@code='a']", :index_as => [:stored_sortable])
+        t.id_asset(:path => "record/datafield[@tag='024' and @ind1='8']/subfield[@code='a']", :index_as => [:stored_sortable])
 
         # Relationships terms (Crosswalk MARC to QDC: http://www.loc.gov/marc/marc2dc.html#qualifiedlist)
         # Tag 775 - Other Edition Entry (R); Subfield $o - Other item identifier (R)

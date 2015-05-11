@@ -316,8 +316,8 @@ module DRI
 
           # MODS Terms
           t.mods_id_local(:path => "mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          # mods_id_asset - Used for sorting sequenced items
-          t.mods_id_asset(:path => "mods:mods/mods:identifier[@type='asset']", :index_as => [:stored_sortable])
+          # id_asset - Used for sorting sequenced items
+          t.id_asset(:path => "mods:mods/mods:identifier[@type='asset']", :index_as => [:stored_sortable])
 
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
