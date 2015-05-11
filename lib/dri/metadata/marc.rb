@@ -128,16 +128,14 @@ module DRI
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.collection("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
+          xml.record("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
                    "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                    "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
-              xml.record {
-                xml.leader
-                xml.controlfield(:tag => '')
-                xml.datafield(:tag => '', :ind1 => '#', :ind2 => '#') {
-                  xml.subfield(:code => '')
-                }
-              }
+            xml.leader
+            xml.controlfield(:tag => '')
+            xml.datafield(:tag => '', :ind1 => '#', :ind2 => '#') {
+              xml.subfield(:code => '')
+            }
           }
         end
         return builder.doc
@@ -284,7 +282,7 @@ module DRI
       def type
         #[DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
         # Position 7 (for 6th character as substring starts positions in 1 rather that 0)
-        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
+        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//leader, 7, 1)')]]
       end
 
       def add_datafields(datafields)
