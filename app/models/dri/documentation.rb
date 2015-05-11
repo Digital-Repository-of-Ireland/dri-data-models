@@ -9,12 +9,9 @@ module DRI
     # Full Simple DC Title, Creator, Subject, Description, Contributor, Publisher, Date, Type,
     # Format, Identifier, Source, Language, Relation, Coverage, Rights
     has_attributes :creator, :title, :subject, :description, :contributor, :publisher, :language,
-                   :date, :relation, :source, :geographical_coverage, :temporal_coverage,
-                   :type, :format, :coverage, :rights, :identifier, :geocode_point,
-                   :geocode_box, datastream: :descMetadata, multiple: true
-
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                    multiple: true
+                   :date, :source, :geographical_coverage, :temporal_coverage, :creation_date, :published_date,
+                   :resource_type, :format, :coverage, :rights, :identifier,
+                   :geocode_point, :geocode_box, :relation, datastream: :descMetadata, multiple: true
 
     def attributes=(properties)
       super(properties)
