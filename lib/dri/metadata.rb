@@ -17,5 +17,6 @@ module DRI
     autoload :Transformations, 'dri/metadata/transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :LinkedData, 'dri/metadata/linked_data'
+    autoload :Documentation, 'dri/metadata/documentation'
   end
 end

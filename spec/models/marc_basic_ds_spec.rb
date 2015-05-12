@@ -34,7 +34,7 @@ describe 'Marc' do
       empty_xml = subject.class.xml_template
       empty_xml.should be_a_kind_of(Nokogiri::XML::Document)
       empty_xml.collect_namespaces["xmlns:marc"].should eq(MARC_NS)
-      empty_xml.children.first.name.should eq("collection")
+      empty_xml.children.first.name.should eq("record")
     end
   end
 end
