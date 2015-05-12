@@ -16,9 +16,6 @@ module DRI
     # dependent: :destroy -> remove the documentation object if the collection is deleted
     has_many :documentation_objects, class_name: "DRI::Documentation", as: :documentation_for, dependent: :destroy
 
-    # dependent: :destroy -> remove the documentation object if the collection is deleted
-    has_many :documentation_objects, :class_name => "DRI::Documentation", :dependent => :destroy, :property => :is_description_of
-
     # Declare a 'extracted' DS, of the following type
     contains "extracted", class_name: 'DRI::Metadata::Extracted'
 

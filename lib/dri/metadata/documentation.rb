@@ -2,7 +2,7 @@ module DRI::Metadata
   class Documentation < ActiveFedora::NtriplesRDFDatastream
 
     # It supports all the DRI Compulsory elements
-    property :title, predicate: RDF::DC.title, multiple: true do |index|
+    property :title, predicate: RDF::DC.title do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
@@ -11,54 +11,54 @@ module DRI::Metadata
       index.as :stored_searchable
     end
 
-    property :creator, predicate: RDF::DC.creator, multiple: true do |index|
+    property :creator, predicate: RDF::DC.creator do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable,
                :sortable
     end
 
-    property :contributor, predicate: RDF::DC.contributor, multiple: true do |index|
+    property :contributor, predicate: RDF::DC.contributor do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_facetable
     end
 
-    property :publisher, predicate: RDF::DC.publisher, multiple: true do |index|
+    property :publisher, predicate: RDF::DC.publisher do |index|
       index.as DRI::Metadata::Descriptors.cleaned_facetable,
                DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :description, predicate: RDF::DC.description, multiple: true do |index|
+    property :description, predicate: RDF::DC.description do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :rights, predicate: RDF::DC.rights, multiple: true do |index|
+    property :rights, predicate: RDF::DC.rights do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :language, predicate: RDF::DC.language, multiple: true do |index|
+    property :language, predicate: RDF::DC.language do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata:: Descriptors.language_facetable
     end
 
-    property :date, predicate: RDF::DC.date, multiple: true do |index|
+    property :date, predicate: RDF::DC.date do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :creation_date, predicate: RDF::DC.created, multiple: true do |index|
+    property :creation_date, predicate: RDF::DC.created do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :published_date, predicate: RDF::DC.issued, multiple: true do |index|
+    property :published_date, predicate: RDF::DC.issued do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :subject, predicate: RDF::DC.subject, multiple: true do |index|
+    property :subject, predicate: RDF::DC.subject do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_facetable,
                DRI::Metadata::Descriptors.cleaned_displayable
@@ -97,12 +97,12 @@ module DRI::Metadata
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :geocode_point, predicate: RDF::DC.spatial, attributes: {"xsi:type" => RDF::DC.Point} do |index|
+    property :geocode_point, predicate: RDF::DC.spatial do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
 
-    property :geocode_box, predicate: RDF::DC.spatial, attributes: {"xsi:type" => RDF::DC.Box} do |index|
+    property :geocode_box, predicate: RDF::DC.spatial do |index|
       index.as DRI::Metadata::Descriptors.cleaned_searchable,
                DRI::Metadata::Descriptors.cleaned_displayable
     end
