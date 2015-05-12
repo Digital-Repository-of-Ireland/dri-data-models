@@ -19,6 +19,7 @@ module DRI
         has_attributes :licence, datastream: :properties, multiple: false
         has_attributes :ingest_files_from_metadata, datastream: :properties, multiple: false
         has_attributes :master_file_access, datastream: :properties, multiple: false
+        has_attributes :published_at, datastream: :properties, multiple: false
 
       end
     end
