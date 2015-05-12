@@ -330,13 +330,14 @@ module Sufia
       end
 
       def setup_pub_date( format )
-        first_date = self.create_date
+        first_date = self.published_at
         unless first_date.blank?
           first_date = CGI::escapeHTML(first_date)
           date = Time.parse(first_date) #first_date.gsub(/[^0-9|n\.d\.]/, "")[0,4]
           date_value = date.strftime("%Y, %B %-d") if format.eql?("apa")
           date_value = date.strftime("%d %B %Y") if format.eql?("mla")
           date_value = date.strftime("%Y") if format.eql?("chicago")
+          date_value = date.strftime("%Y") if format.eql?("dri")
           return nil if date_value.nil?
         end
         clean_end_punctuation(date_value) if date_value

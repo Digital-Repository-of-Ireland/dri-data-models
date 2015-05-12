@@ -19,6 +19,7 @@ module DRI
         t.depositing_institute(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.licence(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
         t.ingest_files_from_metadata(:path=>"ingestFilesFromMetadata", :namespace_prefix => nil, :index_as=>[:facetable, :displayable])
+        t.published_at(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
       end # set_terminology
 
       # Build the default XML document
