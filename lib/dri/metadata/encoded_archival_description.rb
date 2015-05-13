@@ -10,18 +10,30 @@ module DRI
         # Elements that can occur nested within other elements: multiple options
         t.p(:path => "p", :namespace_prefix => nil)
         # They can be used as subjects or even in the title
-        t.geographic_name(:path=>"geogname")
-        t.name_(:path=>"name")
-        t.persname_(:path=>"persname[not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
+        t.geographic_name(:path=>"geogname") {
           t.role(:path => {:attribute=>"role"})
         }
-        t.corpname_(:path=>"corpname")
+        t.name_(:path=>"name") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.persname_(:path=>"persname[not(parent::origination[@label='Creator:']) and not(@role='creator') and not(@role='cre') and not(@role='aut')]") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.corpname_(:path=>"corpname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+        t.famname_(:path=>"famname") {
+          t.role(:path => {:attribute=>"role"})
+        }
+
         t.date_(:path=>"date[not(parent::creation) and not(parent::publicationstmt)]") {
           t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
           t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
         }
 
         t.date_text(:ref => [:date], :attributes => {"normal" => :none})
+
+        t.subject_anywhere(:path=>"subject")
 
         t.ead(:path=>"*", :namespace_prefix => nil) {
           t.eadheader {
@@ -78,11 +90,12 @@ module DRI
               # Preferred subject from the guidelines
               t.subject_a(:path=>"subject")
               # Name, Personal, Corporate Name
-              t.name_coverage(:ref => [:name])
-              t.persname_coverage(:ref => [:persname])
-              t.corpname_coverage(:ref => [:corpname])
+              t.name_coverage(:path => "name", :attributes => {:role => "subject"})
+              t.persname_coverage(:path => "persname", :attributes => {:role => "subject"})
+              t.corpname_coverage(:path => "corpname", :attributes => {:role => "subject"})
+              t.famname_coverage(:path => "famname", :attributes => {:role => "subject"})
               # Geographical coverage
-              t.geographical_coverage(:ref => [:geographic_name])
+              t.geographical_coverage(:path => "geogname", :attributes => {:role => "subject"})
             }
             t.subject_b(:path=>"subject")
 
@@ -228,6 +241,7 @@ module DRI
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
         t.persname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :persname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.corpname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :corpname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.famname_coverage(:proxy => [:ead, :archdesc, :controlaccess, :famname_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.geographical_coverage(:proxy => [:ead, :archdesc, :controlaccess, :geographical_coverage], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
         t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation"))] and not(@normal)]')
         # EAD Elements
@@ -237,9 +251,9 @@ module DRI
         t.institute(:proxy => [:ead, :archdesc, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # Related Material
-        t.related_material(:proxy => [:ead, :archdesc, :related_material, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Alternative Form Available
-        t.alternative_form(:proxy => [:ead, :archdesc, :alternative_form, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.alternative_form(:path => "extref/@href[ancestor::altformavail]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
         t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')
@@ -377,14 +391,14 @@ module DRI
         # Display of Creation Date
         unless creation_date_idx == [] && creation_date == []
           cdate_array = creation_date.collect! do |value|
-            DRI::Metadata::Transformations.create_dcmi_point(value)
+            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
           solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date_idx, creation_date_idx_d) | cdate_array)
         end
         # Display of Published Date
         unless published_date_idx == [] && published_date == []
           pdate_array = published_date.collect! do |value|
-            DRI::Metadata::Transformations.create_dcmi_point(value)
+            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
           solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date_idx, published_date_idx_d) | pdate_array)
         end
@@ -444,7 +458,7 @@ module DRI
       # Mapping to UI subjects: controlaccess/subject or subject
       # These are generic subjects similar to dc:coverage
       def subject_for_index()
-        return subject | subject_archdesc
+        return subject | subject_archdesc | subject_anywhere
       end
 
       # These are DRI Subject(Name)
@@ -465,10 +479,10 @@ module DRI
       # These are DRI Subject(Place)
       def subject_temporal_for_index()
         dtext_array = date_text.collect! do |value|
-          DRI::Metadata::Transformations.create_dcmi_point(value)
+          DRI::Metadata::Transformations.create_dcmi_period(value)
         end
         tcoverage_array = temporal_coverage.collect! do |value|
-          DRI::Metadata::Transformations.create_dcmi_point(value)
+          DRI::Metadata::Transformations.create_dcmi_period(value)
         end
         return display_date_for_index(temporal_coverage_idx, temporal_coverage_idx_d) |
             display_date_for_index(date_idx, date_idx_d) |
@@ -498,23 +512,23 @@ module DRI
               sdate = ISO8601::DateTime.new(range[0]).strftime("%b %d, %Y") #start date
               edate = ISO8601::DateTime.new(range[1]).strftime("%b %d, %Y") #end date
               if idx <= (date_field_d.length - 1)
-                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], range[0], range[1])
+                DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx], range[0], range[1])
               else
-                DRI::Metadata::Transformations.create_dcmi_point(sdate << ' - ' << edate, range[0], range[1])
+                DRI::Metadata::Transformations.create_dcmi_period(sdate << ' - ' << edate, range[0], range[1])
               end
             else
               if idx <= (date_field_d.length - 1)
-                DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx], value)
+                DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx], value)
               else
                 sdate = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
-                DRI::Metadata::Transformations.create_dcmi_point(sdate, value)
+                DRI::Metadata::Transformations.create_dcmi_period(sdate, value)
               end
             end
-          rescue ISO8601::Errors::UnknownPattern => e
+          rescue ISO8601::Errors::StandardError
             if idx <= (date_field_d.length - 1)
-              DRI::Metadata::Transformations.create_dcmi_point(date_field_d[idx]) # DCMI Period 'name' is the md value
+              DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx]) # DCMI Period 'name' is the md value
             else
-              DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+              DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
             end
           end
         end
@@ -551,11 +565,13 @@ module DRI
           when :creation_date_profiledesc
             [:ead, :eadheader, :profiledesc, :creation, :date]
           when :name_coverage
-            [:ead, :archdesc,  :name_coverage]
+            [:ead, :archdesc, :controlaccess, :name_coverage]
           when :geographical_coverage
             [:ead, :archdesc, :controlaccess, :geographical_coverage]
           when :corpname_coverage
             [:ead, :archdesc, :controlaccess, :corpname_coverage]
+          when :famname_coverage
+            [:ead, :archdesc, :controlaccess, :famname_coverage]
           when :persname_coverage
             [:ead, :archdesc, :controlaccess, :persname_coverage]
           when :physdesc

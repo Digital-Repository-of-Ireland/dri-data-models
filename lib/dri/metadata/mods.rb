@@ -316,6 +316,8 @@ module DRI
 
           # MODS Terms
           t.mods_id_local(:path => "mods:mods/mods:identifier[@type='local']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # id_asset - Used for sorting sequenced items
+          t.id_asset(:path => "mods:mods/mods:identifier[@type='asset']", :index_as => [:stored_sortable])
 
           t.subtitle(:proxy => [:title_info, :subtitle], :index_as => [Descriptors.cleaned_searchable,
                                                                        Descriptors.cleaned_displayable])
@@ -617,9 +619,9 @@ module DRI
         date_field.collect! do| value |
           begin
             display_date = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
-            DRI::Metadata::Transformations.create_dcmi_point(display_date, value)
-          rescue ISO8601::Errors::UnknownPattern => e
-            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+            DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
+          rescue ISO8601::Errors::StandardError
+            DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
           end
         end
       end
@@ -632,12 +634,12 @@ module DRI
 
             if idx <= (date_end.length - 1)
               d_end = ISO8601::DateTime.new(date_end[idx]).strftime("%b %d, %Y")
-              DRI::Metadata::Transformations.create_dcmi_point(d_start << " - " << d_end, name, date_end[idx])
+              DRI::Metadata::Transformations.create_dcmi_period(d_start << " - " << d_end, name, date_end[idx])
             else
-              Transformations.create_dcmi_point(d_start, name)
+              Transformations.create_dcmi_period(d_start, name)
             end
-          rescue ISO8601::Errors::UnknownPattern => e
-            DRI::Metadata::Transformations.create_dcmi_point(name) # DCMI Period 'name' is the md value
+          rescue ISO8601::Errors::StandardError
+            DRI::Metadata::Transformations.create_dcmi_period(name) # DCMI Period 'name' is the md value
           end
         end
 

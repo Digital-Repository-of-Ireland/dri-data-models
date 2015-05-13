@@ -117,7 +117,6 @@ module DRI
         super(new_params, opts)
       end
 
-
       def roles= roles
         if roles.is_a? Hash
           if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
@@ -166,9 +165,10 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
         solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[Solrizer.solr_name("creation_date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "published_date") if solr_doc[Solrizer.solr_name("published_date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "date") if solr_doc[Solrizer.solr_name("date", :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, "temporal_coverage") if solr_doc[Solrizer.solr_name("temporal_coverage", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[Solrizer.solr_name("creator", :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
@@ -219,15 +219,30 @@ module DRI
 
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
-        cdate_ranges = Transformations.transform_date_ranges({ "creation_date" => creation_date})
-        pdate_ranges = Transformations.transform_date_ranges({ "published_date" => published_date})
-        sdate_ranges = Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
+        cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "creation_date" => creation_date})
+        pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "published_date" => published_date})
+        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ "date" => date, "temporal_coverage" => temporal_coverage})
 
-        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
-        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
-        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
+        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
 
+        # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
 
+        uris = geographical_coverage.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+        if uris.present?
+          linked_data = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => uris})
+  
+          geospatial_hash[:coords].concat(linked_data[:coords])
+          geospatial_hash[:name].concat(linked_data[:name])
+          geospatial_hash[:json].concat(linked_data[:json])
+        end
+
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
+        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
         # Split date ranges into separate indexes
         #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
         #solr_doc.merge!(date_ranges)
@@ -236,17 +251,19 @@ module DRI
       end
 
       def display_date_for_index(date_field=[])
+        date_field = date_field.delete_if{|v| /^null$/i.match(v)}
         date_field.collect! do |value|
           begin
-            if DRI::Metadata::Transformations.dcmi_point?(value) # return value for display as it is
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) # return value for display as it is
+              # If value.empty? is cleaned afterwards
               value
             else
               # Date range in ISO8601 format?
               sdate = ISO8601::DateTime.new(value).strftime("%Y-%m-%d")
-              DRI::Metadata::Transformations.create_dcmi_point(value, sdate)
+              DRI::Metadata::Transformations.create_dcmi_period(value, sdate)
             end
-          rescue ISO8601::Errors::UnknownPattern => e
-            DRI::Metadata::Transformations.create_dcmi_point(value) # DCMI Period 'name' is the md value
+          rescue ISO8601::Errors::StandardError
+            DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
           end
         end
       end
@@ -260,6 +277,8 @@ module DRI
         end
         
         array_values = send index_name
+        # Remove empty values from the source metadata: e.g. remove <dc:subject/>
+        array_values = array_values.reject(&:empty?)
 
         array_values.each_with_index do |value, i|
           value_lang = send(index_name, i).send(index_name+"_lang")
@@ -288,14 +307,14 @@ module DRI
 
       # Creates an array of all names stored in the metadata
       def get_person_array()
-          people = contributor | publisher
-          people |= creator.reject{|c| /^null$/i.match(c)}  
+        people = contributor | publisher
+        people |= creator.reject{|c| /^null$/i.match(c)}
 
-          DRI::Vocabulary::marcRelators.each do |role|
-            people |= send("role_"+role)
-          end
+        DRI::Vocabulary::marcRelators.each do |role|
+          people |= send("role_"+role)
+        end
 
-          return people
+        people
       end
 
       def collection?

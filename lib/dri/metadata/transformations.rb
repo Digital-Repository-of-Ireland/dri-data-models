@@ -7,6 +7,9 @@ module DRI
       CREATION_DATE_RANGE_SOLR_FIELD = "cdateRange"
       PUBLISHED_DATE_RANGE_SOLR_FIELD = "pdateRange"
       SUBJECT_DATE_RANGE_SOLR_FIELD = "sdateRange"
+      GEOSPATIAL_SOLR_FIELD = "geospatial"
+      GEOJSON_SOLR_FIELD = "geojson_ssim" # Solrizer only creates _tesim; for BL Maps we need _ssim
+      PLACENAME_SOLR_FIELD = "placename_field"
 
 	    # A function to convert an array of names that conform to archiving formatting standards into human-readable names
       # so that a double-quotes search can pick up the full name eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
@@ -86,6 +89,93 @@ module DRI
         return title_string
       end
 
+      # Parse geospatial data sourced from the metadata into Point or BBox for indexing into Solr
+      # @param[Hash] geodata hash containing all the geo values from the metadata
+      # @return Array of formatted coordinates or bbox for indexing
+      #
+      def self.transform_geospatial(geodata={})
+        results = Hash.new
+        results[:coords] = []
+        results[:name] = []
+        results[:json] = []
+        geodata.each do | key, value |
+          value.each do | geo_string |
+            if (dcmi_point? geo_string)
+              point = get_geo_point(geo_string)
+              # [east_long north_lat]
+              if point.has_key?('east') && point.has_key?('north') && point.has_key?('name')
+                results[:coords] << "#{point['east']} #{point['north']}"
+                results[:name] << point['name']
+                results[:json] << geojson_string_from_coords(point['name'], "#{point['east']} #{point['north']}")
+              end
+            elsif (dcmi_box? geo_string)
+              box = get_geo_box(geo_string)
+              # [west_long south_lat east_long north_lat]
+              if box.has_key?('name') && box.has_key?('eastlimit') && box.has_key?('northlimit') && box.has_key?('westlimit') && box.has_key?('southlimit')
+                results[:coords] << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
+                results[:name] << box['name']
+                results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
+              end
+            elsif (geo_string =~ /\A#{URI::regexp(['http', 'https'])}\z/)
+              ld = DRI::LinkedData.where(source: geo_string)
+              if ld.present?
+                geojson = ld.first.spatial
+                geojson.each do |geo|
+                  geojson_hash = JSON.parse(geo, symbolize_names: true)
+                  results[:json] << geo
+                  results[:name] << geojson_hash[:properties][:placename]
+                  results[:coords] << "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
+                end 
+              end
+            end
+          end
+        end
+        return results
+      end
+
+      def self.get_geo_point value
+        return {} if value.nil?
+
+        point = Hash.new
+
+        # DCMI Point?
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+          if k.eql?('east')
+            point['east'] = v.strip
+          elsif k.eql?('north')
+            point['north'] = v.strip
+          elsif k.eql?('name')
+            point['name'] = v.strip
+          end
+        end
+
+        return point
+      end
+
+      def self.get_geo_box value
+        return {} if value.nil?
+
+        box = Hash.new
+
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+          if k.eql?('northlimit')
+            box['northlimit'] = v.strip
+          elsif k.eql?('eastlimit')
+            box['eastlimit'] = v.strip
+          elsif k.eql?('southlimit')
+            box['southlimit'] = v.strip
+          elsif k.eql?('westlimit')
+            box['westlimit'] = v.strip
+          elsif k.eql?('name')
+            box['name'] = v.strip
+          end
+        end
+
+        return box
+      end
+
       #---------------------------------------------------------------------------------------------------------------
       # Date, Time transformations for indexing
       #---------------------------------------------------------------------------------------------------------------
@@ -119,7 +209,7 @@ module DRI
 
         range = Hash.new
 
-        # DCMI Point?
+        # DCMI Period?
         value.split(/\s*;\s*/).each do |component|
           (k,v) = component.split(/\s*=\s*/)
           begin
@@ -128,8 +218,8 @@ module DRI
             elsif k.eql?('end')
               range['end'] = ISO8601::DateTime.new(v).year
             end
-          rescue ISO8601::Errors::UnknownPattern => e
-            Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601!!")
+          rescue ISO8601::Errors::StandardError => e
+            Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return {}
           end
         end
@@ -159,8 +249,8 @@ module DRI
               unless dat.include?('/')
                 ISO8601::DateTime.new(dat).year
               end
-            rescue ISO8601::Errors::UnknownPattern => e
-              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601!!")
+            rescue ISO8601::Errors::StandardError => e
+              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
               return []
             end
           end
@@ -168,8 +258,8 @@ module DRI
           begin
             # Single date, therefore end date = start date (for correct date range indexing)
             dates[0] = dates[1] = ISO8601::DateTime.new(val).year
-          rescue ISO8601::Errors::UnknownPattern => e
-            Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601!!")
+          rescue ISO8601::Errors::StandardError => e
+            Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return []
           end
         end
@@ -185,10 +275,26 @@ module DRI
             ISO8601::DateTime.new(value)
           end
           return true
-        rescue ISO8601::Errors::UnknownPattern => e
-          Rails.logger.error("Unable to parse `#{value}' as a date-time object")
+        rescue ISO8601::Errors::StandardError => e
+          Rails.logger.error("Unable to parse `#{value}' as a date-time object. Error: #{e.to_s}.")
           return false
         end
+      end
+
+      #---------------------
+      # Helper Functions
+      #---------------------
+
+      def self.dcmi_period?(value)
+        result = false
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+
+          if ['start', 'end', 'scheme'].include? k
+            result = true
+          end
+        end
+        return result
       end
 
       def self.dcmi_point?(value)
@@ -196,16 +302,95 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k,v) = component.split(/\s*=\s*/)
 
-          if k.eql?('name') || k.eql?('start') || k.eql?('end') || k.eql?('scheme')
+          if ['east', 'north', 'elevation'].include? k
             result = true
           end
         end
         return result
       end
 
-      def self.create_dcmi_point(name, sdate="", edate="", scheme="")
+      def self.dcmi_box?(value)
+        result = false
+        value.split(/\s*;\s*/).each do |component|
+          (k,v) = component.split(/\s*=\s*/)
+
+          if ['eastlimit', 'northlimit', 'southlimit', 'westlimit', 'uplimit', 'downlimit'].include? k
+            result = true
+          end
+        end
+        return result
+      end
+
+      def self.create_dcmi_period(name, sdate="", edate="", scheme="")
         return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
       end
+
+      # Taken from maps_controller and adapted
+      def self.geojson_string_from_coords(name, coords)
+        geojson_hash = {type: "Feature", geometry: {}, properties: {}}
+        if coords.scan(/[\s]/).length == 3 # bbox
+          coords_array = coords.split(' ').map { |v| v.to_f }
+          geojson_hash[:bbox] = coords_array
+          geojson_hash[:geometry][:type] = "Polygon"
+          geojson_hash[:geometry][:coordinates] = [[[coords_array[0],coords_array[1]],
+                                                    [coords_array[2],coords_array[1]],
+                                                    [coords_array[2],coords_array[3]],
+                                                    [coords_array[0],coords_array[3]],
+                                                    [coords_array[0],coords_array[1]]]]
+        elsif coords.match(/^[-]?[\d]*[\.]?[\d]*[ ,][-]?[\d]*[\.]?[\d]*$/) # point
+          geojson_hash[:geometry][:type] = "Point"
+          if coords.match(/,/)
+            coords_array = coords.split(',').reverse
+          else
+            coords_array = coords.split(' ')
+          end
+          geojson_hash[:geometry][:coordinates] = coords_array.map { |v| v.to_f }
+        else
+          Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
+        end
+        geojson_hash[:properties] = {}
+        geojson_hash[:properties][:placename] = name
+
+        # Return as a JSON String for blacklight-maps
+        geojson_hash.to_json.to_s
+      end
+
+      def self.get_spatial_coordinates geo_string
+        coordinates = lat = long = eastlimit = northlimit = westlimit = southlimit = ""
+
+        if DRI::Metadata::Transformations.dcmi_point?(geo_string)
+          geo_string.split(/\s*;\s*/).each do |component|
+            (k,v) = component.split(/\s*=\s*/)
+            if k.eql?('east')
+              lat = v.strip
+            elsif k.eql?('north')
+              long = v.strip
+            end
+          end
+          if (!lat.empty? && !long.empty?)
+            coordinates = "#{lat} #{long}"
+          end
+        elsif DRI::Metadata::Transformations.dcmi_box?(geo_string)
+          geo_string.split(/\s*;\s*/).each do |component|
+            (k,v) = component.split(/\s*=\s*/)
+            if k.eql?('eastlimit')
+              eastlimit = v.strip
+            elsif k.eql?('northlimit')
+              northlimit = v.strip
+            elsif k.eql?('westlimit')
+              westlimit = v.strip
+            elsif k.eql?('southlimit')
+              southlimit = v.strip
+            end
+          end
+          if (!eastlimit.empty? && !northlimit.empty? && !westlimit.empty? && !southlimit.empty?)
+            coordinates = "#{westlimit} #{southlimit} #{eastlimit} #{northlimit}"
+          end
+        end
+
+        return coordinates
+      end
+
       # Split date ranges into separate _start and _end SOLR indexes
       #
       # This is not an optimal solution for doing date ranges in SOLR and

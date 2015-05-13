@@ -16,5 +16,7 @@ module DRI
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
     autoload :Marc, 'dri/metadata/marc'
+    autoload :LinkedData, 'dri/metadata/linked_data'
+    autoload :Documentation, 'dri/metadata/documentation'
   end
 end

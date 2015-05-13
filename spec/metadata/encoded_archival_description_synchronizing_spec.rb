@@ -107,7 +107,7 @@ describe 'EncodedArchivalDescription' do
         end
         obj.delete
       end
-      # @ead_collection = DRI::EncodedArchivalDescription.find(@ead_collection.pid.to_s) #hmmm, have to do this before I delete otherwise I get a 404 error!
+      @ead_collection = DRI::EncodedArchivalDescription.find(@ead_collection.pid.to_s) #hmmm, have to do this before I delete otherwise I get a 404 error!
       @ead_collection.delete
     end
   end

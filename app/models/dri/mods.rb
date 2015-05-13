@@ -3,22 +3,34 @@ module DRI
     include DRI::ModelSupport::ModsSupport
 
     # MODS relationships
+    # To express the bi-directionality of the sequencing relationships
+    # belongs_to means that the foreign key is in the table for this class.
+    # So belongs_to can ONLY go in the class that holds the foreign key
+    # has_one means that there is a foreign key in another table that references this class.
+    # So has_one can ONLY go in a class that is referenced by a column in another table.
+    # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
+    # so we need to validate that there is only one!!
     belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Mods"
-    belongs_to :succeeding, :property=>:related_succeeding, :class_name => "DRI::Mods"
+    has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Mods"
+
     belongs_to :original, :property=>:related_original, :class_name => "DRI::Mods"
+
     belongs_to :host, :property=>:related_host, :class_name => "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
     has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
+
     belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    has_many :version, :property=>:related_version, :class_name => "DRI::Mods"
-    has_many :format, :property=>:related_format, :class_name => "DRI::Mods"
-    has_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
-    has_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
-    has_many :review, :property=>:related_review, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :version, :property=>:related_version, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :format, :property=>:related_format, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :review, :property=>:related_review, :class_name => "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
+    # MODS record asset identifier used to sort pages/sequenced items
+    has_attributes :id_asset, datastream: :descMetadata, multiple: false
     # MODS rest of identifiers are repeatable
     has_attributes :identifier, datastream: :descMetadata, multiple: true
     has_attributes :id_doi, datastream: :descMetadata, multiple: true
@@ -64,6 +76,8 @@ module DRI
     # Roles
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
+
+    has_attributes :type, datastream: :descMetadata, multiple: true
 
     # TODO Disabled for now
     #around_save :create_multiple_records
@@ -178,21 +192,31 @@ module DRI
 
     def process_relationships()
       add_dm_relationship(related_items_ids_preceding, :preceding)
-      add_dm_relationship(related_items_ids_succeeding, :succeeding)
+      #add_dm_relationship(related_items_ids_succeeding, :succeeding)
       add_dm_relationship(related_items_ids_original, :original)
       add_dm_relationship(related_items_ids_host, :host)
-      add_dm_relationship(related_items_ids_constituent, :constituents)
+      #add_dm_relationship(related_items_ids_constituent, :constituents)
       add_dm_relationship(related_items_ids_series, :series)
       add_dm_relationship(related_items_ids_otherVersion, :version)
       add_dm_relationship(related_items_ids_otherFormat, :format)
       add_dm_relationship(related_items_ids_references, :references)
       add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
       add_dm_relationship(related_items_ids_reviewOf, :review)
+
+      # After processing all the relationships for the object, save
+      self.save if self.valid?
     end
 
     # Process a specific mods relationship for the object
     #
     def add_dm_relationship(rels_array, rels_name)
+      # Reset previous relationships
+      if self.send("#{rels_name}").respond_to?("push")
+        self.send("#{rels_name}").clear
+      else
+        self.association(rels_name.to_sym).replace(nil)
+      end
+
       if rels_array.empty?
         return
       end
@@ -218,8 +242,8 @@ module DRI
       rels_array.each do |item_id|
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "mods_id_local_tesim:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.to_s}\""
+        solr_query = "#{Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
@@ -231,9 +255,10 @@ module DRI
           unless mods_obj == nil
             if (rels_name.equal?(:constituents))
               mods_obj.send("#{:host}=", self)
+              mods_obj.save if mods_obj.valid?
             elsif rels_name.equal?(:host)
               self.send("#{rels_name}=", mods_obj)
-              self.governing_collection = mods_obj
+              #self.association(:governing_collection).replace(mods_obj)
             else
               if self.send("#{rels_name}").respond_to?("push")
                 self.send("#{rels_name}").push mods_obj
@@ -242,20 +267,19 @@ module DRI
               end
             end
 
-            mods_obj.save if mods_obj.valid?
             # Save object, if valid
-            self.save if self.valid?
+            #self.save if self.valid?
           end
         end
       end
     end # end add_mods_relationship
 
     def get_relationships_names
-      return {:preceding => "Is Preceded By",
-              :succeeding => "Is Succeeded By",
+      return {:preceding => "Preceding",
+              :succeeding => "Succeeding",
               :original => "Has Original",
-              :host => "Host",
-              :constituents => "Constituents",
+              :host => "Is Part Of",
+              :constituents => "Has Parts",
               :series => "Has Series",
               :version => "Is Version Of",
               :format => "Is Format Of",

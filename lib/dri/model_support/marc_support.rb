@@ -17,15 +17,17 @@ module DRI
         collection[0].children.remove
         
         records[1..-1].each do |r|
-            collection[0].children.remove
-            collection[0].add_child(r)
-            create_object collection[0].to_xml
+          create_object r.to_xml
         end
       end
 
       def create_object xml
         new_object = DRI::Batch.with_standard :marc
-        new_object.governing_collection = self.governing_collection
+        if !self.governing_collection.nil?
+          new_object.governing_collection = self.governing_collection
+        else
+          new_object.governing_collection = self
+        end
         new_object.depositor = self.depositor
         new_object.status = self.status
         new_object.update_metadata xml

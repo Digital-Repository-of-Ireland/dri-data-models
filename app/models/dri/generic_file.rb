@@ -27,6 +27,7 @@ class GenericFile < ActiveFedora::Base
   has_attributes :checksum_md5, datastream: :dri_properties, multiple: false
   has_attributes :checksum_sha256, datastream: :dri_properties, multiple: false
   has_attributes :checksum_rmd160, datastream: :dri_properties, multiple: false
+  has_attributes :preservation_only, datastream: :dri_properties, multiple: false
 
   # DRI is not storing files in Fedora (which would be too slow to be of practical use),
   # instead a datastream will link to a URL in the DRI storage system.
@@ -50,7 +51,7 @@ class GenericFile < ActiveFedora::Base
   # Unstemmed, searchable, stored
   def noid_indexer
     @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
-  end 
+  end
 
   def to_solr(solr_doc={}, opts={})
     super(solr_doc, opts)
