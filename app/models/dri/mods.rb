@@ -21,8 +21,8 @@ module DRI
     has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
 
     belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :version, :property=>:related_version, :class_name => "DRI::Mods"
-    has_and_belongs_to_many :format, :property=>:related_format, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :other_version, :property=>:related_version, :class_name => "DRI::Mods"
+    has_and_belongs_to_many :other_format, :property=>:related_format, :class_name => "DRI::Mods"
     has_and_belongs_to_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
     has_and_belongs_to_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
     has_and_belongs_to_many :review, :property=>:related_review, :class_name => "DRI::Mods"
@@ -197,8 +197,8 @@ module DRI
       add_dm_relationship(related_items_ids_host, :host)
       #add_dm_relationship(related_items_ids_constituent, :constituents)
       add_dm_relationship(related_items_ids_series, :series)
-      add_dm_relationship(related_items_ids_otherVersion, :version)
-      add_dm_relationship(related_items_ids_otherFormat, :format)
+      add_dm_relationship(related_items_ids_otherVersion, :other_version)
+      add_dm_relationship(related_items_ids_otherFormat, :other_format)
       add_dm_relationship(related_items_ids_references, :references)
       add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
       add_dm_relationship(related_items_ids_reviewOf, :review)
@@ -281,8 +281,8 @@ module DRI
               :host => "Is Part Of",
               :constituents => "Has Parts",
               :series => "Has Series",
-              :version => "Is Version Of",
-              :format => "Is Format Of",
+              :other_version => "Is Version Of",
+              :other_format => "Is Format Of",
               :referenced_by => "Is Referenced By",
               :references => "References",
               :review => "Is Review Of"
