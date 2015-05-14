@@ -21,8 +21,8 @@ module DRI
     has_many :constituents, predicate: ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods", as: :host
 
     belongs_to :series, predicate: ModsRelsVocabulary.relatedSeries, class_name: "DRI::Mods"
-    has_and_belongs_to_many :version, predicate: ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
-    has_and_belongs_to_many :format, predicate: ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
+    has_and_belongs_to_many :other_version, predicate: ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
+    has_and_belongs_to_many :other_format, predicate: ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
     has_and_belongs_to_many :referenced_by, predicate: ModsRelsVocabulary.relatedReferencedBy, class_name: "DRI::Mods"
     has_and_belongs_to_many :references, predicate: ModsRelsVocabulary.relatedReference, class_name: "DRI::Mods"
     has_and_belongs_to_many :review, predicate: ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
@@ -198,8 +198,8 @@ module DRI
       add_dm_relationship(related_items_ids_host, :host)
       #add_dm_relationship(related_items_ids_constituent, :constituents)
       add_dm_relationship(related_items_ids_series, :series)
-      add_dm_relationship(related_items_ids_otherVersion, :version)
-      add_dm_relationship(related_items_ids_otherFormat, :format)
+      add_dm_relationship(related_items_ids_otherVersion, :other_version)
+      add_dm_relationship(related_items_ids_otherFormat, :other_format)
       add_dm_relationship(related_items_ids_references, :references)
       add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
       add_dm_relationship(related_items_ids_reviewOf, :review)
@@ -282,8 +282,8 @@ module DRI
               :host => "Is Part Of",
               :constituents => "Has Parts",
               :series => "Has Series",
-              :version => "Is Version Of",
-              :format => "Is Format Of",
+              :other_version => "Is Version Of",
+              :other_format => "Is Format Of",
               :referenced_by => "Is Referenced By",
               :references => "References",
               :review => "Is Review Of"
