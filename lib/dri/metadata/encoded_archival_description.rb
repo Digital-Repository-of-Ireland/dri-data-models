@@ -248,7 +248,7 @@ module DRI
         t.note(:proxy => [:ead, :eadheader, :filedesc, :notestmt, :note], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         # Institute
-        t.institute(:proxy => [:ead, :archdesc, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        #t.institute(:proxy => [:ead, :archdesc, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # Related Material
         t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -378,9 +378,9 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable, type: :string) => "Collection")
 
         # Institute and sponsor/Depositing Institute: archdesc/did/repository
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :facetable) => institute) unless institute == []
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :stored_searchable, type: :string) => institute) unless institute == []
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute) unless institute == []
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :facetable) => institute) unless institute == []
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('institute', :stored_searchable, type: :string) => institute) unless institute == []
+        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('depositing_institute', :stored_searchable, type: :string) => institute) unless institute == []
 
         # Indexing dates for display + COOL date range
 
