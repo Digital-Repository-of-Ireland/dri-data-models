@@ -321,7 +321,7 @@ module DRI
             node['tag'] = controlfield['controlfield_tag'].first
             node.content = controlfield['controlfield_value'].first
             
-            record.add_child(node)
+            record.add_child(node) unless node.content.blank?
         end
       end
 
