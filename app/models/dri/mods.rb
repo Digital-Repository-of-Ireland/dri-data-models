@@ -115,7 +115,7 @@ module DRI
       descMetadata.ng_xml = object
 
       # Apply XSLT MODS 2 OAI_DC, and store it in Fedora's DC datastream
-      oai_dc_xml = DRI::Utils.apply_xslt_transformation('xslt/mods2oai_dc.xsl', object)
+      # oai_dc_xml = DRI::Utils.apply_xslt_transformation('xslt/mods2oai_dc.xsl', object)
       # FIXME F4 deprecated below
       # self.datastreams['DC'].content = oai_dc_xml.to_s
 

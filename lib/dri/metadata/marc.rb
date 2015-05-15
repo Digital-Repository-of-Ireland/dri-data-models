@@ -69,15 +69,14 @@ module DRI
           end
         end
 
-        # NCCB Specific fields
-        t.add_title_info(:path => 'record/datafield[@tag="130" or @tag="246"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
-        t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.other_names(:path => 'record/datafield[@tag="700" or @tag="720"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.notes(:path => 'record/datafield[@tag="500" or @tag="504" or @tag="505" or @tag="510" or @tag="520" or @tag="530" or @tag="546"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.shelfmark(:path => 'record/datafield[@tag="082"]/subfield[@code="a"] | //record/datafield[@tag="852"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Extra Facets:
-        t.author_facet(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111" or @tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.subject_name_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        # NCCB Specific fields and overrides
+        t.nccb_catalog_author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_add_title_info(:path => 'record/datafield[@tag="130" or @tag="246"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_other_names(:path => 'record/datafield[@tag="700" or @tag="720"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_notes(:path => 'record/datafield[@tag="500" or @tag="501" or @tag="503" or @tag="504" or @tag="505" or @tag="508" or @tag="510" or @tag="514" or @tag="520"  or @tag="521" or @tag="524" or @tag="530" or @tag="531" or @tag="546" or @tag="586"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # NCCB specific Facets
+        t.nccb_subject_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
         # Date Indices
         t.creation_date_idx(:path => "//record/controlfield[@tag='008']")
@@ -322,7 +321,7 @@ module DRI
             node['tag'] = controlfield['controlfield_tag'].first
             node.content = controlfield['controlfield_value'].first
             
-            record.add_child(node)
+            record.add_child(node) unless node.content.blank?
         end
       end
 
