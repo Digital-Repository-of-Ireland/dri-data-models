@@ -174,7 +174,7 @@ class Marc < DRI::Batch
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if marc_item.empty?
-        Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+        Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.id}")
       else
         doc = SolrDocument.new(marc_item[0])
         # Cast the solr document to its corresponding Fedora object
