@@ -150,12 +150,12 @@ class Marc < DRI::Batch
 
     # Get Root collection of current object.
     # This is to restrict relationship processing only within the given collection
-    solr_query = "id:\"#{pid.to_s}\""
+    solr_query = "id:\"#{id.to_s}\""
     # The query service returns back a set of Solr Documents, therefore need to be casted later on
     solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
     if (solr_docs == nil || solr_docs == [])
-      Rails.logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+      Rails.logger.error("Solr document for object with PID #{self.id} not found in Solr")
       return
     end
 
@@ -163,7 +163,7 @@ class Marc < DRI::Batch
     root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
     if (root_collection == nil)
-      Rails.logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+      Rails.logger.error("Root collection ID for object with PID #{self.id} not found in Solr")
       return
     end
 
