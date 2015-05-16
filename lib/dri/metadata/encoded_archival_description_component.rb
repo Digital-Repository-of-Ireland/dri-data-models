@@ -223,13 +223,6 @@ module DRI
         @synchronize_metadata_on_save || true
       end
 
-      #def from_xml(xml=nil)
-      #  if xml.nil?
-      #    # noop: handled in #ng_xml accessor.. tmpl.ng_xml = self.xml_template
-      #  elsif
-      #    self.ng_xml = xml
-      #  end
-      #end
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
