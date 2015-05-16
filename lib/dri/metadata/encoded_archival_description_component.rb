@@ -223,13 +223,6 @@ module DRI
         @synchronize_metadata_on_save || true
       end
 
-      #def from_xml(xml=nil)
-      #  if xml.nil?
-      #    # noop: handled in #ng_xml accessor.. tmpl.ng_xml = self.xml_template
-      #  elsif
-      #    self.ng_xml = xml
-      #  end
-      #end
       # Build the xml doc
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
@@ -426,7 +419,7 @@ module DRI
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creation_date_for_index
+      def creation_date_for_index()
         if (creation_date_idx != [] || creation_date != [])
           cdate_array = creation_date.collect! do |value|
             DRI::Metadata::Transformations.create_dcmi_period(value)
@@ -440,7 +433,7 @@ module DRI
 
       # Maps to origination/persname, if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
-      def creator_for_index
+      def creator_for_index()
         if (creator != [])
           return creator
         else
@@ -450,7 +443,7 @@ module DRI
       end
 
       # Get the Institute Information from the parent collection
-      def institute_for_index
+      def institute_for_index()
         if (institute != [])
           return institute
         else

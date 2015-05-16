@@ -167,8 +167,7 @@ module DRI
         # Title (collection-level, M)
         t.title(:proxy => [:ead, :eadheader, :filedesc, :titlestmt, :title], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Description (collection-level, M)
-        #t.description(:proxy => [:ead, :archdesc, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.description(:path => "/ead/archdesc/scopecontent/p | /ead/archdesc[not(scopecontent)]/did/abstract", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.description(:path => "/ead/archdesc/scopecontent/p | /ead/archdesc[not(scopecontent)]/did/abstract | /ead/archdesc[not(scopecontent) and not(did/abstract)]/bioghist/p", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Language //archdesc/did/langmaterial/language (collection-level, R best practice) but for NIVAL... use langusage in the eadHeader
         t.language(:proxy => [:ead, :eadheader, :profiledesc, :langusage, :language], :index_as=>[Descriptors.cleaned_searchable,  Descriptors.language_facetable])
         # Creator (collection-level, M)
@@ -271,30 +270,13 @@ module DRI
         @synchronize_metadata_on_save || true
       end
 
-      # When working with EAD documents using namespaces and schema-based
-      #def from_xml(xml=nil)
-      #  if xml.nil?
-      #  # noop: handled in #ng_xml accessor.. tmpl.ng_xml = self.xml_template
-      #  elsif xml.kind_of? Nokogiri::XML::Node
-      #    self.ng_xml = xml.remove_namespaces!
-      #  else
-      #    self.ng_xml = Nokogiri::XML::Document.parse(xml).remove_namespaces!
-      #  end
-      #end
-
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          # Updated EAD to use XSD as opposed to DTD
-          #xml.doc.create_internal_subset(
-          #    'ead',
-          #    "+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN",
-          #    ""
-          #)
           xml.ead("xmlns:xlink"=>"http://www.w3.org/1999/xlink",
                   "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
-                  "xmlns:ead"=>"urn:isbn:1-931666-22-9",
-                  "xsi:schemaLocation"=>"http://www.loc.gov/ead ead.xsd") {
+                  "xmlns"=>"urn:isbn:1-931666-22-9",
+                  "xsi:schemaLocation"=>"urn:isbn:1-931666-22-9 http://www.loc.gov/ead/ead.xsd") {
             xml.eadheader {
               xml.eadid
               xml.filedesc {
@@ -430,17 +412,6 @@ module DRI
       def language_for_index()
         return language | language_did
       end
-      # Mapping to UI description attribute from EAD: scopecontent, abstract
-      #def description_for_index()
-        #return description unless description == []
-        #return abstract unless abstract == []
-        #return bioghist unless bioghist == []
-        #return dao_desc unless dao_desc == []
-        #return note unless note == []
-        #return []
-        # No concatenation, instead use the order of precedence above
-        # return abstract | scope_content | bioghist | dao_desc | note
-      #end
 
       # Mapping to UI Rights / License ? userestrict or accessrestrict
       def rights_for_index()
@@ -578,8 +549,6 @@ module DRI
             [:ead, :archdesc, :did, :physdesc]
           when :type
             [:ead, :archdesc, :did, :physdesc, :type]
-          #when :type_ead
-          #  "archival finding aid"
           when :dao
             [:ead, :archdesc, :did, :dao]
           when :dao_href
