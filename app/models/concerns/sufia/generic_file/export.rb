@@ -316,7 +316,7 @@ module Sufia
       private
 
       def setup_database_name
-        "Digital Repository of Ireland [Distributer]"
+        "Digital Repository of Ireland [Distributor]"
       end
 
       def access_date_mla
