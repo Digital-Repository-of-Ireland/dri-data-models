@@ -21,8 +21,8 @@ class Marc < DRI::Batch
   has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  belongs_to :preceding, predicate: ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
-  has_many :succeeding, predicate: ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
+  belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
+  has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships

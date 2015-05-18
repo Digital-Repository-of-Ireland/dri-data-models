@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <!-- Review Below MARC XSD - Invalid value for the leader field -->
+    <leader>#####nam#0000#a#4508</leader>
+    <controlfield tag="001">DB_04</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="c">n.p.g.</subfield>
+    </datafield>
+    <!-- Mapped to Data Model marc_id (tag 024) Unique ID used for DRI internal relationships -->
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="a">nccb3</subfield>
+      <subfield code="2">local</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">Eng</subfield>
+    </datafield>
+    <datafield tag="100" ind1=" " ind2=" ">
+      <subfield code="a">Doyle, Richard.</subfield>
+    </datafield>
+    <datafield tag="240" ind1=" " ind2=" ">
+      <subfield code="a">In Fairyland, a Series of Pictures from the Elf-World, by William Doyle. With a Poem by William Allingham / illustrated by Richard Doyle; poem by William Allingham</subfield>
+    </datafield>
+    <datafield tag="245" ind1=" " ind2=" ">
+      <subfield code="a">In Fairyland, a Series of Pictures from the Elf-World, by William Doyle. With a Poem by William Allingham / illustrated by Richard Doyle; poem by William Allingham</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">First edition</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">London</subfield>
+      <subfield code="b">Longmans, Green, Reader and Dyer</subfield>
+      <subfield code="c">1870</subfield>
+      <subfield code="f">Engraved and Printed by Edmund Evans</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2=" ">
+      <subfield code="a">London</subfield>
+      <subfield code="b">Longmans, Green, Reader, and Dyer</subfield>
+      <subfield code="c">1870</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">[8],31,[1]p., col. plates, 38.5cm</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">“Mary, Charlie &amp; Stephen, from Mr Tracey, 1870” is inscribed in pencil on front endpapers</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">This is the only first edition of what is widely regarded as Richard Doyle’s masterpiece available in the Collections being explored by the NCCB. The elaborate and coloured illustrations are the central focus in this work, while the large size and dimensions of the book suggest a work that is designed to flaunt the detail and complexity of the pictures. The book is often regarded as bringing together the Victorian interest in the fairy tale alongside the developments in the creation of illustrated works in this period. Critics have acclaimed Doyle’s work as shaping the Victorian imagining of fairies, which continues to influence contemporary illustrations, yet it is also frequently suggested that Doyle’s illustrations are complete in themselves and can be ‘read’ without accompanying text.  This work is of further importance within Pearse Street’s Children’s Book Collection as its holdings trace some of the main developments in nineteenth-century illustrated books and picture books. Richard Doyle (1824-83) was an illustrator, printmaker, and watercolour painter, son of Irish political cartoonist John Doyle. Doyle’s illustrations are set alongside Irish poet William Allingham’s verse, which develops a love story in the fairy world over the course of a day, with sections titled “Dawn” and “The Noon-Call”. Though Allingham was commissioned to write the accompanying poem, he was disappointed with the finished result, saying there had been little consultation between artist and poet.  There are divergences between the text and the illustrations, and little symbiosis. The layout of the work reflects this division, as words and illustrations are kept largely separate. The book was printed and produced by Edmund Evans, who worked with other key illustrators of the period, including Randolph Caldecott, Walter Crane, and Kate Greenaway.   1 - See Jan Susina, “ ‘Like the Fragments of Coloured Glass in a Kaleidoscope’: Andrew Lang Mixes Up Richard Doyle’s In Fairyland”, Marvels and Tales 17.1 (2003): 100-119, 102. 
+ 2 - William Allingham, qtd. in Susina, “ ‘Like the Fragments of Coloured Glass’”, 104
+</subfield>    </datafield>    <datafield tag="540" ind1=" " ind2=" ">      <subfield code="a">Metadata copyright owned by Dublin City Public Libraries and Archive.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2=" ">
+      <subfield code="x">Literature</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Fairies</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Development of picture book</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Nineteenth century picture books</subfield>
+    </datafield>
+    <datafield tag="654" ind1=" " ind2=" ">
+      <subfield code="a">Fairies</subfield>
+      <subfield code="a">Development of picture book</subfield>
+      <subfield code="a">Nineteenth century picture books</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Illustrator</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Form</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Genre</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Edition</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Publishing Histories</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Folklore</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Illustrator</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Form</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Genre</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Edition</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Publishing Histories</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Folklore</subfield>
+    </datafield>
+    <datafield tag="700" ind1=" " ind2=" ">
+      <subfield code="a">Allingham, William.</subfield>
+    </datafield>
+    <datafield tag="700" ind1=" " ind2=" ">
+      <subfield code="e">Doyle, Richard.</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">Dublin City Library &amp; Archive</subfield>
+    </datafield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">Children’s Book Collection, Dublin City Public Library and Archive (Pearse Street)</subfield>
+      <subfield code="b">Children’s Book Collection – DCLA, Pearse Street</subfield>
+    </datafield>
+</record>
+

@@ -43,16 +43,18 @@ module DRI
             # ingest_files_from_metadata
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
             # FIXME Need to call checksum method below but this method is implemented in dri_app
-            # MetadataHelpers.checksum_metadata(new_child)
-
+            #MetadataHelpers.checksum_metadata(new_child)
+            #duplicates = object_duplicates?(new_child)
+            duplicates = false
             # Don't add new node if it's invalid
-            if new_child.valid?
+            if new_child.valid? && !duplicates
               Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
               new_child.save
               # add to queue
               prev_obj = new_child
+            elsif duplicates
+              Rails.logger.error("ERR_EAD_SAVE: #{new_child.identifier} is duplicated!!")
             else
-              # TODO Notify DRI App that there are invalid objects!!
               Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
               new_child.errors.messages.each do |key, value|
                 Rails.logger.error("#{key}: #{value}")
@@ -295,6 +297,19 @@ module DRI
         # return metadata.xpath("/*/*[matches(local-name(), 'c[01-12]')]") unless metadata.xpath("/*/*[matches(local-name(),'c[01-12]')]").empty?
         # For Xpath 1.0
         return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
+      end
+
+      def object_duplicates? object
+        result = false
+
+        if object.governing_collection.present?
+          collection_id = object.governing_collection.id
+          solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)}:\"#{object.metadata_md5}\" AND #{ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)}:\"#{collection_id}\""
+          documents = ActiveFedora::SolrService.query(solr_query, :defType => "edismax", :rows => "10", :fl => "id").delete_if{|obj| obj["id"] == object.id}
+          result = true unless documents.empty?
+        end
+
+        return result
       end
     end # module
   end # module
