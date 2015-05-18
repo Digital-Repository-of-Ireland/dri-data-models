@@ -31,6 +31,12 @@ module DRI
       super(properties)
     end
 
+    def roles= roles
+      if descMetadata.class == DRI::Metadata::QualifiedDublinCore
+        descMetadata.roles = roles
+      end
+    end
+
     def type
       descMetadata.resource_type
     end

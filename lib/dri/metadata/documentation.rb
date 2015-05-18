@@ -137,6 +137,27 @@ module DRI
         serialize
       end
 
+      def roles= roles
+        if roles.is_a? Hash
+          if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
+            changed_roles = Hash.new
+            roles["type"].uniq.each do |role|
+              changed_roles[role] = []
+            end
+
+            roles["type"].each_with_index do |role, i|
+              if (roles["name"][i] != "")
+                changed_roles[role].push(roles["name"][i])
+              end
+            end
+
+            changed_roles.keys.each do |role|
+              send role+"=", changed_roles[role]
+            end
+          end
+        end
+      end
+
       def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
