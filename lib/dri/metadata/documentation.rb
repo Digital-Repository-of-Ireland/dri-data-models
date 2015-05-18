@@ -132,6 +132,11 @@ module DRI
         false
       end
 
+      # Implement this method as implemented also in DRI::Metadata::Base
+      def to_xml
+        serialize
+      end
+
       def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
@@ -288,6 +293,10 @@ module DRI
         end
 
         people
+      end
+
+      def type
+        resource_type
       end
 
       def remove_null_values solr_doc, field

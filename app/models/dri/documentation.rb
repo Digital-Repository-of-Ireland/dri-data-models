@@ -1,34 +1,38 @@
 module DRI
-  class Documentation < ActiveFedora::Base
-    include Sufia::Noid
-    include DRI::ModelSupport::Properties
-    include DRI::ModelSupport::Permissions
+  class Documentation < DRI::Batch
 
-    # Versionable
-    has_many_versions
-
+    # Override interchangeable_metadata definition of descMetadata
     contains "descMetadata", class_name: "DRI::Metadata::Documentation"
-
-    # Complete metadata record datastream
-    contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
-
-    # Documentation has_many generic files through Fcrepo::RelsExt.isConstituentOf (to distinguish from Batch relation)
-    has_many :generic_files, class_name: "DRI::GenericFile", as: :documentation
 
     belongs_to :documentation_for, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, class_name: "DRI::Batch"
 
     # Full Simple DC Title, Creator, Subject, Description, Contributor, Publisher, Date, Type,
     # Format, Identifier, Source, Language, Relation, Coverage, Rights
-    has_attributes :creator, :title, :subject, :description, :contributor, :publisher, :language,
-                   :date, :source, :geographical_coverage, :temporal_coverage, :temporal_coverage_period, :creation_date, :published_date,
-                   :resource_type, :format, :coverage, :rights, :identifier,
-                   :geocode_point, :geocode_box, :relation, datastream: :descMetadata, multiple: true
+    #has_attributes :creator, :title, :subject, :description, :contributor, :publisher, :language,
+    #               :date, :source, :geographical_coverage, :temporal_coverage, :temporal_coverage_period, :creation_date, :published_date,
+    #               :resource_type, :format, :coverage, :rights, :identifier,
+    #               :geocode_point, :geocode_box, :relation, datastream: :descMetadata, multiple: true
+
+    has_attributes :date, :source, :geographical_coverage, :temporal_coverage, :temporal_coverage_period,
+                   :resource_type, :format, :coverage, :identifier, :geocode_point, :geocode_box, :relation,
+                   datastream: :descMetadata, multiple: true
 
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
 
     def attributes=(properties)
+      # When updating from DRI form, type attribute key needs to be replaced with resource_type
+      properties.keys.each do |k|
+        if(k == "type")
+          properties["resource_type"] = properties[k]
+          properties.delete(k)
+        end
+      end
       super(properties)
+    end
+
+    def type
+      descMetadata.resource_type
     end
 
     def self.find_or_create(pid)
@@ -43,6 +47,12 @@ module DRI
       super(solr_doc, opts)
     end
 
+    # Override from interchangeable_metadata: descMetadata doesn't inherit from base and it loads the correct class
+    def load_attributes
+      @metadata_class = descMetadata.class
+    end
+
+    # Override from interchangeable_metadata as DRI::Metadata::Documentation does not inherit from DRI::Metadata::Base
     def custom_validations
       results = descMetadata.custom_validations
 

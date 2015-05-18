@@ -17,8 +17,6 @@ class GenericFile < ActiveFedora::Base
 
   belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: "DRI::Batch"
 
-  belongs_to :documentation, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isConstituentOf, class_name: "DRI::Documentation"
-
   # Declare a 'dri_properties' DS, of the following type
   contains "dri_properties", class_name: "DRI::Metadata::FileProperties"
 

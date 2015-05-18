@@ -24,20 +24,22 @@ module DRI
 
     def self.with_standard(standard, args = {})
       case standard
-      when :marc
-        Marc.new(args)
-      when :qdc
-        QualifiedDublinCore.new(args)
-      when :ead_collection
-       EncodedArchivalDescription.new(:collection, args)
-      when :ead_component
-        EncodedArchivalDescription.new(:component, args)
-      when :mods
-        Mods.new(args)
-      else
-        QualifiedDublinCore.new(args)
+        when :marc
+          Marc.new(args)
+        when :qdc
+          QualifiedDublinCore.new(args)
+        when :ead_collection
+         EncodedArchivalDescription.new(:collection, args)
+        when :ead_component
+          EncodedArchivalDescription.new(:component, args)
+        when :mods
+          Mods.new(args)
+        when :documentation
+          Documentation.new(args)
+        else
+          QualifiedDublinCore.new(args)
       end
-    end 
+    end
 
     def self.find_or_create(pid)
       begin
