@@ -637,9 +637,9 @@ module DRI
         end
       end #metadata_path
 
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       def collection?
         (ead_level == ["item"]) ? false : true

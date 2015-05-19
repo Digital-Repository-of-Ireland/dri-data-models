@@ -18,9 +18,9 @@ module DRI
       end
 
       # Can this metadata type replace another metadata type
-      def interchangeable?
-      	true
-      end
+      #def interchangeable?
+      #	 true
+      #end
 
       def collection?
       	false

@@ -3,6 +3,8 @@ class Marc < DRI::Batch
 
   include DRI::ModelSupport::MarcSupport
 
+  contains "descMetadata", class_name: "DRI::Metadata::Marc"
+
   has_attributes :leader, datastream: :descMetadata, multiple: false
   has_attributes :controlfield, :controlfield_tag, datastream: :descMetadata, multiple: true
   has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true

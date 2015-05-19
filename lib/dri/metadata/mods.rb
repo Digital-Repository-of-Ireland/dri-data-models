@@ -386,9 +386,9 @@ module DRI
         false
       end
       # FIXME This is probably not needed anymore
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       # If the /mods/mods:typeOfResource[@collection="yes"] return true
       def collection?

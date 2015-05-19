@@ -1,6 +1,8 @@
 module DRI
   class QualifiedDublinCore < DRI::Batch
 
+    contains "descMetadata", class_name: "DRI::Metadata::QualifiedDublinCore"
+
     # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form

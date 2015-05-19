@@ -274,9 +274,9 @@ module DRI
         errors
       end
 
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       def type
         #[DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]

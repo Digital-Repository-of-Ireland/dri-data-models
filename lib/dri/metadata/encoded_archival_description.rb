@@ -588,9 +588,9 @@ module DRI
         end
       end #metadata_path
 
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       def collection?
         true

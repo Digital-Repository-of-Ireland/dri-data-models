@@ -2,6 +2,8 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
+    contains "descMetadata", class_name: "DRI::Metadata::Mods"
+
     # MODS relationships
     # To express the bi-directionality of the sequencing relationships
     # belongs_to means that the foreign key is in the table for this class.
