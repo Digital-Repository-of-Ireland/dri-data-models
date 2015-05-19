@@ -32,7 +32,7 @@ module DRI
     end
 
     def roles= roles
-      if descMetadata.class == DRI::Metadata::QualifiedDublinCore
+      if descMetadata.class == DRI::Metadata::Documentation
         descMetadata.roles = roles
       end
     end
