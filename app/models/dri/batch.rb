@@ -11,7 +11,7 @@ module DRI
   
     has_many_versions
 
-    has_many :generic_files, class_name: "DRI::GenericFile", as: :batch
+    has_many :generic_files, class_name: "DRI::GenericFile", as: :batch, dependent: :destroy
 
     # dependent: :destroy -> remove the documentation object if the collection is deleted
     has_many :documentation_objects, class_name: "DRI::Documentation", as: :documentation_for, dependent: :destroy

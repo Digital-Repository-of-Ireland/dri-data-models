@@ -7,7 +7,7 @@ module DRI
       	attr_accessor :collection
 
         belongs_to :governing_collection, property: :is_governed_by, class_name: 'DRI::Batch'
-        has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection
+        has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection, dependent: :destroy
 
         # NOT USED - Two relationships below for managing a collection's collections
         # (!) ONLY FOR COLLECTIONS
