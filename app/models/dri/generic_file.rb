@@ -1,6 +1,6 @@
 module DRI
   class GenericFile < ActiveFedora::Base
-    include Sufia::GenericFile
+    #include Sufia::GenericFile
     include Sufia::ModelMethods
     include Sufia::Noid
     include Sufia::GenericFile::MimeTypes
