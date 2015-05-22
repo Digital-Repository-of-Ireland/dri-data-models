@@ -8,6 +8,7 @@ module DRI
     include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
+    include DRI::ModelSupport::RelationshipsSupport
   
     has_many_versions
 
@@ -106,19 +107,16 @@ module DRI
 
     # Relationships Methods
 
-    def process_collection_relationships
-    end
+    #def process_collection_relationships
+    #end
 
-    def process_relationships()
-    end
+    #def process_relationships()
+    #end
 
-    def add_dm_relationship
-    end
-
-    def get_relationships_names
+    #def get_relationships_names
       # Empty Array - NO DRI specific relationships for now Overriden
-      return {}
-    end
+      #return {}
+    #end
 
   end # Class Batch
 end # Module DRI

@@ -16,15 +16,15 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::Marc"
+  #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_and_belongs_to_many :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::Marc"
+  #has_and_belongs_to_many :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
+  #has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
-  has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
+  #belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
+  #has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
@@ -96,6 +96,7 @@ class Marc < DRI::Batch
     self.descMetadata.add_datafields(datafields) unless datafields.nil?
   end
 
+=begin
   # Iterate over every collection's object and process relationships
   #
   def process_collection_relationships
@@ -135,6 +136,45 @@ class Marc < DRI::Batch
     # After processing all the relationships for the object, save
     self.save if self.valid?
   end
+=end
+
+  def get_relationships_names
+    return {:related => "Is Related To",
+            :is_version => "Is Version Of",
+            :is_format => "Is Format Of",
+            :preceding => "Preceding",
+            :succeeding => "Succeeding"
+    }
+  end
+
+  def get_relationships_records
+    return {:related => retrieve_relation_records(relation_ids_relation,
+                        ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
+            :is_version => retrieve_relation_records(relation_ids_isVersionOf,
+                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
+            :is_format => retrieve_relation_records(relation_ids_isFormatOf,
+                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
+            :preceding => retrieve_relation_records(relation_ids_preceding,
+                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
+            :succeeding => retrieve_relation_records(relation_ids_succeeding,
+                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string))
+    }
+  end
+
+  def create_multiple_records
+    yield
+
+    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
+    full_metadata_no_ns.remove_namespaces!
+    if !new_record? && full_metadata_no_ns.search("//record").count > 1
+      begin
+        Sufia.queue.push(CreateMarcRecordsJob.new(self.id))
+      rescue Exception => e
+      end
+    end
+  end
+
+  private
 
   # Process a specific qdc relationship for the object
   #
@@ -193,28 +233,6 @@ class Marc < DRI::Batch
       end
     end
   end # end add_dm_relationship
-
-  def get_relationships_names
-    return {:related => "Is Related To",
-            :is_version => "Is Version Of",
-            :is_format => "Is Format Of",
-            :preceding => "Preceding",
-            :succeeding => "Succeeding"
-    }
-  end
-
-  def create_multiple_records
-    yield
-
-    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
-    full_metadata_no_ns.remove_namespaces!
-    if !new_record? && full_metadata_no_ns.search("//record").count > 1
-      begin
-        Sufia.queue.push(CreateMarcRecordsJob.new(self.id))
-      rescue Exception => e
-      end
-    end
-  end
       
 end
 end

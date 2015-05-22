@@ -28,11 +28,11 @@ describe 'Marc' do
   end
 
   it "should add relationship relation, is_version_of and is_format_of" do
-    @nccb1.process_relationships
+    md_relationships_hash = @nccb1.get_relationships_records
 
-    added_rels = [DRI::Marc.find(@nccb1.related_ids.first).marc_id,
-        DRI::Marc.find(@nccb1.is_format_ids.first).marc_id,
-        DRI::Marc.find(@nccb1.is_version_ids.first).marc_id]
+    added_rels = [DRI::Marc.find(md_relationships_hash[:related].first).marc_id,
+        DRI::Marc.find(md_relationships_hash[:is_format].first).marc_id,
+        DRI::Marc.find(md_relationships_hash[:is_version].first).marc_id]
 
     added_rels.should =~ ["nccb3", "nccb2", "nccb0"]
   end
@@ -40,15 +40,6 @@ describe 'Marc' do
   after(:each) do
     unless @nccb0.new_record?
       @nccb0.delete
-    end
-    unless @nccb1.new_record?
-      @nccb1.delete
-    end
-    unless @nccb2.new_record?
-      @nccb2.delete
-    end
-    unless @nccb3.new_record?
-      @nccb3.delete
     end
   end
 

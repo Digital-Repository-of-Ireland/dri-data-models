@@ -12,22 +12,22 @@ module DRI
     # So has_one can ONLY go in a class that is referenced by a column in another table.
     # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
     # so we need to validate that there is only one!!
-    belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods"
-    has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods", as: :preceding
+    #belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods"
+    #has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods", as: :preceding
 
-    belongs_to :original, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedOriginal, class_name: "DRI::Mods"
+    #belongs_to :original, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedOriginal, class_name: "DRI::Mods"
 
-    belongs_to :host, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods"
+    #belongs_to :host, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
-    has_many :constituents, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods", as: :host
+    #has_many :constituents, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods", as: :host
 
-    belongs_to :series, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSeries, class_name: "DRI::Mods"
-    has_and_belongs_to_many :other_version, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
-    has_and_belongs_to_many :other_format, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
-    has_and_belongs_to_many :referenced_by, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReferencedBy, class_name: "DRI::Mods"
-    has_and_belongs_to_many :references, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReference, class_name: "DRI::Mods"
-    has_and_belongs_to_many :review, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
+    #belongs_to :series, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSeries, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :other_version, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :other_format, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :referenced_by, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReferencedBy, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :references, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReference, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :review, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -161,6 +161,7 @@ module DRI
       end
     end
 
+=begin
     # Iterate over every collection's object and process relationships
     # Recursive: if object is collection then process collection relationships
     # Once all the current object's children's rels have been process then process the current rels
@@ -194,21 +195,91 @@ module DRI
     end # end add_relationships
 
     def process_relationships()
-      add_dm_relationship(related_items_ids_preceding, :preceding)
-      #add_dm_relationship(related_items_ids_succeeding, :succeeding)
-      add_dm_relationship(related_items_ids_original, :original)
-      add_dm_relationship(related_items_ids_host, :host)
-      #add_dm_relationship(related_items_ids_constituent, :constituents)
-      add_dm_relationship(related_items_ids_series, :series)
-      add_dm_relationship(related_items_ids_otherVersion, :other_version)
-      add_dm_relationship(related_items_ids_otherFormat, :other_format)
-      add_dm_relationship(related_items_ids_references, :references)
-      add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
-      add_dm_relationship(related_items_ids_reviewOf, :review)
+      #add_dm_relationship(related_items_ids_preceding, :preceding)
+      ##add_dm_relationship(related_items_ids_succeeding, :succeeding)
+      #add_dm_relationship(related_items_ids_original, :original)
+      #add_dm_relationship(related_items_ids_host, :host)
+      ##add_dm_relationship(related_items_ids_constituent, :constituents)
+      #add_dm_relationship(related_items_ids_series, :series)
+      #add_dm_relationship(related_items_ids_otherVersion, :other_version)
+      #add_dm_relationship(related_items_ids_otherFormat, :other_format)
+      #add_dm_relationship(related_items_ids_references, :references)
+      #add_dm_relationship(related_items_ids_isReferencedBy, :referenced_by)
+      #add_dm_relationship(related_items_ids_reviewOf, :review)
 
       # After processing all the relationships for the object, save
-      self.save if self.valid?
+      #self.save if self.valid?
     end
+=end
+
+    def get_relationships_names
+      return {:preceding => "Preceding",
+              :succeeding => "Succeeding",
+              :original => "Has Original",
+              :host => "Is Part Of",
+              :constituents => "Has Parts",
+              :series => "Has Series",
+              :other_version => "Is Version Of",
+              :other_format => "Is Format Of",
+              :referenced_by => "Is Referenced By",
+              :references => "References",
+              :review => "Is Review Of"
+      }
+    end
+
+    def get_relationships_records
+      return {:preceding => retrieve_relation_records(related_items_ids_preceding,
+                            ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :succeeding => retrieve_relation_records(related_items_ids_succeeding,
+                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :original => retrieve_relation_records(related_items_ids_original,
+                           ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :host => retrieve_relation_records(related_items_ids_host,
+                       ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :constituents => retrieve_relation_records(related_items_ids_constituent,
+                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :series => retrieve_relation_records(related_items_ids_series,
+                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :other_version => retrieve_relation_records(related_items_ids_otherVersion,
+                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :other_format => retrieve_relation_records(related_items_ids_otherFormat,
+                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy,
+                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :references => retrieve_relation_records(related_items_ids_references,
+                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
+              :review => retrieve_relation_records(related_items_ids_reviewOf,
+                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string))
+      }
+    end
+
+    def create_multiple_records
+      yield # Do save the object
+
+      if (self.trigger_update)
+        # Check whether there are namespaces
+        #if self.fullMetadata.ng_xml.namespaces.values.include?("http://www.loc.gov/mods/v3")
+        # Get the prefix used in the XML for MODS
+        #  ns_array = self.fullMetadata.ng_xml.namespaces.select{ |key, hash| hash == "http://www.loc.gov/mods/v3"}.first
+        #  prefix = ns_array.first.to_s.dup
+        #  prefix.slice! "xmlns:"
+
+        #  query = self.fullMetadata.ng_xml.search("//#{prefix}:mods")
+        #else
+        query = self.fullMetadata.ng_xml.search("//mods:mods")
+        #end
+
+        if !new_record? && query.count > 1
+          begin
+            Sufia.queue.push(CreateModsRecordsJob.new(self.id))
+          rescue Exception => e
+            Logger.error(e.message)
+          end
+        end
+      end # end if
+    end # end create_multiple_records
+
+    private
 
     # Process a specific mods relationship for the object
     #
@@ -276,46 +347,5 @@ module DRI
         end
       end
     end # end add_mods_relationship
-
-    def get_relationships_names
-      return {:preceding => "Preceding",
-              :succeeding => "Succeeding",
-              :original => "Has Original",
-              :host => "Is Part Of",
-              :constituents => "Has Parts",
-              :series => "Has Series",
-              :other_version => "Is Version Of",
-              :other_format => "Is Format Of",
-              :referenced_by => "Is Referenced By",
-              :references => "References",
-              :review => "Is Review Of"
-      }
-    end
-
-    def create_multiple_records
-      yield # Do save the object
-
-      if (self.trigger_update)
-        # Check whether there are namespaces
-        #if self.fullMetadata.ng_xml.namespaces.values.include?("http://www.loc.gov/mods/v3")
-        # Get the prefix used in the XML for MODS
-        #  ns_array = self.fullMetadata.ng_xml.namespaces.select{ |key, hash| hash == "http://www.loc.gov/mods/v3"}.first
-        #  prefix = ns_array.first.to_s.dup
-        #  prefix.slice! "xmlns:"
-
-        #  query = self.fullMetadata.ng_xml.search("//#{prefix}:mods")
-        #else
-        query = self.fullMetadata.ng_xml.search("//mods:mods")
-        #end
-
-        if !new_record? && query.count > 1
-          begin
-            Sufia.queue.push(CreateModsRecordsJob.new(self.id))
-          rescue Exception => e
-            Logger.error(e.message)
-          end
-        end
-      end # end if
-    end # end create_multiple_records
   end # Class Mods
 end # Module DRI

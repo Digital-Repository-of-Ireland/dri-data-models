@@ -6,6 +6,8 @@ module DRI
       included do
       	attr_accessor :collection
 
+        #before_destroy :reload_governing_collection
+
         belongs_to :governing_collection, property: :is_governed_by, class_name: 'DRI::Batch'
         has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection, dependent: :destroy
 
@@ -108,6 +110,10 @@ module DRI
 
         solr_doc
       end #collections_to_solr
+
+      #private def reload_governing_collection
+      #  self.governing_collection.reload unless self.governing_collection.nil? || self.governing_collection.destroyed?
+      #end
     end # module
   end # module
 end #module

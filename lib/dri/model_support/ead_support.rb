@@ -38,7 +38,12 @@ module DRI
             # Add depositor, status and permissions from parent
             new_child.depositor = self.depositor
             new_child.status = self.status
-            new_child.permissions = self.permissions.to_a
+            # Copy permissions from parent
+            new_child.read_groups_string = self.read_groups_string
+            new_child.edit_groups_string = self.edit_groups_string
+            new_child.manager_groups_string = self.manager_groups_string
+            new_child.manager_users_string = self.manager_users_string
+
             
             # ingest_files_from_metadata
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata

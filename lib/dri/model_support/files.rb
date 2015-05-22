@@ -37,7 +37,7 @@ module DRI
           add_file temp_file, "content", file_name
           true
         rescue Exception => e
-          logger.error "Error loading url: #{e.message}\n"
+          logger.error "Error loading url: #{file_url} PID: #{self.id}\n"
           logger.error e.backtrace.join("\n")
           false
         ensure
