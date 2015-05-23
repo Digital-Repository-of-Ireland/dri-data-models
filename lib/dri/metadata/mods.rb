@@ -758,7 +758,7 @@ module DRI
         errors[:type] = "can't be blank" if type_result == false
 
         # If this is a collection then validate:
-        if (!mods_type_collection.nil?)
+        if (!mods_type_collection.nil? && !mods_type_collection.empty?)
           errors[:description] = "can't be blank" if description_result == false
           errors[:rights] = "can't be blank" if rights_result == false
           errors[:creation_date] = "can't be blank" if date_result == false
