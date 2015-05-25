@@ -43,14 +43,6 @@ module DRI
         # Language (collection-level)
         has_attributes :language, datastream: :descMetadata, multiple: true
 
-        # FIXME - check DRI elements below, not included here initially
-        # Source (collection-level, R)
-        # has_attributes :source, datastream: :descMetadata, multiple: true
-        # Geographical coverage (collection-level)
-        # has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-        # Temporal coverage (collection-level)
-        # has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-
         validate :custom_validations
       end
 
@@ -114,7 +106,6 @@ module DRI
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
           result = "DRI::Metadata::Mods"
-          # result = (!xml.xpath("/mods:mods/mods:typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif (xml.internal_subset != nil && xml.internal_subset.name == 'ead') || ['ead'].include?(root_name)
@@ -125,9 +116,8 @@ module DRI
           result = "DRI::Metadata::Marc"
         elsif ['mods'].include?(root_name)
           result = "DRI::Metadata::Mods"
-        #elsif ['modsCollection'].include?(root_name)
-          # Check whether the first record is a collection
-        #  result = (!xml.xpath("/modsCollection/mods[1]/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
+        elsif ['RDF'].include?(root_name)
+          result = "DRI::Metadata::Documentation"
         end
 
         return result
@@ -153,19 +143,24 @@ module DRI
             ds = ds_class.constantize.new
           else
             # Load class from :desc_metadata_class which is set ingest_controller
-            ds = desc_metadata_class.constantize.new
+            ds = desc_metadata_class.constantize.new unless ds == DRI::Metadata::Documentation
           end
         else
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
-          old_digital_object = descMetadata.digital_object
-          unless (ds_class == nil)
-            ds = ds_class.constantize.from_xml descMetadata.to_xml
+          if (!['DRI::Metadata::Documentation'].include? ds_class)
+            old_digital_object = descMetadata.digital_object
+            unless (ds_class == nil)
+              ds = ds_class.constantize.from_xml descMetadata.to_xml
+            else
+              ds = DRI::Metadata::QualifiedDublinCore.new
+            end
+            ds.digital_object = old_digital_object
           else
-            ds = DRI::Metadata::QualifiedDublinCore.new
+            @metadata_class = ds_class.constantize
+            return
           end
-          ds.digital_object = old_digital_object
         end
 
         if (ds != nil)
@@ -173,12 +168,6 @@ module DRI
           self.add_datastream ds
         end
         @metadata_class = descMetadata.class
-        # FIXME Check whether desc_metadata_class has to be set here as well
-        # This is causing problems when updating EAD descMetadata datastream as desc_metadata_class is nil when
-        # loading an existing EAD object
-        #@desc_metadata_class = descMetadata.class
-        # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
-        # self.descMetadata.save if self.descMetadata.changed?
 
       end # load_attributes
     end # module

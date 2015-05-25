@@ -201,7 +201,7 @@ module DRI
         # EAD elements
         t.note(:proxy => [:c, :did, :note], :index_as=>[Descriptors.cleaned_searchable])
         # Institute / Depositing Institution
-        t.institute(:proxy => [:c, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        #t.institute(:proxy => [:c, :did, :repository, :corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
 
         # Related Material
         t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -329,12 +329,12 @@ module DRI
         #solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage)
 
         # Institute and sponsor/Depositing Institute: archdesc/did/repository
-        institute_array = institute_for_index
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :facetable) => institute_array) unless institute_array == []
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
+        #institute_array = institute_for_index
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :facetable) => institute_array) unless institute_array == []
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :stored_searchable, type: :string) => institute_array) unless institute_array == []
         # depositing_institute_ssm - the dri_app looks for this type of indexed field at object-level display
-        solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
+        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('depositing_institute', :displayable, type: :string) => institute_array) unless institute_array == []
 
         # Index related_material and alternative_form_available
         solr_doc.merge!(Solrizer.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
@@ -443,14 +443,14 @@ module DRI
       end
 
       # Get the Institute Information from the parent collection
-      def institute_for_index()
-        if (institute != [])
-          return institute
-        else
+      #def institute_for_index()
+      #  if (institute != [])
+      #    return institute
+      #  else
           # Get the Institute from the parent collection, if available
-          get_field_from_parent("institute")
-        end
-      end
+      #    get_field_from_parent("institute")
+      #  end
+      #end
 
       def get_field_from_parent(field_name)
         fedora_object = DRI::EncodedArchivalDescription.find(pid)
@@ -633,9 +633,9 @@ module DRI
         end
       end #metadata_path
 
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       def collection?
         (ead_level == ["item"]) ? false : true

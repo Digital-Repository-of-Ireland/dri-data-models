@@ -1,7 +1,5 @@
 module DRI
-
   module Metadata
-
     class FileProperties < ActiveFedora::OmDatastream
 
       # OM (Opinionated Metadata) terminology mapping
@@ -25,9 +23,6 @@ module DRI
       def prefix
         '' # add a prefix for solr index terms if you need to namespace identical terms in multiple data streams
       end
-
     end
-
   end
-
 end

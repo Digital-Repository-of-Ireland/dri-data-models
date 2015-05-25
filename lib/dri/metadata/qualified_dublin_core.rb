@@ -185,7 +185,7 @@ module DRI
           end
         end
 
-        # all_metadata - A SOLR index of all the text contained in the XML document
+       # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
         ng_xml.xpath("//text()").each do |text_node|
           all_metadata += text_node.text

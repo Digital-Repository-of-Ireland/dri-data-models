@@ -1,6 +1,8 @@
 module DRI
   class QualifiedDublinCore < DRI::Batch
 
+    #before_destroy :delete_parents
+
     # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
@@ -31,22 +33,23 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    has_and_belongs_to_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    has_and_belongs_to_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
 
-    belongs_to :container, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :container, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
     # hasPart is managed through the isPartOf relationship. This automatically adds the child isPartOf
     # whenever a hasPart relationship is added
-    has_many :parts, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
+    #has_many :parts, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
 
-    belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+    #has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
 
-    belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
-    has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    #has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
 
-    belongs_to :source_rel, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :has_source, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
+    #has_many :source_for, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
 
     def initialize(args = {})
       args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -75,6 +78,7 @@ module DRI
       end
     end
 
+=begin
     # Iterate over every collection's object and process relationships
     #
     def process_collection_relationships
@@ -107,20 +111,66 @@ module DRI
     end # end add_relationships
 
     def process_relationships()
-      add_dm_relationship(relation_ids_relation, :related)
-      add_dm_relationship(relation_ids_isPartOf, :container)
-      #add_dm_relationship(relation_ids_hasPart, :parts)
-      add_dm_relationship(relation_ids_isReferencedBy, :referenced)
-      add_dm_relationship(relation_ids_references, :references)
-      add_dm_relationship(relation_ids_isVersionOf, :is_version)
-      #add_dm_relationship(relation_ids_hasVersion, :has_versions)
-      add_dm_relationship(relation_ids_isFormatOf, :is_format)
-      #add_dm_relationship(relation_ids_hasFormat, :has_format)
-      add_dm_relationship(relation_ids_source, :source_rel)
+      #add_dm_relationship(relation_ids_relation, :related)
+      #add_dm_relationship(relation_ids_isPartOf, :container)
+      ##add_dm_relationship(relation_ids_hasPart, :parts)
+      #add_dm_relationship(relation_ids_isReferencedBy, :referenced)
+      #add_dm_relationship(relation_ids_references, :references)
+      #add_dm_relationship(relation_ids_isVersionOf, :is_version)
+      ##add_dm_relationship(relation_ids_hasVersion, :has_versions)
+      #add_dm_relationship(relation_ids_isFormatOf, :is_format)
+      ##add_dm_relationship(relation_ids_hasFormat, :has_format)
+      #add_dm_relationship(relation_ids_source, :has_source)
 
       # After processing all the relationships for the object, save
-      self.save if self.valid?
+      #self.save if self.valid?
     end
+=end
+
+    def get_relationships_names
+      return {:related => "Is Related To",
+              :referenced => "Is Referenced By",
+              :references => "References",
+              :container => "Is Part Of",
+              :parts => "Has Part",
+              :is_version => "Is Version Of",
+              :has_versions => "Has Version",
+              :is_format => "Is Format Of",
+              :has_format => "Has Format",
+              :has_source => "Source"
+      }
+    end
+
+    def get_relationships_records
+      return {:related => retrieve_relation_records(relation_ids_relation,
+                          Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :referenced => retrieve_relation_records(relation_ids_isReferencedBy,
+                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :references => retrieve_relation_records(relation_ids_references,
+                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :container => retrieve_relation_records(relation_ids_isPartOf,
+                            Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :parts => retrieve_relation_records(relation_ids_hasPart,
+                        Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :is_version => retrieve_relation_records(relation_ids_isVersionOf,
+                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :has_versions => retrieve_relation_records(relation_ids_hasVersion,
+                               Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :is_format => retrieve_relation_records(relation_ids_isFormatOf,
+                            Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :has_format => retrieve_relation_records(relation_ids_hasFormat,
+                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+              :has_source => retrieve_relation_records(relation_ids_source,
+                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string))
+      }
+      end
+
+    private
+
+    #def delete_parents
+    #  deleted = self.class.delete_all "governing_collection_id = #{id}"
+    #  deleted.size
+    #end
 
     # Process a specific qdc relationship for the object
     #
@@ -189,19 +239,5 @@ module DRI
       end
     end # end add_dm_relationship
 
-    def get_relationships_names
-      return {:related => "Is Related To",
-              :referenced => "Is Referenced By",
-              :references => "References",
-              :container => "Is Part Of",
-              :parts => "Has Part",
-              :is_version => "Is Version Of",
-              :has_versions => "Has Version",
-              :is_format => "Is Format Of",
-              :has_format => "Has Format",
-              :source_rel => "Source"
-      }
-    end
-      
   end # Class QualifiedDublinCore
 end # Module DRI

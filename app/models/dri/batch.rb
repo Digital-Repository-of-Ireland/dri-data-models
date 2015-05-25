@@ -10,11 +10,12 @@ module DRI
     include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
+    include DRI::ModelSupport::RelationshipsSupport
 
-    has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of
+    has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of, :dependent => :destroy
 
     # dependent: :destroy -> remove the documentation object if the collection is deleted
-    has_many :documentation_objects, :class_name => "DRI::Documentation", :dependent => :destroy, :property => :is_description_of
+    has_many :documentation_objects, :class_name => "DRI::Documentation", :property => :is_description_of, :dependent => :destroy
 
     # Declare a 'extracted' DS, of the following type
     has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
@@ -23,20 +24,22 @@ module DRI
     has_attributes :full_text, datastream: :extracted, multiple: true
 
     def self.with_standard(standard, args = {})
-     case standard
-       when :marc
-         Marc.new(args)
-       when :qdc
-         QualifiedDublinCore.new(args)
-       when :ead_collection
+      case standard
+        when :marc
+          Marc.new(args)
+        when :qdc
+          QualifiedDublinCore.new(args)
+        when :ead_collection
          EncodedArchivalDescription.new(:collection, args)
-       when :ead_component
-         EncodedArchivalDescription.new(:component, args)
-       when :mods
-         Mods.new(args)
-       else
-         QualifiedDublinCore.new(args)
-     end
+        when :ead_component
+          EncodedArchivalDescription.new(:component, args)
+        when :mods
+          Mods.new(args)
+        when :documentation
+          Documentation.new(args)
+        else
+          QualifiedDublinCore.new(args)
+      end
     end
 
     def self.find_or_create(pid)
@@ -91,7 +94,6 @@ module DRI
 
     # Indexing object types as a hierarchical tree
     def object_types_to_solr(solr_doc=Hash.new)
-
       object_types = []
 
       self.descMetadata.type.each do | curr_category |
@@ -112,20 +114,16 @@ module DRI
 
     # Relationships Methods
 
-    def process_collection_relationships
-    end
+    #def process_collection_relationships
+    #end
 
-    def process_relationships()
-    end
+    #def process_relationships()
+    #end
 
-    def add_dm_relationship
-
-    end
-
-    def get_relationships_names
+    #def get_relationships_names
       # Empty Array - NO DRI specific relationships for now Overriden
-      return {}
-    end
+      #return {}
+    #end
 
   end # Class Batch
 end # Module DRI

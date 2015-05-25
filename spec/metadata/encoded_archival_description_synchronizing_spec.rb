@@ -101,12 +101,12 @@ describe 'EncodedArchivalDescription' do
   after(:each) do
     if !@ead_collection.new_record?
       # Delete all descendants of @ead_collection and their generic files
-      DRI::EncodedArchivalDescription.find(ActiveFedora::SolrService.solr_name('ancestor_id', :stored_searchable) => @ead_collection.pid.to_s).each do |obj|
-        obj.generic_files.each do |file_obj|
-          file_obj.delete
-        end
-        obj.delete
-      end
+      #DRI::EncodedArchivalDescription.find(ActiveFedora::SolrService.solr_name('ancestor_id', :stored_searchable) => @ead_collection.pid.to_s).each do |obj|
+      #  obj.generic_files.each do |file_obj|
+      #    file_obj.delete
+      #  end
+      #  obj.delete
+      #end
       @ead_collection = DRI::EncodedArchivalDescription.find(@ead_collection.pid.to_s) #hmmm, have to do this before I delete otherwise I get a 404 error!
       @ead_collection.delete
     end

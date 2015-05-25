@@ -14,15 +14,15 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  has_and_belongs_to_many :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  has_and_belongs_to_many :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
-  has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Marc"
+  #belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
+  #has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Marc"
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
@@ -94,6 +94,7 @@ class Marc < DRI::Batch
     self.descMetadata.add_datafields(datafields) unless datafields.nil?
   end
 
+=begin
   # Iterate over every collection's object and process relationships
   #
   def process_collection_relationships
@@ -133,6 +134,45 @@ class Marc < DRI::Batch
     # After processing all the relationships for the object, save
     self.save if self.valid?
   end
+=end
+
+  def get_relationships_names
+    return {:related => "Is Related To",
+            :is_version => "Is Version Of",
+            :is_format => "Is Format Of",
+            :preceding => "Preceding",
+            :succeeding => "Succeeding"
+    }
+  end
+
+  def get_relationships_records
+    return {:related => retrieve_relation_records(relation_ids_relation,
+                        Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+            :is_version => retrieve_relation_records(relation_ids_isVersionOf,
+                           Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+            :is_format => retrieve_relation_records(relation_ids_isFormatOf,
+                          Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+            :preceding => retrieve_relation_records(relation_ids_preceding,
+                          Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+            :succeeding => retrieve_relation_records(relation_ids_succeeding,
+                           Solrizer.solr_name('marc_id', :stored_searchable, type: :string))
+    }
+  end
+
+  def create_multiple_records
+    yield
+
+    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
+    full_metadata_no_ns.remove_namespaces!
+    if !new_record? && full_metadata_no_ns.search("//record").count > 1
+      begin
+        Sufia.queue.push(CreateMarcRecordsJob.new(self.id))
+      rescue Exception => e
+      end
+    end
+  end
+
+  private
 
   # Process a specific qdc relationship for the object
   #
@@ -191,28 +231,5 @@ class Marc < DRI::Batch
       end
     end
   end # end add_dm_relationship
-
-  def get_relationships_names
-    return {:related => "Is Related To",
-            :is_version => "Is Version Of",
-            :is_format => "Is Format Of",
-            :preceding => "Preceding",
-            :succeeding => "Succeeding"
-    }
-  end
-
-  def create_multiple_records
-    yield
-
-    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
-    full_metadata_no_ns.remove_namespaces!
-    if !new_record? && full_metadata_no_ns.search("//record").count > 1
-      begin
-        Sufia.queue.push(CreateMarcRecordsJob.new(self.pid))
-      rescue Exception => e
-      end
-    end
-  end
-      
 end
 end

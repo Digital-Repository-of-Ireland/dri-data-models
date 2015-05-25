@@ -55,7 +55,7 @@ module DRI
     has_attributes :date_idx, datastream: :descMetadata, multiple: true
 
     # Institute
-    has_attributes :institute, datastream: :descMetadata, multiple: true
+    #has_attributes :institute, datastream: :descMetadata, multiple: true
 
     # Related Material
     # The <relatedmaterial> element is comparable to ISAD(G) data element 3.5.3 and MARC field 544 with indicator 1

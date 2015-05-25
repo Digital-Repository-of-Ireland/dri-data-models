@@ -274,6 +274,19 @@ module DRI
         # For Xpath 1.0
         return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
       end
+
+      def object_duplicates? object
+        result = false
+
+        if object.governing_collection.present?
+          collection_id = object.governing_collection.id
+          solr_query = "#{Solrizer.solr_name('metadata_md5', :stored_searchable, type: :string)}:\"#{object.metadata_md5}\" AND #{Solrizer.solr_name('isGovernedBy', :stored_searchable, type: :symbol)}:\"#{collection_id}\""
+          documents = Solrizer.query(solr_query, :defType => "edismax", :rows => "10", :fl => "id").delete_if{|obj| obj["id"] == object.id}
+          result = true unless documents.empty?
+        end
+
+        return result
+      end
     end # module
   end # module
 end # module
