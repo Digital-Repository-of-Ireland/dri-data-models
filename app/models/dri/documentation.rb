@@ -26,6 +26,10 @@ module DRI
     end
 
     def attributes=(properties)
+      point_hash = Hash.new
+      box_hash = Hash.new
+      period_hash = Hash.new
+
       # When updating from DRI form, type attribute key needs to be replaced with resource_type
       properties.keys.each do |k|
         if(k == "type")
@@ -36,8 +40,6 @@ module DRI
       # Adding :geocode_point and :geocode_box to properties if :geographical_coverage present
       # for spatial indexing
       if !properties[:geographical_coverage].nil? && !properties[:geographical_coverage].empty?
-        point_hash = Hash.new
-        box_hash = Hash.new
         properties[:geographical_coverage].each do |item|
           if DRI::Metadata::Transformations.dcmi_point? item
             if point_hash[:geocode_point].nil?
@@ -57,7 +59,6 @@ module DRI
         # Adding :temporal_coverage_period to properties if :temporal_coverage present
         # for temporal indexing
         if !properties[:temporal_coverage].nil? && !properties[:temporal_coverage].empty?
-          period_hash = Hash.new
           properties[:temporal_coverage].each do |item|
             if DRI::Metadata::Transformations.dcmi_period? item
               if period_hash[:temporal_coverage_period].nil?
