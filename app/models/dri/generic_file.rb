@@ -76,6 +76,8 @@ module DRI
       solr_doc
     end
 
+    private
+
     def delete_files
       local_file_info = LocalFile.where("fedora_id LIKE :f AND ds_id LIKE :d",
                                         { :f => self.id, :d => 'content' }).order("version DESC").to_a
@@ -83,8 +85,7 @@ module DRI
       FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(self.id), :force => true)
 
       storage = Storage::S3Interface.new
-      storage.delete_bucket(self.id)
+      storage.delete_bucket(Utils.split_id(self.id))
     end
-
   end
 end
