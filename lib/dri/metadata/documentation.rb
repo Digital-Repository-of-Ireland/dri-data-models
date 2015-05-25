@@ -97,23 +97,15 @@ module DRI
 
       property :temporal_coverage, predicate: RDF::DC.temporal do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                 DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :geocode_point, predicate: RDF::DC.Point do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
+      property :geocode_point, predicate: RDF::DC.Point
 
-      property :geocode_box, predicate: RDF::DC.Box do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
+      property :geocode_box, predicate: RDF::DC.Box
 
-      property :temporal_coverage_period, predicate: RDF::DC.Period do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
+      property :temporal_coverage_period, predicate: RDF::DC.Period
 
       property :relation, predicate: RDF::DC.relation do |index|
         index.as :stored_searchable, :facetable
@@ -172,6 +164,9 @@ module DRI
         solr_doc = remove_null_values(solr_doc, "date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("date", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "temporal_coverage") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("temporal_coverage", :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, "creator") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creator", :stored_searchable)].present?
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => resource_type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => resource_type)
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()

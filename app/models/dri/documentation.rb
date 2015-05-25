@@ -28,6 +28,47 @@ module DRI
           properties.delete(k)
         end
       end
+      # Adding :geocode_point and :geocode_box to properties if :geographical_coverage present
+      # for spatial indexing
+      if !properties[:geographical_coverage].nil? && !properties[:geographical_coverage].empty?
+        point_hash = Hash.new
+        box_hash = Hash.new
+        properties[:geographical_coverage].each do |item|
+          if DRI::Metadata::Transformations.dcmi_point? item
+            if point_hash[:geocode_point].nil?
+              point_hash[:geocode_point] = [item]
+            else
+              point_hash[:geocode_point] << item
+            end
+          elsif DRI::Metadata::Transformations.dcmi_box? item
+            if box_hash[:geocode_box].nil?
+              box_hash[:geocode_box] = [item]
+            else
+              box_hash[:geocode_box] << item
+            end
+          end
+        end
+
+        # Adding :temporal_coverage_period to properties if :temporal_coverage present
+        # for temporal indexing
+        if !properties[:temporal_coverage].nil? && !properties[:temporal_coverage].empty?
+          period_hash = Hash.new
+          properties[:temporal_coverage].each do |item|
+            if DRI::Metadata::Transformations.dcmi_period? item
+              if period_hash[:temporal_coverage_period].nil?
+                period_hash[:temporal_coverage_period] = [item]
+              else
+                period_hash[:temporal_coverage_period] << item
+              end
+            end
+          end
+        end
+
+        properties.merge!(point_hash) { |key, old_value, new_value| old_value } unless point_hash.empty?
+        properties.merge!(box_hash) { |key, old_value, new_value| old_value } unless box_hash.empty?
+        properties.merge!(period_hash) { |key, old_value, new_value| old_value } unless period_hash.empty?
+      end
+
       super(properties)
     end
 
