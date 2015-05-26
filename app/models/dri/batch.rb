@@ -15,7 +15,7 @@ module DRI
     has_many :generic_files, :class_name => "DRI::GenericFile", :property => :is_part_of, :dependent => :destroy
 
     # dependent: :destroy -> remove the documentation object if the collection is deleted
-    has_many :documentation_objects, :class_name => "DRI::Documentation", :property => :is_description_of, :dependent => :destroy
+    has_many :documentation_objects, :class_name => "DRI::Documentation", :property => :is_description_of
 
     # Declare a 'extracted' DS, of the following type
     has_metadata :name => "extracted", :type => DRI::Metadata::Extracted
