@@ -43,8 +43,6 @@ module DRI
             new_child.edit_groups_string = self.edit_groups_string
             new_child.manager_groups_string = self.manager_groups_string
             new_child.manager_users_string = self.manager_users_string
-
-            
             # ingest_files_from_metadata
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
             # FIXME Need to call checksum method below but this method is implemented in dri_app
@@ -55,6 +53,7 @@ module DRI
             if new_child.valid? && !duplicates
               Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
               new_child.save
+              create_reader_group(new_child.id) if new_child.is_collection?
               # add to queue
               prev_obj = new_child
             elsif duplicates
@@ -315,6 +314,12 @@ module DRI
         end
 
         return result
+      end
+
+      def create_reader_group id
+        grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
+        grp.reader_group = true
+        grp.save
       end
     end # module
   end # module
