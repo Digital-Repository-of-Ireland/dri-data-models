@@ -2,6 +2,11 @@ require 'uri'
 
 module DRI
   module Utils
+
+    def self.split_id(pid)
+      pid.sub("#{Rails.application.config.id_namespace}:", '')
+    end
+
     # Validates a String URI
     # @param[String] the string URI
     # return true if valid URI; false otherwise
