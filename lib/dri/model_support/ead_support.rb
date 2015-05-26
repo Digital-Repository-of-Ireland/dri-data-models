@@ -146,7 +146,7 @@ module DRI
               if new_child.valid?
                 Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
                 new_child.save
-
+                create_reader_group(new_child.id) if new_child.is_collection?
                 # add to queue
                 prev_obj = new_child
               else
@@ -286,6 +286,12 @@ module DRI
         end
 
         return result
+      end
+
+      def create_reader_group id
+        grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
+        grp.reader_group = true
+        grp.save
       end
     end # module
   end # module
