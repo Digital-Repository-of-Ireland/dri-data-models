@@ -50,25 +50,25 @@ module DRI
             end
           end
         end
+      end
 
-        # Adding :temporal_coverage_period to properties if :temporal_coverage present
-        # for temporal indexing
-        if !properties[:temporal_coverage].nil? && !properties[:temporal_coverage].empty?
-          properties[:temporal_coverage].each do |item|
-            if DRI::Metadata::Transformations.dcmi_period? item
-              if period_hash[:temporal_coverage_period].nil?
-                period_hash[:temporal_coverage_period] = [item]
-              else
-                period_hash[:temporal_coverage_period] << item
-              end
+      # Adding :temporal_coverage_period to properties if :temporal_coverage present
+      # for temporal indexing
+      if !properties[:temporal_coverage].nil? && !properties[:temporal_coverage].empty?
+        properties[:temporal_coverage].each do |item|
+          if DRI::Metadata::Transformations.dcmi_period? item
+            if period_hash[:temporal_coverage_period].nil?
+              period_hash[:temporal_coverage_period] = [item]
+            else
+              period_hash[:temporal_coverage_period] << item
             end
           end
         end
-
-        properties.merge!(point_hash) { |key, old_value, new_value| old_value } unless point_hash.empty?
-        properties.merge!(box_hash) { |key, old_value, new_value| old_value } unless box_hash.empty?
-        properties.merge!(period_hash) { |key, old_value, new_value| old_value } unless period_hash.empty?
       end
+
+      properties.merge!(point_hash) { |key, old_value, new_value| old_value } unless point_hash.empty?
+      properties.merge!(box_hash) { |key, old_value, new_value| old_value } unless box_hash.empty?
+      properties.merge!(period_hash) { |key, old_value, new_value| old_value } unless period_hash.empty?
 
       super(properties)
     end
