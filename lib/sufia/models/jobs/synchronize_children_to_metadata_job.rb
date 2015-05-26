@@ -5,7 +5,7 @@ class SynchronizeChildrenToMetadataJob < ActiveFedoraPidBasedJob
   end
 
   def run
-  	# sleep 3
+    sleep 3
     object.synchronize_children_to_metadata
   end
 
