@@ -46,7 +46,7 @@ module DRI
             # ingest_files_from_metadata
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
             # FIXME Need to call checksum method below but this method is implemented in dri_app
-            #MetadataHelpers.checksum_metadata(new_child)
+            MetadataHelpers.checksum_metadata(new_child)
             duplicates = object_duplicates?(new_child)
             #duplicates = false
             # Don't add new node if it's invalid
