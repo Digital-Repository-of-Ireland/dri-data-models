@@ -55,7 +55,7 @@ module DRI
               new_child.save
               begin
                 create_reader_group(new_child.id) if new_child.is_collection?
-              rescue SQLite3::Exception
+              rescue ActiveRecord::StandardError
                 Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
               end
               # add to queue
