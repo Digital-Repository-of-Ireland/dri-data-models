@@ -47,13 +47,17 @@ module DRI
             new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
             # FIXME Need to call checksum method below but this method is implemented in dri_app
             #MetadataHelpers.checksum_metadata(new_child)
-            #duplicates = object_duplicates?(new_child)
-            duplicates = false
+            duplicates = object_duplicates?(new_child)
+            #duplicates = false
             # Don't add new node if it's invalid
             if new_child.valid? && !duplicates
               Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
               new_child.save
-              create_reader_group(new_child.id) if new_child.is_collection?
+              begin
+                create_reader_group(new_child.id) if new_child.is_collection?
+              rescue SQLite3::Exception
+                Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
+              end
               # add to queue
               prev_obj = new_child
             elsif duplicates
