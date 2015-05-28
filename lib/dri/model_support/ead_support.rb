@@ -138,17 +138,24 @@ module DRI
               # ingest_files_from_metadata
               new_child.ingest_files_from_metadata = ingest_files_from_metadata
               # FIXME Need to call checksum method below but this method is implemented in dri_app
-              # MetadataHelpers.checksum_metadata(new_child)
+              MetadataHelpers.checksum_metadata(new_child)
+              duplicates = object_duplicates?(new_child)
               #new_child.private_metadata="0"
               #new_child.master_file="1"
 
               # Don't add new node if it's invalid
-              if new_child.valid?
+              if new_child.valid? && !duplicates
                 Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
                 new_child.save
-                create_reader_group(new_child.id) if new_child.is_collection?
+                begin
+                  create_reader_group(new_child.id) if new_child.is_collection?
+                rescue
+                  Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.pid} ")
+                end
                 # add to queue
                 prev_obj = new_child
+              elsif duplicates
+                Rails.logger.error("ERR_EAD_SAVE: #{new_child.identifier} is duplicated!!")
               else
                 # TODO Notify DRI App that there are invalid objects!!
                 Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
@@ -279,17 +286,17 @@ module DRI
         result = false
 
         if object.governing_collection.present?
-          collection_id = object.governing_collection.id
+          collection_id = object.governing_collection_id
           solr_query = "#{Solrizer.solr_name('metadata_md5', :stored_searchable, type: :string)}:\"#{object.metadata_md5}\" AND #{Solrizer.solr_name('isGovernedBy', :stored_searchable, type: :symbol)}:\"#{collection_id}\""
-          documents = Solrizer.query(solr_query, :defType => "edismax", :rows => "10", :fl => "id").delete_if{|obj| obj["id"] == object.id}
+          documents = Solrizer.query(solr_query, :defType => "edismax", :rows => "10", :fl => "id").delete_if{|obj| obj["id"] == object.pid}
           result = true unless documents.empty?
         end
 
         return result
       end
 
-      def create_reader_group id
-        grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
+      def create_reader_group pid
+        grp = UserGroup::Group.new(:name => pid, :description => "Default Reader group for collection #{pid}")
         grp.reader_group = true
         grp.save
       end

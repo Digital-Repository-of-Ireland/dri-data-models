@@ -18,6 +18,7 @@ module DRI
     has_attributes :coverage, datastream: :descMetadata, multiple: true
     has_attributes :identifier, datastream: :descMetadata, multiple: true
     # Used for relationships
+    has_attributes :id_asset, datastream: :descMetadata, multiple: false
     has_attributes :qdc_id, datastream: :descMetadata, multiple: true
     has_attributes :geocode_point, datastream: :descMetadata, multiple: true
     has_attributes :geocode_box, datastream: :descMetadata, multiple: true
