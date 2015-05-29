@@ -27,8 +27,8 @@ module DRI
 
       # When updating from DRI form, type attribute key needs to be replaced with resource_type
       properties.keys.each do |k|
-        if(k == "type")
-          properties["resource_type"] = properties[k]
+        if(k.to_sym == :type)
+          properties[:resource_type] = properties[k]
           properties.delete(k)
         end
       end
