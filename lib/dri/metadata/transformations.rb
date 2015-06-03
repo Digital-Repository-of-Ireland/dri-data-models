@@ -228,7 +228,7 @@ module DRI
             elsif k.eql?('end')
               range['end'] = ISO8601::DateTime.new(v).year
             end
-          rescue ISO8601::Errors::StandardError => e
+          rescue Exception => e
             Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return {}
           end
