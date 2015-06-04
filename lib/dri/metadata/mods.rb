@@ -378,6 +378,7 @@ module DRI
                                 :namespace_prefix => MODS_NS_PREFIX)
           t.part_date_end(:path => "part/mods:date[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
                               :namespace_prefix => MODS_NS_PREFIX)
+          t.licence(:path => "mods/mods:accessCondition", :namespace_prefix => MODS_NS_PREFIX, :attributes => {"type" => "use and reproduction"})
         end
 
       end
@@ -560,6 +561,9 @@ module DRI
         sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date_other", "part_date"].include?(key)}
         solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
 
+        licence_array = licence_for_index()
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
+
         solr_doc
       end
 
@@ -578,6 +582,14 @@ module DRI
       #
       #  return []
       #end
+
+      def licence_for_index()
+        if (!licence.empty?)
+          licence
+        else
+          return ['Please see rights statement']
+        end
+      end
 
       def creation_date_for_index()
         return display_single_date_for_index(creation_date) unless creation_date == []
