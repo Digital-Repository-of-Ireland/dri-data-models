@@ -83,9 +83,6 @@ module DRI
                                         { :f => self.id, :d => 'content' }).order("version DESC").to_a
       local_file_info.each { |file| file.destroy }
       FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(self.id), :force => true)
-
-      storage = Storage::S3Interface.new
-      storage.delete_bucket(self.batch.id)
     end
   end
 end

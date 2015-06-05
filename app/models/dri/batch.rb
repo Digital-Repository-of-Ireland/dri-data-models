@@ -9,6 +9,8 @@ module DRI
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
+
+    after_destroy :delete_bucket
   
     has_many_versions
 
@@ -104,6 +106,13 @@ module DRI
 
       solr_doc
     end
+
+    private
+
+      def delete_bucket
+        storage = Storage::S3Interface.new
+        storage.delete_bucket(self.id)
+      end
 
     # Relationships Methods
 
