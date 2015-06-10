@@ -76,6 +76,18 @@ module DRI
       solr_doc
     end
 
+    ## Extract the metadata from the content datastream and record it in the characterization datastream
+    ## Issue
+    ## Override to fix issue with sample_rate or height or width md terms from FITS being generated as float
+    ## as opposed to integer strings. this was causing Solr errors when indexing as the Solr fields are integers
+    def characterize
+      metadata = content.extract_metadata
+      characterization.ng_xml = round_float_values(metadata) if metadata.present?
+      append_metadata
+      self.filename = [content.original_name]
+      save
+    end
+
     private
 
     def delete_files
@@ -83,6 +95,14 @@ module DRI
                                         { :f => self.id, :d => 'content' }).order("version DESC").to_a
       local_file_info.each { |file| file.destroy }
       FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(self.id), :force => true)
+    end
+
+    def round_float_values md_xml
+      doc = Nokogiri::XML::Document.parse(md_xml)
+      doc.search("//fits:sampleRate | //fits:height | //fits:width", "fits" => "http://hul.harvard.edu/ois/xml/ns/fits/fits_output").each do |node|
+        node.content = (node.text.to_f.round).to_s
+      end
+      return doc.to_xml
     end
   end
 end
