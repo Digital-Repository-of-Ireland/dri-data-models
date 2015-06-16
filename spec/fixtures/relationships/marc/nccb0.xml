@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <!-- COLLECTION -->
+    <leader>      pm         3u     </leader>
+    <controlfield tag="001">DB_01</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="c">n.p.g. </subfield>
+    </datafield>
+    <!-- Mapped to Data Model marc_id (tag 024) Unique ID used for DRI internal relationships -->
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="a">nccb0</subfield>
+      <subfield code="2">local</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">Eng</subfield>
+    </datafield>
+    <datafield tag="100" ind1=" " ind2=" ">
+      <subfield code="a">A. M. W. </subfield>
+    </datafield>
+    <datafield tag="240" ind1=" " ind2=" ">
+      <subfield code="a">Patty Williams's voyage : a story almost wholly true / by A. M. W. </subfield>
+    </datafield>
+    <datafield tag="245" ind1=" " ind2=" ">
+      <subfield code="a">Patty Williams's voyage : a story almost wholly true / by A. M. W. </subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Boston</subfield>
+      <subfield code="b">Walker, Wise and Co.</subfield>
+      <subfield code="c">1861</subfield>
+      <subfield code="f">not available</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2=" ">
+      <subfield code="a">Boston</subfield>
+      <subfield code="b">Walker, Wise, and Company</subfield>
+      <subfield code="c">1861</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">104 p. : ill. ; 15 cm.</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Stephen Griffin book plate on inside cover</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">Patty Williams’s Voyage is part of the Stephen Griffin Collection and is an important addition to the collection of more secular nineteenth-century American children’s literature held at the NLI, particularly in terms of its contributions to discourses of race, ethnicity, and nationality. This short novel, primarily aimed at girls, tells of the voyage of an American girl Patty Williams, from New York to San Francisco. The book features an Irish character, Bridget Ryan, ‘Biddy’, and explores the relationship between the upper-class American girl, Patty and lower-class Bridget. Also explored is the relationship between Patty, a white girl, and Jamaican woman Japonica and her daughter Moon. There is an emphasis on Patty broadly supporting values of equality in these relationships, though the narrative’s depiction of Japonica and Moon undercuts this leaning at certain points throughout the text. The book opens with a chapter entitled “Cabin and Steerage” and describes the beginning of Patty and Biddy’s friendship on board across physical and class divisions. Patty’s initial interactions with Biddy are based on fascination and a certain exoticisation of Biddy’s appearance (8). This narrative fascination with appearance, particularly attached to nationality or race, is continued throughout the story. For example, the detailed description of appearance is continued when Patty and her mother meet Japonica and Moon (19-20). Though Patty supports notions of tolerance and a certain kind of equality throughout, Biddy is shown to espouse a deeply-embedded and virulent racism, evident when Patty admires “the negroes, with their beautiful turbans and torches” (31-2), but Biddy, in her accented brogue, deems the people ugly: “‘They’re ugly crathurs, my father says, and the furder we keep from thim the betther for us’” (31-2). The depiction of Japonica and Moon is telling in that although Patty is shown to abhor racism and support equality, and insists that a fellow passenger must not call Japonica’s baby, Moon, a “monkey” (19, 26), the woman and her child, employed by Patty’s mother, are taken from the island with other goods and wares.Differences between how the girls are raised by their parents are also emphasised. In one instance, a violent storm rocks the ship, but while Patty is comforted by her mother, Biddy reveals that she was terrified and that her father had to forcibly quieten her brothers: “ ‘Dad had to shake thim, and bate thim, to hish up; all in the did of the night’” (47). Towards, the end of the narrative, Patty begins to ‘improve’ Biddy teaching her how to read, and giving her a primer to remember her by (98).</subfield>
+    </datafield>
+    <datafield tag="540" ind1=" " ind2=" ">
+      <subfield code="a">Metadata copyright owned by the National Library of Ireland. Check with NLI reprographic services for reproduction rights.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2=" ">
+      <subfield code="x">Literature</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">American literature</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Travel</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Migration</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Race</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Slavery</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">San Francisco</subfield>
+    </datafield>
+    <datafield tag="654" ind1=" " ind2=" ">
+      <subfield code="a">American literature</subfield>
+      <subfield code="a">Travel</subfield>
+      <subfield code="a">Migration</subfield>
+      <subfield code="a">Race</subfield>
+      <subfield code="a">Slavery</subfield>
+      <subfield code="a">San Francisco</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Gender</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Girls</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Irishness</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Gender</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Girls</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Irishness</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">National Library of Ireland</subfield>
+    </datafield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">National Library of Ireland (Stephen Griffin Collection)</subfield>
+      <subfield code="b">Children’s Books (General Catalogue) - NLI</subfield>
+    </datafield>
+</record>

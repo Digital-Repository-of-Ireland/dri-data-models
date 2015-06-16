@@ -46,7 +46,7 @@ module DRI
         new_object.depositor = self.depositor
         new_object.status = self.status
         new_object.update_metadata xml
-        new_object.datastreams['rightsMetadata'].content = self.rightsMetadata.content
+        new_object.permissions = self.permissions.to_a
 
         # Assign collection membership - only for collections (hasCollectionMember and isMemberOfCollection)
         if (new_object.is_collection? && self.is_collection?)

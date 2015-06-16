@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <leader>01386nam a2200349La 4500</leader>
+    <controlfield tag="001">DB_02</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="c">n.p.g </subfield>
+    </datafield>
+    <!-- Mapped to Data Model marc_id (tag 024) Unique ID used for DRI internal relationships -->
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="a">nccb1</subfield>
+      <subfield code="2">local</subfield>
+    </datafield>
+    <!-- mapped to marc_id_asset -->
+    <datafield tag="024" ind1="8" ind2=" ">
+      <subfield code="a">NCCB_1</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">Eng</subfield>
+    </datafield>
+    <datafield tag="100" ind1=" " ind2=" ">
+      <subfield code="a">Janvier, Emma N.</subfield>
+    </datafield>
+    <datafield tag="240" ind1=" " ind2=" ">
+      <subfield code="a">Twenty-five cents, or, The grateful Irish boy.</subfield>
+    </datafield>
+    <datafield tag="245" ind1=" " ind2=" ">
+      <subfield code="a">Twenty-five cents, or, The grateful Irish boy.</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">Philadelphia</subfield>
+      <subfield code="a">New York</subfield>
+      <subfield code="b">American Sunday-School Union</subfield>
+      <subfield code="c">1869</subfield>
+      <subfield code="f">Not available</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2=" ">
+      <subfield code="a">Philadelphia and New York</subfield>
+      <subfield code="b">American Sunday School Union </subfield>
+      <subfield code="c">[between 1869 and 1894?]; Copyright statement on book date 1868: “Entered according to Act of Congress, in the year 1868, by the AMERICAN SUNDAY-SCHOOL UNION, in the Clerk’s Office of the District Court of the United States for the Eastern District of Pennsylvania</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">[2], 5-126 p., [1] leaf of plates : ill. ; 16 cm.</subfield>
+    </datafield>
+    <datafield tag="500" ind1=" " ind2=" ">
+      <subfield code="a">Book plate from Stephen Griffin Collection; inscribed in pencil on front endpapers: “Cedric D. Gully […] Book […] A present from his father […] June 30th 1869</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">This is an important and relatively early example, from the NLI’s holdings, of material published by the American Sunday School Union which features an Irish character in an almost wholly positive manner. Earlier books published by the American Sunday School Union held in the NLI feature stories about Ireland and Irish characters with an emphasis on the danger and folly of Catholicism, and which promoted conversion from Catholicism. In contrast, Twenty Five Cents, focuses on ideas of industry, honesty, usefulness, and the upholding of a general moral code through the character of “the grateful Irish boy”, Bernard Bryan. With the help of an upper-class American woman, Bernard rises from begging on the street to co-managing a large business. The book can be noted as an important precursor to works published by Horatio Alger and others, and featuring Irish characters, in a secular context. The “twenty-five cents” of the title refers to the capital Mrs Gardiner gives to Bernard in order to start his own business and to deter him from begging. This twenty-five cents is returned to throughout the narrative and becomes the guiding source of Bernard’s fortunes, saving him on various occasions. Though published by the American Sunday School Union, the focus on religion is muted throughout and arises on few occasions. Mrs Gardiner is at first “anxious that Bernard should have some religious instruction” (24), but is usually only invoked in terms of advancing Bernard’s education. Significantly, Bernard’s mother is praised for having introduced her children to the Bible (43), and her knowledge of the Bible is cited as having comforted her in her trials of adjusting to the difficulties of life in America (44). Both incidents serve to subtly underline the value of a Christian religion focused on the Bible for immigrant communities in America. The book incorporates elements of adventure with some imperial connotations as Bernard learns from Mr Gardiner, “an east India merchant” (41). Bernard later travels the world making his name in the importing business, and he comes to be associated with a beneficial, benign form of capitalism based on ideas of truth and his success was founded on the dictum “ ‘His word was as good as his bond,’ so entirely truthful was he known to be in every transaction” (58). In the closing part of the narrative, Bernard arrives back to Mr Gardiner’s firm just in time to save it from ruin. The conclusion signals Bernard as part of a new generation, as he co-manages the Gardiner’s business, which becomes “Gardiner and Bryan”, with Mr Gardiner’s son following the retirement of Mr Gardiner.</subfield>
+    </datafield>
+    <datafield tag="540" ind1=" " ind2=" ">
+      <subfield code="a">Metadata copyright owned by the National Library of Ireland. Check with NLI reprographic services for reproduction rights.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2=" ">
+      <subfield code="x">Literature</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Immigrant</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">America</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Irish-American</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Adventure</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Business</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Capitalism</subfield>
+    </datafield>
+    <datafield tag="654" ind1=" " ind2=" ">
+      <subfield code="a">Immigrant</subfield>
+      <subfield code="a">America</subfield>
+      <subfield code="a">Irish-American</subfield>
+      <subfield code="a">Adventure</subfield>
+      <subfield code="a">Business</subfield>
+      <subfield code="a">Capitalism</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Ireland</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Representations of Nations and Nationalities</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Moral</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Religion</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Genre</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Ireland</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Representations of Nations and Nationalities</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Moral</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Religion</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Genre</subfield>
+    </datafield>
+    <!-- is_version_of record/datafield[@tag="775"]/subfield[@code="o"] -->
+    <datafield tag="775" ind1=" " ind2=" ">
+      <subfield code="o">nccb0</subfield>
+    </datafield>
+    <!-- is_format_of -->
+    <datafield tag="776" ind1=" " ind2=" ">
+      <subfield code="o">nccb2</subfield>
+    </datafield>
+    <!-- relation -->
+    <datafield tag="787" ind1=" " ind2=" ">
+      <subfield code="o">nccb3</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">National Library of Ireland</subfield>
+    </datafield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">National Library of Ireland</subfield>
+      <subfield code="b">Children’s Books (General Catalogue) - NLI</subfield>
+    </datafield>
+</record>
+

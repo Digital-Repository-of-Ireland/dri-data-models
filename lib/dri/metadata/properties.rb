@@ -1,7 +1,5 @@
 module DRI
-
   module Metadata
-
     class Properties < ActiveFedora::OmDatastream
 
       # OM (Opinionated Metadata) terminology mapping
@@ -19,6 +17,7 @@ module DRI
         t.depositing_institute(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable])
         t.licence(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :displayable, :facetable])
         t.ingest_files_from_metadata(:path=>"ingestFilesFromMetadata", :namespace_prefix => nil, :index_as=>[:facetable, :displayable])
+        t.master_file_access(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :facetable])
         t.published_at(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
       end # set_terminology
 
@@ -37,12 +36,6 @@ module DRI
         return object_type.include? "Collection"
       end
 
-      def prefix
-        '' # add a prefix for solr index terms if you need to namespace identical terms in multiple data streams 
-      end
-
     end
-
   end
-
 end

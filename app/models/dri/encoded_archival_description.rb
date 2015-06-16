@@ -55,7 +55,7 @@ module DRI
     has_attributes :date_idx, datastream: :descMetadata, multiple: true
 
     # Institute
-    has_attributes :institute, datastream: :descMetadata, multiple: true
+    #has_attributes :institute, datastream: :descMetadata, multiple: true
 
     # Related Material
     # The <relatedmaterial> element is comparable to ISAD(G) data element 3.5.3 and MARC field 544 with indicator 1
@@ -84,7 +84,7 @@ module DRI
       begin
         DRI::EncodedArchivalDescription.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::EncodedArchivalDescription.create({pid: pid})
+        DRI::EncodedArchivalDescription.create({id: pid})
       end
     end
 
@@ -96,7 +96,7 @@ module DRI
     def collections_to_solr(solr_doc=Hash.new)
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-        solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => "1")
       end
       solr_doc
     end
@@ -147,8 +147,8 @@ module DRI
       if object_types.count < 1
         object_types.push "Unknown"
       end
-      solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
 
       # TODO Implementing rights inheritance from parent collections if not present
       #if rights.empty?
@@ -213,7 +213,7 @@ module DRI
       yield
 
       if content_changed && !new_record?
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
+        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
       end
     end
 

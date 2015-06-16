@@ -1,10 +1,10 @@
 module DRI
   module ModelSupport
-  	module Properties
+    module Properties
       extend ActiveSupport::Concern
 
       included do
-      	has_metadata :name => "properties", :type => DRI::Metadata::Properties
+      	contains "properties", class_name: "DRI::Metadata::Properties"
 
         has_attributes :status, datastream: :properties, multiple: false
         has_attributes :object_type, datastream: :properties, multiple: true
@@ -18,6 +18,7 @@ module DRI
         has_attributes :depositing_institute, datastream: :properties, multiple: false
         has_attributes :licence, datastream: :properties, multiple: false
         has_attributes :ingest_files_from_metadata, datastream: :properties, multiple: false
+        has_attributes :master_file_access, datastream: :properties, multiple: false
         has_attributes :published_at, datastream: :properties, multiple: false
 
       end

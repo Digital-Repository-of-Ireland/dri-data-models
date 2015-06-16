@@ -101,7 +101,12 @@ module DRI
         geodata.each do | key, value |
           value.each do | geo_string |
             if (dcmi_point? geo_string)
-              point = get_geo_point(geo_string)
+              begin
+               point = get_geo_point(geo_string)
+              rescue Exception => e
+                Rails.logger.error("Exception in transform_geospatial: #{geo_string} => #{e.to_s}")
+                break
+              end
               # [east_long north_lat]
               if point.has_key?('east') && point.has_key?('north') && point.has_key?('name')
                 results[:coords] << "#{point['east']} #{point['north']}"
@@ -109,7 +114,12 @@ module DRI
                 results[:json] << geojson_string_from_coords(point['name'], "#{point['east']} #{point['north']}")
               end
             elsif (dcmi_box? geo_string)
-              box = get_geo_box(geo_string)
+              begin
+                box = get_geo_box(geo_string)
+              rescue Exception => e
+                Rails.logger.error("Exception in transform_geospatial: #{geo_string} => #{e.to_s}")
+                break
+              end
               # [west_long south_lat east_long north_lat]
               if box.has_key?('name') && box.has_key?('eastlimit') && box.has_key?('northlimit') && box.has_key?('westlimit') && box.has_key?('southlimit')
                 results[:coords] << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
@@ -118,14 +128,14 @@ module DRI
               end
             elsif (geo_string =~ /\A#{URI::regexp(['http', 'https'])}\z/)
               ld = DRI::LinkedData.where(source: geo_string)
-              if ld.present?
+              unless ld.empty?
                 geojson = ld.first.spatial
                 geojson.each do |geo|
                   geojson_hash = JSON.parse(geo, symbolize_names: true)
                   results[:json] << geo
                   results[:name] << geojson_hash[:properties][:placename]
                   results[:coords] << "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
-                end 
+                end
               end
             end
           end
@@ -218,7 +228,7 @@ module DRI
             elsif k.eql?('end')
               range['end'] = ISO8601::DateTime.new(v).year
             end
-          rescue ISO8601::Errors::StandardError => e
+          rescue Exception => e
             Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601. Error: #{e.to_s}.")
             return {}
           end
@@ -362,9 +372,9 @@ module DRI
           geo_string.split(/\s*;\s*/).each do |component|
             (k,v) = component.split(/\s*=\s*/)
             if k.eql?('east')
-              lat = v.strip
+              lat = v.strip unless v.nil? || v.empty?
             elsif k.eql?('north')
-              long = v.strip
+              long = v.strip unless v.nil? || v.empty?
             end
           end
           if (!lat.empty? && !long.empty?)
@@ -374,13 +384,13 @@ module DRI
           geo_string.split(/\s*;\s*/).each do |component|
             (k,v) = component.split(/\s*=\s*/)
             if k.eql?('eastlimit')
-              eastlimit = v.strip
+              eastlimit = v.strip unless v.nil? || v.empty?
             elsif k.eql?('northlimit')
-              northlimit = v.strip
+              northlimit = v.strip unless v.nil? || v.empty?
             elsif k.eql?('westlimit')
-              westlimit = v.strip
+              westlimit = v.strip unless v.nil? || v.empty?
             elsif k.eql?('southlimit')
-              southlimit = v.strip
+              southlimit = v.strip unless v.nil? || v.empty?
             end
           end
           if (!eastlimit.empty? && !northlimit.empty? && !westlimit.empty? && !southlimit.empty?)
@@ -450,8 +460,8 @@ module DRI
       #		end
 
       #		if start.length > 0
-      #			results.merge!(Solrizer.solr_name(key+"_start", :dateable) => start)
-      #			results.merge!(Solrizer.solr_name(key+"_end", :dateable) => finish)
+      #			results.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key+"_start", :dateable) => start)
+      #			results.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key+"_end", :dateable) => finish)
       #		end
       #	end
 
