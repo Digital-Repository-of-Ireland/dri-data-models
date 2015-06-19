@@ -244,7 +244,7 @@ module DRI
                      :namespace_prefix => MODS_NS_PREFIX)
 
           # language
-          t.language(:path => "language/mods:languageTerm[@type='code']", :index_as=>[Descriptors.cleaned_searchable,
+          t.language(:path => "mods/mods:language/mods:languageTerm[@type='code']", :index_as=>[Descriptors.cleaned_searchable,
                                                                            Descriptors.language_facetable])
 
           # Source
