@@ -22,10 +22,10 @@ Gem::Specification.new do |s|
 
   s.add_dependency "rails", ">= 4.0"
   s.add_dependency 'sass-rails', '~> 4.0.3'
-  s.add_dependency "hydra-head", ">= 7.0"
+  s.add_dependency "hydra-head", "~> 9.0"
   s.add_dependency "hydra-access-controls"
   s.add_dependency "hydra-collections"
   s.add_dependency "iso-639"
+  s.add_dependency "sufia-models", ">= 6.0.0.rc4"
   s.add_dependency "iso8601"
-  s.add_dependency "sufia-models", ">= 4.0.0"
 end

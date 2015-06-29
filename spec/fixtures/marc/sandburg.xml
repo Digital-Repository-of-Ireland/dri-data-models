@@ -13,6 +13,11 @@
       <subfield code="a">0152038655 :</subfield>
       <subfield code="c">$15.95</subfield>
     </datafield>
+    <!-- AMG Added below (tag 024) to test the management of relationships -->
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="a">0123456789</subfield>
+      <subfield code="2">local</subfield>
+    </datafield>
     <datafield tag="040" ind1=" " ind2=" ">
       <subfield code="a">DLC</subfield>
       <subfield code="c">DLC</subfield>

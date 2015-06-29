@@ -7,27 +7,27 @@ module DRI
       # OM (Opinionated Metadata) terminology mapping to an Marc Collection
       # df=datafield, sf=subfield,
       set_terminology do |t|
-        t.root(:path=>"collection", :namespace_prefix => nil)
+        t.root(:path=>"record", :namespace_prefix => nil)
 
-         t.record(:path=>"record", :namespace_prefix=>nil) {
+        t.record(:path=>"record", :namespace_prefix=>nil) {
 
-            t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.leader(:path=>"leader", :namespace_prefix=>nil, :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-            t.controlfield {
-              t.controlfield_tag(:path=>{:attribute=>"tag"})
+          t.controlfield {
+            t.controlfield_tag(:path=>{:attribute=>"tag"})
+          }
+
+          t.datafield {
+            t.tag(:path=>{:attribute=>"tag"})
+            t.ind1(:path=>{:attribute=>"ind1"})
+            t.ind2(:path=>{:attribute=>"ind2"})
+            t.subfield(:path => "subfield") {
+              t.code(:path=>{:attribute=>"code"})
             }
-
-            t.datafield {
-              t.tag(:path=>{:attribute=>"tag"})
-              t.ind1(:path=>{:attribute=>"ind1"})
-              t.ind2(:path=>{:attribute=>"ind2"})
-              t.subfield(:path => "subfield") {
-                t.code(:path=>{:attribute=>"code"})
-              }
-            }
-
+          }
         }
 
+        # TERM PROXIES and mappings
         # Mandatory fields
         t.title(:path => 'record/datafield[@tag="245"]/subfield[@code="a" or @code="b" or @code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.description(:path => 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -69,19 +69,48 @@ module DRI
           end
         end
 
-        # NCCB Specific fields
-        t.add_title_info(:path => 'record/datafield[@tag="130" or @tag="246"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
-        t.author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.other_names(:path => 'record/datafield[@tag="700" or @tag="720"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.notes(:path => 'record/datafield[@tag="500" or @tag="504" or @tag="505" or @tag="510" or @tag="520" or @tag="530" or @tag="546"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.shelfmark(:path => 'record/datafield[@tag="082"]/subfield[@code="a"] | //record/datafield[@tag="852"]/subfield[@code="c"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Extra Facets:
-        t.author_facet(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111" or @tag="700"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.subject_name_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        # NCCB Specific fields and overrides
+        t.nccb_catalog_author(:path => 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_add_title_info(:path => 'record/datafield[@tag="130" or @tag="246"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_other_names(:path => 'record/datafield[@tag="700" or @tag="720"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_notes(:path => 'record/datafield[@tag="500" or @tag="501" or @tag="503" or @tag="504" or @tag="505" or @tag="508" or @tag="510" or @tag="514" or @tag="520"  or @tag="521" or @tag="524" or @tag="530" or @tag="531" or @tag="546" or @tag="586"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.nccb_subject(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="653"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # NCCB specific Facets
+        t.nccb_subject_facet(:path => 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
         # Date Indices
         t.creation_date_idx(:path => "//record/controlfield[@tag='008']")
 
+        # marc_id is used as a local, unique identifier for the record and is used for internal DRI relationships specified in the metadata
+        # we map it to 024 - Other Standard Identifier (R)
+        # Standard number or code published on an item which cannot be accommodated in another field
+        # The type of standard number or code is identified in the first indicator position or in subfield $2 (Source of number or code)
+        # Full map: tag 024; first indicator 7 (Source specified in subfield $2), subfield $2 contains a value of 'local' (from http://www.loc.gov/standards/sourcelist/standard-identifier.html)
+        # value of the identifier comes then from subfield $a
+        # Example: 024 	7#$a0A3200912B4A1057$2local http://www.loc.gov/marc/marc2dc.html#unqualifiedlist
+        t.marc_id(:path => "record/datafield[@tag='024' and @ind1='7' and subfield[@code='2']='local']/subfield[@code='a']", :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # marc_asset - Used for sorting sequenced items
+        # we map it to 024 - Other Standard Identifier (R); indicator1 = 8 (Unspecified type of standard number or code)
+        t.id_asset(:path => "record/datafield[@tag='024' and @ind1='8']/subfield[@code='a']", :index_as => [:stored_sortable])
+
+        # Relationships terms (Crosswalk MARC to QDC: http://www.loc.gov/marc/marc2dc.html#qualifiedlist)
+        # Tag 775 - Other Edition Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_isVersionOf(:path => 'record/datafield[@tag="775"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 776 - Additional Physical Form Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_isFormatOf(:path => 'record/datafield[@tag="776"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 787 - Other Relationship Entry (R); Subfield $o - Other item identifier (R)
+        t.relation_ids_relation(:path => 'record/datafield[@tag="787"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        # Tag 780 - Preceding Entry (R); Subfield $o - Preceding item identifier (R)
+        t.relation_ids_preceding(:path => 'record/datafield[@tag="780"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Tag 785 - Succeeding Entry (R); Subfield $o - Succeeding item identifier (R)
+        t.relation_ids_succeeding(:path => 'record/datafield[@tag="785"]/subfield[@code="o"]', :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+        #t.related_material(:path => "record/datafield[@tag='544' and @ind1='0']/subfield[@code='a']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        #FIXME Related Material for now is also mapped to alternative_form, as allows to specify a URL
+        t.related_material(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # MARC field 530, subfield $u for a URL to an alternative form available of this resource
+        t.alternative_form(:path => "record/datafield[@tag='530']/subfield[@code='u']", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
 
       # From: Appendix 2 - Conversion rules for Leader06 - dc:Type mapping
@@ -98,32 +127,30 @@ module DRI
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.collection("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
+          xml.record("xmlns:marc"=>"http://www.loc.gov/MARC21/slim",
                    "xmlns:xsi"=>"http://www.w3.org/2001/XMLSchema-instance",
                    "xsi:schemaLocation"=>"http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd") {
-              xml.record {
-                xml.leader
-                xml.controlfield(:tag => '')
-                xml.datafield(:tag => '', :ind1 => '#', :ind2 => '#') {
-                  xml.subfield(:code => '')
-                }
-              }
+            xml.leader
+            xml.controlfield(:tag => '')
+            xml.datafield(:tag => '', :ind1 => '#', :ind2 => '#') {
+              xml.subfield(:code => '')
+            }
           }
         end
         return builder.doc
       end
 
-      def to_solr(solr_doc=Hash.new)
+      def to_solr(solr_doc=Hash.new, opts = {})
         solr_doc = super(solr_doc)
 
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
-        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type)
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
         person_array = get_person_array()
 
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ""
@@ -131,11 +158,11 @@ module DRI
           all_metadata += text_node.text
           all_metadata += " "
         end
-        solr_doc.merge!(Solrizer.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
 
-        solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
-        solr_doc.merge!(Solrizer.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
-        solr_doc.merge!(Solrizer.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
 
         # Split facets into different languages based on xml:lang
         # faceted_language_indexes = Hash.new
@@ -145,8 +172,8 @@ module DRI
         # faceted_language_indexes.merge! split_array_into_languages("geographical_coverage")
 
         # faceted_language_indexes.each do | key, value |
-        #   solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
-        #   solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
+        #   solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :text) => value)
+        #   solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :facetable, type: :text) => value)
         # end
 
         # Split date ranges into separate indexes
@@ -196,6 +223,7 @@ module DRI
         creator_result = false
         rights_result = false
         creation_date_result = false
+        #local_identifier_result = false
 
 
         # Join all elements in array, get rid of carriage returns from the form (squish) and validate
@@ -205,6 +233,10 @@ module DRI
         creator_result = true unless creator.join.squish == ""
         rights_result = true unless rights.join.squish == ""
         creation_date_result = true unless creation_date.join.squish == ""
+
+        #marc_id.each do |curr_id|
+        #  local_identifier_result = true unless curr_id.blank?
+        #end
 
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
@@ -230,6 +262,8 @@ module DRI
           creation_date_result = true unless curr_creation_date.blank?
         end
 
+        # TODO Do we require a marc_id?
+        #errors[:marc_id] = "not present." unless local_identifier_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:type] = "can't be blank" if type_result == false
         errors[:description] = "can't be blank" if description_result == false
@@ -240,14 +274,14 @@ module DRI
         errors
       end
 
-      def interchangeable?
-        false
-      end
+      #def interchangeable?
+      #  false
+      #end
 
       def type
         #[DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
         # Position 7 (for 6th character as substring starts positions in 1 rather that 0)
-        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
+        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//leader, 7, 1)')]]
       end
 
       def add_datafields(datafields)
@@ -287,7 +321,7 @@ module DRI
             node['tag'] = controlfield['controlfield_tag'].first
             node.content = controlfield['controlfield_value'].first
             
-            record.add_child(node)
+            record.add_child(node) unless node.content.blank?
         end
       end
 

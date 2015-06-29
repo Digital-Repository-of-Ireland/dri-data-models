@@ -58,13 +58,10 @@ describe 'Batch' do
 
   it "should have the specified datastreams" do
     # Check for descMetadata datastream with MODS in it
-    @audio.datastreams.keys.should include("descMetadata")
+    @audio.datastreams.keys.should include(:descMetadata)
     @audio.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
-    # Check for rightsMetadata datastream
-    @audio.datastreams.keys.should include("rightsMetadata")
-    @audio.rightsMetadata.should be_kind_of Hydra::Datastream::RightsMetadata
     # Check for properties datastream
-    @audio.datastreams.keys.should include("properties")
+    @audio.datastreams.keys.should include(:properties)
     @audio.properties.should be_kind_of DRI::Metadata::Properties
   end
 

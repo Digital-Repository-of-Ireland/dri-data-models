@@ -20,7 +20,7 @@ patch)
 install_deps)
     ;;
 configure)
-    rm Gemfile.lock
+    rm -f Gemfile.lock
     bundle install --quiet
     ;;
 compile)

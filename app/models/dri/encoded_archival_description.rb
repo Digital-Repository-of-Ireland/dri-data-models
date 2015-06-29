@@ -40,13 +40,13 @@ module DRI
     #has_attributes :language_did, datastream: :descMetadata, multiple: true
     #has_attributes :creation_date_profiledesc, datastream: :descMetadata, multiple: true
     has_attributes :access_restrict, datastream: :descMetadata, multiple: true
-    has_attributes :subject_archdesc, datastream: :descMetadata, multiple: true
 
     # Coverage: name, geographical, location, temporal
     has_attributes :name_coverage, datastream: :descMetadata, multiple: true
     has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
     has_attributes :persname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :corpname_coverage, datastream: :descMetadata, multiple: true
+    has_attributes :famname_coverage, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
     has_attributes :date_text, datastream: :descMetadata, multiple: true
     has_attributes :temporal_coverage_idx, datastream: :descMetadata, multiple: true
@@ -55,13 +55,16 @@ module DRI
     has_attributes :date_idx, datastream: :descMetadata, multiple: true
 
     # Institute
-    has_attributes :institute, datastream: :descMetadata, multiple: true
+    #has_attributes :institute, datastream: :descMetadata, multiple: true
 
     # Related Material
+    # The <relatedmaterial> element is comparable to ISAD(G) data element 3.5.3 and MARC field 544 with indicator 1
     has_attributes :related_material, datastream: :descMetadata, multiple: true
 
     # Alternative Form Available
     has_attributes :alternative_form, datastream: :descMetadata, multiple: true
+
+    has_attributes :type, datastream: :descMetadata, multiple: true
 
     around_save :synchronize_if_changed
 
@@ -81,7 +84,7 @@ module DRI
       begin
         DRI::EncodedArchivalDescription.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::EncodedArchivalDescription.create({pid: pid})
+        DRI::EncodedArchivalDescription.create({id: pid})
       end
     end
 
@@ -93,7 +96,7 @@ module DRI
     def collections_to_solr(solr_doc=Hash.new)
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-        solr_doc.merge!(solr_name('is_first_sibling', :stored_searchable) => "1")
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => "1")
       end
       solr_doc
     end
@@ -144,8 +147,8 @@ module DRI
       if object_types.count < 1
         object_types.push "Unknown"
       end
-      solr_doc.merge!(solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
 
       # TODO Implementing rights inheritance from parent collections if not present
       #if rights.empty?
@@ -192,7 +195,7 @@ module DRI
           # 2. c/c or 3. c/c01/c02...
           # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
           # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
-          xml.xpath("/*/*[starts-with(local-name(), 'c')]").remove
+          xml.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]").remove
         end
       end
 
@@ -210,7 +213,7 @@ module DRI
       yield
 
       if content_changed && !new_record?
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.pid))
+        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
       end
     end
 

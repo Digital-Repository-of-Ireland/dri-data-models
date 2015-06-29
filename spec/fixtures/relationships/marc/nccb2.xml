@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<record xmlns="http://www.loc.gov/MARC21/slim" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <!-- Review Below MARC XSD - Invalid value for the leader field -->
+    <leader>#####nam#0000#a#4509</leader>
+    <controlfield tag="001">DB_03</controlfield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="c">One shilling</subfield>
+    </datafield>
+    <!-- Mapped to Data Model marc_id (tag 024) Unique ID used for DRI internal relationships -->
+    <datafield tag="024" ind1="7" ind2=" ">
+      <subfield code="a">nccb2</subfield>
+      <subfield code="2">local</subfield>
+    </datafield>
+    <datafield tag="041" ind1=" " ind2=" ">
+      <subfield code="a">Eng</subfield>
+    </datafield>
+    <datafield tag="100" ind1=" " ind2=" ">
+      <subfield code="a">Goldsmith, Oliver, 1728-1774.</subfield>
+    </datafield>
+    <datafield tag="240" ind1=" " ind2=" ">
+      <subfield code="a">An Elegy on the Glory of Her Sex, Mrs Mary Blaize / Illustrated by Randloph Caldecott; verse by Oliver Goldsmith</subfield>
+    </datafield>
+    <datafield tag="245" ind1=" " ind2=" ">
+      <subfield code="a">An Elegy on the Glory of Her Sex, Mrs Mary Blaize / Illustrated by Randloph Caldecott; verse by Oliver Goldsmith</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">Part of R. Caldecott’s Picture Books series</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">London</subfield>
+      <subfield code="b">George Routledge and Sons</subfield>
+      <subfield code="c">1885</subfield>
+      <subfield code="f">Edmund Evans, engraver and printer, Racquet Court, Fleet Street, E.C.</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2=" ">
+      <subfield code="a">London</subfield>
+      <subfield code="b">George Routledge and Sons</subfield>
+      <subfield code="c">[1885]</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">24p., ill. (some col.), 20.5 x 24cm, pbk</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">This is an important book from the oeuvre of Randolph Caldecott, often termed the father of the picture book, and is part of Caldecott’s “Picture Books” series. When Caldecott’s “Picture Books” were first published, dates were not included, but the earliest editions were printed by George Routledge and the back covers were used to advertise other similar works,  both of which are present on this copy. The work is significant in terms of the development of the picture book form – words and images form interesting counterpoints, as the images suggest further detail not contained in the text. This is a departure from previous modes of including images in children’s books, where the images largely and directly reflected the text. This work is of further importance and interest in that it suggests interest for a dual audience of adult and child, using Goldsmith’s satirical verse about a prostitute, now a pawnbroker. The illustrations are full of colour and life designed to attract the child reader’s attention, while also containing additional elements which the adult reader may understand in a different way to the child. The words and images can be read as both satirical and literal, lending to its attraction to a dual audience.   1 -“Randolph Caldecott Society UK”, http://www.randolphcaldecott.org.uk/editions.htm (accessed 07/04/2015)</subfield>
+    </datafield>
+    <datafield tag="540" ind1=" " ind2=" ">
+      <subfield code="a">Metadata copyright owned by Dublin City Public Libraries and Archive.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2=" ">
+      <subfield code="x">Literature</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Women</subfield>
+    </datafield>
+    <datafield tag="653" ind1=" " ind2=" ">
+      <subfield code="a">Dual audience</subfield>
+    </datafield>
+    <datafield tag="654" ind1=" " ind2=" ">
+      <subfield code="a">Women</subfield>
+      <subfield code="a">Dual audience</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Illustrator</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Gender</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Form</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="a">Genre</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Illustrator</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Gender</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Form</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2=" ">
+      <subfield code="x">Genre</subfield>
+    </datafield>
+    <datafield tag="700" ind1=" " ind2=" ">
+      <subfield code="a">Caldecott, Randolph, 1846-1886.</subfield>
+    </datafield>
+    <datafield tag="700" ind1=" " ind2=" ">
+      <subfield code="e">Caldecott, Randolph, 1846-1886.</subfield>
+    </datafield>
+    <datafield tag="850" ind1=" " ind2=" ">
+      <subfield code="a">Dublin City Library &amp; Archive</subfield>
+    </datafield>
+    <datafield tag="852" ind1=" " ind2=" ">
+      <subfield code="a">Children’s Book Collection, Dublin City Library and Archive (Pearse Street)</subfield>
+      <subfield code="b">Children’s Book Collection – DCLA, Pearse Street</subfield>
+    </datafield>
+</record>
+

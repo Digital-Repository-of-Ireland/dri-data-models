@@ -1,7 +1,5 @@
 module DRI
-
   module Metadata
-
     class FileProperties < ActiveFedora::OmDatastream
 
       # OM (Opinionated Metadata) terminology mapping
@@ -10,6 +8,7 @@ module DRI
         t.checksum_md5(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.checksum_sha256(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
         t.checksum_rmd160(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
+        t.preservation_only(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
       end # set_terminology
 
       # Build the default XML document
@@ -21,12 +20,6 @@ module DRI
           return builder.doc
       end
 
-      def prefix
-        '' # add a prefix for solr index terms if you need to namespace identical terms in multiple data streams 
-      end
-
     end
-
   end
-
 end

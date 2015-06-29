@@ -48,5 +48,5 @@ end
 
 group :test do
   # dri-user-group gem added for the rspec tests
-  gem "user_group", :git => 'git@tracker.dri.ie:drirepo/dri-user-group.git', :branch => 'develop'
+  gem "user_group", :git => 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', :branch => 'develop'
 end

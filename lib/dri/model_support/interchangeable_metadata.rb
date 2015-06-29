@@ -5,16 +5,14 @@ module DRI
 
       included do
         attr_accessor :desc_metadata_class
-
         attr_accessor :trigger_update
 
-        # Descriptive metadata datastream
-        has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
+        # Descriptive metadata datastream - F4 uses "File attachments" instead of datas
+        contains "descMetadata", class_name: "DRI::Metadata::Base"
         # Complete metadata record datastream
-        has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
+        contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
 
         after_initialize :load_attributes
-        after_save :reset_metadata_check
 
         # TODO Check that these match the DRI Level 1 and 2 terms (some are missing)
         # DRI Mandatory (M)
@@ -23,7 +21,7 @@ module DRI
         # Description (collection-level)
         has_attributes :description, datastream: :descMetadata, multiple: true
         # ADDED TYPE, it is compulsory
-        has_attributes :type, datastream: :descMetadata, multiple: true
+        #has_attributes :type, datastream: :descMetadata, multiple: true
         # Rights (collection-level)
         has_attributes :rights, datastream: :descMetadata, multiple: true
         # Creator (collection-level)
@@ -43,19 +41,7 @@ module DRI
         # Language (collection-level)
         has_attributes :language, datastream: :descMetadata, multiple: true
 
-        # FIXME - check DRI elements below, not included here initially
-        # Source (collection-level, R)
-        # has_attributes :source, datastream: :descMetadata, multiple: true
-        # Geographical coverage (collection-level)
-        # has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-        # Temporal coverage (collection-level)
-        # has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-
         validate :custom_validations
-      end
-
-      def has_metadata_class_changed?
-        (@metadata_class != descMetadata.class) ? true : false
       end
 
       # Should only be set in a new class
@@ -76,9 +62,6 @@ module DRI
       end
 
       private
-
-      @metadata_class
-
 
       def custom_validations
         if descMetadata.class < DRI::Metadata::Base
@@ -114,7 +97,6 @@ module DRI
           result = "DRI::Metadata::QualifiedDublinCore"
         elsif namespace.has_value?("http://www.loc.gov/mods/v3")
           result = "DRI::Metadata::Mods"
-          # result = (!xml.xpath("/mods:mods/mods:typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         elsif namespace.has_value?("http://www.loc.gov/MARC21/slim")
           result = "DRI::Metadata::Marc"
         elsif (xml.internal_subset != nil && xml.internal_subset.name == 'ead') || ['ead'].include?(root_name)
@@ -125,17 +107,10 @@ module DRI
           result = "DRI::Metadata::Marc"
         elsif ['mods'].include?(root_name)
           result = "DRI::Metadata::Mods"
-        #elsif ['modsCollection'].include?(root_name)
-          # Check whether the first record is a collection
-        #  result = (!xml.xpath("/modsCollection/mods[1]/typeOfResource[@collection='yes']").empty?) ? "DRI::Metadata::ModsCollection" : "DRI::Metadata::Mods"
         end
 
         return result
       end # get_metadata_class_from_xml
-
-      def reset_metadata_check
-        @metadata_class = descMetadata.class
-      end
 
       def load_attributes
         ds_class = ""
@@ -145,41 +120,38 @@ module DRI
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
-          if ["DRI::Metadata::QualifiedDublinCore",
-              "DRI::Metadata::Mods",
-              "DRI::Metadata::EncodedArchivalDescription",
-              "DRI::Metadata::EncodedArchivalDescriptionComponent",
-              "DRI::Metadata::Marc"].include? ds_class
+          if ["DRI::Metadata::EncodedArchivalDescription",
+              "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             ds = ds_class.constantize.new
           else
             # Load class from :desc_metadata_class which is set ingest_controller
-            ds = desc_metadata_class.constantize.new
+            if ["DRI::Metadata::EncodedArchivalDescription",
+             "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? desc_metadata_class
+              ds = desc_metadata_class.constantize.new
+            else
+              # if EAD or EADComponent do not create ds
+              return
+            end
           end
         else
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
-          old_digital_object = descMetadata.digital_object
-          unless (ds_class == nil)
+
+          if ["DRI::Metadata::EncodedArchivalDescription",
+                  "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
+            old_digital_object = descMetadata.uri
             ds = ds_class.constantize.from_xml descMetadata.to_xml
+            ds.uri = old_digital_object
           else
-            ds = DRI::Metadata::QualifiedDublinCore.new
+            return
           end
-          ds.digital_object = old_digital_object
         end
 
         if (ds != nil)
           ds.instance_variable_set :@dsid, "descMetadata"
-          self.add_datastream ds
+          self.attach_file ds, "descMetadata"
         end
-        @metadata_class = descMetadata.class
-        # FIXME Check whether desc_metadata_class has to be set here as well
-        # This is causing problems when updating EAD descMetadata datastream as desc_metadata_class is nil when
-        # loading an existing EAD object
-        #@desc_metadata_class = descMetadata.class
-        # VERY IMPORTANT!! issue1195 Fix to Avoid descMetadata.changed? = true when loading objects from fedora
-        # self.descMetadata.save if self.descMetadata.changed?
-
       end # load_attributes
     end # module
   end # module

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<marc:record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xmlns:marc="http://www.loc.gov/MARC21/slim"
+                 xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <marc:leader>      pm         3u     </marc:leader>
+    <marc:controlfield tag="008">      s2015    caua   j      000 0 eng  </marc:controlfield>
+    <!-- AMG Added below (tag 024) to test the management of relationships -->
+    <marc:datafield tag="024" ind1="7" ind2=" ">
+      <marc:subfield code="a">0123456789</marc:subfield>
+      <marc:subfield code="2">local</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="042" ind1=" " ind2=" ">
+      <marc:subfield code="a">dc</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="110" ind1=" " ind2=" ">
+      <marc:subfield code="a">DRI</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="260" ind1=" " ind2=" ">
+      <marc:subfield code="c">2015-03-09</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="520" ind1=" " ind2=" ">
+      <marc:subfield code="a">Pollard Textbooks Collection Master Dataset</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="530" ind1=" " ind2=" ">
+      <marc:subfield code="u">https://www.tcd.ie/Library/epb/named-collections/p.php</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="540" ind1=" " ind2=" ">
+      <marc:subfield code="a">Metadata copyright holder: Trinity College Library Dublin</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="245" ind1="0" ind2="0">
+      <marc:subfield code="a">Pollard Collection B</marc:subfield>
+    </marc:datafield>
+    <marc:datafield tag="655" ind1="7" ind2=" ">
+      <marc:subfield code="a">Collection</marc:subfield>
+      <marc:subfield code="2">local</marc:subfield>
+    </marc:datafield>
+</marc:record>
