@@ -3,6 +3,8 @@ module DRI
 
     #before_destroy :delete_parents
 
+    contains "descMetadata", class_name: "DRI::Metadata::QualifiedDublinCore"
+
     # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
@@ -34,23 +36,21 @@ module DRI
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
-    #has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::QualifiedDublinCore"
-    #has_and_belongs_to_many :referenced, :property=>:dcterms_is_referenced_by, :class_name => "DRI::QualifiedDublinCore"
-    #has_and_belongs_to_many :references, :property=>:dcterms_references, :class_name => "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :referenced, predicate: ::RDF::DC.isReferencedBy, class_name: "DRI::QualifiedDublinCore"
+    #has_and_belongs_to_many :references, predicate: ::RDF::DC.references, class_name: "DRI::QualifiedDublinCore"
 
-    #belongs_to :container, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
-    # hasPart is managed through the isPartOf relationship. This automatically adds the child isPartOf
-    # whenever a hasPart relationship is added
-    #has_many :parts, :property=>:dcterms_is_part_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :container, predicate: ::RDF::DC.isPartOf, class_name: "DRI::QualifiedDublinCore"
+    #has_many :parts, predicate: ::RDF::DC.isPartOf, class_name: "DRI::QualifiedDublinCore", as: :container
 
-    #belongs_to :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
-    #has_many :has_versions, :property=>:dcterms_is_version_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::QualifiedDublinCore"
+    #has_many :has_versions, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::QualifiedDublinCore", as: :is_version
 
-    #belongs_to :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
-    #has_many :has_format, :property=>:dcterms_is_format_of, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::QualifiedDublinCore"
+    #has_many :has_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::QualifiedDublinCore", as: :is_format
 
-    #belongs_to :has_source, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
-    #has_many :source_for, :property=>:dcterms_source, :class_name => "DRI::QualifiedDublinCore"
+    #belongs_to :has_source, predicate: ::RDF::DC.source, class_name: "DRI::QualifiedDublinCore"
+    #has_many :source_for, predicate: ::RDF::DC.source, class_name: "DRI::QualifiedDublinCore", as: :has_source
 
     def initialize(args = {})
       args[:desc_metadata_class] = "DRI::Metadata::QualifiedDublinCore"
@@ -75,7 +75,7 @@ module DRI
       begin
         DRI::QualifiedDublinCore.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::QualifiedDublinCore.create({pid: pid})
+        DRI::QualifiedDublinCore.create({id: pid})
       end
     end
 
@@ -86,7 +86,7 @@ module DRI
       if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -96,7 +96,7 @@ module DRI
             doc = SolrDocument.new(obj_doc)
             object = DRI::QualifiedDublinCore.find(doc.id)
             begin
-              Sufia.queue.push(CreateQdcRelationshipsJob.new(object.pid))
+              Sufia.queue.push(CreateQdcRelationshipsJob.new(object.id))
             rescue Exception => e
               Rails.logger.error(e.message)
             end
@@ -144,25 +144,25 @@ module DRI
 
     def get_relationships_records
       return {:related => retrieve_relation_records(relation_ids_relation,
-                          Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                          ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :referenced => retrieve_relation_records(relation_ids_isReferencedBy,
-                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :references => retrieve_relation_records(relation_ids_references,
-                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :container => retrieve_relation_records(relation_ids_isPartOf,
-                            Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :parts => retrieve_relation_records(relation_ids_hasPart,
-                        Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                        ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :is_version => retrieve_relation_records(relation_ids_isVersionOf,
-                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :has_versions => retrieve_relation_records(relation_ids_hasVersion,
-                               Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                               ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :is_format => retrieve_relation_records(relation_ids_isFormatOf,
-                            Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :has_format => retrieve_relation_records(relation_ids_hasFormat,
-                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
               :has_source => retrieve_relation_records(relation_ids_source,
-                             Solrizer.solr_name('qdc_id', :stored_searchable, type: :string))
+                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string))
       }
       end
 
@@ -189,31 +189,31 @@ module DRI
 
       # Get Root collection of current object.
       # This is to restrict relationship processing only within the given collection
-      solr_query = "id:\"#{pid.to_s}\""
+      solr_query = "id:\"#{id.to_s}\""
       # The query service returns back a set of Solr Documents, therefore need to be casted later on
       solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if (solr_docs == nil || solr_docs == [])
-        Rails.logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+        Rails.logger.error("Solr document for object with PID #{self.id} not found in Solr")
         return
       end
 
       doc = SolrDocument.new(solr_docs[0])
-      root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+      root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
-        Rails.logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+        Rails.logger.error("Root collection ID for object with PID #{self.id} not found in Solr")
         return
       end
 
       rels_array.each do |item_id|
         # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
         qdc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if qdc_item.empty?
-          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.id}")
         else
           doc = SolrDocument.new(qdc_item[0])
           # Cast the solr document to its corresponding Fedora object

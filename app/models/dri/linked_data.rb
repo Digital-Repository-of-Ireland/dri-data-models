@@ -2,7 +2,7 @@ module DRI
   class LinkedData < ActiveFedora::Base
     include Sufia::Noid
 
-    has_metadata :name => "descMetadata", :type => DRI::Metadata::LinkedData
+    contains "descMetadata", class_name: "DRI::Metadata::LinkedData"
 
     has_attributes :creator, :identifier, :source,
                    :contributor, :title, :tag, :description, 
@@ -19,19 +19,12 @@ module DRI
       begin
         DRI::LinkedData.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::LinkedData.create({pid: pid})
+        DRI::LinkedData.create({id: pid})
       end
-    end
-
-    # Unstemmed, searchable, stored
-    def noid_indexer
-      @noid_indexer ||= Solrizer::Descriptor.new(:text, :indexed, :stored)
     end
 
     def to_solr(solr_doc={}, opts={})
-      super(solr_doc, opts).tap do |solr_doc|
-        solr_doc[Solrizer.solr_name('noid', noid_indexer)] = noid
-      end
+      super(solr_doc, opts)
     end
       
   end 

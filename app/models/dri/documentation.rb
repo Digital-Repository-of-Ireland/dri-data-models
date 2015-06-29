@@ -1,10 +1,10 @@
 module DRI
   class Documentation < DRI::Batch
-    include Sufia::Noid
 
-    has_metadata :name => "descMetadata", :type => DRI::Metadata::Documentation
+    # Override interchangeable_metadata definition of descMetadata
+    contains "descMetadata", class_name: "DRI::Metadata::Documentation"
 
-    belongs_to :documentation_for, property: :is_description_of, :class_name => "DRI::Batch"
+    belongs_to :documentation_for, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, class_name: "DRI::Batch"
 
     # Full Simple DC Title, Creator, Subject, Description, Contributor, Publisher, Date, Type,
     # Format, Identifier, Source, Language, Relation, Coverage, Rights
@@ -19,11 +19,6 @@ module DRI
 
     has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
                     multiple: true
-
-    def initialize(args = {})
-      args[:desc_metadata_class] = "DRI::Metadata::Documentation"
-      super(args)
-    end
 
     def attributes=(properties)
       point_hash = Hash.new

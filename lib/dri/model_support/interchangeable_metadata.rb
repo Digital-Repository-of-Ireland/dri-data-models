@@ -5,16 +5,14 @@ module DRI
 
       included do
         attr_accessor :desc_metadata_class
-
         attr_accessor :trigger_update
 
-        # Descriptive metadata datastream
-        has_metadata :name => "descMetadata", :type => DRI::Metadata::Base
+        # Descriptive metadata datastream - F4 uses "File attachments" instead of datas
+        contains "descMetadata", class_name: "DRI::Metadata::Base"
         # Complete metadata record datastream
-        has_metadata :name => "fullMetadata", :type => DRI::Metadata::FullMetadata
+        contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
 
         after_initialize :load_attributes
-        after_save :reset_metadata_check
 
         # TODO Check that these match the DRI Level 1 and 2 terms (some are missing)
         # DRI Mandatory (M)
@@ -23,7 +21,7 @@ module DRI
         # Description (collection-level)
         has_attributes :description, datastream: :descMetadata, multiple: true
         # ADDED TYPE, it is compulsory
-        # has_attributes :type, datastream: :descMetadata, multiple: true
+        #has_attributes :type, datastream: :descMetadata, multiple: true
         # Rights (collection-level)
         has_attributes :rights, datastream: :descMetadata, multiple: true
         # Creator (collection-level)
@@ -46,10 +44,6 @@ module DRI
         validate :custom_validations
       end
 
-      def has_metadata_class_changed?
-        (@metadata_class != descMetadata.class) ? true : false
-      end
-
       # Should only be set in a new class
       def desc_metadata_class= desc_metadata_class
         if self.new?
@@ -68,9 +62,6 @@ module DRI
       end
 
       private
-
-      @metadata_class
-
 
       def custom_validations
         if descMetadata.class < DRI::Metadata::Base
@@ -116,16 +107,10 @@ module DRI
           result = "DRI::Metadata::Marc"
         elsif ['mods'].include?(root_name)
           result = "DRI::Metadata::Mods"
-        elsif ['RDF'].include?(root_name)
-          result = "DRI::Metadata::Documentation"
         end
 
         return result
       end # get_metadata_class_from_xml
-
-      def reset_metadata_check
-        @metadata_class = descMetadata.class
-      end
 
       def load_attributes
         ds_class = ""
@@ -135,40 +120,38 @@ module DRI
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
-          if ["DRI::Metadata::QualifiedDublinCore",
-              "DRI::Metadata::Mods",
-              "DRI::Metadata::EncodedArchivalDescription",
-              "DRI::Metadata::EncodedArchivalDescriptionComponent",
-              "DRI::Metadata::Marc"].include? ds_class
+          if ["DRI::Metadata::EncodedArchivalDescription",
+              "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             ds = ds_class.constantize.new
           else
             # Load class from :desc_metadata_class which is set ingest_controller
-            ds = desc_metadata_class.constantize.new unless ds == DRI::Metadata::Documentation
+            if ["DRI::Metadata::EncodedArchivalDescription",
+             "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? desc_metadata_class
+              ds = desc_metadata_class.constantize.new
+            else
+              # if EAD or EADComponent do not create ds
+              return
+            end
           end
         else
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
           ds_class = get_metadata_class_from_xml descMetadata.to_xml
-          if (!['DRI::Metadata::Documentation'].include? ds_class)
-            old_digital_object = descMetadata.digital_object
-            unless (ds_class == nil)
-              ds = ds_class.constantize.from_xml descMetadata.to_xml
-            else
-              ds = DRI::Metadata::QualifiedDublinCore.new
-            end
-            ds.digital_object = old_digital_object
+
+          if ["DRI::Metadata::EncodedArchivalDescription",
+                  "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
+            old_digital_object = descMetadata.uri
+            ds = ds_class.constantize.from_xml descMetadata.to_xml
+            ds.uri = old_digital_object
           else
-            @metadata_class = ds_class.constantize
             return
           end
         end
 
         if (ds != nil)
           ds.instance_variable_set :@dsid, "descMetadata"
-          self.add_datastream ds
+          self.attach_file ds, "descMetadata"
         end
-        @metadata_class = descMetadata.class
-
       end # load_attributes
     end # module
   end # module

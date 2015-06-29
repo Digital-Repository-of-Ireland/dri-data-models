@@ -3,6 +3,8 @@ module DRI
   module Metadata
 
     class Base < ActiveFedora::OmDatastream
+      has_many_versions
+
       # Boolean flag for metadata types like EAD where extracts of the metadata
       # may be stored in other Fedora objects. This allows us to add functions
       # to synchronize the XML between several objects
@@ -16,9 +18,9 @@ module DRI
       end
 
       # Can this metadata type replace another metadata type
-      def interchangeable?
-      	true
-      end
+      #def interchangeable?
+      #	 true
+      #end
 
       def collection?
       	false
@@ -37,14 +39,10 @@ module DRI
         end
       end
 
-      def prefix
-        '' # add a prefix for solr index terms if you need to namespace identical terms in multiple data streams 
-      end
-
       def remove_null_values solr_doc, field
         [:stored_searchable, :facetable].each do |index_type|
-          if solr_doc[Solrizer.solr_name(field, index_type)].present?
-            solr_doc[Solrizer.solr_name(field, index_type)].delete_if{|v| /^null$/i.match(v) || (!v.nil? && v.empty?)}
+          if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].present?
+            solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].delete_if{|v| /^null$/i.match(v) || (!v.nil? && v.empty?)}
           end
         end
 

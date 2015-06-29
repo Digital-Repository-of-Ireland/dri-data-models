@@ -3,6 +3,8 @@ class Marc < DRI::Batch
 
   include DRI::ModelSupport::MarcSupport
 
+  contains "descMetadata", class_name: "DRI::Metadata::Marc"
+
   has_attributes :leader, datastream: :descMetadata, multiple: false
   has_attributes :controlfield, :controlfield_tag, datastream: :descMetadata, multiple: true
   has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
@@ -14,15 +16,15 @@ class Marc < DRI::Batch
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
-  #has_and_belongs_to_many :related, :property=>:dcterms_relation, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::Marc"
   # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  #has_and_belongs_to_many :is_version, :property=>:dcterms_is_version_of, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::Marc"
   # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  #has_and_belongs_to_many :is_format, :property=>:dcterms_is_format_of, :class_name => "DRI::Marc"
+  #has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
 
   # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  #belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Marc"
-  #has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Marc"
+  #belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
+  #has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
@@ -101,7 +103,7 @@ class Marc < DRI::Batch
     if self.is_collection?
       # Get all the collection's objects
       # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
       query = Solr::Query.new(solr_query)
       while (query.has_more?)
@@ -147,15 +149,15 @@ class Marc < DRI::Batch
 
   def get_relationships_records
     return {:related => retrieve_relation_records(relation_ids_relation,
-                        Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+                        ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
             :is_version => retrieve_relation_records(relation_ids_isVersionOf,
-                           Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
             :is_format => retrieve_relation_records(relation_ids_isFormatOf,
-                          Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
             :preceding => retrieve_relation_records(relation_ids_preceding,
-                          Solrizer.solr_name('marc_id', :stored_searchable, type: :string)),
+                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
             :succeeding => retrieve_relation_records(relation_ids_succeeding,
-                           Solrizer.solr_name('marc_id', :stored_searchable, type: :string))
+                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string))
     }
   end
 
@@ -190,31 +192,31 @@ class Marc < DRI::Batch
 
     # Get Root collection of current object.
     # This is to restrict relationship processing only within the given collection
-    solr_query = "id:\"#{pid.to_s}\""
+    solr_query = "id:\"#{id.to_s}\""
     # The query service returns back a set of Solr Documents, therefore need to be casted later on
     solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
     if (solr_docs == nil || solr_docs == [])
-      Rails.logger.error("Solr document for object with PID #{self.pid} not found in Solr")
+      Rails.logger.error("Solr document for object with PID #{self.id} not found in Solr")
       return
     end
 
     doc = SolrDocument.new(solr_docs[0])
-    root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+    root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
     if (root_collection == nil)
-      Rails.logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
+      Rails.logger.error("Root collection ID for object with PID #{self.id} not found in Solr")
       return
     end
 
     rels_array.each do |item_id|
       # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{Solrizer.solr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-      solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
+      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+      solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
       marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
       if marc_item.empty?
-        Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+        Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.id}")
       else
         doc = SolrDocument.new(marc_item[0])
         # Cast the solr document to its corresponding Fedora object

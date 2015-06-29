@@ -2,6 +2,8 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
+    contains "descMetadata", class_name: "DRI::Metadata::Mods"
+
     # MODS relationships
     # To express the bi-directionality of the sequencing relationships
     # belongs_to means that the foreign key is in the table for this class.
@@ -10,22 +12,22 @@ module DRI
     # So has_one can ONLY go in a class that is referenced by a column in another table.
     # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
     # so we need to validate that there is only one!!
-    #belongs_to :preceding, :property=>:related_preceding, :class_name => "DRI::Mods"
-    #has_many :succeeding, :property=>:related_preceding, :class_name => "DRI::Mods"
+    #belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods"
+    #has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Mods", as: :preceding
 
-    #belongs_to :original, :property=>:related_original, :class_name => "DRI::Mods"
+    #belongs_to :original, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedOriginal, class_name: "DRI::Mods"
 
-    #belongs_to :host, :property=>:related_host, :class_name => "DRI::Mods"
+    #belongs_to :host, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods"
     # Constituents is managed through the host relationship. This automatically adds a constituent
     # whenever a host relationship is added
-    #has_many :constituents, :property=>:related_host, :class_name => "DRI::Mods"
+    #has_many :constituents, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedHost, class_name: "DRI::Mods", as: :host
 
-    #belongs_to :series, :property=>:related_series, :class_name => "DRI::Mods"
-    #has_and_belongs_to_many :other_version, :property=>:related_version, :class_name => "DRI::Mods"
-    #has_and_belongs_to_many :other_format, :property=>:related_format, :class_name => "DRI::Mods"
-    #has_and_belongs_to_many :referenced_by, :property=>:related_referenced_by, :class_name => "DRI::Mods"
-    #has_and_belongs_to_many :references, :property=>:related_reference, :class_name => "DRI::Mods"
-    #has_and_belongs_to_many :review, :property=>:related_review, :class_name => "DRI::Mods"
+    #belongs_to :series, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSeries, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :other_version, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedVersion, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :other_format, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedFormat, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :referenced_by, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReferencedBy, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :references, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReference, class_name: "DRI::Mods"
+    #has_and_belongs_to_many :review, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
     has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
@@ -155,7 +157,7 @@ module DRI
       begin
         DRI::Mods.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::Mods.create({pid: pid})
+        DRI::Mods.create({id: pid})
       end
     end
 
@@ -167,7 +169,7 @@ module DRI
       if self.is_collection?
         # Get all the collection's objects
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.pid.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
 
         # collection_objects_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
         query = Solr::Query.new(solr_query)
@@ -177,7 +179,7 @@ module DRI
             doc = SolrDocument.new(obj_doc)
             object = DRI::Mods.find(doc.id)
             begin
-              Sufia.queue.push(CreateModsRelationshipsJob.new(object.pid))
+              Sufia.queue.push(CreateModsRelationshipsJob.new(object.id))
             rescue Exception => e
               Rails.logger.error(e.message)
             end
@@ -227,27 +229,27 @@ module DRI
 
     def get_relationships_records
       return {:preceding => retrieve_relation_records(related_items_ids_preceding,
-                            Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                            ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :succeeding => retrieve_relation_records(related_items_ids_succeeding,
-                             Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :original => retrieve_relation_records(related_items_ids_original,
-                           Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                           ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :host => retrieve_relation_records(related_items_ids_host,
-                       Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                       ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :constituents => retrieve_relation_records(related_items_ids_constituent,
-                               Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :series => retrieve_relation_records(related_items_ids_series,
-                         Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :other_version => retrieve_relation_records(related_items_ids_otherVersion,
-                                Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :other_format => retrieve_relation_records(related_items_ids_otherFormat,
-                               Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy,
-                                Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :references => retrieve_relation_records(related_items_ids_references,
-                             Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)),
+                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
               :review => retrieve_relation_records(related_items_ids_reviewOf,
-                         Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string))
+                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string))
       }
     end
 
@@ -294,7 +296,7 @@ module DRI
       end
 
       # Get Root collection
-      solr_query = "id:\"#{pid.to_s}\""
+      solr_query = "id:\"#{id.to_s}\""
       # The query service returns back a set of Solr Documents, therefore need to be casted later on
       solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
@@ -304,7 +306,7 @@ module DRI
       end
 
       doc = SolrDocument.new(solr_docs[0])
-      root_collection = doc[Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)]
+      root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
 
       if (root_collection == nil)
         logger.error("Root collection ID for object with PID #{self.pid} not found in Solr")
@@ -314,12 +316,12 @@ module DRI
       rels_array.each do |item_id|
         # FIXME Revise these two queries
         # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-        solr_query = "#{Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-        solr_query << " AND #{Solrizer.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
+        solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
         mods_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
         if mods_item.empty?
-          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.pid}")
+          Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.id}")
         else
           doc = SolrDocument.new(mods_item[0])
           # Cast the solr document to its corresponding Fedora object
