@@ -453,11 +453,12 @@ module DRI
       #end
 
       def get_field_from_parent(field_name)
-        uri_terms = uri.split("/")
-        id = uri_terms[uri_terms.size()-2] # get the object's id
-        fedora_object = DRI::EncodedArchivalDescription.find(id)
+        obj_id = uri.to_str.split("/")[-2] # get the object's id
+
+        fedora_object = DRI::EncodedArchivalDescription.find(obj_id)
+
         unless fedora_object.nil? || fedora_object.governing_collection.nil?
-          solr_query = "id:\"#{fedora_object.governing_collection.id.to_s}\""
+          solr_query = "id:\"#{fedora_object.governing_collection_id.to_s}\""
           docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 
           parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
