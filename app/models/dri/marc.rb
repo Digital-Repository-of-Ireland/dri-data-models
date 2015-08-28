@@ -138,26 +138,25 @@ class Marc < DRI::Batch
   end
 =end
 
-  def get_relationships_names
-    return {:related => "Is Related To",
-            :is_version => "Is Version Of",
-            :is_format => "Is Format Of",
-            :preceding => "Preceding",
-            :succeeding => "Succeeding"
+  def self.relationships
+    return {related: {label: "Is Related To", field: "relation_ids_relation"},
+            is_version: {label: "Is Version Of", field: "relation_ids_isVersionOf"},
+            is_format: {label: "Is Format Of", field: "relation_ids_isFormatOf"},
+            preceding: {label: "Preceding", field: "relation_ids_preceding"},
+            succeeding: {label: "Succeeding", field: "relation_ids_succeeding"}
     }
   end
 
+  def self.solr_relationships_field
+    ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)
+  end
+
   def get_relationships_records
-    return {:related => retrieve_relation_records(relation_ids_relation,
-                        ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
-            :is_version => retrieve_relation_records(relation_ids_isVersionOf,
-                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
-            :is_format => retrieve_relation_records(relation_ids_isFormatOf,
-                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
-            :preceding => retrieve_relation_records(relation_ids_preceding,
-                          ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)),
-            :succeeding => retrieve_relation_records(relation_ids_succeeding,
-                           ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string))
+    return {:related => retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
+            :is_version => retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
+            :is_format => retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
+            :preceding => retrieve_relation_records(relation_ids_preceding, self.class.solr_relationships_field),
+            :succeeding => retrieve_relation_records(relation_ids_succeeding, self.class.solr_relationships_field)
     }
   end
 

@@ -212,44 +212,37 @@ module DRI
     end
 =end
 
-    def get_relationships_names
-      return {:preceding => "Preceding",
-              :succeeding => "Succeeding",
-              :original => "Has Original",
-              :host => "Is Part Of",
-              :constituents => "Has Parts",
-              :series => "Has Series",
-              :other_version => "Is Version Of",
-              :other_format => "Is Format Of",
-              :referenced_by => "Is Referenced By",
-              :references => "References",
-              :review => "Is Review Of"
+    def self.relationships
+      return {preceding: {label: "Preceding", field: "related_items_ids_preceding"},
+              succeeding: {label: "Succeeding", field: "related_items_ids_succeeding"},
+              original: {label: "Has Original", field: "related_items_ids_original"},
+              host: {label: "Is Part Of", field: "related_items_ids_host"},
+              constituents: {label: "Has Parts", field: "related_items_ids_constituent"},
+              series: {label: "Has Series", field: "related_items_ids_series"},
+              other_version: {label: "Is Version Of", field: "related_items_ids_otherVersion"},
+              other_format: {label: "Is Format Of", field: "related_items_ids_otherFormat"},
+              referenced_by: {label: "Is Referenced By", field: "related_items_ids_isReferencedBy"},
+              references: {label: "References", field: "related_items_ids_references"},
+              review: {label: "Is Review Of", field: "related_items_ids_reviewOf"}
       }
     end
 
+    def self.solr_relationships_field
+      ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)
+    end
+
     def get_relationships_records
-      return {:preceding => retrieve_relation_records(related_items_ids_preceding,
-                            ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :succeeding => retrieve_relation_records(related_items_ids_succeeding,
-                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :original => retrieve_relation_records(related_items_ids_original,
-                           ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :host => retrieve_relation_records(related_items_ids_host,
-                       ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :constituents => retrieve_relation_records(related_items_ids_constituent,
-                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :series => retrieve_relation_records(related_items_ids_series,
-                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :other_version => retrieve_relation_records(related_items_ids_otherVersion,
-                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :other_format => retrieve_relation_records(related_items_ids_otherFormat,
-                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy,
-                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :references => retrieve_relation_records(related_items_ids_references,
-                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :review => retrieve_relation_records(related_items_ids_reviewOf,
-                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string))
+      return {:preceding => retrieve_relation_records(related_items_ids_preceding, self.class.solr_relationships_field),
+              :succeeding => retrieve_relation_records(related_items_ids_succeeding, self.class.solr_relationships_field),
+              :original => retrieve_relation_records(related_items_ids_original, self.class.solr_relationships_field),
+              :host => retrieve_relation_records(related_items_ids_host, self.class.solr_relationships_field),
+              :constituents => retrieve_relation_records(related_items_ids_constituent, self.class.solr_relationships_field),
+              :series => retrieve_relation_records(related_items_ids_series, self.class.solr_relationships_field),
+              :other_version => retrieve_relation_records(related_items_ids_otherVersion, self.class.solr_relationships_field),
+              :other_format => retrieve_relation_records(related_items_ids_otherFormat, self.class.solr_relationships_field),
+              :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy, self.class.solr_relationships_field),
+              :references => retrieve_relation_records(related_items_ids_references, self.class.solr_relationships_field),
+              :review => retrieve_relation_records(related_items_ids_reviewOf, self.class.solr_relationships_field)
       }
     end
 
