@@ -107,6 +107,10 @@ module DRI
       solr_doc
     end
 
+    def published?
+      self.status == "published"
+    end
+
     private
 
       def delete_bucket

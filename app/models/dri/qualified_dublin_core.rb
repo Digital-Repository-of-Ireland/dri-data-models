@@ -128,41 +128,35 @@ module DRI
     end
 =end
 
-    def get_relationships_names
-      return {:related => "Is Related To",
-              :referenced => "Is Referenced By",
-              :references => "References",
-              :container => "Is Part Of",
-              :parts => "Has Part",
-              :is_version => "Is Version Of",
-              :has_versions => "Has Version",
-              :is_format => "Is Format Of",
-              :has_format => "Has Format",
-              :has_source => "Source"
+    def self.relationships
+      return {related: { label: "Is Related To", field: "relation_ids_relation"},
+              referenced: {label: "Is Referenced By", field: "relation_ids_isReferencedBy"},
+              references: {label: "References", field: "relation_ids_references"},
+              container: {label: "Is Part Of", field: "relation_ids_isPartOf"},
+              parts: {label: "Has Part", field: "relation_ids_hasPart"},
+              is_version: {label: "Is Version Of", field: "relation_ids_isVersionOf"},
+              has_versions: {label: "Has Version", field: "relation_ids_hasVersion"},
+              is_format: {label: "Is Format Of", field: "relation_ids_isFormatOf"},
+              has_format: {label: "Has Format", field: "relation_ids_hasFormat"},
+              has_source: {label: "Source", field: "relation_ids_source"}
       }
+    end
+  
+    def self.solr_relationships_field
+      ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)
     end
 
     def get_relationships_records
-      return {:related => retrieve_relation_records(relation_ids_relation,
-                          ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :referenced => retrieve_relation_records(relation_ids_isReferencedBy,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :references => retrieve_relation_records(relation_ids_references,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :container => retrieve_relation_records(relation_ids_isPartOf,
-                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :parts => retrieve_relation_records(relation_ids_hasPart,
-                        ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :is_version => retrieve_relation_records(relation_ids_isVersionOf,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_versions => retrieve_relation_records(relation_ids_hasVersion,
-                               ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :is_format => retrieve_relation_records(relation_ids_isFormatOf,
-                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_format => retrieve_relation_records(relation_ids_hasFormat,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_source => retrieve_relation_records(relation_ids_source,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string))
+      return {:related => retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
+              :referenced => retrieve_relation_records(relation_ids_isReferencedBy, self.class.solr_relationships_field),
+              :references => retrieve_relation_records(relation_ids_references, self.class.solr_relationships_field),
+              :container => retrieve_relation_records(relation_ids_isPartOf, self.class.solr_relationships_field),
+              :parts => retrieve_relation_records(relation_ids_hasPart, self.class.solr_relationships_field),
+              :is_version => retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
+              :has_versions => retrieve_relation_records(relation_ids_hasVersion, self.class.solr_relationships_field),
+              :is_format => retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
+              :has_format => retrieve_relation_records(relation_ids_hasFormat, self.class.solr_relationships_field),
+              :has_source => retrieve_relation_records(relation_ids_source, self.class.solr_relationships_field)
       }
       end
 
