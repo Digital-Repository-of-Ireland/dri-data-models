@@ -24,6 +24,16 @@ describe 'Mods' do
   xit "should expose metadata fields recommended by the DRI Metadata Models Taskforce for indexing" do
   end
 
+  it 'should only index valid temporal metadata' do
+    indexed_md = @mods_col.descMetadata.to_solr
+    expect(indexed_md['temporal_coverage_tesim']).to match_array(["name=Jan 01, 1980 - Jan 01, 1990; start=1980; end=1990;"])
+    expect(indexed_md['creation_date_tesim']).to match_array(["name=Jan 01, 1889; start=1889;"])
+    expect(indexed_md['published_date_tesim']).to match_array(["name=Beginning of 2000;"])
+    expect(indexed_md['cdateRange']).to match_array(["1889 1889"])
+    expect(indexed_md['sdateRange']).to match_array(["1980 1990"])
+    expect(indexed_md['pdateRange']).to be_nil
+  end
+
   it "should validate the presence of the title metadata field" do
     @mods_col.should be_valid
     @mods_col.title = [""]

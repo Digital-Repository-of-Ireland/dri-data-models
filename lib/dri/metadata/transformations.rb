@@ -332,7 +332,7 @@ module DRI
       end
 
       def self.create_dcmi_period(name, sdate="", edate="", scheme="")
-        return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}"
+        return "name=#{name}; #{sdate != '' ? 'start=' << sdate << ';' :''} #{edate != '' ? 'end=' << edate << ';' :''} #{scheme != '' ? 'scheme=' << scheme << ';' :''}".rstrip
       end
 
       # Taken from maps_controller and adapted

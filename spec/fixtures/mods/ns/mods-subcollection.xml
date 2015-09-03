@@ -39,7 +39,7 @@
   <!-- Additional type of the collection: Collection -->
   <mods:genre type="dct">Collection</mods:genre>
   <!-- The Rights of the collection -->
-  <mods:accessCondition>
+  <mods:accessCondition type="use and reproduction">
     <copyrightMD:copyright copyright.status="copyrighted">
       <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
       <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
