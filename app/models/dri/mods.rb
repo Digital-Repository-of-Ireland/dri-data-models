@@ -2,7 +2,7 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
-    contains "descMetadata", class_name: "DRI::Metadata::Mods"
+    contains 'descMetadata', class_name: 'DRI::Metadata::Mods'
 
     # MODS relationships
     # To express the bi-directionality of the sequencing relationships
@@ -86,7 +86,7 @@ module DRI
 
     # Initialize - mods record
     def initialize(args = {})
-      args[:desc_metadata_class] = "DRI::Metadata::Mods"
+      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
       super(args)
     end
 

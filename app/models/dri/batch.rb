@@ -14,16 +14,16 @@ module DRI
   
     has_many_versions
 
-    has_many :generic_files, class_name: "DRI::GenericFile", as: :batch, dependent: :destroy
+    has_many :generic_files, class_name: 'DRI::GenericFile', as: :batch, dependent: :destroy
 
     # dependent: :destroy -> remove the documentation object if the collection is deleted
-    has_many :documentation_objects, class_name: "DRI::Documentation", as: :documentation_for
+    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
     # Declare a 'extracted' DS, of the following type
-    contains "extracted", class_name: 'DRI::Metadata::Extracted'
+    contains 'extracted', class_name: 'DRI::Metadata::Extracted'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
-    has_attributes :full_text, datastream: :extracted, multiple: true
+    property :full_text, delegate_to: 'extracted', multiple: true
 
     def self.with_standard(standard, args = {})
       case standard
@@ -57,7 +57,7 @@ module DRI
     # @param[String,File] xml_text xml metadata content or a File
     # @return[boolean] true if op successful
     # Note: Use this in preference over the setting xml directly in the OmDatastreams
-    def update_metadata xml_text
+    def update_metadata(xml_text)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -96,7 +96,7 @@ module DRI
       end
 
       if object_types.count < 1
-        object_types.push "Unknown"
+        object_types.push('Unknown')
       end
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
@@ -108,7 +108,7 @@ module DRI
     end
 
     def published?
-      self.status == "published"
+      self.status == 'published'
     end
 
     private

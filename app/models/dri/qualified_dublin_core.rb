@@ -1,38 +1,37 @@
 module DRI
   class QualifiedDublinCore < DRI::Batch
 
-    #before_destroy :delete_parents
-
-    contains "descMetadata", class_name: "DRI::Metadata::QualifiedDublinCore"
+    contains 'descMetadata', class_name: 'DRI::Metadata::QualifiedDublinCore'
 
     # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :relation, datastream: :descMetadata, multiple: true
-    has_attributes :external_relation, datastream: :descMetadata, multiple: true
-    has_attributes :source, datastream: :descMetadata, multiple: true
-    has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :name_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :type, datastream: :descMetadata, multiple: true
-    has_attributes :format, datastream: :descMetadata, multiple: true
-    has_attributes :coverage, datastream: :descMetadata, multiple: true
-    has_attributes :identifier, datastream: :descMetadata, multiple: true
+    property :date, delegate_to: 'descMetadata', multiple: true
+    property :relation, delegate_to: 'descMetadata', multiple: true
+    property :external_relation, delegate_to: 'descMetadata', multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    property :name_coverage, delegate_to: 'descMetadata', multiple: true
+    property :type, delegate_to: 'descMetadata', multiple: true
+    property :format, delegate_to: 'descMetadata', multiple: true
+    property :coverage, delegate_to: 'descMetadata', multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
     # Used for relationships
-    has_attributes :id_asset, datastream: :descMetadata, multiple: false
-    has_attributes :qdc_id, datastream: :descMetadata, multiple: true
-    has_attributes :geocode_point, datastream: :descMetadata, multiple: true
-    has_attributes :geocode_box, datastream: :descMetadata, multiple: true
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
+    property :id_asset, delegate_to: 'descMetadata', multiple: false
+    property :qdc_id, delegate_to: 'descMetadata', multiple: true
+    property :geocode_point, delegate_to: 'descMetadata', multiple: true
+    property :geocode_box, delegate_to: 'descMetadata', multiple: true
+
+    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend('role_').to_sym}), datastream: :descMetadata,
                                    multiple: true
 
     # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("relation_ids_").to_sym}),
+    has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend('relation_ids_').to_sym}),
                     datastream: :descMetadata, multiple: true
 
     # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
+    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend('ext_related_items_ids_').to_sym}),
                    datastream: :descMetadata, multiple: true
 
     # QDC Relationships
@@ -161,11 +160,6 @@ module DRI
       end
 
     private
-
-    #def delete_parents
-    #  deleted = self.class.delete_all "governing_collection_id = #{id}"
-    #  deleted.size
-    #end
 
     # Process a specific qdc relationship for the object
     #

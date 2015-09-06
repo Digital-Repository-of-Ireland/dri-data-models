@@ -17,11 +17,11 @@ module DRI
         has_many :member_collections, class_name: 'DRI::Batch', as: :parent_collection
 
         # Additional relationships to keep track of sibling order, important for EAD
-        belongs_to :previous_sibling, property: :is_preceded_by, class_name: 'DRI::Batch'
+        belongs_to :previous_sibling, predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy, class_name: 'DRI::Batch'
         # Updated so this is the equivalent of a :has_one relationship (similar to what we do in MODS with preceding/succeeding)
         # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
         # FIXME below needs to be updated to :has_many as opposed to :belongs_to
-        belongs_to :next_sibling, property: :is_preceded_by, class_name: 'DRI::Batch'
+        has_many :next_sibling, predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy, class_name: 'DRI::Batch', as: :previous_sibling
 
         def collection= collection
           if @collection == collection

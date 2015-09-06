@@ -8,44 +8,44 @@ module DRI
         attr_accessor :trigger_update
 
         # Descriptive metadata datastream - F4 uses "File attachments" instead of datas
-        contains "descMetadata", class_name: "DRI::Metadata::Base"
+        contains 'descMetadata', class_name: 'DRI::Metadata::Base'
         # Complete metadata record datastream
-        contains "fullMetadata", class_name: "DRI::Metadata::FullMetadata"
+        contains 'fullMetadata', class_name: 'DRI::Metadata::FullMetadata'
 
         after_initialize :load_attributes
 
         # TODO Check that these match the DRI Level 1 and 2 terms (some are missing)
         # DRI Mandatory (M)
         # Title (collection-level)
-        has_attributes :title, datastream: :descMetadata, multiple: true
+        property :title, delegate_to: 'descMetadata', multiple: true
         # Description (collection-level)
-        has_attributes :description, datastream: :descMetadata, multiple: true
+        property :description, delegate_to: 'descMetadata', multiple: true
         # ADDED TYPE, it is compulsory
-        #has_attributes :type, datastream: :descMetadata, multiple: true
+        #property :type, delegate_to: 'descMetadata', multiple: true
         # Rights (collection-level)
-        has_attributes :rights, datastream: :descMetadata, multiple: true
+        property :rights, delegate_to: 'descMetadata', multiple: true
         # Creator (collection-level)
-        has_attributes :creator, datastream: :descMetadata, multiple: true
+        property :creator, delegate_to: 'descMetadata', multiple: true
 
         # DRI Recommended (R)
         # Contributor
-        has_attributes :contributor, datastream: :descMetadata, multiple: true
+        property :contributor, delegate_to: 'descMetadata', multiple: true
         # Publisher (collection-level, DRI pre-populated)
-        has_attributes :publisher, datastream: :descMetadata, multiple: true
+        property :publisher, delegate_to: 'descMetadata', multiple: true
         # Published Date (collection-level)
-        has_attributes :published_date, datastream: :descMetadata, multiple: true
+        property :published_date, delegate_to: 'descMetadata', multiple: true
         # Creation Date (collection-level, DRI pre-populated)
-        has_attributes :creation_date, datastream: :descMetadata, multiple: true
+        property :creation_date, delegate_to: 'descMetadata', multiple: true
         # Subject (collection-level)
-        has_attributes :subject, datastream: :descMetadata, multiple: true
+        property :subject, delegate_to: 'descMetadata', multiple: true
         # Language (collection-level)
-        has_attributes :language, datastream: :descMetadata, multiple: true
+        property :language, delegate_to: 'descMetadata', multiple: true
 
         validate :custom_validations
       end
 
       # Should only be set in a new class
-      def desc_metadata_class= desc_metadata_class
+      def desc_metadata_class=(desc_metadata_class)
         if self.new?
           @desc_metadata_class = desc_metadata_class
         end
@@ -53,7 +53,7 @@ module DRI
 
       # Issue 1195 - Trigger update, additional flag to avoid ead updates when loading fedora objects
       # load_attributes changes the descMetadata datastream to load the right metadata class
-      def trigger_update= update
+      def trigger_update=(update)
         @trigger_update = update
       end
 
@@ -80,11 +80,11 @@ module DRI
         end
       end # custom_validations
 
-      def get_metadata_class_from_xml xml_text
+      def get_metadata_class_from_xml(xml_text)
         result = nil
         xml = nil
 
-        if (xml_text.is_a? Nokogiri::XML::Document)
+        if xml_text.is_a? Nokogiri::XML::Document
           xml = xml_text
         else
           xml = Nokogiri::XML xml_text
@@ -136,12 +136,12 @@ module DRI
         else
           # When loading the object from Fedora, check what metadata
           # the XML uses and load the correct class.
-          ds_class = get_metadata_class_from_xml descMetadata.to_xml
+          ds_class = get_metadata_class_from_xml(descMetadata.to_xml)
 
           if ["DRI::Metadata::EncodedArchivalDescription",
                   "DRI::Metadata::EncodedArchivalDescriptionComponent"].include? ds_class
             old_digital_object = descMetadata.uri
-            ds = ds_class.constantize.from_xml descMetadata.to_xml
+            ds = ds_class.constantize.from_xml(descMetadata.to_xml)
             ds.uri = old_digital_object
           else
             return
@@ -149,8 +149,8 @@ module DRI
         end
 
         if (ds != nil)
-          ds.instance_variable_set :@dsid, "descMetadata"
-          self.attach_file ds, "descMetadata"
+          ds.instance_variable_set(:@dsid, 'descMetadata')
+          self.attach_file(ds, 'descMetadata')
         end
       end # load_attributes
     end # module

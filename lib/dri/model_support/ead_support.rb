@@ -2,75 +2,72 @@ module DRI
   module ModelSupport
     module EadSupport
       extend ActiveSupport::Concern
-      
+
       def synchronize_children_to_metadata
-        if self.new_record?
+        if self.new_record? || (descMetadata.class != DRI::Metadata::EncodedArchivalDescription &&
+            descMetadata.class != DRI::Metadata::EncodedArchivalDescriptionComponent)
           return
         end
 
-        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription ||
-           descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
+        metadata_child_index = 0
+        prev_obj = nil
+        metadata_children = []
 
-          metadata_child_index = 0
-          prev_obj = nil
+        # Remove Ead namespaces
+        fullMetadataNoNs = self.fullMetadata.ng_xml.clone
+        fullMetadataNoNs.remove_namespaces!
+
+        # Find the immediate children of this collection in the metadata
+        case descMetadata.class.to_s
+        when "DRI::Metadata::EncodedArchivalDescription"
+          metadata_children = fullMetadataNoNs.xpath("/ead/archdesc/dsc/*")
+        when "DRI::Metadata::EncodedArchivalDescriptionComponent"
+          metadata_children = get_ead_children_components(fullMetadataNoNs)
+        else
           metadata_children = []
+        end
 
-          # Remove Ead namespaces
-          fullMetadataNoNs = self.fullMetadata.ng_xml.clone
-          fullMetadataNoNs.remove_namespaces!
-
-          # Find the immediate children of this collection in the metadata
-          case descMetadata.class.to_s
-            when "DRI::Metadata::EncodedArchivalDescription"
-              metadata_children = fullMetadataNoNs.xpath("/ead/archdesc/dsc/*")
-            when "DRI::Metadata::EncodedArchivalDescriptionComponent"
-              metadata_children = get_ead_children_components(fullMetadataNoNs)
-            else
-              metadata_children = []
-          end
-
-          while metadata_child_index < metadata_children.length do
-            # Create a new child
-            new_child = DRI::EncodedArchivalDescription.new :component
-            new_child.update_metadata metadata_children[metadata_child_index].to_xml
-            new_child.previous_sibling = prev_obj
-            new_child.governing_collection = self
-            # Add depositor, status and permissions from parent
-            new_child.depositor = self.depositor
-            new_child.status = self.status
-            # Copy permissions from parent
-            new_child.read_groups_string = self.read_groups_string
-            new_child.edit_groups_string = self.edit_groups_string
-            new_child.manager_groups_string = self.manager_groups_string
-            new_child.manager_users_string = self.manager_users_string
-            # ingest_files_from_metadata
-            new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
-            # FIXME Need to call checksum method below but this method is implemented in dri_app
-            MetadataHelpers.checksum_metadata(new_child)
-            duplicates = object_duplicates?(new_child)
-            #duplicates = false
-            # Don't add new node if it's invalid
-            if new_child.valid? && !duplicates
-              Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
-              new_child.save
-              begin
-                create_reader_group(new_child.id) if new_child.is_collection?
-              rescue
-                Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
-              end
-              # add to queue
-              prev_obj = new_child
-            elsif duplicates
-              Rails.logger.error("ERR_EAD_SAVE: #{new_child.identifier} is duplicated!!")
-            else
-              Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
-              new_child.errors.messages.each do |key, value|
-                Rails.logger.error("#{key}: #{value}")
-              end
+        while metadata_child_index < metadata_children.length do
+          # Create a new child
+          new_child = DRI::EncodedArchivalDescription.new :component
+          new_child.update_metadata metadata_children[metadata_child_index].to_xml
+          new_child.previous_sibling = prev_obj unless prev_obj.nil?
+          new_child.governing_collection = self
+          # Add depositor, status and permissions from parent
+          new_child.depositor = self.depositor
+          new_child.status = self.status
+          # Copy permissions from parent
+          new_child.read_groups_string = self.read_groups_string
+          new_child.edit_groups_string = self.edit_groups_string
+          new_child.manager_groups_string = self.manager_groups_string
+          new_child.manager_users_string = self.manager_users_string
+          # ingest_files_from_metadata
+          new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
+          checksum_metadata(new_child)
+          duplicates = object_duplicates?(new_child)
+          #duplicates = false
+          # Don't add new node if it's invalid
+          if new_child.valid? && !duplicates
+            Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
+            new_child.save
+            begin
+              create_reader_group(new_child.id) if new_child.is_collection?
+            rescue
+              Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
-
-            metadata_child_index += 1
+            retrieve_linked_data(new_child)
+            # add to queue
+            prev_obj = new_child
+          elsif duplicates
+            Rails.logger.error("ERR_EAD_SAVE: #{new_child.identifier} is duplicated!!")
+          else
+            Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
+            new_child.errors.messages.each do |key, value|
+              Rails.logger.error("#{key}: #{value}")
+            end
           end
+
+          metadata_child_index += 1
         end
       end # synchronize_children_to_metadata
 
@@ -313,23 +310,40 @@ module DRI
         return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
       end
 
-      def object_duplicates? object
+      def object_duplicates?(object)
         result = false
 
         if object.governing_collection.present?
           collection_id = object.governing_collection.id
           solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)}:\"#{object.metadata_md5}\" AND #{ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)}:\"#{collection_id}\""
-          documents = ActiveFedora::SolrService.query(solr_query, :defType => "edismax", :rows => "10", :fl => "id").delete_if{|obj| obj["id"] == object.id}
+          documents = ActiveFedora::SolrService.query(solr_query, :defType => 'edismax', :rows => '10', :fl => 'id').delete_if { |obj| obj["id"] == object.id }
           result = true unless documents.empty?
         end
 
         return result
       end
 
-      def create_reader_group id
+      def create_reader_group(id)
         grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
         grp.reader_group = true
         grp.save
+      end
+
+      def retrieve_linked_data(obj)
+        if AuthoritiesConfig
+          begin
+            Sufia.queue.push(LinkedDataJob.new(obj.id)) unless obj.geographical_coverage.blank?
+          rescue Exception => e
+            Rails.logger.error "Unable to submit linked data job: #{e.message}"
+          end
+        end
+      end
+
+      def checksum_metadata(object)
+        if object.attached_files.has_key?(:descMetadata)
+          xml = object.attached_files[:descMetadata].content
+          object.metadata_md5 = Checksum.md5_string(xml)
+        end
       end
     end # module
   end # module

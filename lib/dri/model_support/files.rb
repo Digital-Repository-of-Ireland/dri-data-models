@@ -206,9 +206,12 @@ module DRI
         # Does the actual collection/file save
         yield
 
-        if content_changed && self.generic_files.empty? &&
-          !self.dao_href.empty? && !new_record?
-          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
+        # Do not process files if object is a collection (DRI Collections do not have assets)
+        unless is_collection?
+          if content_changed && self.generic_files.empty? &&
+              !self.dao_href.empty? && !new_record?
+            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
+          end
         end
       end # ingest_files_if_changed
 

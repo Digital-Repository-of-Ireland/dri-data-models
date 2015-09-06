@@ -30,7 +30,6 @@
   </ead:eadheader>
   <ead:archdesc level="fonds" relatedencoding="ISAD(G)v2">
     <ead:did>
-      <ead:unittitle encodinganalog="3.1.2">Kilkenny Design Workshop</ead:unittitle>
       <ead:unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="KDW" encodinganalog="3.1.1">KDW</ead:unitid>
       <ead:unitdate datechar="Creation" normal="19630101/19881231" encodinganalog="3.1.3">1963 - 1988</ead:unitdate>
       <ead:physdesc>
