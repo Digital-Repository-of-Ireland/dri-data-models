@@ -10,7 +10,7 @@ describe 'EncodedArchivalDescription' do
     @ead_collection.save
   end
 
-  it "should add new children if it's metadata specifies this" do
+  xit "should add new children if it's metadata specifies this" do
     #@ead_collection.save
     @ead_collection.synchronize_children_to_metadata
 
@@ -99,7 +99,7 @@ describe 'EncodedArchivalDescription' do
   end
 
   after(:each) do
-    if !@ead_collection.new_record?
+    unless @ead_collection.new_record?
       # Delete all descendants of @ead_collection and their generic files
       DRI::EncodedArchivalDescription.where(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :stored_searchable, type: :string) => @ead_collection.id.to_s).each do |obj|
         obj.generic_files.each do |file_obj|
