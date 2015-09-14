@@ -79,7 +79,7 @@ namespace :jetty do
 end
 
 desc "Run Continuous Integration"
-task :ci => ['jetty:reset','ci:setup:rspec'] do
+task :ci => ['jetty:reset','jetty:config','ci:setup:rspec'] do
   ENV['environment'] = "test"
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 120
