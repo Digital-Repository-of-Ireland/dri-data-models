@@ -86,7 +86,7 @@ module DRI
     def collections_to_solr(solr_doc=Hash.new)
       solr_doc = super(solr_doc)
       if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => "1")
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => '1')
       end
       solr_doc
     end
@@ -99,12 +99,12 @@ module DRI
       file_type_display = []
 
       if is_collection?
-        file_type.push "collection"
+        file_type.push('collection')
 
         if !is_root_collection? && !ead_level.blank?
           file_type_display.push ead_level.strip.capitalize
         else
-          file_type_display.push "Collection"
+          file_type_display.push('Collection')
         end
       end
       solr_doc
@@ -125,7 +125,7 @@ module DRI
       if object_types.empty?
         case descMetadata
           when DRI::Metadata::EncodedArchivalDescriptionComponent
-            if (descMetadata.collection?)
+            if descMetadata.collection?
               object_types.push('Collection')
             end
             object_types.push ead_level.split.map(&:capitalize)*' '
@@ -143,11 +143,11 @@ module DRI
       solr_doc
     end
 
-    def update_metadata xml_text
-      # Trigger update - issue 1195 (only trigger EAD update if updating descMetadata)
-      self.trigger_update=(true)
+    def update_metadata(xml_text, ingest=true)
+      # Differentiate between ingest and individual object update
+      ingest ? self.trigger_ingest=(true) : self.trigger_update=(true)
 
-      if (xml_text.is_a? File)
+      if xml_text.is_a?(File)
         xml_text = xml_text.read
       end
 
@@ -161,8 +161,8 @@ module DRI
 
     # If this is EAD, put the full XML in fullMetadata and
     # return XML with the component's children removed
-    def split_ead_xml xml_text, xml_type
-      if (xml_text.is_a? Nokogiri::XML::Document)
+    def split_ead_xml(xml_text, xml_type)
+      if xml_text.is_a?(Nokogiri::XML::Document)
         xml = xml_text
       else
         xml = Nokogiri::XML xml_text
@@ -170,17 +170,17 @@ module DRI
       # Remove namespaces from XML - handle EAD XSD (EAD data model is namespace-free)
       xml.remove_namespaces!
 
-      if (xml_type == "DRI::Metadata::EncodedArchivalDescription")
-        xml.xpath("/ead/archdesc/dsc/*").remove
+      if xml_type == 'DRI::Metadata::EncodedArchivalDescription'
+        xml.xpath('/ead/archdesc/dsc/*').remove
       else
         # 1. dsc/c
-        if (!xml.xpath("/*/dsc/*").empty?)
-          xml.xpath("/*/dsc/*").remove
+        if !xml.xpath('/*/dsc/*').empty?
+          xml.xpath('/*/dsc/*').remove
         else
           # 2. c/c or 3. c/c01/c02...
           # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
           # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
-          xml.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]").remove
+          xml.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]').remove
         end
       end
 
@@ -190,7 +190,7 @@ module DRI
     def synchronize_if_changed
       content_changed = false
 
-      if (self.descMetadata.synchronize_metadata_on_save == true && self.trigger_update)
+      if self.descMetadata.synchronize_metadata_on_save == true && self.trigger_ingest
         content_changed = self.descMetadata.changed?
       end
 

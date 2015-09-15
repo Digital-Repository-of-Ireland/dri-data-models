@@ -6,10 +6,8 @@ module DRI
       included do
       	attr_accessor :collection
 
-        #before_destroy :reload_governing_collection
-
-        belongs_to :governing_collection, property: :is_governed_by, class_name: 'DRI::Batch'
-        has_many :governed_items, property: :is_governed_by, class_name: 'DRI::Batch', as: :governing_collection, dependent: :destroy
+        belongs_to :governing_collection, predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy, class_name: 'DRI::Batch'
+        has_many :governed_items, predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy, class_name: 'DRI::Batch', as: :governing_collection, dependent: :destroy
 
         # NOT USED - Two relationships below for managing a collection's collections
         # (!) ONLY FOR COLLECTIONS
@@ -18,18 +16,15 @@ module DRI
 
         # Additional relationships to keep track of sibling order, important for EAD
         belongs_to :previous_sibling, predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy, class_name: 'DRI::Batch'
-        # Updated so this is the equivalent of a :has_one relationship (similar to what we do in MODS with preceding/succeeding)
-        # ActiveFedora does not implement has_one. They treat it as a special case of has_many (1-to-1 association)
-        # FIXME below needs to be updated to :has_many as opposed to :belongs_to
         has_many :next_sibling, predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy, class_name: 'DRI::Batch', as: :previous_sibling
 
         def collection= collection
           if @collection == collection
           	@collection = collection
           # FIXME Possible Bug: obj.count returns random number even if empty?
-          elsif (collection == true) && (self.id.nil? || self.generic_files.count == 0)
+          elsif collection == true && (self.id.nil? || self.generic_files.count == 0)
         	  @collection = collection
-          elsif (collection == false) && (self.id.nil? || self.governed_items.count == 0) && (self.id.nil? || self.member_collections.count == 0)
+          elsif collection == false && (self.id.nil? || self.governed_items.count == 0) && (self.id.nil? || self.member_collections.count == 0)
           	@collection = collection
           end
         end
@@ -111,9 +106,6 @@ module DRI
         solr_doc
       end #collections_to_solr
 
-      #private def reload_governing_collection
-      #  self.governing_collection.reload unless self.governing_collection.nil? || self.governing_collection.destroyed?
-      #end
     end # module
   end # module
 end #module

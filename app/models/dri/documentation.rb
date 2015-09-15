@@ -19,8 +19,9 @@ module DRI
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
     property :relation, delegate_to: 'descMetadata', multiple: true
 
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend('role_').to_sym }), datastream: :descMetadata,
-                    multiple: true
+    self.class_eval do
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
     def attributes=(properties)
       point_hash = Hash.new

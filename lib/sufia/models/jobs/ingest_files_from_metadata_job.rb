@@ -1,4 +1,4 @@
-class IngestFilesFromMetadataJob < ActiveFedoraPidBasedJob
+class IngestFilesFromMetadataJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :ingest_files_from_metadata

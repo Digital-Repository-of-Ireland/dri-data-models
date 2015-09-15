@@ -23,16 +23,13 @@ module DRI
     property :geocode_point, delegate_to: 'descMetadata', multiple: true
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
 
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend('role_').to_sym}), datastream: :descMetadata,
-                                   multiple: true
-
-    # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend('relation_ids_').to_sym}),
-                    datastream: :descMetadata, multiple: true
-
-    # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend('ext_related_items_ids_').to_sym}),
-                   datastream: :descMetadata, multiple: true
+    self.class_eval do
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Internal Relationships
+      DRI::Vocabulary::qdcRelationshipTypes.map { |s| property s.prepend('relation_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # External relationships (contain a URI to resources external to DRI)
+      DRI::Vocabulary::qdcRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
     # QDC Relationships
     #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::QualifiedDublinCore"
@@ -60,7 +57,7 @@ module DRI
       DRI::Batch.model_name
     end
 
-    def roles= roles
+    def roles=(roles)
       if descMetadata.class == DRI::Metadata::QualifiedDublinCore
         descMetadata.roles = roles
       end
@@ -157,7 +154,7 @@ module DRI
               :has_format => retrieve_relation_records(relation_ids_hasFormat, self.class.solr_relationships_field),
               :has_source => retrieve_relation_records(relation_ids_source, self.class.solr_relationships_field)
       }
-      end
+    end
 
     private
 

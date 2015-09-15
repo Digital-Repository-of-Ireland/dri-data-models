@@ -2,7 +2,7 @@ module DRI
   module Metadata
     class Documentation < ActiveFedora::RDFXMLDatastream
       # Versionable, included as this DS does not inherit from DRI::MetadataBase
-      has_many_versions
+      #has_many_versions
 
       # It supports all the DRI Compulsory elements
       property :title, predicate: RDF::DC.title do |index|

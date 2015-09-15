@@ -68,16 +68,14 @@ module DRI
     property :subject_date_start, delegate_to: 'descMetadata', multiple: true
     property :subject_date_end, delegate_to: 'descMetadata', multiple: true
 
-    # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
-                   datastream: :descMetadata, multiple: true
-    # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
-                    datastream: :descMetadata, multiple: true
-
-    # Roles
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                    multiple: true
+    self.class_eval do
+      # Roles
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Internal Relationships
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # External relationships (contain a URI to resources external to DRI)
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
     property :type, delegate_to: 'descMetadata', multiple: true
 
@@ -94,8 +92,7 @@ module DRI
       super(properties)
     end
 
-    def update_metadata(xml_text)
-      self.trigger_update=(true)
+    def update_metadata(xml_text, ingest=true)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end

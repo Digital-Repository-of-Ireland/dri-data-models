@@ -54,7 +54,7 @@ class Marc < DRI::Batch
     descMetadata.type
   end
 
-  def update_metadata xml_text
+  def update_metadata(xml_text, ingest=true)
     if (xml_text.is_a? File)
       xml_text = xml_text.read
     end

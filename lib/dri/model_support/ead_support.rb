@@ -3,6 +3,25 @@ module DRI
     module EadSupport
       extend ActiveSupport::Concern
 
+      included do
+        around_save :ingest_files_if_changed
+
+        attr_accessor :trigger_ingest
+        attr_accessor :trigger_update
+
+        # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading fedora objects
+        # load_attributes changes the descMetadata datastream to load the right metadata class
+        def trigger_ingest
+          @trigger_ingest || false
+        end
+
+        # Individual object metadata update flag
+        def trigger_update
+          @trigger_update || false
+        end
+      end
+
+      # Process a component's children and create associated objects in Fedora
       def synchronize_children_to_metadata
         if self.new_record? || (descMetadata.class != DRI::Metadata::EncodedArchivalDescription &&
             descMetadata.class != DRI::Metadata::EncodedArchivalDescriptionComponent)
@@ -70,6 +89,44 @@ module DRI
           metadata_child_index += 1
         end
       end # synchronize_children_to_metadata
+
+      # Create associated generic file from a given URL
+      def process_ingest_of_file_urls
+        case descMetadata
+        when DRI::Metadata::EncodedArchivalDescription
+        when DRI::Metadata::EncodedArchivalDescriptionComponent
+          self.dao_href.each do |url|
+            if !url.blank?
+              add_file_from_url url.strip
+            end
+          end
+        else # Do nothing
+        end
+      end # process_ingest_of_file_urls
+
+      # Ingest a file (generic_file) from a given URL
+      def add_file_from_url file_url
+        file_name = File.basename(URI(file_url).path)
+        begin
+
+          # We have a copy of the remote file for processing
+          temp_file = Tempfile.new(['tmp', File.extname(file_url)])
+          temp_file.binmode
+          open(file_url) { |data| temp_file.write data.read}
+          temp_file.close
+
+          add_file temp_file, "content", file_name
+          true
+        rescue Exception => e
+          logger.error "Error loading url: #{file_url} PID: #{self.id}\n"
+          logger.error e.backtrace.join("\n")
+          false
+        ensure
+          # Explicitly close the temp file
+          temp_file.close unless temp_file.nil?
+          temp_file.unlink unless temp_file.nil?
+        end
+      end # add_file_from_url
 
 =begin
       def synchronize_children_to_metadata
@@ -296,9 +353,9 @@ module DRI
       end # is_child_id_in_metadata
 =end
 
-      # Returns an array of children ead components
-      # @param Nokogiri::XML
-      # @return Nokogiri::XML::NodeSet (Array of EAD Components)
+      # Returns an array of children EAD components
+      # @param metadata [Nokogiri::XML] EAD component XML metadata
+      # @return [Array<Nokogiri::XML::NodeSet>] Array of children EAD components
       def get_ead_children_components(metadata)
         # Components in EAD can either be children of dsc; or children of c
         # 1. dsc/c
@@ -310,6 +367,9 @@ module DRI
         return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
       end
 
+      # Checks whether the passed object is a duplicate
+      # @param object [DRI::Batch] the object to check
+      # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
         result = false
 
@@ -323,12 +383,16 @@ module DRI
         return result
       end
 
+      # Create deafult reader group permissions for the object and save
+      # @param object [DRI::Batch] the object for which to add a default reader group
       def create_reader_group(id)
         grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
         grp.reader_group = true
         grp.save
       end
 
+      # Adds linked data records for logaimn links present in the metadata (geographical_coverage)
+      # @param obj [DRI::Batch] the object to check
       def retrieve_linked_data(obj)
         if AuthoritiesConfig
           begin
@@ -339,12 +403,34 @@ module DRI
         end
       end
 
+      # Generates metadata checksum for the object
+      # @param object [DRI::Batch] the digital object
       def checksum_metadata(object)
         if object.attached_files.has_key?(:descMetadata)
           xml = object.attached_files[:descMetadata].content
           object.metadata_md5 = Checksum.md5_string(xml)
         end
       end
+
+      # Triggers the creation of generic files for EAD components if specified in metadata
+      def ingest_files_if_changed
+        content_changed = false
+
+        if self.ingest_files_from_metadata == 'true' && self.trigger_ingest
+          content_changed = self.descMetadata.changed?
+        end
+
+        # Does the actual collection/file save
+        yield
+
+        # Do not process files if object is a collection (DRI Collections do not have assets)
+        unless is_collection?
+          if content_changed && self.generic_files.empty? &&
+              !self.dao_href.empty? && !new_record?
+            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
+          end
+        end
+      end # ingest_files_if_changed
     end # module
   end # module
 end # module

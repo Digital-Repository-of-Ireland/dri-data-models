@@ -1,4 +1,4 @@
-class CreateModsRecordsJob < ActiveFedoraPidBasedJob
+class CreateModsRecordsJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :mods
