@@ -2,7 +2,7 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
-    contains "descMetadata", class_name: "DRI::Metadata::Mods"
+    contains 'descMetadata', class_name: 'DRI::Metadata::Mods'
 
     # MODS relationships
     # To express the bi-directionality of the sequencing relationships
@@ -30,63 +30,61 @@ module DRI
     #has_and_belongs_to_many :review, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
+    property :mods_id_local, delegate_to: 'descMetadata', multiple: false
     # MODS record asset identifier used to sort pages/sequenced items
-    has_attributes :id_asset, datastream: :descMetadata, multiple: false
+    property :id_asset, delegate_to: 'descMetadata', multiple: false
     # MODS rest of identifiers are repeatable
-    has_attributes :identifier, datastream: :descMetadata, multiple: true
-    has_attributes :id_doi, datastream: :descMetadata, multiple: true
-    has_attributes :id_uri, datastream: :descMetadata, multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
+    property :id_doi, delegate_to: 'descMetadata', multiple: true
+    property :id_uri, delegate_to: 'descMetadata', multiple: true
     # Collection attribute
-    has_attributes :mods_type_collection, datastream: :descMetadata, multiple: false
+    property :mods_type_collection, delegate_to: 'descMetadata', multiple: false
     # Title
-    has_attributes :subtitle, datastream: :descMetadata, multiple: true
+    property :subtitle, delegate_to: 'descMetadata', multiple: true
     # Description
-    has_attributes :abstract, datastream: :descMetadata, multiple: true
-    has_attributes :toc, datastream: :descMetadata, multiple: true
-    has_attributes :note_mods_type, datastream: :descMetadata, multiple: true
-    has_attributes :note_mods_no_type, datastream: :descMetadata, multiple: true
+    property :abstract, delegate_to: 'descMetadata', multiple: true
+    property :toc, delegate_to: 'descMetadata', multiple: true
+    property :note_mods_type, delegate_to: 'descMetadata', multiple: true
+    property :note_mods_no_type, delegate_to: 'descMetadata', multiple: true
     # Source
-    has_attributes :source, datastream: :descMetadata, multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
     # Dates
-    has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :date_other, datastream: :descMetadata, multiple: true
-    has_attributes :date_other_start, datastream: :descMetadata, multiple: true
-    has_attributes :date_other_end, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date_end, datastream: :descMetadata, multiple: true
-    has_attributes :issued_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :issued_date_end, datastream: :descMetadata, multiple: true
-    has_attributes :creation_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :creation_date_end, datastream: :descMetadata, multiple: true
+    property :date, delegate_to: 'descMetadata', multiple: true
+    property :date_other, delegate_to: 'descMetadata', multiple: true
+    property :date_other_start, delegate_to: 'descMetadata', multiple: true
+    property :date_other_end, delegate_to: 'descMetadata', multiple: true
+    property :captured_date, delegate_to: 'descMetadata', multiple: true
+    property :captured_date_start, delegate_to: 'descMetadata', multiple: true
+    property :captured_date_end, delegate_to: 'descMetadata', multiple: true
+    property :issued_date_start, delegate_to: 'descMetadata', multiple: true
+    property :issued_date_end, delegate_to: 'descMetadata', multiple: true
+    property :creation_date_start, delegate_to: 'descMetadata', multiple: true
+    property :creation_date_end, delegate_to: 'descMetadata', multiple: true
 
-    has_attributes :name_coverage, datastream: :descMetadata, multiple: true
+    property :name_coverage, delegate_to: 'descMetadata', multiple: true
     # Geographical, temporal
-    has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :subject_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :subject_date_end, datastream: :descMetadata, multiple: true
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    property :subject_date_start, delegate_to: 'descMetadata', multiple: true
+    property :subject_date_end, delegate_to: 'descMetadata', multiple: true
 
-    # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
-                   datastream: :descMetadata, multiple: true
-    # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
-                    datastream: :descMetadata, multiple: true
+    self.class_eval do
+      # Roles
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Internal Relationships
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # External relationships (contain a URI to resources external to DRI)
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
-    # Roles
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                    multiple: true
-
-    has_attributes :type, datastream: :descMetadata, multiple: true
+    property :type, delegate_to: 'descMetadata', multiple: true
 
     # TODO Disabled for now
     #around_save :create_multiple_records
 
     # Initialize - mods record
     def initialize(args = {})
-      args[:desc_metadata_class] = "DRI::Metadata::Mods"
+      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
       super(args)
     end
 
@@ -94,8 +92,7 @@ module DRI
       super(properties)
     end
 
-    def update_metadata(xml_text)
-      self.trigger_update=(true)
+    def update_metadata(xml_text, ingest=true)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -212,44 +209,37 @@ module DRI
     end
 =end
 
-    def get_relationships_names
-      return {:preceding => "Preceding",
-              :succeeding => "Succeeding",
-              :original => "Has Original",
-              :host => "Is Part Of",
-              :constituents => "Has Parts",
-              :series => "Has Series",
-              :other_version => "Is Version Of",
-              :other_format => "Is Format Of",
-              :referenced_by => "Is Referenced By",
-              :references => "References",
-              :review => "Is Review Of"
+    def self.relationships
+      return {preceding: {label: "Preceding", field: "related_items_ids_preceding"},
+              succeeding: {label: "Succeeding", field: "related_items_ids_succeeding"},
+              original: {label: "Has Original", field: "related_items_ids_original"},
+              host: {label: "Is Part Of", field: "related_items_ids_host"},
+              constituents: {label: "Has Parts", field: "related_items_ids_constituent"},
+              series: {label: "Has Series", field: "related_items_ids_series"},
+              other_version: {label: "Is Version Of", field: "related_items_ids_otherVersion"},
+              other_format: {label: "Is Format Of", field: "related_items_ids_otherFormat"},
+              referenced_by: {label: "Is Referenced By", field: "related_items_ids_isReferencedBy"},
+              references: {label: "References", field: "related_items_ids_references"},
+              review: {label: "Is Review Of", field: "related_items_ids_reviewOf"}
       }
     end
 
+    def self.solr_relationships_field
+      ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)
+    end
+
     def get_relationships_records
-      return {:preceding => retrieve_relation_records(related_items_ids_preceding,
-                            ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :succeeding => retrieve_relation_records(related_items_ids_succeeding,
-                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :original => retrieve_relation_records(related_items_ids_original,
-                           ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :host => retrieve_relation_records(related_items_ids_host,
-                       ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :constituents => retrieve_relation_records(related_items_ids_constituent,
-                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :series => retrieve_relation_records(related_items_ids_series,
-                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :other_version => retrieve_relation_records(related_items_ids_otherVersion,
-                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :other_format => retrieve_relation_records(related_items_ids_otherFormat,
-                               ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy,
-                                ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :references => retrieve_relation_records(related_items_ids_references,
-                             ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)),
-              :review => retrieve_relation_records(related_items_ids_reviewOf,
-                         ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string))
+      return {:preceding => retrieve_relation_records(related_items_ids_preceding, self.class.solr_relationships_field),
+              :succeeding => retrieve_relation_records(related_items_ids_succeeding, self.class.solr_relationships_field),
+              :original => retrieve_relation_records(related_items_ids_original, self.class.solr_relationships_field),
+              :host => retrieve_relation_records(related_items_ids_host, self.class.solr_relationships_field),
+              :constituents => retrieve_relation_records(related_items_ids_constituent, self.class.solr_relationships_field),
+              :series => retrieve_relation_records(related_items_ids_series, self.class.solr_relationships_field),
+              :other_version => retrieve_relation_records(related_items_ids_otherVersion, self.class.solr_relationships_field),
+              :other_format => retrieve_relation_records(related_items_ids_otherFormat, self.class.solr_relationships_field),
+              :referenced_by => retrieve_relation_records(related_items_ids_isReferencedBy, self.class.solr_relationships_field),
+              :references => retrieve_relation_records(related_items_ids_references, self.class.solr_relationships_field),
+              :review => retrieve_relation_records(related_items_ids_reviewOf, self.class.solr_relationships_field)
       }
     end
 

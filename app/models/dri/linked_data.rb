@@ -2,14 +2,22 @@ module DRI
   class LinkedData < ActiveFedora::Base
     include Sufia::Noid
 
-    contains "descMetadata", class_name: "DRI::Metadata::LinkedData"
+    contains 'descMetadata', class_name: 'DRI::Metadata::LinkedData'
 
-    has_attributes :creator, :identifier, :source,
-                   :contributor, :title, :tag, :description, 
-                   :publisher, :date_created, :subject,
-                   :resource_type, :identifier, :language, datastream: :descMetadata, multiple: true
-
-    has_attributes :spatial, datastream: :descMetadata, multiple: true
+    property :creator, delegate_to: 'descMetadata', multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
+    property :contributor, delegate_to: 'descMetadata', multiple: true
+    property :title, delegate_to: 'descMetadata', multiple: true
+    property :tag, delegate_to: 'descMetadata', multiple: true
+    property :description, delegate_to: 'descMetadata', multiple: true
+    property :publisher, delegate_to: 'descMetadata', multiple: true
+    property :date_created, delegate_to: 'descMetadata', multiple: true
+    property :subject, delegate_to: 'descMetadata', multiple: true
+    property :resource_type, delegate_to: 'descMetadata', multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
+    property :language, delegate_to: 'descMetadata', multiple: true
+    property :spatial, delegate_to: 'descMetadata', multiple: true
 
     def attributes=(properties)
       super(properties)

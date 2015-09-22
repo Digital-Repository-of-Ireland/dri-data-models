@@ -19,7 +19,7 @@
     <mods:dateCreated encoding="w3cdtf" point="end">1973-12-31</mods:dateCreated>
   </mods:originInfo>
   <mods:abstract>Colour scheme for a single light stained glass window featuring St. Brendan holding his church, with his ship depicted in a lozenge to his left, and a sea monster entwined around his legs.</mods:abstract>
-  <mods:accessCondition>Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</mods:accessCondition>
+  <mods:accessCondition type="use and reproduction">Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</mods:accessCondition>
   <mods:typeOfResource>still image</mods:typeOfResource>
   <mods:subject authority="lcsh">
     <mods:topic>Drawings, Irish</mods:topic>

@@ -1,4 +1,3 @@
-require 'spec_helper'
 
 describe 'EncodedArchivalDescription' do
   # Before each test create test objects
@@ -10,12 +9,18 @@ describe 'EncodedArchivalDescription' do
   end
 
   # EAD Object Tests
-  it "should be a kind of Batch" do
+  it "should be a kind of Batch and EncodedArchivalDescription" do
     @ead_header.should be_kind_of(DRI::Batch)
+    @ead_header.should be_kind_of(DRI::EncodedArchivalDescription)
   end
 
-  it "should have an ead datastream" do
+  it "should have the specified datastreams" do
+    @ead_header.attached_files.keys.should include(:descMetadata)
     @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
+    @ead_header.attached_files.keys.should include(:fullMetadata)
+    @ead_header.fullMetadata.should be_kind_of(DRI::Metadata::FullMetadata)
+    @ead_header.attached_files.keys.should include(:properties)
+    @ead_header.properties.should be_kind_of(DRI::Metadata::Properties)
   end
 
   it "should have namespaces removed from the ead datastream" do
@@ -33,7 +38,7 @@ describe 'EncodedArchivalDescription' do
   it "should validate the presence of title attribute" do
     @ead_header = DRI::EncodedArchivalDescription.new :collection
     @no_title = fixture("ead/collections/ead_header_no_title.xml")
-    @ead_header.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@no_title).to_xml
+    @ead_header.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@no_title).to_xml)
     @ead_header.should_not be_valid
   end
 

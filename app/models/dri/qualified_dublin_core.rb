@@ -1,39 +1,35 @@
 module DRI
   class QualifiedDublinCore < DRI::Batch
 
-    #before_destroy :delete_parents
-
-    contains "descMetadata", class_name: "DRI::Metadata::QualifiedDublinCore"
+    contains 'descMetadata', class_name: 'DRI::Metadata::QualifiedDublinCore'
 
     # Full Simple DC Title, Creator, Subject, Description, Publisher, Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :relation, datastream: :descMetadata, multiple: true
-    has_attributes :external_relation, datastream: :descMetadata, multiple: true
-    has_attributes :source, datastream: :descMetadata, multiple: true
-    has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :name_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :type, datastream: :descMetadata, multiple: true
-    has_attributes :format, datastream: :descMetadata, multiple: true
-    has_attributes :coverage, datastream: :descMetadata, multiple: true
-    has_attributes :identifier, datastream: :descMetadata, multiple: true
+    property :date, delegate_to: 'descMetadata', multiple: true
+    property :relation, delegate_to: 'descMetadata', multiple: true
+    property :external_relation, delegate_to: 'descMetadata', multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    property :name_coverage, delegate_to: 'descMetadata', multiple: true
+    property :type, delegate_to: 'descMetadata', multiple: true
+    property :format, delegate_to: 'descMetadata', multiple: true
+    property :coverage, delegate_to: 'descMetadata', multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
     # Used for relationships
-    has_attributes :id_asset, datastream: :descMetadata, multiple: false
-    has_attributes :qdc_id, datastream: :descMetadata, multiple: true
-    has_attributes :geocode_point, datastream: :descMetadata, multiple: true
-    has_attributes :geocode_box, datastream: :descMetadata, multiple: true
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                                   multiple: true
+    property :id_asset, delegate_to: 'descMetadata', multiple: false
+    property :qdc_id, delegate_to: 'descMetadata', multiple: true
+    property :geocode_point, delegate_to: 'descMetadata', multiple: true
+    property :geocode_box, delegate_to: 'descMetadata', multiple: true
 
-    # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("relation_ids_").to_sym}),
-                    datastream: :descMetadata, multiple: true
-
-    # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::qdcRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
-                   datastream: :descMetadata, multiple: true
+    self.class_eval do
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Internal Relationships
+      DRI::Vocabulary::qdcRelationshipTypes.map { |s| property s.prepend('relation_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # External relationships (contain a URI to resources external to DRI)
+      DRI::Vocabulary::qdcRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
     # QDC Relationships
     #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::QualifiedDublinCore"
@@ -61,7 +57,7 @@ module DRI
       DRI::Batch.model_name
     end
 
-    def roles= roles
+    def roles=(roles)
       if descMetadata.class == DRI::Metadata::QualifiedDublinCore
         descMetadata.roles = roles
       end
@@ -128,50 +124,39 @@ module DRI
     end
 =end
 
-    def get_relationships_names
-      return {:related => "Is Related To",
-              :referenced => "Is Referenced By",
-              :references => "References",
-              :container => "Is Part Of",
-              :parts => "Has Part",
-              :is_version => "Is Version Of",
-              :has_versions => "Has Version",
-              :is_format => "Is Format Of",
-              :has_format => "Has Format",
-              :has_source => "Source"
+    def self.relationships
+      return {related: { label: "Is Related To", field: "relation_ids_relation"},
+              referenced: {label: "Is Referenced By", field: "relation_ids_isReferencedBy"},
+              references: {label: "References", field: "relation_ids_references"},
+              container: {label: "Is Part Of", field: "relation_ids_isPartOf"},
+              parts: {label: "Has Part", field: "relation_ids_hasPart"},
+              is_version: {label: "Is Version Of", field: "relation_ids_isVersionOf"},
+              has_versions: {label: "Has Version", field: "relation_ids_hasVersion"},
+              is_format: {label: "Is Format Of", field: "relation_ids_isFormatOf"},
+              has_format: {label: "Has Format", field: "relation_ids_hasFormat"},
+              has_source: {label: "Source", field: "relation_ids_source"}
       }
+    end
+  
+    def self.solr_relationships_field
+      ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)
     end
 
     def get_relationships_records
-      return {:related => retrieve_relation_records(relation_ids_relation,
-                          ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :referenced => retrieve_relation_records(relation_ids_isReferencedBy,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :references => retrieve_relation_records(relation_ids_references,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :container => retrieve_relation_records(relation_ids_isPartOf,
-                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :parts => retrieve_relation_records(relation_ids_hasPart,
-                        ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :is_version => retrieve_relation_records(relation_ids_isVersionOf,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_versions => retrieve_relation_records(relation_ids_hasVersion,
-                               ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :is_format => retrieve_relation_records(relation_ids_isFormatOf,
-                            ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_format => retrieve_relation_records(relation_ids_hasFormat,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)),
-              :has_source => retrieve_relation_records(relation_ids_source,
-                             ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string))
+      return {:related => retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
+              :referenced => retrieve_relation_records(relation_ids_isReferencedBy, self.class.solr_relationships_field),
+              :references => retrieve_relation_records(relation_ids_references, self.class.solr_relationships_field),
+              :container => retrieve_relation_records(relation_ids_isPartOf, self.class.solr_relationships_field),
+              :parts => retrieve_relation_records(relation_ids_hasPart, self.class.solr_relationships_field),
+              :is_version => retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
+              :has_versions => retrieve_relation_records(relation_ids_hasVersion, self.class.solr_relationships_field),
+              :is_format => retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
+              :has_format => retrieve_relation_records(relation_ids_hasFormat, self.class.solr_relationships_field),
+              :has_source => retrieve_relation_records(relation_ids_source, self.class.solr_relationships_field)
       }
-      end
+    end
 
     private
-
-    #def delete_parents
-    #  deleted = self.class.delete_all "governing_collection_id = #{id}"
-    #  deleted.size
-    #end
 
     # Process a specific qdc relationship for the object
     #

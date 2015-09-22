@@ -28,7 +28,7 @@
       <mods:languageTerm type="code" authority="iso639-2b">eng</mods:languageTerm>
       <mods:languageTerm type="text">English</mods:languageTerm>
     </mods:language>
-    <mods:accessCondition>
+    <mods:accessCondition type="use and reproduction">
       <copyrightMD:copyright copyright.status="copyrighted">Mary Mark Ockerbloom</copyrightMD:copyright>
       <copyrightMD:general.note>The Celebration of Women Writers listing is copyrighted.</copyrightMD:general.note>
     </mods:accessCondition>

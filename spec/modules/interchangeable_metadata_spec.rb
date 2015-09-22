@@ -1,5 +1,4 @@
 # spec/modules/interchangeable_metadata_spec.rb
-require 'spec_helper'
 
 describe 'Batch' do
 

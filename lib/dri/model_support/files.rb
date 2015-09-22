@@ -6,47 +6,6 @@ module DRI
       require 'uri'
       require 'tempfile'
 
-      included do
-        around_save :ingest_files_if_changed
-      end
-
-      def process_ingest_of_file_urls
-        case descMetadata
-          when DRI::Metadata::EncodedArchivalDescription
-          when DRI::Metadata::EncodedArchivalDescriptionComponent
-            self.dao_href.each do |url|
-              if !url.blank?
-                add_file_from_url url.strip
-              end
-            end
-          else # Do nothing
-        end
-      end # process_ingest_of_file_urls
-
-      # Ingest a file (generic_file) from a given URL
-      def add_file_from_url file_url
-        file_name = File.basename(URI(file_url).path)
-        begin
-
-          # We have a copy of the remote file for processing
-          temp_file = Tempfile.new(['tmp', File.extname(file_url)])
-          temp_file.binmode
-          open(file_url) { |data| temp_file.write data.read}
-          temp_file.close
-
-          add_file temp_file, "content", file_name
-          true
-        rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{self.id}\n"
-          logger.error e.backtrace.join("\n")
-          false
-        ensure
-          # Explicitly close the temp file
-          temp_file.close unless temp_file.nil?
-          temp_file.unlink unless temp_file.nil?
-        end
-      end # add_file_from_url
-
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
       def file_metadata_to_solr(solr_doc=Hash.new)
@@ -165,13 +124,13 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_searchable, type: :integer) => sample_rate)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :facetable, type: :integer) => sample_rate)
 
-        if (duration_total != nil)
+        if duration_total != nil
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration_total', :stored_sortable, type: :integer) => [duration_total])
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_searchable) => duration)
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :facetable, type: :integer) => duration)
         end
 
-        if (file_size_total != nil)
+        if file_size_total != nil
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size_total', :stored_sortable, type: :integer) => [file_size_total])
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_searchable, type: :integer) => file_size)
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :facetable, type: :integer) => file_size)
@@ -193,24 +152,6 @@ module DRI
 
         solr_doc
       end # file_metadata_to_solr
-
-      private
-
-      def ingest_files_if_changed
-        content_changed = false
-
-        if (self.ingest_files_from_metadata == "true" && self.trigger_update)
-          content_changed = self.descMetadata.changed?
-        end
-
-        # Does the actual collection/file save
-        yield
-
-        if content_changed && self.generic_files.empty? &&
-          !self.dao_href.empty? && !new_record?
-          Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
-        end
-      end # ingest_files_if_changed
 
     end # module
 

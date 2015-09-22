@@ -1,6 +1,7 @@
 #!/usr/bin/env rake
 require 'jettywrapper'
 require 'rspec/core/rake_task'
+require 'yard'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -9,6 +10,7 @@ begin
 rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
+
 begin
   require 'rdoc/task'
 rescue LoadError
@@ -27,7 +29,11 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.rdoc_files.include('lib/dri/metadata/*.rb')
-  rdoc.rdoc_files.include('app/models/*.rb')
+  rdoc.rdoc_files.include('app/models/**/*.rb')
+end
+
+YARD::Rake::YardocTask.new(:yard) do |t|
+  t.files = ['lib/**/*.rb', 'app/models/**/*.rb']
 end
 
 require 'ci/reporter/rake/rspec'
@@ -46,8 +52,40 @@ namespace :jetty do
 
 end
 
+namespace :jetty do
+  SOLR_DIR = "solr_conf/conf"
+
+  desc "Config Jetty"
+  task :config do
+    Rake::Task["jetty:config_solr"].reenable
+    Rake::Task["jetty:config_solr"].invoke
+    Rake::Task["jetty:config_fedora"].reenable
+    Rake::Task["jetty:config_fedora"].invoke
+  end
+
+  desc "Copies the default SOLR config for the bundled Hydra Testing Server"
+  task :config_solr do
+    FileList["#{SOLR_DIR}/*"].each do |f|
+      cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
+      cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
+    end
+
+  end
+
+  desc "Copies a custom fedora config for the bundled jetty"
+  task :config_fedora do
+    fcfg = 'fedora_conf/federated.json'
+    if File.exists?(fcfg)
+      puts "copying over federated.json"
+      cp("#{fcfg}", APP_ROOT + '/jetty/etc/', :verbose => true)
+    else
+      puts "#{fcfg} file not found -- skipping fedora config"
+    end
+  end
+end
+
 desc "Run Continuous Integration"
-task :ci => ['jetty:reset','ci:setup:rspec'] do
+task :ci => ['jetty:reset','jetty:config','ci:setup:rspec'] do
   ENV['environment'] = "test"
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 120

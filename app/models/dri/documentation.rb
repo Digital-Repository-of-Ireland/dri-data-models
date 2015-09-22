@@ -2,23 +2,26 @@ module DRI
   class Documentation < DRI::Batch
 
     # Override interchangeable_metadata definition of descMetadata
-    contains "descMetadata", class_name: "DRI::Metadata::Documentation"
+    contains 'descMetadata', class_name: 'DRI::Metadata::Documentation'
 
-    belongs_to :documentation_for, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, class_name: "DRI::Batch"
+    belongs_to :documentation_for, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, class_name: 'DRI::Batch'
 
-    # Full Simple DC Title, Creator, Subject, Description, Contributor, Publisher, Date, Type,
-    # Format, Identifier, Source, Language, Relation, Coverage, Rights
-    #has_attributes :creator, :title, :subject, :description, :contributor, :publisher, :language,
-    #               :date, :source, :geographical_coverage, :temporal_coverage, :temporal_coverage_period, :creation_date, :published_date,
-    #               :resource_type, :format, :coverage, :rights, :identifier,
-    #               :geocode_point, :geocode_box, :relation, datastream: :descMetadata, multiple: true
+    property :date, delegate_to: 'descMetadata', multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage_period, delegate_to: 'descMetadata', multiple: true
+    property :resource_type, delegate_to: 'descMetadata', multiple: true
+    property :format, delegate_to: 'descMetadata', multiple: true
+    property :coverage, delegate_to: 'descMetadata', multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
+    property :geocode_point, delegate_to: 'descMetadata', multiple: true
+    property :geocode_box, delegate_to: 'descMetadata', multiple: true
+    property :relation, delegate_to: 'descMetadata', multiple: true
 
-    has_attributes :date, :source, :geographical_coverage, :temporal_coverage, :temporal_coverage_period,
-                   :resource_type, :format, :coverage, :identifier, :geocode_point, :geocode_box, :relation,
-                   datastream: :descMetadata, multiple: true
-
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                    multiple: true
+    self.class_eval do
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
     def attributes=(properties)
       point_hash = Hash.new
@@ -27,7 +30,7 @@ module DRI
 
       # When updating from DRI form, type attribute key needs to be replaced with resource_type
       properties.keys.each do |k|
-        if(k.to_sym == :type)
+        if k.to_sym == :type
           properties[:resource_type] = properties[k]
           properties.delete(k)
         end
@@ -73,7 +76,7 @@ module DRI
       super(properties)
     end
 
-    def roles= roles
+    def roles=(roles)
       if descMetadata.class == DRI::Metadata::Documentation
         descMetadata.roles = roles
       end
@@ -87,7 +90,7 @@ module DRI
       begin
         DRI::Documentation.find(pid)
       rescue ActiveFedora::ObjectNotFoundError
-        DRI::Documentation.create({id: pid})
+        DRI::Documentation.create({pid: pid})
       end
     end
 

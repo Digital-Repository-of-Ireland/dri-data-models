@@ -119,7 +119,7 @@ module DRI
         # Position 7 for 6th character and position 8 for 7th as Xpath substring first position is 1 rather that 0)
         leader_6_type = ng_xml.xpath('substring(//record/leader, 7, 1)')
         leader_7_type = ng_xml.xpath('substring(//record/leader, 8, 1)')
-        ["p"].include?(leader_6_type) || ["c", "s"].include?(leader_7_type) ? true : false
+        ["p"].include?(leader_6_type) || ["c"].include?(leader_7_type) ? true : false
       end
 
       # Build the xml doc

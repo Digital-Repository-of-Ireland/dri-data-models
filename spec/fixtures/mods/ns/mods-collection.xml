@@ -2,7 +2,7 @@
 <mods:mods xmlns:mods="http://www.loc.gov/mods/v3"
   xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.loc.gov/mods/ http://www.loc.gov/standards/mods/mods-3-5.xsd"
+  xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
   version="3.5">
   <!-- identifier will be used for relationships valid URI here -->
   <mods:identifier type="local">MODS-ID-1234</mods:identifier>
@@ -45,7 +45,7 @@
   <!-- Additional type of the collection: Collection -->
   <mods:genre type="dct">Collection</mods:genre>
   <!-- The Rights of the collection -->
-  <mods:accessCondition>
+  <mods:accessCondition type="use and reproduction">
     <copyrightMD:copyright copyright.status="copyrighted">
       <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
       <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
@@ -65,7 +65,7 @@
   <!-- Creation date, Published date -->
   <mods:originInfo>
     <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
-    <mods:dateIssued encoding="w3cdtf">2000</mods:dateIssued>
+    <mods:dateIssued encoding="w3cdtf">Beginning of 2000</mods:dateIssued>
     <mods:publisher>UNKNOWN</mods:publisher>
   </mods:originInfo>
   <!-- hasPart: expressing sub-collections, use relatedItem[@type="constituent"] -->
