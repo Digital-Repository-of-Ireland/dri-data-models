@@ -374,5 +374,26 @@ module DRI
           "source"
       ]
     end
+
+    def self.ead_level_values
+      ['collection',
+        'fonds',
+        'class',
+        'recordgrp',
+        'series',
+        'subfonds',
+        'subgrp',
+        'subseries',
+        'file',
+        'item',
+        'otherlevel']
+    end
+
+    def self.ead_people_tags
+      ['name',
+       'persname',
+       'corpname',
+       'famnane']
+    end
   end
 end

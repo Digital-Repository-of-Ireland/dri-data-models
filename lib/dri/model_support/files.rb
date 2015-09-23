@@ -30,7 +30,6 @@ module DRI
           file_type_display.push "Collection"
         end
 
-        # TODO - AMG check generic_file to batch rel is indexed properly
         solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""        
         results = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
 

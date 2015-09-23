@@ -246,7 +246,7 @@ module DRI
     def create_multiple_records
       yield # Do save the object
 
-      if (self.trigger_update)
+      if self.trigger_ingest
         # Check whether there are namespaces
         #if self.fullMetadata.ng_xml.namespaces.values.include?("http://www.loc.gov/mods/v3")
         # Get the prefix used in the XML for MODS

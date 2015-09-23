@@ -100,7 +100,7 @@ module DRI
         results[:json] = []
         geodata.each do | key, value |
           value.each do | geo_string |
-            if (dcmi_point? geo_string)
+            if dcmi_point?(geo_string)
               begin
                point = get_geo_point(geo_string)
               rescue Exception => e
@@ -113,7 +113,7 @@ module DRI
                 results[:name] << point['name']
                 results[:json] << geojson_string_from_coords(point['name'], "#{point['east']} #{point['north']}")
               end
-            elsif (dcmi_box? geo_string)
+            elsif dcmi_box?(geo_string)
               begin
                 box = get_geo_box(geo_string)
               rescue Exception => e

@@ -23,8 +23,7 @@ module DRI
 
       # Process a component's children and create associated objects in Fedora
       def synchronize_children_to_metadata
-        if self.new_record? || (descMetadata.class != DRI::Metadata::EncodedArchivalDescription &&
-            descMetadata.class != DRI::Metadata::EncodedArchivalDescriptionComponent)
+        if self.new_record?
           return
         end
 
@@ -33,22 +32,22 @@ module DRI
         metadata_children = []
 
         # Remove Ead namespaces
-        fullMetadataNoNs = self.fullMetadata.ng_xml.clone
-        fullMetadataNoNs.remove_namespaces!
+        full_metadata_nons = self.fullMetadata.ng_xml.clone
+        full_metadata_nons.remove_namespaces!
 
         # Find the immediate children of this collection in the metadata
-        case descMetadata.class.to_s
-        when "DRI::Metadata::EncodedArchivalDescription"
-          metadata_children = fullMetadataNoNs.xpath("/ead/archdesc/dsc/*")
-        when "DRI::Metadata::EncodedArchivalDescriptionComponent"
-          metadata_children = get_ead_children_components(fullMetadataNoNs)
+        case self.descMetadata.class.to_s
+        when 'DRI::Metadata::EncodedArchivalDescription'
+          metadata_children = full_metadata_nons.xpath('/ead/archdesc/dsc/*')
+        when 'DRI::Metadata::EncodedArchivalDescriptionComponent'
+          metadata_children = get_ead_children_components(full_metadata_nons)
         else
           metadata_children = []
         end
 
         while metadata_child_index < metadata_children.length do
           # Create a new child
-          new_child = DRI::EncodedArchivalDescription.new :component
+          new_child = DRI::EncodedArchivalDescription.new(:component)
           new_child.update_metadata metadata_children[metadata_child_index].to_xml
           new_child.previous_sibling = prev_obj unless prev_obj.nil?
           new_child.governing_collection = self
@@ -95,7 +94,7 @@ module DRI
         case descMetadata
         when DRI::Metadata::EncodedArchivalDescription
         when DRI::Metadata::EncodedArchivalDescriptionComponent
-          self.dao_href.each do |url|
+          self.dao_href_proxy.each do |url|
             if !url.blank?
               add_file_from_url url.strip
             end
@@ -160,12 +159,12 @@ module DRI
           metadata_children = []
 
           # Remove EAD namespaces
-          fullMetadataNoNs = self.fullMetadata.ng_xml.clone
-          fullMetadataNoNs.remove_namespaces!
+          full_metadata_nons = self.fullMetadata.ng_xml.clone
+          full_metadata_nons.remove_namespaces!
           if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
-            metadata_children = fullMetadataNoNs.xpath("/ead/archdesc/dsc/*")
+            metadata_children = full_metadata_nons.xpath("/ead/archdesc/dsc/*")
           else
-            metadata_children = get_ead_children_components(fullMetadataNoNs)
+            metadata_children = get_ead_children_components(full_metadata_nons)
           end
 
           if metadata_children.empty?
@@ -191,9 +190,9 @@ module DRI
             if is_ead_same_object?(child_obj, metadata_children[metadata_child_index])
               # fullMetadata automatically adds an XML header to the start and an extra "\n" at the end.
               # we have to undo these modifications in order to do the comparison
-              cfullMetadataNoNs = child_obj.fullMetadata.ng_xml.clone
-              cfullMetadataNoNs.remove_namespaces!
-              clean_fullMetadata = cfullMetadataNoNs.to_s[22..-1]
+              cfull_metadata_nons = child_obj.fullMetadata.ng_xml.clone
+              cfull_metadata_nons.remove_namespaces!
+              clean_fullMetadata = cfull_metadata_nons.to_s[22..-1]
               clean_fullMetadata = clean_fullMetadata[0..-2]
 
               # now we can do the comparison
@@ -359,12 +358,12 @@ module DRI
       def get_ead_children_components(metadata)
         # Components in EAD can either be children of dsc; or children of c
         # 1. dsc/c
-        return metadata.xpath("/*/dsc/*") unless metadata.xpath("/*/dsc/*").empty?
+        return metadata.xpath('/*/dsc/*') unless metadata.xpath('/*/dsc/*').empty?
         # 2. c/c and 3. c01/c02/...
         # For Xpath 2.0
         # return metadata.xpath("/*/*[matches(local-name(), 'c[01-12]')]") unless metadata.xpath("/*/*[matches(local-name(),'c[01-12]')]").empty?
         # For Xpath 1.0
-        return metadata.xpath("/*/*[starts-with(local-name(), 'c') and string-length(local-name()) <= 3]")
+        metadata.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]')
       end
 
       # Checks whether the passed object is a duplicate
@@ -380,7 +379,7 @@ module DRI
           result = true unless documents.empty?
         end
 
-        return result
+        result
       end
 
       # Create deafult reader group permissions for the object and save
@@ -426,7 +425,7 @@ module DRI
         # Do not process files if object is a collection (DRI Collections do not have assets)
         unless is_collection?
           if content_changed && self.generic_files.empty? &&
-              !self.dao_href.empty? && !new_record?
+              !self.dao_href_proxy.empty? && !new_record?
             Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
           end
         end

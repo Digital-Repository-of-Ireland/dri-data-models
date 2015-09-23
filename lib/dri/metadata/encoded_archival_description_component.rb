@@ -7,213 +7,257 @@ module DRI
       # OM (Opinionated Metadata) terminology mapping to an EAD Component tag
       set_terminology do |t|
         t.root(:path=>"*", :namespace_prefix => nil)
-        # Elements that can occur nested within other elements: multiple options
-        t.p(:path => "p", :namespace_prefix => nil)
-        # They can be used as subjects or even in the title
-        t.geographic_name(:path=>"geogname[not(@role='subject')]") {
-          t.role(:path => {:attribute=>"role"})
+
+        # Subject name, temporal and geographical terms
+        t.geog_name(:path => 'geogname') {
+          t.role(:path => {:attribute => 'role'})
         }
-        t.name_(:path=>"name[not(@role='subject')]") {
-          t.role(:path => {:attribute=>"role"})
+        t.geog_name_cvg(:ref => :geog_name, :path => 'geogname[not(@role="subject")]')
+
+        t.name {
+          t.role(:path => {:attribute => 'role'})
         }
-        t.persname_(:path=>"persname[not(parent::origination[@label='Creator:']) and not(@role='creator') and not(@role='cre') and not(@role='aut') and not(@role='subject')]") {
-          t.role(:path => {:attribute=>"role"})
+        t.name_cvg(:ref => :name, :path => 'name[not(parent::origination) and not(@role="subject")]')
+
+        t.pers_name(:path => 'persname') {
+          t.role(:path => {:attribute => 'role'})
         }
-        t.corpname_(:path=>"corpname[not(@role='subject')]") {
-          t.role(:path => {:attribute=>"role"})
+        t.pers_name_cvg(:ref => :pers_name, :path => 'persname[not(parent::origination) and not(@role="subject")]')
+
+        t.corp_name(:path => 'corpname') {
+          t.role(:path => {:attribute => 'role'})
         }
-        t.famname_(:path=>"famname[not(@role='subject')]") {
-          t.role(:path => {:attribute=>"role"})
+        t.corp_name_cvg(:ref => :corp_name, :path => 'corpname[not(parent::origination) and not(@role="subject")]')
+
+        t.fam_name(:path => 'famname') {
+          t.role(:path => {:attribute => 'role'})
         }
-        t.date_(:path=>"date") {
-          t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
-          t.type(:path => {:attribute=>"type"}, :namespace_prefix => nil)
+        t.fam_name_cvg(:ref => :fam_name, :path => 'famname[not(parent::origination) and not(@role="subject")]')
+
+        t.date {
+          t.normal_at(:path => {:attribute => 'normal'})
+          t.type_at(:path => {:attribute => 'type'})
+        }
+        t.date_text(:ref => :date, :attributes => {:normal => :none})
+
+        t.lang(:path => 'language') {
+          t.langcode_at(:path => {:attribute => 'langcode'})
         }
 
-        t.subject_anywhere(:path=>"subject")
+        t.subject_anywhere(:path => 'subject')
 
-        t.date_text(:ref => [:date], :attributes => {"normal" => :none})
+        t.ext_ref(:path => 'extref') {
+          t.href_at(:path => {:attribute => 'href'})
+        }
+
+        # EAD p
+        t.p(:path => 'p')
+
+        t.ext_ref_p(:path =>'p') {
+          t.ext_ref(:ref => [:ext_ref])
+        }
+
+        # c, c01..c12
+        t.scope_content(:path => 'scopecontent') {
+          t.p(:ref => [:p])
+        }
+        # Key subjects under controlaccess
+        t.control_access(:path => 'controlaccess') {
+          # Preferred subject from the guidelines
+          t.subject(:ref => [:subject_anywhere])
+          # Name, Personal name, Family name, Corporate Name, Geographical name
+          t.name(:ref => [:name], :attributes => {:role => 'subject'})
+          t.pers_name(:ref => [:pers_name], :attributes => {:role => 'subject'})
+          t.corp_name(:ref => [:corp_name], :attributes => {:role => 'subject'})
+          t.fam_name(:ref => [:fam_name], :attributes => {:role => 'subject'})
+          t.geog_name(:ref => [:geog_name], :attributes => {:role => 'subject'})
+          t.name_cvg(:ref => [:name_cvg])
+          t.pers_name_cvg(:ref => [:pers_name_cvg])
+          t.corp_name_cvg(:ref => [:corp_name_cvg])
+          t.fam_name_cvg(:ref => [:fam_name_cvg])
+          t.geog_name_cvg(:ref => [:geog_name_cvg])
+        }
+
+        t.biog_hist(:path => 'bioghist') {
+          t.p(:ref => [:p])
+        }
+
+        # did
+        t.lang_material(:path => 'langmaterial') {
+          t.lang(:ref => [:lang])
+        }
+        t.origination {
+          t.person_contributor(:ref => [:pers_name], :attributes => {:role => 'contributor'})
+          t.person_creator(:ref => [:pers_name], :attributes => {:role => 'creator'})
+          t.pers_name(:ref => [:pers_name])
+          t.name(:ref => [:name])
+          t.corp_name(:ref => [:corp_name])
+          t.fam_name(:ref => [:fam_name])
+        }
+
+        t.unit_date(:path => 'unitdate') {
+          t.normal_at(:path => {:attribute => 'normal'})
+          t.datechar_at(:path => {:attribute => 'datechar'})
+        }
+        t.unit_date_display(:ref => :unit_date, :attributes => {:normal => "none"})
+        t.unit_date_other(:ref => :unit_date, :path =>'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]')
+
+        t.phys_desc(:path => 'physdesc') {
+          t.genre_form(:path => 'genreform')
+        }
+        t.dao_desc {
+          t.p(:ref => [:p])
+        }
+        t.dao {
+          t.href_at(:path => {:attribute => 'href'})
+          t.dao_desc(:ref => [:dao_desc], :path => 'daodesc')
+        }
+
+        t.use_restrict(:path => 'userestrict') {
+          t.p(:ref => [:p])
+        }
+
+        t.rel_mat(:path => 'relatedmaterial') {
+          t.p(:ref => [:p])
+          t.ext_ref(:ref => [:ext_ref])
+        }
+
+        t.alt_form(:path => "altformavail") {
+          t.p(:ref => [:p])
+          t.ext_ref_p(:ref => [:ext_ref_p])
+        }
+
+        t.note {
+          t.p(:ref => [:p])
+        }
+
+        # We need to keep track of the unitid in order to sync this XML snippet to the correct
+        # component tag in the complete EAD XML datastream in the collection object!
+        t.unit_id(:path=>'unitid') {
+          t.repository_code_at(:path => {:attribute => 'repositorycode'})
+          t.country_code_at(:path => {:attribute => 'countrycode'})
+          t.identifier_at(:path => {:attribute => 'identifier'})
+          t.url_at(:path => {:attribute => 'url'})
+          t.public_id_at(:path => {:attribute => 'publicid'})
+        }
+
+        t.did {
+          t.unit_id(:ref => [:unit_id])
+          t.unit_title(:path => 'unittitle')
+          t.unit_date(:ref => [:unit_date])
+          t.unitdate_creation(:ref => [:unit_date], :path =>'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]')
+          t.unitdate_pub(:ref => [:unit_date], :attributes => {:datechar => 'publication'})
+          t.unit_date_other(:ref => [:unit_date_other])
+          t.origination(:ref => [:origination])
+          t.abstract
+          t.lang_material(:ref => [:lang_material])
+          t.dao(:ref => [:dao])
+          t.phys_desc(:ref => [:phys_desc])
+          t.note(:ref => [:note])
+          t.repository
+        }
 
         t.c(:path=>"*", :namespace_prefix => nil) {
-          t.ead_level(:path => {:attribute=>"level"}, :namespace_prefix => nil)
-          t.other(:path => {:attribute=>"otherlevel"}, :namespace_prefix => nil)
-          t.did {
-            t.unittitle {
-              t.geographical_title(:ref => [:geographic_name])
-            }
-            t.abstract {
-              t.p_(:ref => [:p])
-            }
-            t.note {
-              t.p_(:ref => [:p])
-            }
-            # Language within did
-            t.langmaterial {
-              t.language(:path => "language", :namespace_prefix => nil){
-                t.langcode_attr(:path => {:attribute=>"langcode"}, :namespace_prefix => nil)
-              }
-            }
-            # FIXME Creator in NIVAL uses label="Creator:"
-            t.creator(:path=>"origination")
+          # level attributes
+          t.ead_level_at(:path => {:attribute => 'level'})
+          t.other_level_at(:path => {:attribute => 'otherlevel'})
 
-            t.origination(:path=>"origination") {
-              t.contributor(:path=>"persname", :attributes=>{:role=>"contributor"}, :namespace_prefix => nil)
-            }
-
-            t.unitdate(:path=>"unitdate") {
-              t.normal(:path => {:attribute=>"normal"}, :namespace_prefix => nil)
-              t.datechar(:path => {:attribute=>"datechar"}, :namespace_prefix => nil)
-            }
-
-            t.physdesc(:path=>"physdesc") {
-              t.type(:path=>"genreform")
-            }
-            t.dao(:path=>"dao") {
-              t.href(:path => {:attribute=>"href"}, :namespace_prefix => nil)
-              t.daodesc {
-                t.p_(:ref => [:p])
-              }
-            }
-
-            # We need to keep track of the unitid in order to sync this XML snippet to the correct
-            # component tag in the complete EAD XML datastream in the collection object!
-            t.unitid(:path=>"unitid") {
-              t.repository_code(:path => {:attribute=>"repositorycode"}, :namespace_prefix => nil)
-              t.country_code(:path => {:attribute=>"countrycode"}, :namespace_prefix => nil)
-              t.identifier_attr(:path => {:attribute=>"identifier"}, :namespace_prefix => nil)
-              t.url_attr(:path => {:attribute=>"url"}, :namespace_prefix => nil)
-              t.public_id_attr(:path => {:attribute=>"publicid"}, :namespace_prefix => nil)
-            }
-            # Institute: Institution responsible for providing intellectual access to the materials being described
-            t.repository {
-              t.p_(:ref => [:p])
-              t.corpname {
-                t.p_(:ref => [:p])
-              }
-            }
-          }
-          t.controlaccess {
-            t.p_(:ref => [:p])
-            # Or just subject within controlaccess as immediate child of c
-            t.subject_c(:path=>"subject")
-            # Name, Personal, Corporate Name
-            t.name_subject(:path => "name", :attributes => {:role => "subject"})
-            t.persname_subject(:path => "persname", :attributes => {:role => "subject"})
-            t.corpname_subject(:path => "corpname", :attributes => {:role => "subject"})
-            t.famname_subject(:path => "famname", :attributes => {:role => "subject"})
-            t.geographical_subject(:path => "geogname", :attributes => {:role => "subject"})
-          }
-          t.bioghist {
-            t.p_(:ref => [:p])
-          }
-          t.scopecontent(:path=>"scopecontent", :namespace_prefix => nil) {
-            t.head
-            t.p_(:ref => [:p])
-          }
-          t.userestrict {
-            t.p_(:ref => [:p])
-          }
-          t.accessrestrict {
-            t.p_(:ref => [:p])
-          }
-          t.related_material(:path => "relatedmaterial", :namespace_prefix => nil) {
-            t.title
-            t.p_(:ref => [:p])
-          }
-          t.alternative_form(:path => "altformavail", :namespace_prefix => nil) {
-            t.p_(:ref => [:p])
-          }
+          t.did(:ref => [:did])
+          t.control_access(:ref => [:control_access])
+          t.biog_hist(:ref => [:biog_hist])
+          t.scope_content(:ref => [:scope_content])
+          t.use_restrict(:ref => [:use_restrict])
+          t.rel_mat(:ref => [:rel_mat])
+          t.alt_form(:ref => [:alt_form])
+          t.dao(:ref => [:dao])
+          t.dsc
         }
 
-        # DRI Mandatory elements
-        # Title
-        t.title(:proxy => [:c, :did, :unittitle], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
-        # Description
-        t.description(:proxy => [:c, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Creator
-        t.creator(:proxy => [:c, :did, :creator], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
-        # Rights - From guidelines, comes from userestrict
-        t.rights(:proxy => [:c, :userestrict, :p], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
-        # Creation Date, now with generic xpath query: @datechar="creation" is now case-insensitive
-        t.creation_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and not(@normal)]')
+        # DRI mandatory fields 1-to-1 mappings
+        t.title(:proxy => [:c, :did, :unit_title], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.language(:proxy => [:c, :did, :lang_material, :lang], :index_as => [Descriptors.cleaned_searchable, Descriptors.language_facetable])
+        t.contributor(:proxy => [:c, :did, :origination, :person_contributor], :index_as => [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
+        t.publisher(:proxy => [:c, :did, :repository], :index_as => [Descriptors.cleaned_searchable])
+        t.rights(:proxy => [:c, :use_restrict, :p], :index_as => [Descriptors.cleaned_displayable, :stored_searchable])
+        t.type(:proxy => [:c, :did, :phys_desc, :genre_form], :index_as => [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        # DRI Common fields
-        # Language
-        t.language(:proxy => [:c, :did, :langmaterial, :language], :index_as=>[Descriptors.cleaned_searchable, Descriptors.language_facetable])
-        # Publisher
-        t.publisher(:proxy => [:c, :did, :repository], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        # Published Date
-        # TODO Add published_date field to the terminology. What's the mapped EAD term?
-        t.published_date(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")] and not(@normal)]')
-        # Subjects
-        t.subject(:proxy => [:c, :controlaccess, :subject_c], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        # EAD coverage elements within control access headings, authority-controlled search across finding aids
-        t.name_subject(:proxy => [:c, :controlaccess, :name_subject], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.persname_subject(:proxy => [:c, :controlaccess, :persname_subject], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.corpname_subject(:proxy => [:c, :controlaccess, :corpname_subject], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.famname_subject(:proxy => [:c, :controlaccess, :famname_subject], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.geographical_subject(:proxy => [:c, :controlaccess, :geographical_subject], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
+        t.creation_date(:proxy => [:c, :did, :unitdate_creation])
+        t.published_date(:proxy => [:c, :did, :unitdate_pub])
+        t.subject(:proxy => [:c, :control_access, :subject], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
-        # Contributor
-        t.contributor(:proxy => [:c, :did, :origination, :contributor], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable,  :sortable])
+        t.description(:path => '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.desc_abstract(:proxy => [:c, :did, :abstract])
+        t.desc_biog_hist(:proxy => [:c, :biog_hist, :p])
+        t.desc_dao_desc(:proxy => [:c, :did, :dao, :dao_desc, :p])
+        t.desc_scope_content(:proxy => [:c, :scope_content, :p])
+        t.desc_note(:proxy => [:c, :did, :note])
 
-        # EAD specific fields
-        # Ead Level
-        t.ead_level(:proxy => [:c, :ead_level])
-        t.ead_level_other(:proxy => [:c, :other])
-        # Abstract
-        t.abstract(:proxy => [:c, :did, :abstract], :index_as=>[Descriptors.cleaned_searchable])
-        # Bioghist
-        t.bioghist(:proxy => [:c, :bioghist], :index_as=>[Descriptors.cleaned_searchable])
-        # Scopecontent
-        t.scope_content(:proxy => [:c, :scopecontent, :p], :index_as=>[Descriptors.cleaned_searchable])
-        # Accessrestrict - access conditions
-        t.access_restrict(:proxy => [:c, :accessrestrict, :p], :index_as=>[Descriptors.cleaned_displayable, :stored_searchable])
-        # EAD coverage elements within control access headings, authority-controlled search across finding aids
-        t.name_coverage(:proxy => [:name], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.persname_coverage(:proxy => [:persname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.corpname_coverage(:proxy => [:corpname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.famname_coverage(:proxy => [:famname], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.geographical_coverage(:proxy => [:geographic_name], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        # Generic xpath query: @datechar="creation" is now case-insensitive
-        t.temporal_coverage(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and not(@normal)]')
+        t.creator(:path => '/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]')
+        t.creator_role(:proxy => [:c, :did, :origination, :person_creator])
+        t.creator_name(:proxy => [:c, :did, :origination, :name])
+        t.creator_persname(:proxy => [:c, :did, :origination, :pers_name])
+        t.creator_corpname(:proxy => [:c, :did, :origination, :corp_name])
+        t.creator_famname(:proxy => [:c, :did, :origination, :fam_name])
 
-        t.physdesc(:proxy => [:c, :did, :physdesc], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.type(:proxy => [:c, :did, :physdesc, :type], :index_as=>[:stored_searchable])
-        t.type_ead(:proxy => [:c, :ead_level], :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.dao(:path => '//dao')
-        t.dao_href(:path => '//dao/@href')
-        t.dao_desc(:path => '//dao/daodesc/p')
-        #t.unitid(:proxy => [:c, :did, :unitid], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        #t.eadid(:proxy => [:c, :did, :unitid], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.repository_code(:proxy => [:c, :did, :unitid, :repository_code], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.country_code(:proxy => [:c, :did, :unitid, :country_code], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.identifier(:proxy => [:c, :did, :unitid], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.identifier_url(:proxy => [:c, :did, :unitid, :url_attr], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.identifier_id(:proxy => [:c, :did, :unitid, :identifier_attr], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        t.identifier_public_id(:proxy => [:c, :did, :unitid, :public_id_attr], :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_facetable])
-        # EAD elements
-        t.note(:proxy => [:c, :did, :note], :index_as=>[Descriptors.cleaned_searchable])
+        # Subjects (including names, persnames, corpnames and famnames with @role='subject', nested within <controlaccess>)
+        t.name_subject(:proxy => [:c, :control_access, :name], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.persname_subject(:proxy => [:c, :control_access, :pers_name], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.corpname_subject(:proxy => [:c, :control_access, :corp_name], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.famname_subject(:proxy => [:c, :control_access, :fam_name], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+        t.geogname_subject(:proxy => [:c, :control_access, :geog_name], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+
+        # EAD level
+        t.ead_level(:proxy => [:c, :ead_level_at], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        # Eadlevel - otherlevel
+        t.ead_level_other(:proxy => [:c, :other_level_at], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+
+
+        t.dao_did(:proxy => [:c, :did, :dao])
+        t.dao_other(:proxy => [:c, :dao])
+        # Dao
+        t.dao_proxy(:proxy => [:dao])
+        # Dao_href
+        t.dao_href_proxy(:proxy => [:dao, :href_at])
+        # Daodesc
+        t.dao_desc_proxy(:proxy => [:dao, :dao_desc, :p])
+
+        # Identifier
+        t.identifier(:proxy => [:c, :did, :unit_id])
+        # Compulsory attributes at finding aid level: identifier, repositorycode and countrycode, in <eadid>
+        t.identifier_id(:proxy => [:c, :did, :unit_id, :identifier_at])
+        # Repositorycode
+        t.repository_code(:proxy => [:c, :did, :unit_id, :repository_code_at])
+        # Countrycode
+        t.country_code(:proxy => [:c, :did, :unit_id, :country_code_at])
+        t.identifier_url(:proxy => [:c, :did, :unit_id, :url_at])
+        t.identifier_public_id(:proxy => [:c, :did, :unit_id, :public_id_at])
 
         # Related Material
-        t.related_material(:path => "extref/@href[ancestor::relatedmaterial]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.related_material(:proxy => [:c, :rel_mat, :ext_ref, :href_at], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Alternative Form Available
-        t.alternative_form(:path => "extref/@href[ancestor::altformavail]", :index_as=>[Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-
-        t.creation_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
-        t.creation_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")] and @normal]')
-        t.published_date_idx(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")]]/@normal')
-        t.published_date_idx_d(:path => 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication")] and @normal]')
-        t.temporal_coverage_idx(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
-        t.temporal_coverage_idx_d(:path => 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))] and @normal]')
-        t.date_idx(:proxy => [:date, :normal])
-        t.date_idx_d(:path => "date[@normal]")
+        t.alternative_form(:proxy => [:c, :alt_form, :ext_ref_p, :ext_ref, :href_at], :index_as => [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
         # Mapping to geogname supporting DCMI Point and Box
-        t.geocode_point(:path=>"geogname[not(@role='subject')]", :attributes=> {"rules"=>"dcterms:Point"})
-        t.geocode_box(:path=>"geogname[not(@role='subject')]", :attributes=> {"rules"=>"dcterms:Box"})
+        t.geocode_point(:ref => :geog_name_cvg, :attributes => {:rules => 'dcterms:Point'})
+        t.geocode_box(:ref => :geog_name_cvg, :attributes => {:rules => 'dcterms:Box'})
         # Mapping to geogname supporting Logaimn URIs
-        t.geocode_logainm(:path=>"geogname[not(@role='subject')]", :attributes=> {"source"=>"logainm"})
+        t.geocode_logainm(:ref => :geog_name_cvg, :attributes => {:source => 'logainm'})
+
+        # PROXIES FOR INDEXING
+        # EAD coverage elements within control access headings, authority-controlled search across finding aids
+        t.name_coverage(:path => '/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]')
+        t.persname_coverage(:proxy => [:c, :control_access, :pers_name_cvg])
+        t.corpname_coverage(:proxy => [:c, :control_access, :corp_name_cvg])
+        t.famname_coverage(:proxy => [:c, :control_access, :fam_name_cvg])
+        t.geographical_coverage(:proxy => [:geog_name_cvg])
+        t.geogname_coverage_access(:proxy => [:c, :control_access, :geog_name_cvg])
+        t.temporal_coverage(:proxy => [:did, :unit_date_other])
+
+        t.creation_date_idx(:path => '/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
+        t.published_date_idx(:path => '/*/did/unitdate[@datechar="publication"]/@normal')
+        t.temporal_coverage_idx(:path => 'did/unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
+        t.date_idx(:proxy => [:date, :normal_at])
+
       end # set_terminology
 
       def synchronize_metadata_on_save
@@ -225,8 +269,27 @@ module DRI
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.c(:level => '') {
             xml.did {
-              xml.unittitle
-              xml.unitid(:identifier => '', :repositorycode => '', :countrycode => 'IE')
+              xml.unittitle # title
+              xml.unitid(:identifier => '', :repositorycode => '', :countrycode => 'IE') # identifier
+              xml.unitdate(:datechar => 'creation', :normal => '') # creation_date
+              xml.unitdate(:datechar => 'publication', :normal => '') # published_date
+              xml.origination {
+                xml.persname(:role => 'creator')
+                xml.persname(:role => 'contributor')
+              }
+              xml.langmaterial {
+                xml.language(:langcode => 'en')
+              }
+              xml.physdesc {
+                xml.genreform # type
+              }
+            }
+            xml.scopecontent # description
+            xml.userestrict # rights
+            xml.controlaccess {
+              xml.subject # subject
+              xml.persname(:role => 'subject')
+              xml.geogname(:role => 'subject')
             }
           }
         end
@@ -235,7 +298,7 @@ module DRI
       end
 
       def retrieve_xpath
-        terminology.xpath_for(:title)
+        self.class.terminology.xpath_for(:title)
       end
 
       def to_solr(solr_doc=Hash.new, opts = {})
@@ -244,61 +307,52 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title', :stored_searchable, type: :string) => title)
         # Title
         # title_sorted - A SOLR index for sorting titles
-        if (title.length > 0)
+        if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
-          if (sorted_title != "")
+          unless sorted_title.empty?
             solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
         # Type
-        type_array = type_for_index()
+        type_array = type_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => type_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type_array)
 
         # Person  - EAD has several "name" tags, so we merge them together into the SOLR document
-        person_array = person_array_for_index()
+        person_array = person_array_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # Creator
-        creator_array = creator_for_index()
+        creator_array = creator_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :facetable) => creator_array)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable, type: :text) => DRI::Metadata::Transformations.transform_name(creator_array))
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable, type: :text) => creator_array)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ""
-        ng_xml.xpath("//text()").each do |text_node|
+        all_metadata = ''
+        ng_xml.xpath('//text()').each do |text_node|
           all_metadata += text_node.text
-          all_metadata += " "
+          all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
-
-        # TODO Check whether this has to be indexed here
-        # Description
-        description_array = description_for_index()
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('description', :stored_searchable, type: :string) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # Rights
-        rights_array = rights_for_index()
+        rights_array = rights_for_index
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('rights', :stored_searchable, type: :string) => rights_array)
 
-        # Licence
-        #licence_array = licence_for_index()
-        #solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
-
         # Subject: generic, name and place
-        subject_array = subject_for_index()
+        subject_array = subject_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :stored_searchable) => subject_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :facetable) => subject_array)
 
-        subject_name_array = subject_name_for_index()
-        subject_place_array = subject_place_for_index()
+        subject_name_array = subject_name_for_index
+        subject_place_array = subject_place_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :stored_searchable) => subject_name_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :facetable) => subject_name_array)
@@ -307,61 +361,65 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :facetable) => subject_place_array)
 
         # Display of Creation Date
-        creation_date_array = creation_date_for_index()
+        creation_date_array = creation_date_for_index
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array == []
-        solr_doc = remove_null_values(solr_doc, "creation_date") if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("creation_date", :stored_searchable)].present?
-
-        # Language
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('language', :stored_searchable) => language)
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable)].present?
 
         # Geographical Coverage
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
 
-        # Index related_material and alternative_form_available
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('related_material', :stored_searchable) => related_material) unless related_material == []
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('alternative_form', :stored_searchable) => alternative_form) unless alternative_form == []
-
-        # Indexing dates for display + COOL date range
+        # Indexing dates for display
         # Display of Subject(Temporal)
-        subject_temporal_array = subject_temporal_for_index()
+        subject_temporal_array = subject_temporal_for_index
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
-        if (creation_date_idx != [])
+        unless creation_date_idx.empty?
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
         else
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent("creation_date_idx"))
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent('creation_date_idx'))
         end
-        # Display of Creation Date
-        unless published_date_idx == [] && published_date == []
-          pdate_array = published_date.collect! do |value|
+
+        # Published Date
+        pdate_array = published_date.collect.with_index do |value, idx|
+          if !published_date(idx).normal_at.empty?
+            iso_date = published_date(idx).normal_at[0]
+
+            if (iso_date.include?('/'))
+              range = iso_date.split('/')
+              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
+            else
+              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
+            end
+          else
             DRI::Metadata::Transformations.create_dcmi_period(value)
           end
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date_idx, published_date_idx_d) | pdate_array)
         end
+
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => pdate_array) unless published_date.empty?
         # Index date ranges
-        date_ranges = date_ranges_for_index() # ALL the date ranges
+        date_ranges = date_ranges_for_index # ALL the date ranges
 
         # Creation date dateRange index
-        cdate_ranges = date_ranges.select {|key, value| ["creation_date"].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+        cdate_ranges = date_ranges.select {|key, value| ['creation_date'].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges.empty?
 
         # Published date dateRange index
-        pdate_ranges = date_ranges.select {|key, value| ["published_date"].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
+        pdate_ranges = date_ranges.select {|key, value| ['published_date'].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges.empty?
 
         # Subject date dateRange index
-        sdate_ranges = date_ranges.select {|key, value| ["subject_date"].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
+        sdate_ranges = date_ranges.select {|key, value| ['subject_date'].include?(key)}
+        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges.empty?
 
         # Geospatial indexing
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
-        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => geocode_point | geocode_box})
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({'geographical_coverage' => geocode_point | geocode_box})
 
         uris = geocode_logainm.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
         if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({"geographical_coverage" => uris})
+          linked_data = DRI::Metadata::Transformations.transform_geospatial({'geographical_coverage' => uris})
 
           geospatial_hash[:coords].concat(linked_data[:coords])
           geospatial_hash[:name].concat(linked_data[:name])
@@ -381,112 +439,122 @@ module DRI
         return name_coverage | persname_coverage | corpname_coverage | famname_coverage | creator | contributor
       end
 
-      # Choose from the first available term from EAD that can be mapped to description
-      # Abstract, scope_content, or daodesc
-      def description_for_index
-        return description unless description == []
-        return dao_desc unless dao_desc == []
-        return abstract unless abstract == []
-
-        return []
-      end
-
       # Mapping to c/userestrict (Rights in the UI)
       # If the component does not have this information it is then inherited from the immediate parent
       # and returned for its indexing as Rights
       def rights_for_index
-        rights != [] ? rights : get_field_from_parent("rights")
+        !rights.empty? ? rights : get_field_from_parent('rights')
       end
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
       def creation_date_for_index
-        if (creation_date_idx != [] || creation_date != [])
-          cdate_array = creation_date.collect! do |value|
-            DRI::Metadata::Transformations.create_dcmi_period(value)
+       if !creation_date.empty?
+          cdate_array = creation_date.collect.with_index do |value, idx|
+            unless creation_date(idx).normal_at.empty?
+              iso_date = creation_date(idx).normal_at[0]
+
+              if (iso_date.include?('/'))
+                range = iso_date.split('/')
+                DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
+              else
+                DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
+              end
+            else
+              DRI::Metadata::Transformations.create_dcmi_period(value)
+            end
           end
-          return display_date_for_index(creation_date_idx, creation_date_idx_d) | cdate_array
+          return cdate_array
         else
           # Inherit the information
-          return get_field_from_parent("creation_date")
+          return get_field_from_parent('creation_date')
         end
       end
 
-      # Maps to origination/persname, if the component does not have this information, it is then
-      # inherited from the immediate parent (similar to rights - userestrict)
-      def creator_for_index()
-        if (creator != [])
-          return creator
-        else
-          # Inherit the information
-          get_field_from_parent("creator")
-        end
+      def creator_for_index
+        creator.empty? ? get_field_from_parent('creator') : creator_with_roles
+      end
+
+      def creator_with_roles
+        creators_array = []
+        ng_xml.search('/*/did/origination/*[not(@role="contributor")]').each { |n| creators_array << (n['role'].nil? ? n.content : "#{n.content} (#{n['role']})") }
+
+        creators_array
+
       end
 
       def get_field_from_parent(field_name)
-        obj_id = uri.to_str.split("/")[-2] # get the object's id
+        parent_field = nil
+        fedora_object = nil
 
-        fedora_object = DRI::EncodedArchivalDescription.find(obj_id)
+        obj_id = uri.to_str.split('/')[-2] # get the object's id
+        fedora_object = DRI::EncodedArchivalDescription.find(obj_id) unless obj_id.nil?
 
         unless fedora_object.nil? || fedora_object.governing_collection.nil?
           solr_query = "id:\"#{fedora_object.governing_collection_id.to_s}\""
-          docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+          docs = ActiveFedora::SolrService.query(solr_query, :defType => 'edismax')
 
           parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
         end
 
-        if !parent_field.nil?
-          return parent_field
-        else
-          return []
-        end
+        !parent_field.nil? ? parent_field : []
       end
 
       # Mapping to UI subjects: controlaccess/subject
       def subject_for_index
-        return subject | subject_anywhere | name_subject | persname_subject | corpname_subject | geographical_subject | famname_subject
+        subject | subject_anywhere | name_subject | persname_subject | corpname_subject | geogname_subject | famname_subject
       end
 
       # These are DRI Subject(Name)
       def subject_name_for_index
-        # Format persname to include role
-        persname_roles = persname.collect!.with_index do |n, idx|
-          n = (persname.role[idx].nil?) ? n : (n + " (#{persname.role[idx]})")
-        end
-        name_roles = name.collect!.with_index do |n, idx|
-          n = (name.role[idx].nil?) ? n : (n + " (#{name.role[idx]})")
-        end
-        corpname_roles = corpname.collect!.with_index do |n, idx|
-          n = (corpname.role[idx].nil?) ? n : (n + " (#{corpname.role[idx]})")
-        end
-        famname_roles = famname.collect!.with_index do |n, idx|
-          n = (famname.role[idx].nil?) ? n : (n + " (#{famname.role[idx]})")
-        end
+        persname_roles = pers_name_cvg.map.with_index { |n, idx| pers_name_cvg(idx).role.empty? ? n : (n + " (#{pers_name_cvg(idx).role[0]})") }
+        name_roles = name_cvg.map.with_index { |n, idx| name_cvg(idx).role.empty? ? n : (n + " (#{name_cvg(idx).role[0]})") }
+        corpname_roles = corp_name_cvg.map.with_index { |n, idx| corp_name_cvg(idx).role.empty? ? n : (n + " (#{corp_name_cvg(idx).role[0]})") }
+        famname_roles = fam_name_cvg.map.with_index { |n, idx| fam_name_cvg(idx).role.empty? ? n : (n + " (#{fam_name_cvg(idx).role[0]})") }
 
-        return name_roles | persname_roles | corpname_roles | famname_roles
+        name_roles | persname_roles | corpname_roles | famname_roles
       end
 
       # These are DRI Subject(Place)
       def subject_place_for_index
-        geo_roles = geographic_name.collect!.with_index do |n, idx|
-          n = (geographic_name.role[idx].nil?) ? n : (n + " (#{geographic_name.role[idx]})")
-        end
+        geo_roles = geog_name_cvg.map.with_index { |n, idx| geog_name_cvg(idx).role.empty? ? n : (n + " (#{geog_name_cvg(idx).role[0]})") }
 
-        return geo_roles
+        geo_roles
       end
 
       # These are DRI Subject(Place)
-      def subject_temporal_for_index()
-        dtext_array = date_text.collect! do |value|
-          DRI::Metadata::Transformations.create_dcmi_period(value)
+      def subject_temporal_for_index
+        date_array = date.collect.with_index do |value, idx|
+          if !date(idx).normal_at.empty?
+            iso_date = date(idx).normal_at[0]
+
+            if (iso_date.include?('/'))
+              range = iso_date.split('/')
+              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
+            else
+              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
+            end
+          else
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          end
         end
-        tcoverage_array = temporal_coverage.collect! do |value|
-          DRI::Metadata::Transformations.create_dcmi_period(value)
+
+        temporal_array = temporal_coverage.collect.with_index do |value, idx|
+          if !temporal_coverage(idx).normal_at.empty?
+            iso_date = temporal_coverage(idx).normal_at[0]
+
+            if (iso_date.include?('/'))
+              range = iso_date.split('/')
+              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
+            else
+              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
+            end
+          else
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          end
         end
-        return display_date_for_index(temporal_coverage_idx, temporal_coverage_idx_d) |
-            display_date_for_index(date_idx, date_idx_d) |
-            tcoverage_array |
-            dtext_array
+
+        temporal_array | date_array
       end
 
       # Return all date ranges formatted in the right format for indexing and single dates
@@ -495,137 +563,401 @@ module DRI
       def date_ranges_for_index
         dates_hash = Hash.new
 
-        dates_hash["creation_date"] = creation_date_idx == [] ? get_field_from_parent("creation_date_idx") : creation_date_idx
-        dates_hash["published_date"] = published_date_idx
-        dates_hash["subject_date"] = temporal_coverage_idx | date_idx
+        cdate_array = creation_date_idx.empty? ? get_field_from_parent('creation_date_idx') : creation_date_idx
 
-        return dates_hash
+        dates_hash['creation_date'] = cdate_array unless cdate_array.empty?
+        dates_hash['published_date'] = published_date_idx unless published_date_idx.empty?
+        dates_hash['subject_date'] = temporal_coverage_idx | date_idx unless temporal_coverage_idx.empty? && date_idx.empty?
+
+        dates_hash
       end
 
-      def display_date_for_index(date_field, date_field_d)
-        date_field.collect.with_index do |value, idx|
-          begin
-            # Date range in ISO8601 format: YYYYmmdd/YYYYmmdd
-            if (value.include?('/'))
-              range = value.split("/")
-              sdate = ISO8601::DateTime.new(range[0]).strftime("%b %d, %Y") #start date
-              edate = ISO8601::DateTime.new(range[1]).strftime("%b %d, %Y") #end date
-              if idx <= (date_field_d.length - 1)
-                DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx], range[0], range[1])
-              else
-                DRI::Metadata::Transformations.create_dcmi_period(sdate << ' - ' << edate, range[0], range[1])
-              end
-            else
-              if idx <= (date_field_d.length - 1)
-                DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx], value)
-              else
-                sdate = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
-                DRI::Metadata::Transformations.create_dcmi_period(sdate, value)
-              end
-            end
-          rescue ISO8601::Errors::StandardError
-            if idx <= (date_field_d.length - 1)
-              DRI::Metadata::Transformations.create_dcmi_period(date_field_d[idx]) # DCMI Period 'name' is the md value
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
+      # Returns array of types for ead components
+      # Stores first physdesc/genreform and the ead level last
+      # @return [Array<String>] types for indexing
+      def type_for_index
+        # Remove 'otherlevel' from ead type
+        level = ead_level - ['otherlevel']
+
+        type | level.map(&:capitalize) | ead_level_other.map(&:capitalize)
+      end
+
+      def collection?
+        ead_level == ['item'] ? false : true
+      end
+
+      def add_desc_scope_content(desc_array)
+        ng_xml.search('/*/scopecontent').each do |n|
+          n.remove
+        end
+
+        comp = ng_xml.root
+        sc = Nokogiri::XML::Node.new('scopecontent', ng_xml)
+        desc_array.each do |desc|
+          unless desc.empty?
+            p = Nokogiri::XML::Node.new('p', ng_xml)
+            p.content = desc
+            sc.add_child(p)
+          end
+        end
+        comp.add_child(sc) unless sc.children.empty?
+      end
+
+      def add_desc_abstract(desc_array)
+        ng_xml.search('/*/did/abstract').each do |n|
+          n.remove
+        end
+
+        did_node = ng_xml.at('/*/did')
+        desc_array.each do |desc|
+          unless desc.empty?
+            abstract = Nokogiri::XML::Node.new('abstract', ng_xml)
+            abstract.content = desc
+            did_node.add_child(abstract)
+          end
+        end
+      end
+
+      def add_desc_biog_hist(desc_array)
+        ng_xml.search('/*/bioghist').each do |n|
+          n.remove
+        end
+
+        comp = ng_xml.root
+        bh = Nokogiri::XML::Node.new('bioghist', ng_xml)
+        desc_array.each do |desc|
+          unless desc.empty?
+            p = Nokogiri::XML::Node.new('p', ng_xml)
+            p.content = desc
+            bh.add_child(p)
+          end
+        end
+        comp.add_child(bh) unless bh.children.empty?
+      end
+
+      def add_creation_date(dates)
+        dates.symbolize_keys! if dates.is_a?(Hash)
+        if dates.is_a?(Hash) && [:display, :normal].all? { |s| dates.key? s } && dates[:display].size == dates[:normal].size
+
+          ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each do |n|
+            n.remove
+          end
+
+          did_node = ng_xml.at('/*/did')
+          dates[:display].each_with_index do |disp, idx|
+            unless disp.empty?
+              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+              node.content = disp
+              node['datechar'] = 'creation'
+              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+              did_node.add_child(node)
             end
           end
         end
       end
 
-      # Mapping to UI subjects: //c@level or type
-      def type_for_index
-        return type_ead.map(&:capitalize) | ead_level_other.map(&:capitalize) | type
+      def add_published_date(dates)
+        dates.symbolize_keys! if dates.is_a?(Hash)
+        if dates.is_a?(Hash) && [:display, :normal].all? { |s| dates.key? s } && dates[:display].size == dates[:normal].size
+
+          ng_xml.search('/*/did/unitdate[@datechar="publication"]').each do |n|
+            n.remove
+          end
+
+          did_node = ng_xml.at('/*/did')
+          dates[:display].each_with_index do |disp, idx|
+            unless disp.empty?
+              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+              node.content = disp
+              node['datechar'] = 'publication'
+              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+              did_node.add_child(node)
+            end
+          end
+        end
       end
 
-      # def metadata_path field
-      #   case field
-      #     when :title
-      #       [:c, :did, :unittitle]
-      #     when :description, :scope_content
-      #       [:c, :scopecontent, :p]
-      #     when :abstract
-      #       [:c, :did, :abstract]
-      #     when :bioghist
-      #       [:c, :bioghist]
-      #     when :scope_content
-      #       [:scope_content]
-      #     when :ead_level, :type_ead
-      #       [:c, :ead_level]
-      #     when :ead_level_other
-      #       [:c, :other]
-      #     when :language
-      #       [:c, :did, :langmaterial, :language]
-      #     when :creator
-      #       [:c, :did, :creator]
-      #     when :contributor
-      #       [:c, :did, :origination, :contributor]
-      #     # FIXME Check the mapping for publisher, for components!
-      #     when :publisher
-      #       [:c, :did, :repository]
-      #     when :creation_date
-      #       [:creation_date]
-      #     when :published_date
-      #       [:published_date]
-      #     when :subject
-      #       [:c, :control_access, :subject_c]
-      #     when :name_coverage
-      #       [:name]
-      #     when :persname_coverage
-      #       [:persname]
-      #     when :corpname_coverage
-      #       [:corpname]
-      #     when :famname_coverage
-      #       [:famname]
-      #     when :geographical_coverage
-      #       [:geographic_name]
-      #     when :temporal_coverage
-      #       [:temporal_coverage]
-      #     when :physdesc
-      #       [:c, :did, :physdesc]
-      #     when :type
-      #       [:c, :did, :physdesc, :type]
-      #     when :dao
-      #       [:c, :did, :dao]
-      #     when :dao_href
-      #       [:c, :did, :dao, :href]
-      #     when :dao_desc
-      #       [:c, :did, :dao, :daodesc, :p]
-      #     when :repository_code
-      #       [:c, :did, :unitid, :repository_code]
-      #     when :country_code
-      #       [:c, :did, :unitid, :country_code]
-      #     when :identifier
-      #       [:c, :did, :unitid]
-      #     when :identifier_id
-      #       [:c, :did, :unitid, :identifier_attr]
-      #     when :identifier_url
-      #       [:c, :did, :unitid, :url_attr]
-      #     when :identifier_public_id
-      #       [:c, :did, :unitid, :public_id_attr]
-      #     when :rights, :licence
-      #       [:c, :userestrict, :p]
-      #     when :access_restrict
-      #       [:c, :accessrestrict, :p]
-      #     when :note
-      #       [:c, :did, :note]
-      #     when :institute
-      #       [:c, :did, :repository, :corpname]
-      #     when :related_material
-      #       [:c, :related_material, :p]
-      #     when :alternative_form
-      #       [:c, :alternative_form, :p]
-      #     else
-      #       []
-      #   end
-      # end #metadata_path
+      # Updates every person element under origination (creators)
+      # @param creators [Hash] the attributes and content required to create a persname
+      # @option :display [Array<String>] the content for the node
+      # @option :role [Array<String>] the role attribute for the node
+      # @option :tag [Array<String>] the name of the person tag to add
+      def add_creator(creators)
+        creators.symbolize_keys! if creators.is_a?(Hash)
+        if creators.is_a?(Hash) && [:tag, :display, :role].all? { |s| creators.key? s } &&
+            (creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size)
+          ng_xml.search('/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |n|
+            n.remove
+          end
 
-      #def interchangeable?
-      #  false
-      #end
+          origination = ng_xml.at('/*/did/origination')
+          creators[:display].each_with_index do |disp, idx|
+            if DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx]) && !disp.empty?
+              node = Nokogiri::XML::Node.new(creators[:tag][idx], ng_xml)
+              node.content = disp
+              node[:role] = creators[:role][idx] unless creators[:role][idx].empty?
+              origination.add_child(node)
+            end
+          end
+        end
+      end
 
-      def collection?
-        (ead_level == ["item"]) ? false : true
+      def add_contributor(contributors)
+        ng_xml.search('/*/did/origination/persname[@role="contributor"]').each do |n|
+          n.remove
+        end
+
+        origination = ng_xml.at('/*/did/origination')
+        contributors.each do |disp|
+          unless disp.empty?
+            node = Nokogiri::XML::Node.new('persname', ng_xml)
+            node.content = disp
+            node[:role] = 'contributor'
+            origination.add_child(node)
+          end
+        end
+      end
+
+      #
+      # @param people [Hash] the attributes and content required to create a persname
+      # @option :display [Array<String>] the content for the node
+      # @option :role [Array<String>] the role attribute for the node
+      # @option :tag [Array<String>] the name of the person tag to add
+      def add_name_coverage(people)
+        people.symbolize_keys! if people.is_a?(Hash)
+        if people.is_a?(Hash) && [:tag, :display, :role].all? { |s| people.key? s } &&
+            (people[:display].size == people[:role].size && people[:role].size == people[:tag].size)
+          ng_xml.search('/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |n|
+            n.remove
+          end
+
+          origination = ng_xml.at('/*/controlaccess')
+          people[:display].each_with_index do |disp, idx|
+            if DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx]) && !disp.empty?
+              node = Nokogiri::XML::Node.new(people[:tag][idx], ng_xml)
+              node.content = disp
+              node[:role] = people[:role][idx] unless people[:role][idx].empty?
+              origination.add_child(node)
+            end
+          end
+        end
+      end
+
+      def add_temporal_coverage(dates)
+        dates.symbolize_keys! if dates.is_a?(Hash)
+        if dates.is_a?(Hash) && [:display, :normal, :datechar].all? { |s| dates.key? s } &&
+            (dates[:display].size == dates[:normal].size && dates[:normal].size == dates[:datechar].size)
+
+          ng_xml.search('/*/did/unitdate[not(@datechar="creation") and not(@datechar="publication")]').each do |n|
+            n.remove
+          end
+
+          did_node = ng_xml.at('/*/did')
+          dates[:display].each_with_index do |disp, idx|
+            unless disp.empty?
+              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+              node.content = disp
+              node['datechar'] = dates[:datechar][idx]
+              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+              did_node.add_child(node)
+            end
+          end
+        end
+      end
+
+      def add_related_material(materials)
+        links = materials.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+
+        ng_xml.search('/*/relatedmaterial').each do |n|
+          n.remove
+        end
+
+        c_node = ng_xml.root
+        # Add related materials that are not external links
+        links.each do |link|
+          unless link.empty?
+            node = Nokogiri::XML::Node.new('relatedmaterial', ng_xml)
+            ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
+            ext_ref['href'] = link
+            node.add_child(ext_ref)
+            c_node.add_child(node)
+          end
+        end
+      end
+
+      def add_alternative_form(materials)
+        links = materials.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+
+        ng_xml.search('/*/altformavail').each do |n|
+          n.remove
+        end
+
+        c_node = ng_xml.root
+        links.each do |link|
+          unless link.empty?
+            node = Nokogiri::XML::Node.new('altformavail', ng_xml)
+            p = Nokogiri::XML::Node.new('p', ng_xml)
+            ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
+            ext_ref['href'] = link
+            p.add_child(ext_ref)
+            node.add_child(p)
+            c_node.add_child(node)
+          end
+        end
+      end
+
+      def add_geogname_coverage_access(locations)
+        locations.symbolize_keys! if locations.is_a?(Hash)
+        if locations.is_a?(Hash) && [:type, :display].all? { |s| locations.key? s } &&
+            (locations[:type].size == locations[:display].size)
+
+          ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each do |n|
+            n.remove
+          end
+
+          control_a = ng_xml.at('/*/controlaccess')
+          locations[:display].each_with_index do |loc, idx|
+            unless loc.empty?
+              node = Nokogiri::XML::Node.new('geogname', ng_xml)
+              node.content = loc
+              unless locations[:type][idx].empty?
+                case locations[:type][idx]
+                when 'dcterms:Point'
+                  node['rules'] = 'dcterms:Point'
+                when 'dcterms:Box'
+                  node['rules'] = 'dcterms:Box'
+                when 'logainm'
+                  node['source'] = 'logainm'
+                else
+                end
+              end
+              control_a.add_child(node)
+            end
+          end
+        end
+      end
+
+      def add_language(languages)
+        languages.symbolize_keys! if languages.is_a?(Hash)
+        if languages.is_a?(Hash) && [:langcode, :text].all? { |s| languages.key? s } &&
+            (languages[:langcode].size == languages[:text].size)
+
+          ng_xml.search('/*/did/langmaterial/language').each do |n|
+            n.remove
+          end
+
+          lang_mat = ng_xml.at('/*/did/langmaterial')
+          languages[:text].each_with_index do |lang, idx|
+            unless lang.empty?
+              node = Nokogiri::XML::Node.new('language', ng_xml)
+              node.content = lang
+              node['langcode'] = languages[:langcode][idx] unless languages[:langcode][idx].empty?
+              lang_mat.add_child(node)
+            end
+          end
+        end
+      end
+
+      def retrieve_terms_hash
+        terms_hash = Hash.new
+        terms_hash[:title] = title
+
+        # Creator
+        creator_hash = Hash.new
+        creator_hash[:display] = []
+        creator_hash[:role] = []
+        creator_hash[:tag] = []
+        ng_xml.search('/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |node|
+          creator_hash[:display] << node.content
+          creator_hash[:role] << (node['role'].nil? ? '' : node['role'])
+          creator_hash[:tag] << node.name
+        end
+        terms_hash[:creator] = creator_hash
+
+        terms_hash[:contributor] = contributor
+        terms_hash[:publisher] = publisher
+        terms_hash[:desc_scope_content] = desc_scope_content
+        terms_hash[:desc_abstract] = desc_abstract
+        terms_hash[:desc_biog_hist] = desc_biog_hist
+        terms_hash[:desc_scope_content] = desc_scope_content
+        terms_hash[:rights] = rights
+        terms_hash[:type] = type
+
+        published_date_hash = Hash.new
+        published_date_hash[:display] = []
+        published_date_hash[:normal] = []
+        ng_xml.search('/*/did/unitdate[@datechar="publication"]').each do |node|
+          published_date_hash[:display] << node.content
+          published_date_hash[:normal] << (node['normal'].nil? ? '' : node['normal'])
+        end
+        terms_hash[:published_date] = published_date_hash
+
+        creation_date_hash = Hash.new
+        creation_date_hash[:display] = []
+        creation_date_hash[:normal] = []
+        ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each do |node|
+          creation_date_hash[:display] << node.content
+          creation_date_hash[:normal] << (node['normal'].nil? ? '' : node['normal'])
+        end
+        terms_hash[:creation_date] = creation_date_hash
+
+        name_coverage_hash = Hash.new
+        name_coverage_hash[:display] = []
+        name_coverage_hash[:role] = []
+        name_coverage_hash[:tag] = []
+        ng_xml.search('/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |node|
+          name_coverage_hash[:display] << node.content
+          name_coverage_hash[:role] << (node['role'].nil? ? '' : node['role'])
+          name_coverage_hash[:tag] << node.name
+        end
+        terms_hash[:name_coverage] = name_coverage_hash
+
+        geogname_coverage_access_hash = Hash.new
+        geogname_coverage_access_hash[:display] = []
+        geogname_coverage_access_hash[:type] = []
+        ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each do |node|
+          geogname_coverage_access_hash[:display] << node.content
+          if !node['source'].nil?
+            geogname_coverage_access_hash[:type] << node['source']
+          else
+            geogname_coverage_access_hash[:type] << (node['rules'].nil? ? '' : node['rules'])
+          end
+        end
+        terms_hash[:geogname_coverage_access] = geogname_coverage_access_hash
+
+        temporal_coverage_hash = Hash.new
+        temporal_coverage_hash[:display] = []
+        temporal_coverage_hash[:normal] = []
+        temporal_coverage_hash[:datechar] = []
+
+        ng_xml.search('/*/did/unitdate[not(@datechar="creation") and not(@datechar="publication")]').each do |node|
+          temporal_coverage_hash[:display] << node.content
+          temporal_coverage_hash[:normal] << (node['normal'].nil? ? '' : node['normal'])
+          temporal_coverage_hash[:datechar] << (node['datechar'].nil? ? '' : node['datechar'])
+        end
+        terms_hash[:temporal_coverage] = temporal_coverage_hash
+
+        terms_hash[:subject] = subject
+        terms_hash[:name_subject] = name_subject
+        terms_hash[:persname_subject] = persname_subject
+        terms_hash[:corpname_subject] = corpname_subject
+        terms_hash[:famname_subject] = famname_subject
+        terms_hash[:geogname_subject] = geogname_subject
+
+        terms_hash[:related_material] = related_material
+        terms_hash[:alternative_form] = alternative_form
+
+        language_hash = Hash.new
+        language_hash[:text] = []
+        language_hash[:langcode] = []
+        language.each_with_index do |value, idx|
+          language_hash[:text] << value
+          language_hash[:langcode] << (language(idx).langcode_at.empty? ? '' : language(idx).langcode_at[0])
+        end
+
+        terms_hash[:language] = language_hash
+
+        terms_hash
       end
 
       # TODO Revise this method for EAD updates
@@ -650,55 +982,40 @@ module DRI
         end
       end #synchronize_children_to_metadata
 
-      # FIXME Check DRI validations (mandatory recommended)
       def custom_validations
         errors = Hash.new
 
         # DRI Mandatory elements (At collection-level)
         title_result = false
-        #description_result = false
-        #creator_result = false
-        #rights_result = false
 
         # EAD-specific validation from best practices
         unit_id_result = false
         cc_result = false
         rc_result = false
         ead_level_result = false
+        ead_level_other_result = false
 
         # Title
         title.each do |curr_title|
           title_result = true unless curr_title.blank?
         end
 
-        # Description
-        #description_for_index().each do |curr_description|
-        #  description_result = true unless curr_description.blank?
-        #end
-        # Rights
-        #rights_for_index().each do |curr_rights|
-        #  rights_result = true unless curr_rights.blank?
-        #end
-        # Creator
-        #creator.each do |curr_creator|
-        #  creator_result = true unless curr_creator.blank?
-        #end
-
         # EAD-specific
-        ead_level.each do |curr_ead_level|
-          ead_level_result = true unless curr_ead_level.blank?
+        unless !DRI::Vocabulary.ead_level_values.include?(ead_level.first)
+          unless !DRI::Vocabulary.ead_level_values.include?(ead_level.first)
+            ead_level.each do |curr_ead_level|
+              ead_level_result = true unless curr_ead_level.blank?
+            end
+
+            ead_level_other.each do |curr_ead_level|
+              ead_level_other_result = true unless curr_ead_level.blank?
+            end
+          end
         end
 
         # For validation of unitid or eadid we now use identifier
         # For EAD header maps to eadid and for components maps to unitid
         identifier.each_with_index do |curr_unit_id, index|
-          # Removed this for unitid, it is only compulsory for EADID; just check for unitid presence
-          #if (!curr_unit_id.blank? &&
-          #    (!identifier_id.blank? ||
-          #        !identifier_url.blank? ||
-          #            !identifier_public_id.blank?))
-          #  unit_id_result = true
-          #end
           # Handle the case where multiple unitid are present: only the first should carry the attributes
           if (index == 0)
             unit_id_result = true unless curr_unit_id.blank?
@@ -715,17 +1032,12 @@ module DRI
         # DRI
         errors[:title] = "can't be blank" if title_result == false
 
-        #if (collection?)
-        #errors[:description] = "can't be blank" if description_result == false
-        #errors[:creator] = "can't be blank" if creator_result == false
-        #errors[:rights] = "can't be blank" if rights_result == false
-        #end
-
-        #errors[:abstract] = "can't be blank" if description_result == false
-
-
-        # EAD
-        errors[:ead_level] = "can't be blank" if ead_level_result == false
+        # Specific EAD validation
+        if ead_level.include?('otherlevel')
+          errors[:ead_level_other] = "can't be blank" if ead_level_other_result == false
+        else
+          errors[:ead_level] = "can't be blank" if ead_level_result == false
+        end
 
         # UNITID validation
         # 1. unitid must be present

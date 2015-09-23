@@ -33,6 +33,7 @@ module DRI
         if k.to_sym == :type
           properties[:resource_type] = properties[k]
           properties.delete(k)
+          break
         end
       end
       # Adding :geocode_point and :geocode_box to properties if :geographical_coverage present
