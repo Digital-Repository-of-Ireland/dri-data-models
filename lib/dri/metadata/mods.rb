@@ -394,41 +394,7 @@ module DRI
         (!mods_type_collection.nil? && !mods_type_collection.empty?) ? true : false
       end
 
-      def metadata_path field
-        recognised_attributes = [:title, :rights, :description, :language, :subject, :contributor,
-                                  :source, :publisher, :creator, :type, :identifier, :published_date, :creation_date,
-                                  :geographical_coverage, :geographical_coverage_lang, :temporal_coverage,
-                                  :temporal_coverage_lang]
-        if recognised_attributes.include? field
-          [field]
-        elsif m = /^role_(.*)/.match(field.to_s)
-          if DRI::Vocabulary::marcRelators.include? m[1]
-            [field]
-          else
-            []
-          end
-        else
-          []
-        end
-      end
-
-      #
-      #
-      def update_indexed_attributes(params={}, opts={})
-        # if the params are just keys, not an array, make then into an array.
-        new_params = {}
-        params.each do |key, val|
-          if key.is_a? Array
-            new_params[key] = val
-          else
-            new_params[[key.to_sym]] = val
-          end
-        end
-        super(new_params, opts)
-      end
-
-      #
-      #
+      # FIXME
       def roles=(roles)
         if roles.is_a? Hash
           if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )

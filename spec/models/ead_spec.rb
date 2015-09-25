@@ -59,19 +59,19 @@ describe 'EncodedArchivalDescription' do
       @component.type  = ['Manuscript']
       @component.rights = ['This is a statement about the rights associated with this object']
       @component.creation_date = {:display => ['2000-2010'], :datechar => ['creation'], :normal => ['20000101/20101231']}
-      @component.language = {:langcode => ['en'], :text => ['English']}
+      @component.language = {:langcode => ['eng'], :text => ['English']}
       @component.save
 
       @ead_header.governed_items << @component
       @ead_header.save
 
-      collection_keys = ["root_collection_id_sim", "root_collection_id_tesim", "root_collection_sim",
-                         "root_collection_tesim", "is_collection_sim", "is_collection_tesim"]
+      collection_keys = ['root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
+                         'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim']
 
-      component_keys = ["ancestor_title_sim", "ancestor_title_tesim", "ancestor_id_tesim", "ancestor_id_sim",
-                         "governing_id_sim", "collection_id_sim", "collection_id_tesim", "collection_sim",
-                         "collection_tesim", "root_collection_id_sim", "root_collection_id_tesim", "root_collection_sim",
-                         "root_collection_tesim", "is_collection_sim", "is_collection_tesim", "is_first_sibling_tesim"]
+      component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_tesim', 'ancestor_id_sim',
+                         'governing_id_sim', 'collection_id_sim', 'collection_id_tesim', 'collection_sim',
+                         'collection_tesim', 'root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
+                         'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim', 'is_first_sibling_tesim']
 
       expect(@ead_header.collections_to_solr.keys).to match_array(collection_keys)
       expect(@ead_header.collections_to_solr).not_to have_key(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable))
@@ -81,10 +81,10 @@ describe 'EncodedArchivalDescription' do
     end
 
     it "should add file metadata information to the object's solr document" do
-      file_md_keys = ["width_isim", "width_sim", "height_isim", "height_sim", "area_isim", "area_sim",
-                         "channels_isim", "channels_sim", "bit_depth_isim", "bit_depth_sim", "sample_rate_isim",
-                         "sample_rate_sim", "file_type_tesim", "file_type_sim", "mime_type_tesim", "mime_type_sim",
-                         "file_type_display_tesim", "file_type_display_sim", "file_format_tesim", "file_format_sim", "file_count_isi"]
+      file_md_keys = ['width_isim', 'width_sim', 'height_isim', 'height_sim', 'area_isim', 'area_sim',
+                         'channels_isim', 'channels_sim', 'bit_depth_isim', 'bit_depth_sim', 'sample_rate_isim',
+                         'sample_rate_sim', 'file_type_tesim', 'file_type_sim', 'mime_type_tesim', 'mime_type_sim',
+                         'file_type_display_tesim', 'file_type_display_sim', 'file_format_tesim', 'file_format_sim', 'file_count_isi']
 
       @component = DRI::EncodedArchivalDescription.new(:component)
       @component.identifier = ['IE/NIVAL KDW-C']
@@ -99,7 +99,7 @@ describe 'EncodedArchivalDescription' do
       @component.type  = ['Manuscript']
       @component.rights = ['This is a statement about the rights associated with this object']
       @component.creation_date = {:display => ['2000-2010'], :normal => ['20000101/20101231']}
-      @component.language = {:langcode => ['en'], :text => ['English']}
+      @component.language = {:langcode => ['eng'], :text => ['English']}
 
       expect(@ead_header.file_metadata_to_solr.keys).to match_array(file_md_keys)
       expect(@ead_header.file_metadata_to_solr).to include(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => ['collection'])
@@ -124,7 +124,7 @@ describe 'EncodedArchivalDescription' do
       @component.type  = ['Manuscript']
       @component.rights = ['This is a statement about the rights associated with this object']
       @component.creation_date = {:display => ['2000-2010'], :normal => ['20000101/20101231']}
-      @component.language = {:langcode => ['en'], :text => ['English']}
+      @component.language = {:langcode => ['eng'], :text => ['English']}
 
       solr_field = ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable)
 
@@ -140,12 +140,193 @@ describe 'EncodedArchivalDescription' do
     end
   end
 
+  context 'synchronize parent metadata' do
+    before(:each) do
+      @ead_xml = fixture('ead/updates/ead.xml')
+      @ead_root = DRI::EncodedArchivalDescription.new :collection
+      @ead_root.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@ead_xml).to_xml, false)
+      @ead_root.save
+
+      @series_xml = fixture('ead/updates/component_series.xml')
+      @ead_series = DRI::EncodedArchivalDescription.new :component
+      @ead_series.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@series_xml).to_xml, false)
+      @ead_series.save
+
+      @file_xml = fixture('ead/updates/component_file.xml')
+      @ead_file = DRI::EncodedArchivalDescription.new :component
+      @ead_file.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@file_xml).to_xml, false)
+      @ead_file.save
+
+      @item_xml = fixture('ead/updates/component_item.xml')
+      @ead_item = DRI::EncodedArchivalDescription.new :component
+      @ead_item.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@item_xml).to_xml, false)
+      @ead_item.save
+
+      @ead_file.governed_items << @ead_item
+      @ead_file.save
+      @ead_series.governed_items << @ead_file
+      @ead_series.save
+      @ead_root.governed_items << @ead_series
+      @ead_root.save
+
+      @collection = DRI::EncodedArchivalDescription.new(:collection)
+      @collection.identifier = ['IE/NIVAL KDW']
+      @collection.identifier_id = 'KDW'
+      @collection.country_code = 'IE'
+      @collection.repository_code = 'IE-DuNIV'
+
+      @attributes_hash = {
+          :title  => ['The test title'],
+          :creator => {:display => ['Creator 1', 'Creator no role'], :role => ['institution', ''], :tag => ['persname', 'name']},
+          :desc_scope_content  => ['This is a test description for the object.'],
+          :rights  => ['This is a statement about the rights associated with this object'],
+          :creation_date => {:display => ['2000-2010'], :normal => ['20000101/20101231']},
+          :language => {:langcode => ['eng'], :text => ['English']}
+      }
+    end
+
+    after(:each) do
+      unless @ead_item.new_record?
+        @ead_item.delete
+      end
+      unless @ead_file.new_record?
+        @ead_file.delete
+      end
+      unless @ead_series.new_record?
+        @ead_series.delete
+      end
+      unless @ead_root.new_record?
+        @ead_root.delete
+      end
+      unless @collection.new_record?
+        @collection.delete
+      end
+    end
+
+    it "should update the object's fullMetadata ds when updating object's metadata" do
+      # via update_attributes
+      @collection.attributes = @attributes_hash
+      expect(@collection.trigger_update).to be true
+      @collection.save
+      expect(@collection.fullMetadata.to_xml).to eq(@collection.descMetadata.to_xml)
+
+    end
+
+    it "should not update the object's fullMetadata if no editable attributes are modified" do
+      # via update_attributes
+      @collection.attributes = {'ingest_files_from_metadata' => 'false'}
+      expect(@collection.trigger_update).to be false
+      expect_any_instance_of(DRI::EncodedArchivalDescription).not_to receive(:update_full_metadata)
+      @collection.save
+    end
+
+    it "should update parents' fullMetadata when updating object's metadata" do
+      @ead_item.attributes = @attributes_hash
+      @ead_item.save
+      result = @ead_item.descMetadata.update_parent_metadata(@ead_item.governing_collection, @ead_item.fullMetadata)
+      expect(result).to eq(true)
+      result = @ead_file.descMetadata.update_parent_metadata(@ead_file.governing_collection, @ead_file.fullMetadata)
+      expect(result).to eq(true)
+      result = @ead_series.descMetadata.update_parent_metadata(@ead_series.governing_collection, @ead_series.fullMetadata)
+      expect(result).to eq(true)
+
+      query = "//*[did/unitid[@repositorycode='#{@ead_item.repository_code}' and @countrycode='#{@ead_item.country_code}' and text()='#{@ead_item.identifier.first}']]"
+      node = @ead_root.fullMetadata.ng_xml.at(query)
+
+      expect(node.at("did/unittitle").content).to eq(@ead_item.title.first)
+      creators = ''
+      node.search("did/origination/*").each { |n| creators << n.content }
+      expect(creators).to eq(@ead_item.creator*'')
+      expect(node.at("userestrict").content).to eq(@ead_item.rights.first)
+      expect(node.at('did/unitdate[@datechar="creation"]').content).to eq('2000-2010')
+      expect(node.at("did/langmaterial/language").content).to eq(@ead_item.language.first)
+    end
+
+    it "should not update parents' fullMetadata when there are no updates for the child object" do
+      result = @ead_series.descMetadata.update_parent_metadata(@ead_series.governing_collection, @ead_series.fullMetadata)
+      expect(result).to eq("update_parent_metadata for #{@ead_series.governing_collection.id}: No differences in fullMetadata")
+    end
+
+    it "should also update parents' fullMetadata if using EAD XSD and namespace prefixes" do
+      @ead_xml_ns = fixture('ead/updates/ead_ns.xml')
+      @ead_ns = DRI::EncodedArchivalDescription.new :collection
+      @ead_ns.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@ead_xml_ns).to_xml, false)
+      @ead_ns.save
+
+      @series_xml_ns = fixture('ead/updates/component_series_ns.xml')
+      @ead_series_ns = DRI::EncodedArchivalDescription.new :component
+      @ead_series_ns.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@series_xml_ns).to_xml, false)
+      @ead_series_ns.save
+
+      @ead_ns.governed_items << @ead_series_ns
+      @ead_ns.save
+
+      @ead_series_ns.attributes = @attributes_hash
+      expect(@ead_series_ns.trigger_update).to be true
+      @ead_series_ns.save
+      @ead_series_ns.descMetadata.update_parent_metadata(@ead_series_ns.governing_collection, @ead_series_ns.fullMetadata)
+
+      query = "//*[ead:did/ead:unitid[@repositorycode='#{@ead_series_ns.repository_code}' and @countrycode='#{@ead_series_ns.country_code}' and text()='#{@ead_series_ns.identifier.first}']]"
+      node = @ead_ns.fullMetadata.ng_xml.at(query)
+      expect(node.xpath("ead:did/ead:unittitle", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq(@ead_series_ns.title.first)
+      creators = ''
+      node.xpath("ead:did/ead:origination/*", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).each { |n| creators << n.content }
+      expect(creators).to eq(@ead_series_ns.creator*'')
+      expect(node.xpath("ead:userestrict", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq(@ead_series_ns.rights.first)
+      expect(node.xpath('ead:did/ead:unitdate[@datechar="creation"]', {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq('2000-2010')
+      expect(node.xpath("ead:did/ead:langmaterial/ead:language", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq(@ead_series_ns.language.first)
+
+      @ead_series_ns.delete
+      @ead_ns.delete
+    end
+
+    it "should update root collection metadata using EAD XSD" do
+      @ead_xml_ns = fixture('ead/updates/ead_ns.xml')
+      @ead_ns = DRI::EncodedArchivalDescription.new :collection
+      @ead_ns.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@ead_xml_ns).to_xml, false)
+      @ead_ns.save
+
+      @ead_ns.attributes = @attributes_hash
+      expect(@ead_ns.trigger_update).to be true
+      @ead_ns.save
+      expect(@ead_ns.trigger_update).to be false
+
+      node = @ead_ns.fullMetadata.ng_xml.root
+
+      expect(node.xpath("ead:archdesc/ead:did/ead:unittitle", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq(@ead_ns.title.first)
+      creators = ''
+      node.xpath("ead:archdesc/ead:did/ead:origination/*", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).each { |n| creators << n.content }
+      expect(creators).to eq(@ead_ns.creator*'')
+      expect(@ead_ns.rights).to eq(@attributes_hash[:rights])
+      expect(node.xpath('ead:archdesc/ead:did/ead:unitdate[@datechar="creation"]', {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq('2000-2010')
+      expect(node.xpath("ead:archdesc/ead:did/ead:langmaterial/ead:language", {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}).first.content).to eq(@ead_ns.language.first)
+
+      @ead_ns.delete
+    end
+
+    it "should update root collection metadata using EAD DTD" do
+      @ead_root.attributes = @attributes_hash
+      expect(@ead_root.trigger_update).to be true
+      @ead_root.save
+      expect(@ead_root.trigger_update).to be false
+
+      node = @ead_root.fullMetadata.ng_xml.root
+      expect(node.at('archdesc/did/unittitle').content).to eq(@ead_root.title.first)
+      creators = ''
+      node.search('archdesc/did/origination/*').each { |n| creators << n.content }
+      expect(creators).to eq(@ead_root.creator*'')
+      expect(@ead_root.rights).to eq(@attributes_hash[:rights])
+      expect(node.at('archdesc/did/unitdate[@datechar="creation"]').content).to eq('2000-2010')
+      expect(node.at('archdesc/did/langmaterial/language').content).to eq(@ead_root.language.first)
+    end
+  end
+
   context 'update attributes methods' do
     # Before each test create test objects
     before(:each) do
       @header_xml = fixture("ead/collections/ead_header_dtd.xml")
       @ead_header = DRI::EncodedArchivalDescription.new :collection
-      @ead_header.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml
+      @ead_header.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml, false)
 
       @collection = DRI::EncodedArchivalDescription.new(:collection)
       @collection.identifier = ['IE/NIVAL KDW']
@@ -181,7 +362,7 @@ describe 'EncodedArchivalDescription' do
           :publisher  => ['Publisher 1'],
           :related_material  => ['http://example.org/relmat'],
           :alternative_form  => ['http://example.org/altform'],
-          :language => {:langcode => ['en'], :text => ['English']}
+          :language => {:langcode => ['eng'], :text => ['English']}
       }
     end
 
@@ -196,7 +377,6 @@ describe 'EncodedArchivalDescription' do
     end
 
     it 'should update the object\'s attributes (EAD collection)' do
-
       # via update_attributes
       @collection.attributes = @attributes_hash
 
@@ -249,7 +429,7 @@ describe 'EncodedArchivalDescription' do
       @collection.famname_subject  = ['subject famname']
       @collection.related_material  = ['http://example.org/relmat']
       @collection.alternative_form  = ['http://example.org/altform']
-      @collection.language = {:langcode => ['en'], :text => ['English']}
+      @collection.language = {:langcode => ['eng'], :text => ['English']}
 
       expect(@collection.title).to match_array(['The test title'])
       expect(@collection.creator).to match_array(['Creator 2'])
@@ -332,7 +512,7 @@ describe 'EncodedArchivalDescription' do
       @component.famname_subject  = ['subject famname']
       @component.related_material  = ['http://example.org/relmat']
       @component.alternative_form  = ['http://example.org/altform']
-      @component.language = {:langcode => ['en'], :text => ['English']}
+      @component.language = {:langcode => ['eng'], :text => ['English']}
 
       expect(@component.title).to match_array(['The test title'])
       expect(@component.creator).to match_array(['Creator 2'])
@@ -389,7 +569,7 @@ describe 'EncodedArchivalDescription' do
       expect(terms_hash[:type]).to match_array(['Collection'])
       expect(terms_hash[:related_material]).to match_array(['http://example.org/relmat'])
       expect(terms_hash[:alternative_form]).to match_array(['http://example.org/altform'])
-      expect(terms_hash[:language]).to include(:langcode => ['en'], :text => ['English'])
+      expect(terms_hash[:language]).to include(:langcode => ['eng'], :text => ['English'])
     end
 
     it "should return a hash of attributes for form update (component)" do
@@ -419,7 +599,7 @@ describe 'EncodedArchivalDescription' do
       expect(terms_hash[:type]).to match_array(['Collection'])
       expect(terms_hash[:related_material]).to match_array(['http://example.org/relmat'])
       expect(terms_hash[:alternative_form]).to match_array(['http://example.org/altform'])
-      expect(terms_hash[:language]).to include(:langcode => ['en'], :text => ['English'])
+      expect(terms_hash[:language]).to include(:langcode => ['eng'], :text => ['English'])
     end
   end
 end

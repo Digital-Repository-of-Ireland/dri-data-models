@@ -127,230 +127,31 @@ module DRI
         end
       end # add_file_from_url
 
-=begin
-      def synchronize_children_to_metadata
-        if self.new_record?
-          return
+      # Searchs for the node's children ead:components (c | c01..12 XML nodes)
+      # @param [Nokogiri::XML::Document] node the document to search
+      # @return [Nokogiri::XML::NodeSet] the children ead:components for the given node
+      def self.get_ead_metadata_components(node)
+        if node.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+          ns_dcl = {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}
+          # Nodes for EAD root collection (as path differs)
+          return node.xpath('/ead:ead/ead:archdesc/ead:dsc/*', ns_dcl) unless node.xpath('/*/ead:archdesc', ns_dcl).empty?
+          # Nodes for components grouped under dsc
+          return node.xpath('/*/ead:dsc/*', ns_dcl) unless node.xpath('/*/ead:dsc/*', ns_dcl).empty?
+
+          # Nodes for components directly nested under the parent component: c or c[01-12]
+          node.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]', ns_dcl)
+        else
+          # Nodes for EAD root collection (as path differs)
+          return node.xpath('/ead/archdesc/dsc/*') unless node.xpath('/*/archdesc').empty?
+          # Nodes for components grouped under dsc
+          return node.xpath('/*/dsc/*') unless node.xpath('/*/dsc/*').empty?
+
+          # Nodes for components directly nested under the parent component: c or c[01-12]
+          node.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]')
         end
-        if descMetadata.class == DRI::Metadata::EncodedArchivalDescription ||
-            descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
-
-          metadata_child_index = 0
-
-          prev_obj = nil
-          child_obj = nil
-
-          # Find the first child (child not preceded by another child) of the current object
-          solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable)}:\"#{id.to_s}\""
-          solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable)}:1"
-          # The query service returns back a set of Solr Documents, therefore need to be casted later on
-          child_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax", :qf => "id")
-
-          if child_obj == []
-            child_obj = nil
-          elsif child_obj != nil
-            # Create an instance of Solr document from the retrieved first child
-            doc = SolrDocument.new(child_obj[0])
-            # Cast the solr document to its corresponding Fedora object
-            child_obj = DRI::EncodedArchivalDescription.find(doc.id)
-          end
-
-          # Find the immediate children of this collection in the metadata
-          metadata_children = []
-
-          # Remove EAD namespaces
-          full_metadata_nons = self.fullMetadata.ng_xml.clone
-          full_metadata_nons.remove_namespaces!
-          if descMetadata.class == DRI::Metadata::EncodedArchivalDescription
-            metadata_children = full_metadata_nons.xpath("/ead/archdesc/dsc/*")
-          else
-            metadata_children = get_ead_children_components(full_metadata_nons)
-          end
-
-          if metadata_children.empty?
-            # Find all the objects for which the ancestor is the current EAD object
-            solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :stored_searchable)}:\"#{id.to_s}\""
-
-            # The query service returns back a set of Solr Documents, therefore need to be casted later on
-            ActiveFedora::SolrService.query(solr_query, :defType => "edismax").each do |obj|
-              # Create an instance of Solr document
-              doc = SolrDocument.new(obj)
-              # Cast the solr document to its corresponding Fedora object
-              obj = DRI::EncodedArchivalDescription.find(doc.id)
-              obj.generic_files.each do |file_obj|
-                file_obj.delete
-              end
-              obj.delete
-            end
-          end
-
-          while metadata_child_index < metadata_children.length do
-            # Metadata identifier matches current child's identifiers?
-            # <unitid @repositorycode @identifier>text()</unitid>
-            if is_ead_same_object?(child_obj, metadata_children[metadata_child_index])
-              # fullMetadata automatically adds an XML header to the start and an extra "\n" at the end.
-              # we have to undo these modifications in order to do the comparison
-              cfull_metadata_nons = child_obj.fullMetadata.ng_xml.clone
-              cfull_metadata_nons.remove_namespaces!
-              clean_fullMetadata = cfull_metadata_nons.to_s[22..-1]
-              clean_fullMetadata = clean_fullMetadata[0..-2]
-
-              # now we can do the comparison
-              if (metadata_children[metadata_child_index].to_s != clean_fullMetadata)
-                # we can replace the child's metadata if the replacement metadata differs
-                child_obj.update_metadata metadata_children[metadata_child_index].to_s
-                child_obj.previous_sibling = prev_obj
-
-                if child_obj.valid?
-                  child_obj.save
-                  # add to queue
-                end
-              end
-              prev_obj = child_obj
-              child_obj = prev_obj.next_sibling
-              metadata_child_index += 1
-            elsif child_obj != nil
-              # TODO: DELETE child
-              Rails.logger.info("Delete child needed")
-            else
-              # Create a new child
-              new_child = DRI::EncodedArchivalDescription.new :component
-              new_child.update_metadata metadata_children[metadata_child_index].to_xml
-              new_child.previous_sibling = prev_obj
-              new_child.governing_collection = self
-              # Add depositor, status and permissions from parent
-              new_child.depositor = self.depositor
-              new_child.status = self.status
-              self.permissions.each do |p|
-                new_child.permissions << p
-              end
-              # ingest_files_from_metadata
-              new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
-              # FIXME Need to call checksum method below but this method is implemented in dri_app
-              # MetadataHelpers.checksum_metadata(new_child)
-
-              # Don't add new node if it's invalid
-              if new_child.valid? && !duplicates
-                Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
-                new_child.save
-                begin
-                  create_reader_group(new_child.id) if new_child.is_collection?
-                rescue
-                  Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.pid} ")
-                end
-                # add to queue
-                prev_obj = new_child
-              elsif duplicates
-                Rails.logger.error("ERR_EAD_SAVE: #{new_child.identifier} is duplicated!!")
-              else
-                # TODO Notify DRI-APP that there are invalid objects!!
-                Rails.logger.error("ERR_EAD_SAVE: #{!new_child.title.empty? ? new_child.title : new_child.identifier}")
-                new_child.errors.messages.each do |key, value|
-                  Rails.logger.error("#{key}: #{value}")
-                end
-              end
-
-              metadata_child_index += 1
-            end
-          end
-          # check if child != nil and child matches metadata_marker
-          #   check if difference in xml
-          #     replace child xml
-          #     child previous_sibling = prev_node
-          #     save child
-          #     prev_node = child
-          #     queue up child
-          #   child = child.next_sibling
-          #   marker++
-          # TODO For EAD Updates the case below is unimplemented
-          # else if child != nil and check if child identifier is not in metadata
-          #   child = child.next_sibling
-          #   delete node and it's children
-          # TODO For EAD Updates the case below is unimplemented
-          # else if child != nil and check if metadata is in children
-          #   prev_later_child = later_child.prev_sibling
-          #   later_child.prev_sibling = prev_child
-          #   prev_later_child.next_sibling = late_child.next_sibling
-          #   don't sync prev_later_child
-          #   prev_later_child.save
-          #   replace later_child xml
-          #   late_child.next_sibling = nil
-          #   save later_child
-          #   marker++
-          # else
-          #   if not, create temp_child using metadata
-          #   temp_child.prev_sibling = prev_node
-          #   copy permissions
-          #   save temp_child
-          #   queue up temp_child
-          #   prev_node = temp_child
-          #   marker++
-
-          # Delete any remaining children
-          while child_obj != nil do
-            to_delete = child_obj
-            child_obj = child_obj.next_sibling
-
-            solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :stored_searchable)}:\"#{to_delete.id.to_s}\""
-
-            # The query service returns back a set of Solr Documents, therefore need to be casted later on
-            ActiveFedora::SolrService.query(solr_query, :defType => "edismax").each do |obj|
-              # Create an instance of Solr document
-              doc = SolrDocument.new(obj)
-              # Cast the solr document to its corresponding Fedora object
-              obj = DRI::EncodedArchivalDescription.find(doc.id)
-              obj.generic_files.each do |file_obj|
-                file_obj.delete
-              end
-              obj.delete
-            end
-            to_delete.delete
-          end
-        end
-      end # synchronize_children_to_metadata
-=end
+      end
 
       private
-
-=begin
-      # Checks that the metadata identifiers match the identifiers of the current EAD component child
-      # being analysed
-      # @param child_obj the current EAD stored child
-      # @param elem the new EAD child from metadata
-      # @return[boolean] true if the identifiers match
-      def is_ead_same_object?(child_obj, elem)
-        repository_code_attr = nil
-        country_code_attr = nil
-
-        # Get the text value for unitid
-        metadata_id = !elem.xpath('did/unitid')[0].text.nil? ? elem.xpath('did/unitid')[0].text : ""
-
-        # Get the value of unitid/@repositorycode
-        if elem.xpath('did/unitid/@repositorycode')[0] != nil
-          repository_code_attr = elem.xpath('did/unitid/@repositorycode')[0].value
-        end
-        # Get the value of unitid/@countrycode
-        if elem.xpath('did/unitid/@countrycode')[0] != nil
-          country_code_attr = elem.xpath('did/unitid/@countrycode')[0].value
-        end
-
-        # To check that the metadata ids match the current child's ids
-        # we need to look first at the value of unitid/eadid AND
-        # then compare against the following attributes of unitid: repositorycode/mainagencycode and countrycode
-        if (child_obj != nil &&
-            child_obj.identifier.include?(metadata_id) &&
-            child_obj.repository_code == repository_code_attr &&
-            child_obj.country_code == country_code_attr)
-          return true
-        else
-          return false
-        end
-      end # is_ead_same_element?
-
-      def is_child_id_in_metadata(child_obj, md_elem)
-        # TODO Implement method for checking whether an existing child identifier is present in new metadata when updating collections
-      end # is_child_id_in_metadata
-=end
 
       # Returns an array of children EAD components
       # @param metadata [Nokogiri::XML] EAD component XML metadata

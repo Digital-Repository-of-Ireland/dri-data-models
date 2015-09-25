@@ -215,7 +215,7 @@ module DRI
         t.desc_scope_content(:proxy => [:ead, :arch_desc, :scope_content, :p])
         t.desc_dao_desc(:proxy => [:ead, :arch_desc, :did, :dao, :dao_desc, :p])
 
-        t.creator(:path => '/ead/archdesc/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]')
+        t.creator(:path => '/ead/archdesc/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
         t.creator_role(:proxy => [:ead, :arch_desc, :did, :origination, :person_creator])
         t.creator_name(:proxy => [:ead, :arch_desc, :did, :origination, :name])
         t.creator_persname(:proxy => [:ead, :arch_desc, :did, :origination, :pers_name])
@@ -269,7 +269,7 @@ module DRI
 
         # PROXIES FOR INDEXING
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
-        t.name_coverage(:path => 'archdesc/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]')
+        t.name_coverage(:path => 'archdesc/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]')
         t.persname_coverage(:proxy => [:ead, :arch_desc, :control_access, :pers_name_cvg])
         t.corpname_coverage(:proxy => [:ead, :arch_desc, :control_access, :corp_name_cvg])
         t.famname_coverage(:proxy => [:ead, :arch_desc, :control_access, :fam_name_cvg])
@@ -637,6 +637,11 @@ module DRI
           end
 
           pub_stmt = ng_xml.at('/ead/eadheader/filedesc/publicationstmt')
+          if pub_stmt.nil?
+            file_desc = ng_xml.at('/ead/eadheader/filedesc')
+            pub_stmt = Nokogiri::XML::Node.new('publicationstmt', ng_xml)
+            file_desc.add(pub_stmt)
+          end
           dates[:display].each_with_index do |disp, idx|
             unless disp.empty?
               node = Nokogiri::XML::Node.new('date', ng_xml)
@@ -657,11 +662,16 @@ module DRI
         creators.symbolize_keys! if creators.is_a?(Hash)
         if creators.is_a?(Hash) && [:tag, :display, :role].all? { |s| creators.key? s } &&
             (creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size)
-          ng_xml.search('/ead/archdesc/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |n|
+          ng_xml.search('/ead/archdesc/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each do |n|
             n.remove
           end
 
           origination = ng_xml.at('/ead/archdesc/did/origination')
+          if origination.nil?
+            did_node = ng_xml.at('/ead/archdesc/did')
+            origination = Nokogiri::XML::Node.new('origination', ng_xml)
+            did_node.add_child(origination)
+          end
           creators[:display].each_with_index do |disp, idx|
             if DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx]) && !disp.empty?
               node = Nokogiri::XML::Node.new(creators[:tag][idx], ng_xml)
@@ -679,6 +689,11 @@ module DRI
         end
 
         origination = ng_xml.at('/ead/archdesc/did/origination')
+        if origination.nil?
+          did_node = ng_xml.at('/ead/archdesc/did')
+          origination = Nokogiri::XML::Node.new('origination', ng_xml)
+          did_node.add_child(origination)
+        end
         contributors.each do |disp|
           unless disp.empty?
             node = Nokogiri::XML::Node.new('persname', ng_xml)
@@ -698,17 +713,22 @@ module DRI
         people.symbolize_keys! if people.is_a?(Hash)
         if people.is_a?(Hash) && [:tag, :display, :role].all? { |s| people.key? s } &&
             (people[:display].size == people[:role].size && people[:role].size == people[:tag].size)
-          ng_xml.search('/ead/archdesc/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |n|
+          ng_xml.search('/ead/archdesc/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each do |n|
             n.remove
           end
 
-          origination = ng_xml.at('/ead/archdesc/controlaccess')
+          control_a = ng_xml.at('/ead/archdesc/controlaccess')
+          if control_a.nil?
+            archdesc_node = ng_xml.at('/ead/archdesc')
+            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+            archdesc_node.add_child(control_a)
+          end
           people[:display].each_with_index do |disp, idx|
             if DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx]) && !disp.empty?
               node = Nokogiri::XML::Node.new(people[:tag][idx], ng_xml)
               node.content = disp
               node[:role] = people[:role][idx] unless people[:role][idx].empty?
-              origination.add_child(node)
+              control_a.add_child(node)
             end
           end
         end
@@ -788,6 +808,11 @@ module DRI
           end
 
           control_a = ng_xml.at('/ead/archdesc/controlaccess')
+          if control_a.nil?
+            archdesc_node = ng_xml.at('/ead/archdesc')
+            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+            archdesc_node.add_child(control_a)
+          end
           locations[:display].each_with_index do |loc, idx|
             unless loc.empty?
               node = Nokogiri::XML::Node.new('geogname', ng_xml)
@@ -819,6 +844,11 @@ module DRI
           end
 
           lang_mat = ng_xml.at('/ead/archdesc/did/langmaterial')
+          if lang_mat.nil?
+            did_node = ng_xml.at('/ead/archdesc/did')
+            lang_mat = Nokogiri::XML::Node.new('langmaterial', ng_xml)
+            did_node.add_child(lang_mat)
+          end
           languages[:text].each_with_index do |lang, idx|
             unless lang.empty?
               node = Nokogiri::XML::Node.new('language', ng_xml)
@@ -839,7 +869,7 @@ module DRI
         creator_hash[:display] = []
         creator_hash[:role] = []
         creator_hash[:tag] = []
-        ng_xml.search('/ead/archdesc/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |node|
+        ng_xml.search('/ead/archdesc/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each do |node|
           creator_hash[:display] << node.content
           creator_hash[:role] << (node['role'].nil? ? '' : node['role'])
           creator_hash[:tag] << node.name
@@ -877,7 +907,7 @@ module DRI
         name_coverage_hash[:display] = []
         name_coverage_hash[:role] = []
         name_coverage_hash[:tag] = []
-        ng_xml.search('/ead/archdesc/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |node|
+        ng_xml.search('/ead/archdesc/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each do |node|
           name_coverage_hash[:display] << node.content
           name_coverage_hash[:role] << (node['role'].nil? ? '' : node['role'])
           name_coverage_hash[:tag] << node.name
@@ -925,10 +955,14 @@ module DRI
           language_hash[:text] << value
           language_hash[:langcode] << (language(idx).langcode_at.empty? ? '' : language(idx).langcode_at[0])
         end
-
         terms_hash[:language] = language_hash
 
         terms_hash
+      end
+
+      # No parent to update as Root collection
+      def update_parent_metadata(parent, full_metadata)
+        return
       end
 
       def custom_validations

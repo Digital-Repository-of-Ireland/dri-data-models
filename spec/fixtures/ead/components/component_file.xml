@@ -3,6 +3,7 @@
         <unittitle encodinganalog="3.1.2">Ephemera</unittitle>
         <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="02" encodinganalog="3.1.1">KDW/RM/02</unitid>
         <unitdate datechar="Creation" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+        <unitdate datechar="publication" normal="19840101/19851231" encodinganalog="3.1.3">1984-1985</unitdate>
         <physdesc>
             <extent encodinganalog="3.1.5">
                 to be determined                </extent>
@@ -19,7 +20,7 @@
         <did>
           <unittitle encodinganalog="3.1.2">Invitation to Kilkenny Design Workshops 1984 retrospective exhibition</unittitle>
           <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="04" encodinganalog="3.1.1">KDW/RM/02/04</unitid>
-          <unitdate datechar="Creation" normal="19840101/19841231" encodinganalog="3.1.3">1984</unitdate>
+          <unitdate datechar="publication" normal="19840101/19851231" encodinganalog="3.1.3">1984-1985</unitdate>
           <physdesc>
             <extent encodinganalog="3.1.5">
                 1 document                </extent>

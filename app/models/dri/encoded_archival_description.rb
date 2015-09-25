@@ -91,7 +91,7 @@ module DRI
       super(modified_attributes)
 
       update_attributes = properties.select {|key, value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
-
+      self.trigger_update = true unless update_attributes.empty?
       update_attributes.each { |key, value| self.send("#{key.to_s}=", value) unless value.nil? }
     end
 
@@ -231,16 +231,26 @@ module DRI
     # @return [Boolean] true if xml updated successfully; false otherwise
     def update_metadata(xml_text, ingest=true)
       # Differentiate between ingest and individual object update
-      ingest ? self.trigger_ingest=(true) : self.trigger_update=(true)
+      ingest ? (self.trigger_ingest = true) : (self.trigger_update = true)
 
       if xml_text.is_a?(File)
         xml_text = xml_text.read
       end
 
-      fullMetadata.ng_xml = xml_text
-      xml_text = split_ead_xml(xml_text, desc_metadata_class)
+      if ingest
+        fullMetadata.ng_xml = xml_text
+        xml_text = split_ead_xml(xml_text, desc_metadata_class)
 
-      descMetadata.ng_xml = xml_text
+        descMetadata.ng_xml = xml_text
+      else
+        if fullMetadata.ng_xml.root.children.empty?
+          fullMetadata.ng_xml = xml_text
+        end
+        # For EAD XML updates we need to discard any children components in the XML
+        # as only updates of metadata fields is supported (NO hierarchy updates)
+        xml_text = split_ead_xml(xml_text, desc_metadata_class)
+        descMetadata.ng_xml = xml_text
+      end
 
       true
     end
@@ -273,18 +283,81 @@ module DRI
       xml
     end
 
+    private
+
+    # Called within synchronize_if__changed (around_save callback) if descMetadata updated
+    def update_full_metadata
+      has_ns = self.fullMetadata.ng_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+
+      if has_ns
+        temp_desc_md = self.descMetadata.ng_xml.clone
+        temp_desc_md.root.add_namespace('ead', 'urn:isbn:1-931666-22-9')
+        temp_desc_md.root.add_namespace('xlink', 'http://www.w3.org/1999/xlink')
+
+        temp_desc_md.search('//*').each do |n|
+          # all ns prefix from root node to every child in the XML
+          n.namespace = temp_desc_md.root.namespace_definitions.find{|ns| ns.prefix=='ead'}
+          if n['href'] # dao @href attr is under xlink ns if using EAD XSD
+            n.attribute('href').namespace = temp_desc_md.root.namespace_definitions.find{|ns| ns.prefix=='xlink'}
+          end
+        end
+        updated_desc_md = temp_desc_md
+      else
+        updated_desc_md = self.descMetadata.ng_xml.clone
+      end
+
+      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(self.fullMetadata.ng_xml)
+
+      # copy children components from un-synced fullMetadata as descMetadata does not include them
+      unless children_components.empty?
+        children_components.each do |node|
+          if has_ns
+            results = updated_desc_md.xpath('//ead:dsc', {'xmlns:ead' => 'urn:isbn:1-931666-22-9'})
+            dsc = results.empty? ? nil : results.first
+          else
+            dsc = updated_desc_md.at('//dsc')
+          end
+
+          if dsc.nil?
+            # directly nested under the parent's component
+            updated_desc_md.root.add_child(node)
+          else
+            # grouped under dsc, if present
+            dsc.add_child(node)
+          end
+        end
+      end
+
+      self.fullMetadata.ng_xml = updated_desc_md
+
+      true
+    end
+
     def synchronize_if_changed
       content_changed = false
 
-      if self.descMetadata.synchronize_metadata_on_save == true && self.trigger_ingest
+      if self.descMetadata.synchronize_metadata_on_save == true
         content_changed = self.descMetadata.changed?
       end
 
+      if self.trigger_update
+        # after descMetadata update and before save synchronise fullMetadata with descMetadata
+        update_full_metadata if content_changed
+        self.trigger_update = false if self.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
+      end
       # Do the object save
       yield
 
       if content_changed && !new_record?
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
+        if self.trigger_ingest
+          # This is an EAD ingest, not MD update
+          Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
+        elsif self.trigger_update && self.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+          # ONLY for EncodedArchivalDescriptionComponent
+          # descMetadata update, trigger parent fullMetadata sync
+          Sufia.queue.push(UpdateParentMetadataJob.new(self.id))
+          self.trigger_update = false
+        end
       end
     end
 

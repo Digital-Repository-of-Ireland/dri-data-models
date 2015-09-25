@@ -1,6 +1,257 @@
 require 'rsolr'
 
 describe 'EncodedArchivalDescription descMetadata' do
+
+  context "create new ead xml" do
+    before(:each) do
+      @md_collection = DRI::Metadata::EncodedArchivalDescription.new
+      @md_component = DRI::Metadata::EncodedArchivalDescriptionComponent.new
+    end
+
+    it "should have an xml_template method returning desired xml" do
+      # collection
+      empty_xml = @md_collection.class.xml_template
+      empty_xml.should be_a_kind_of(Nokogiri::XML::Document)
+      expect(empty_xml.internal_subset).not_to be_nil
+      expect(empty_xml.internal_subset.external_id).to eq('+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN')
+      empty_xml.children.first.name.should eq('ead')
+
+      # component
+      empty_xml = @md_component.class.xml_template
+      empty_xml.should be_a_kind_of(Nokogiri::XML::Document)
+      empty_xml.children.first.name.should eq('c')
+    end
+  end
+
+  context "modify existing ead xml" do
+    before(:each) do
+      @md_collection = DRI::Metadata::EncodedArchivalDescription.new
+      @md_component = DRI::Metadata::EncodedArchivalDescriptionComponent.new
+    end
+
+    it "should update creator nodes" do
+      c_hash = {:display => ['A. Nolan'], :tag => ['persname'], :role => ['photographer']}
+      # Collection
+      # Remove origination tag for creators
+      @md_collection.ng_xml.search('//origination').each do |n|
+        n.remove
+      end
+      @md_collection.add_creator(c_hash)
+      creators = @md_collection.ng_xml.search('//origination/persname')
+      expect(creators.size).to eq 1
+
+      # Component
+      @md_component.ng_xml.search('//origination').each do |n|
+        n.remove
+      end
+      @md_component.add_creator(c_hash)
+      creators = @md_component.ng_xml.search('//origination/persname')
+      expect(creators.size).to eq 1
+
+      c_hash = {:display => ['B. Whitehall'], :tag => ['name'], :role => ['designer']}
+      # Collection
+      @md_collection.add_creator(c_hash)
+      creators = @md_collection.ng_xml.search('//origination/*[local-name() = "name" or local-name() = "persname"]')
+      expect(creators.size).to eq 1
+      expect(creators.first.name).to eq('name')
+      expect(creators.first.content).to eq('B. Whitehall')
+
+      # Component
+      @md_component.add_creator(c_hash)
+      creators = @md_component.ng_xml.search('//origination/*[local-name() = "name" or local-name() = "persname"]')
+      expect(creators.size).to eq 1
+      expect(creators.first.name).to eq('name')
+      expect(creators.first.content).to eq('B. Whitehall')
+    end
+
+    it "should update contributor nodes" do
+      c_hash = ['A. Nolan']
+      # Collection
+      # Remove origination tag for contributors
+      @md_collection.ng_xml.search('//origination').each do |n|
+        n.remove
+      end
+      @md_collection.add_contributor(c_hash)
+      ctbs = @md_collection.ng_xml.search('//origination/persname[@role="contributor"]')
+      expect(ctbs.size).to eq 1
+
+      # Component
+      @md_component.ng_xml.search('//origination').each do |n|
+        n.remove
+      end
+      @md_component.add_contributor(c_hash)
+      ctbs = @md_component.ng_xml.search('//origination/persname[@role="contributor"]')
+      expect(ctbs.size).to eq 1
+
+      c_hash = ['B. Whitehall']
+      # Collection
+      @md_collection.add_contributor(c_hash)
+      ctbs = @md_collection.ng_xml.search('//origination/*[@role="contributor"]')
+      expect(ctbs.size).to eq 1
+      expect(ctbs.first.content).to eq('B. Whitehall')
+
+      # Component
+      @md_component.add_contributor(c_hash)
+      ctbs = @md_component.ng_xml.search('//origination/*[@role="contributor"]')
+      expect(ctbs.size).to eq 1
+      expect(ctbs.first.content).to eq('B. Whitehall')
+    end
+
+    it "should update name_coverage nodes" do
+      n_hash = {:display => ['A. Nolan'], :tag => ['persname'], :role => ['photographer']}
+      # Collection
+      # Remove origination tag for controlaccess
+      @md_collection.ng_xml.search('//controlaccess').each do |n|
+        n.remove
+      end
+      @md_collection.add_name_coverage(n_hash)
+      names = @md_collection.ng_xml.search('//controlaccess/persname')
+      expect(names.size).to eq 1
+
+      # Component
+      @md_component.ng_xml.search('//controlaccess').each do |n|
+        n.remove
+      end
+      @md_component.add_name_coverage(n_hash)
+      names = @md_component.ng_xml.search('//controlaccess/persname')
+      expect(names.size).to eq 1
+
+      n_hash = {:display => ['B. Whitehall'], :tag => ['corpname'], :role => ['studio']}
+      # Collection
+      @md_collection.add_name_coverage(n_hash)
+      names = @md_collection.ng_xml.search('//controlaccess/*[local-name() = "corpname" or local-name() = "persname"]')
+      expect(names.size).to eq 1
+      expect(names.first.name).to eq('corpname')
+      expect(names.first.content).to eq('B. Whitehall')
+
+      # Component
+      @md_component.add_name_coverage(n_hash)
+      names = @md_component.ng_xml.search('//controlaccess/*[local-name() = "corpname" or local-name() = "persname"]')
+      expect(names.size).to eq 1
+      expect(names.first.name).to eq('corpname')
+      expect(names.first.content).to eq('B. Whitehall')
+    end
+
+    it "should update temporal_coverage nodes" do
+      d_hash = {:display => ['Jan 2015'], :datechar => ['coverage'], :normal => ['20150101']}
+
+      # Collection
+      @md_collection.add_temporal_coverage(d_hash)
+      dates = @md_collection.ng_xml.search('//unitdate[not(@datechar="creation") and not(@datechar="publication")]')
+      expect(dates.size).to eq 1
+      expect(dates.first['normal']).to eq('20150101')
+      expect(dates.first.content).to eq('Jan 2015')
+
+      # Component
+      @md_component.add_temporal_coverage(d_hash)
+      dates = @md_component.ng_xml.search('//unitdate[not(@datechar="creation") and not(@datechar="publication")]')
+      expect(dates.size).to eq 1
+      expect(dates.first['normal']).to eq('20150101')
+      expect(dates.first.content).to eq('Jan 2015')
+    end
+
+    it "should update related_material nodes" do
+      rel_hash = ['http://example.org/relatedmaterial']
+
+      # Collection
+      @md_collection.add_related_material(rel_hash)
+      rels = @md_collection.ng_xml.search('//relatedmaterial/extref')
+      expect(rels.size).to eq 1
+      expect(rels.first['href']).to eq('http://example.org/relatedmaterial')
+
+      # Component
+      @md_component.add_related_material(rel_hash)
+      rels = @md_component.ng_xml.search('//relatedmaterial/extref')
+      expect(rels.size).to eq 1
+      expect(rels.first['href']).to eq('http://example.org/relatedmaterial')
+    end
+
+    it "should update alternative_form nodes" do
+      rel_hash = ['http://example.org/altformavail']
+
+      # Collection
+      @md_collection.add_alternative_form(rel_hash)
+      rels = @md_collection.ng_xml.search('//altformavail/p/extref')
+      expect(rels.size).to eq 1
+      expect(rels.first['href']).to eq('http://example.org/altformavail')
+
+      # Component
+      @md_component.add_alternative_form(rel_hash)
+      rels = @md_component.ng_xml.search('//altformavail/p/extref')
+      expect(rels.size).to eq 1
+      expect(rels.first['href']).to eq('http://example.org/altformavail')
+    end
+
+    it "should update geographical coverage nodes" do
+      geog_hash = {:type => ['logainm'], :display => ['http://example.org/1234']}
+
+      # Collection
+      # Remove controlaccess tag for geographical coverage
+      @md_collection.ng_xml.search('//controlaccess').each do |n|
+        n.remove
+      end
+      @md_collection.add_geogname_coverage_access(geog_hash)
+      geogs = @md_collection.ng_xml.search('//controlaccess/geogname')
+      expect(geogs.size).to eq 1
+
+      # Component
+      @md_component.ng_xml.search('//controlaccess').each do |n|
+        n.remove
+      end
+      @md_component.add_geogname_coverage_access(geog_hash)
+      geogs = @md_component.ng_xml.search('////controlaccess/geogname')
+      expect(geogs.size).to eq 1
+
+      geog_hash = {:type => ['dcterms:Point'], :display => ['name=Dublin; east=-6.266155; north=53.350140;']}
+      # Collection
+      @md_collection.add_geogname_coverage_access(geog_hash)
+      geogs = @md_collection.ng_xml.search('//controlaccess/geogname')
+      expect(geogs.size).to eq 1
+      expect(geogs.first.content).to eq('name=Dublin; east=-6.266155; north=53.350140;')
+
+      # Component
+      @md_component.add_geogname_coverage_access(geog_hash)
+      geogs = @md_component.ng_xml.search('//controlaccess/geogname')
+      expect(geogs.size).to eq 1
+      expect(geogs.first.content).to eq('name=Dublin; east=-6.266155; north=53.350140;')
+    end
+
+    it "should update language nodes" do
+      l_hash = {:langcode => ['en'], :text => ['English']}
+      # Collection
+      # Remove origination tag for contributors
+      @md_collection.ng_xml.search('//langmaterial').each do |n|
+        n.remove
+      end
+      @md_collection.add_language(l_hash)
+      lang = @md_collection.ng_xml.search('//langmaterial/language')
+      expect(lang.size).to eq 1
+
+      # Component
+      @md_component.ng_xml.search('//langmaterial').each do |n|
+        n.remove
+      end
+      @md_component.add_language(l_hash)
+      lang = @md_component.ng_xml.search('//langmaterial/language')
+      expect(lang.size).to eq 1
+
+      l_hash = ['B. Whitehall']
+      # Collection
+      @md_collection.add_language(l_hash)
+      lang = @md_collection.ng_xml.search('//langmaterial/language')
+      expect(lang.size).to eq 1
+      expect(lang.first.content).to eq('English')
+      expect(lang.first['langcode']).to eq('en')
+
+      # Component
+      @md_component.add_language(l_hash)
+      lang = @md_component.ng_xml.search('//langmaterial/language')
+      expect(lang.size).to eq 1
+      expect(lang.first.content).to eq('English')
+      expect(lang.first['langcode']).to eq('en')
+    end
+  end
+
   context "validation of DRI compulsory elements" do
     before(:each) do
       @collection_xml = fixture("ead/collections/ead_collection_dtd.xml")
@@ -299,7 +550,7 @@ describe 'EncodedArchivalDescription descMetadata' do
           :desc_abstract  => ['This is a test abstract for the object.'],
           :desc_biog_hist  => ['This is a test biographical history for the object.'],
           :rights  => ['This is a statement about the rights associated with this object'],
-          :language => {:langcode => ['en'], :text => ['English']},
+          :language => {:langcode => ['eng'], :text => ['English']},
           :type  => ['Collection'],
           :published_date => {:display => ['2015'], :normal => ['20150101']},
           :creation_date => {:display => ['2000-2010'], :normal => ['20000101/20101231']},

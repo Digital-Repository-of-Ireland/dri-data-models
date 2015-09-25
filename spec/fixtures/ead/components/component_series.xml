@@ -2,7 +2,9 @@
     <did>
         <unittitle encodinganalog="3.1.2">Related Material</unittitle>
         <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="RM" encodinganalog="3.1.1">KDW/RM</unitid>
-        <unitdate datechar="Creation" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+        <unitdate datechar="publication" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+        <unitdate datechar="publication" normal="19650101" encodinganalog="3.1.3">1965</unitdate>
+      <unitdate datechar="" normal="19650101/19700101" encodinganalog="3.1.3">c. 1965</unitdate>
         <physdesc>
             <extent encodinganalog="3.1.5">
                 3 files                </extent>

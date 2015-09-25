@@ -192,7 +192,7 @@ module DRI
         t.desc_scope_content(:proxy => [:c, :scope_content, :p])
         t.desc_note(:proxy => [:c, :did, :note])
 
-        t.creator(:path => '/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]')
+        t.creator(:path => '/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
         t.creator_role(:proxy => [:c, :did, :origination, :person_creator])
         t.creator_name(:proxy => [:c, :did, :origination, :name])
         t.creator_persname(:proxy => [:c, :did, :origination, :pers_name])
@@ -245,7 +245,7 @@ module DRI
 
         # PROXIES FOR INDEXING
         # EAD coverage elements within control access headings, authority-controlled search across finding aids
-        t.name_coverage(:path => '/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]')
+        t.name_coverage(:path => '/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]')
         t.persname_coverage(:proxy => [:c, :control_access, :pers_name_cvg])
         t.corpname_coverage(:proxy => [:c, :control_access, :corp_name_cvg])
         t.famname_coverage(:proxy => [:c, :control_access, :fam_name_cvg])
@@ -436,7 +436,7 @@ module DRI
 
       # Index Helper Methods
       def person_array_for_index
-        return name_coverage | persname_coverage | corpname_coverage | famname_coverage | creator | contributor
+        name_coverage | persname_coverage | corpname_coverage | famname_coverage | creator | contributor
       end
 
       # Mapping to c/userestrict (Rights in the UI)
@@ -686,11 +686,16 @@ module DRI
         creators.symbolize_keys! if creators.is_a?(Hash)
         if creators.is_a?(Hash) && [:tag, :display, :role].all? { |s| creators.key? s } &&
             (creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size)
-          ng_xml.search('/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |n|
+          ng_xml.search('/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each do |n|
             n.remove
           end
 
           origination = ng_xml.at('/*/did/origination')
+          if origination.nil?
+            did_node = ng_xml.at('/*/did')
+            origination = Nokogiri::XML::Node.new('origination', ng_xml)
+            did_node.add_child(origination)
+          end
           creators[:display].each_with_index do |disp, idx|
             if DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx]) && !disp.empty?
               node = Nokogiri::XML::Node.new(creators[:tag][idx], ng_xml)
@@ -708,6 +713,11 @@ module DRI
         end
 
         origination = ng_xml.at('/*/did/origination')
+        if origination.nil?
+          did_node = ng_xml.at('/*/did')
+          origination = Nokogiri::XML::Node.new('origination', ng_xml)
+          did_node.add_child(origination)
+        end
         contributors.each do |disp|
           unless disp.empty?
             node = Nokogiri::XML::Node.new('persname', ng_xml)
@@ -727,17 +737,22 @@ module DRI
         people.symbolize_keys! if people.is_a?(Hash)
         if people.is_a?(Hash) && [:tag, :display, :role].all? { |s| people.key? s } &&
             (people[:display].size == people[:role].size && people[:role].size == people[:tag].size)
-          ng_xml.search('/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |n|
+          ng_xml.search('/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each do |n|
             n.remove
           end
 
-          origination = ng_xml.at('/*/controlaccess')
+          control_a = ng_xml.at('/*/controlaccess')
+          if control_a.nil?
+            c_node = ng_xml.root
+            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+            c_node.add_child(control_a)
+          end
           people[:display].each_with_index do |disp, idx|
             if DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx]) && !disp.empty?
               node = Nokogiri::XML::Node.new(people[:tag][idx], ng_xml)
               node.content = disp
               node[:role] = people[:role][idx] unless people[:role][idx].empty?
-              origination.add_child(node)
+              control_a.add_child(node)
             end
           end
         end
@@ -816,6 +831,11 @@ module DRI
           end
 
           control_a = ng_xml.at('/*/controlaccess')
+          if control_a.nil?
+            c_node = ng_xml.root
+            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+            c_node.add_child(control_a)
+          end
           locations[:display].each_with_index do |loc, idx|
             unless loc.empty?
               node = Nokogiri::XML::Node.new('geogname', ng_xml)
@@ -847,6 +867,11 @@ module DRI
           end
 
           lang_mat = ng_xml.at('/*/did/langmaterial')
+          if lang_mat.nil?
+            did_node = ng_xml.at('/*/did')
+            lang_mat = Nokogiri::XML::Node.new('langmaterial', ng_xml)
+            did_node.add_child(lang_mat)
+          end
           languages[:text].each_with_index do |lang, idx|
             unless lang.empty?
               node = Nokogiri::XML::Node.new('language', ng_xml)
@@ -867,7 +892,7 @@ module DRI
         creator_hash[:display] = []
         creator_hash[:role] = []
         creator_hash[:tag] = []
-        ng_xml.search('/*/did/origination/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="contributor")]').each do |node|
+        ng_xml.search('/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each do |node|
           creator_hash[:display] << node.content
           creator_hash[:role] << (node['role'].nil? ? '' : node['role'])
           creator_hash[:tag] << node.name
@@ -905,7 +930,7 @@ module DRI
         name_coverage_hash[:display] = []
         name_coverage_hash[:role] = []
         name_coverage_hash[:tag] = []
-        ng_xml.search('/*/controlaccess/*[(local-name() = "name" or local-name() = "persname" or local-name() = "famname" or local-name() = "corpname") and not(@role="subject")]').each do |node|
+        ng_xml.search('/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each do |node|
           name_coverage_hash[:display] << node.content
           name_coverage_hash[:role] << (node['role'].nil? ? '' : node['role'])
           name_coverage_hash[:tag] << node.name
@@ -960,27 +985,78 @@ module DRI
         terms_hash
       end
 
-      # TODO Revise this method for EAD updates
-      def synchronize_children_to_metadata(parent)
-        # Exit if we have no parent to sync with
-        if parent == nil
-          return
+      # Updates an object's parent fullMetadata ds if the object's fullMetadata differs from the parent's
+      # @param [DRI::EncodedArchivalDescription] parent the parent object for which to update fullMetadata ds
+      # @param [DRI::Metadata::FullMetadata] full_metadata the child component's fullMetadata ds
+      def update_parent_metadata(parent, full_metadata)
+        return if parent == nil # Return if we have no parent to sync with
+
+        parent_md_xml = parent.fullMetadata.ng_xml.clone
+
+        if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+          # if original XML file uses EAD XSD and includes namespace prefixes, use them in the query
+          query = "//*[ead:did/ead:unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
+        else
+          query = "//*[did/unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
+        end
+        # Find updated component to sync in parent's fullMetadata
+        component_node = parent_md_xml.at(query)
+
+        # Remove non-significant white space text nodes before comparing content
+        child_xml = Nokogiri::XML.parse(full_metadata.ng_xml.to_s) do |config|
+          config.noblanks
+        end
+        parent_xml = Nokogiri::XML.parse(component_node.to_s) do |config|
+          config.noblanks
         end
 
-        # Prevent parent from automatically syncing
-        parent.synchronize_if_changed = false
+        if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+          # if parent metadata uses EAD XSD, need to add the ns prefixes and declarations
+          # to the updated component xml as descMetadata removes all prefixes, namespaces
+          child_xml.root.add_namespace('ead', 'urn:isbn:1-931666-22-9')
+          child_xml.root.add_namespace('xlink', 'http://www.w3.org/1999/xlink')
 
+          child_xml.search('//*').each do |n|
+            # all ns prefix from root node to every child in the XML
+            n.namespace = child_xml.root.namespace_definitions.find{|ns| ns.prefix=='ead'}
+            if n['href'] # dao @href attr is under xlink ns if using EAD XSD
+              n.attribute('href').namespace = child_xml.root.namespace_definitions.find{|ns| ns.prefix=='xlink'}
+            end
+          end
+
+          # Need to remove the added ns declarations to the component before comparing
+          child_xml_str = child_xml.root.serialize(save_with:0).gsub("\n",'').
+              gsub('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ', '')
+
+          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).gsub("\n",''))
+        else
+          same_metadata = child_xml.root.serialize(save_with:0).gsub("\n",'') == parent_xml.root.serialize(save_with:0).gsub("\n",'')
+        end
         # Check if the component node in parent XML is different
-        parentMetadataXML = parent.descMetadata.to_ng
-        childMetadataXML = descMetadata.to_ng
-        # FIXME Identifying nodes via: unitid and (attributes identifier or publicid or url)
-        matchingNodes = parentMetadataXML.xpath(".//parent::unitid[@repository_code='#{repository_code}' and @countrycode='#{country_code}' and "+
-                                                    " text()=#{identifier}]")
-        # Queue synchronization between parent and grandparent
-        if parent.descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent
-          Sufia.queue.push(SynchronizeMetadata.new(parent.id))
+        unless component_node.nil? || same_metadata
+          component_node.children.remove
+          full_metadata.ng_xml.search('/*/*').each { |node| component_node.add_child(node) }
+          parent.fullMetadata.ng_xml = parent_md_xml
+          # Prevent parent from automatically syncing
+          parent.trigger_update = false
+          parent.trigger_ingest = false
+          parent.save if parent.fullMetadata.changed?
+
+          # Queue synchronization between parent and grandparent
+          if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+            Sufia.queue.push(UpdateParentMetadataJob.new(parent.id))
+          end
+          return true
         end
-      end #synchronize_children_to_metadata
+
+        if !component_node.nil?
+          Rails.logger.info("update_parent_metadata for #{parent.id}: No differences in fullMetadata")
+          "update_parent_metadata for #{parent.id}: No differences in fullMetadata"
+        else
+          Rails.logger.error("update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata")
+          "update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata"
+        end
+      end #update_parent_metadata
 
       def custom_validations
         errors = Hash.new
@@ -1017,7 +1093,7 @@ module DRI
         # For EAD header maps to eadid and for components maps to unitid
         identifier.each_with_index do |curr_unit_id, index|
           # Handle the case where multiple unitid are present: only the first should carry the attributes
-          if (index == 0)
+          if index == 0
             unit_id_result = true unless curr_unit_id.blank?
             country_code.each do |curr_cc|
               cc_result = true unless curr_cc.blank?
