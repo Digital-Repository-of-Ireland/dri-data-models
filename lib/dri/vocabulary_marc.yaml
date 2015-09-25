@@ -722,6 +722,11 @@
           :label: "Date of publication, distribution, etc"
           :multivalue: YES
           :required: NO
+        "e":
+          :code: "e"
+          :label: "Place of manufacture"
+          :multivalue: YES
+          :required: NO
         "f":
           :code: "f"
           :label: "Manufacturer"
