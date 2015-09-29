@@ -20,16 +20,16 @@ module DRI
 
     before_destroy :delete_files
 
-    belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: "DRI::Batch"
+    belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'DRI::Batch'
 
     # Declare a 'dri_properties' DS, of the following type
-    contains "dri_properties", class_name: "DRI::Metadata::FileProperties"
+    contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
 
     # Declare the attributes of 'dri_properties' DS - 'checksum_md5...' - and that the DS is non-repeatable
-    has_attributes :checksum_md5, datastream: :dri_properties, multiple: false
-    has_attributes :checksum_sha256, datastream: :dri_properties, multiple: false
-    has_attributes :checksum_rmd160, datastream: :dri_properties, multiple: false
-    has_attributes :preservation_only, datastream: :dri_properties, multiple: false
+    property :checksum_md5, delegate_to: 'dri_properties', multiple: false
+    property :checksum_sha256, delegate_to: 'dri_properties', multiple: false
+    property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false
+    property :preservation_only, delegate_to: 'dri_properties', multiple: false
 
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
@@ -55,7 +55,7 @@ module DRI
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
-      if (!width.empty? && !height.empty?)
+      if !width.empty? && !height.empty?
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i*height[0].to_i])
       end
 
@@ -64,10 +64,10 @@ module DRI
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
 
       file_type = []
-      file_type.push "audio" if audio?
-      file_type.push "video" if video?
-      file_type.push "image" if image?
-      file_type.push "text" if text?
+      file_type.push('audio') if audio?
+      file_type.push('video') if video?
+      file_type.push('image') if image?
+      file_type.push('text') if text?
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type)
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type)
 
@@ -89,15 +89,15 @@ module DRI
     private
 
     def delete_files
-      local_file_info = LocalFile.where("fedora_id LIKE :f AND ds_id LIKE :d",
-                                        { :f => self.id, :d => 'content' }).order("version DESC").to_a
+      local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
+                                        { :f => self.id, :d => 'content' }).order('version DESC').to_a
       local_file_info.each { |file| file.destroy }
       FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(self.id), :force => true)
     end
 
     def round_float_values md_xml
       doc = Nokogiri::XML::Document.parse(md_xml)
-      doc.search("//fits:sampleRate | //fits:height | //fits:width", "fits" => "http://hul.harvard.edu/ois/xml/ns/fits/fits_output").each do |node|
+      doc.search('//fits:sampleRate | //fits:height | //fits:width', 'fits' => 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output').each do |node|
         node.content = (node.text.to_f.round).to_s
       end
       return doc.to_xml

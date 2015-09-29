@@ -1,4 +1,3 @@
-require 'spec_helper'
 
 describe 'Mods' do
   # Before each test create test objects

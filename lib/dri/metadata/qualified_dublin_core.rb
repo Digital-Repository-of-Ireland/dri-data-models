@@ -245,23 +245,20 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
-        # Split date ranges into separate indexes
-        #date_ranges = Transformations.transform_date_ranges({ "date" => date, "published_date" => published_date, "creation_date" => creation_date})
-        #solr_doc.merge!(date_ranges)
 
         solr_doc
       end
 
-      def display_date_for_index(date_field=[])
+      def display_date_for_index(date_field)
         date_field = date_field.delete_if{|v| /^null$/i.match(v)}
-        date_field.collect! do |value|
+        date_field.collect do |value|
           begin
             if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) # return value for display as it is
               # If value.empty? is cleaned afterwards
               value
             else
               # Date range in ISO8601 format?
-              sdate = ISO8601::DateTime.new(value).strftime("%Y-%m-%d")
+              sdate = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
               DRI::Metadata::Transformations.create_dcmi_period(value, sdate)
             end
           rescue ISO8601::Errors::StandardError
@@ -308,7 +305,7 @@ module DRI
       end
 
       # Creates an array of all names stored in the metadata
-      def get_person_array()
+      def get_person_array
         people = contributor | publisher
         people |= creator.reject{|c| /^null$/i.match(c)}  
 
@@ -320,7 +317,7 @@ module DRI
       end
 
       def collection?
-        type.include? "Collection"
+        type.include? 'Collection'
       end
 
       def custom_validations

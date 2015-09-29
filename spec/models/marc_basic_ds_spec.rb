@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'nokogiri'
 
 describe 'Marc' do

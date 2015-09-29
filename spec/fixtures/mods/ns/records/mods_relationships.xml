@@ -22,7 +22,7 @@
     <mods:form type="material">pencils (drawing and writing equipment)</mods:form>
     <mods:form type="material">ink</mods:form>
   </mods:physicalDescription>
-  <mods:accessCondition>
+  <mods:accessCondition type="use and reproduction">
     <copyrightMD:copyright>
       <copyrightMD:general.note>Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</copyrightMD:general.note>
     </copyrightMD:copyright>

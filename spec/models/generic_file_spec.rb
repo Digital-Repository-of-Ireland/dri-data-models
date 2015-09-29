@@ -1,5 +1,4 @@
 # spec/modules/generic_file.rb
-require 'spec_helper'
 
 describe 'GenericFile' do
   

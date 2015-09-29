@@ -3,15 +3,14 @@ module DRI
   module Metadata
 
     # An ActiveFedora datastream that interacts with MODS.
-
     class Mods < DRI::Metadata::Base
 
       # MODS XML constants.
-      MODS_NS_PREFIX = "mods"
+      MODS_NS_PREFIX = 'mods'
       MODS_NS = 'http://www.loc.gov/mods/v3'
       MODS_SCHEMA = 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd'
-      CR_NS_PREFIX = "copyrightMD"
-      CR_NS = "http://www.cdlib.org/inside/diglib/copyrightMD"
+      CR_NS_PREFIX = 'copyrightMD'
+      CR_NS = 'http://www.cdlib.org/inside/diglib/copyrightMD'
 
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
@@ -19,7 +18,7 @@ module DRI
           t.root(:path =>"mods", :namespace_prefix => MODS_NS_PREFIX, "xmlns:#{CR_NS_PREFIX}" => CR_NS, :schema => MODS_SCHEMA)
 
           t.title_info(:path => "titleInfo", :namespace_prefix => MODS_NS_PREFIX) {
-            t.main_title(:path => "title", :label => "title", :namespace_prefix => MODS_NS_PREFIX)
+            t.main_title(:path => "title", :namespace_prefix => MODS_NS_PREFIX)
             t.subtitle(:path => "subTitle", :namespace_prefix => MODS_NS_PREFIX)
           }
           # Map to the mods record identifier (absolute xpath here)
@@ -31,11 +30,11 @@ module DRI
 
           # This is a mods:name. The underscore is purely to avoid namespace conflicts.
           t.name_(:path => "name", :namespace_prefix => MODS_NS_PREFIX) {
-            t.namePart(:type => :string)
+            t.name_part(:path => 'namePart', :type => :string)
             t.role(:ref => [:role])
             t.date(:path => "namePart", :attributes => {:type=>"date"}, :namespace_prefix => MODS_NS_PREFIX)
             t.last_name(:path => "namePart", :attributes => {:type=>"family"}, :namespace_prefix => MODS_NS_PREFIX)
-            t.first_name(:path => "namePart", :attributes => {:type=>"given"}, :label => "first name", :namespace_prefix => MODS_NS_PREFIX)
+            t.first_name(:path => "namePart", :attributes => {:type=>"given"}, :namespace_prefix => MODS_NS_PREFIX)
           }
           # Role
           t.role(:path => "role", :namespace_prefix => MODS_NS_PREFIX) {
@@ -208,7 +207,7 @@ module DRI
             t.targetAudience(:ref => [:target_audience])
             t.note_mods_no_type(:ref => [:note_mods_no_type])
             t.note_mods_type(:ref => [:note_mods_type])
-            t.subject(:ref => [:subject])
+            t.subject_rel_item(:ref => [:main_subject])
             t.classification(:namespace_prefix => MODS_NS_PREFIX)
             t.location(:ref => [:location])
             t.access_condition(:ref => [:access_condition])
@@ -234,11 +233,10 @@ module DRI
                                     Descriptors.cleaned_displayable,  :sortable],
                         :namespace_prefix => MODS_NS_PREFIX)
           # Description: abstract, tableOfContents, or note
-          # TODO Check this XPath
           t.description(:path => "//mods:mods/mods:abstract | //mods:mods[not(mods:abstract)]/mods:note | //mods:mods[not(mods:abstract) and not(mods:note)]/mods:tableOfContents | //mods:mods[not(mods:abstract) and not(mods:note) and not(mods:tableOfContents)]/mods:physicalDescription/mods:note", :index_as => [Descriptors.cleaned_searchable,
                                                            Descriptors.cleaned_displayable])
           # Subject: defaults to subject/topic
-          t.subject_(:path => "mods/mods:subject/mods:topic", :index_as=>[Descriptors.cleaned_searchable,
+          t.subject(:proxy => [:mods, :main_subject, :main_topic], :index_as=>[Descriptors.cleaned_searchable,
                                                             Descriptors.cleaned_facetable,
                                                             Descriptors.cleaned_displayable],
                      :namespace_prefix => MODS_NS_PREFIX)
@@ -253,19 +251,19 @@ module DRI
                                                                  Descriptors.cleaned_facetable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Type
-          t.type(:path => "mods/mods:typeOfResource", :index_as=>[Descriptors.cleaned_facetable,
+          t.type(:proxy => [:mods, :type_resource], :index_as=>[Descriptors.cleaned_facetable,
                                            Descriptors.cleaned_searchable,
                                            Descriptors.cleaned_displayable],
                  :namespace_prefix => MODS_NS_PREFIX)
 
           t.mods_type_collection(:path => "mods/mods:typeOfResource[@collection='yes']", :namespace_prefix => MODS_NS_PREFIX)
 
-          # Rights - needs special indexing
-          t.rights(:path => "mods/mods:accessCondition", :index_as=>[Descriptors.cleaned_searchable,
-                                                              Descriptors.cleaned_displayable],
+          # Rights - the type attribute with value 'use and reproduction' is DRI compulsory
+          t.rights(:proxy => [:mods, :access_condition], :attributes => {'type' => 'use and reproduction'}, :index_as=>[Descriptors.cleaned_searchable,
+                                                                                                                        Descriptors.cleaned_displayable],
                    :namespace_prefix => MODS_NS_PREFIX)
           # Publisher
-          t.publisher(:path => "mods/mods:originInfo/mods:publisher", :index_as => [Descriptors.cleaned_facetable,
+          t.publisher(:proxy => [:mods, :origin_info, :publisher], :index_as => [Descriptors.cleaned_facetable,
                                                                           Descriptors.cleaned_searchable,
                                                                           Descriptors.cleaned_displayable],
                       :namespace_prefix => MODS_NS_PREFIX)
@@ -379,7 +377,6 @@ module DRI
                                 :namespace_prefix => MODS_NS_PREFIX)
           t.part_date_end(:path => "part/mods:date[@encoding='w3cdtf' or @encoding='iso8601']", :attributes=>{:point=>"end"},
                               :namespace_prefix => MODS_NS_PREFIX)
-          t.licence(:path => "mods/mods:accessCondition", :namespace_prefix => MODS_NS_PREFIX, :attributes => {"type" => "use and reproduction"})
         end
 
       end
@@ -397,42 +394,8 @@ module DRI
         (!mods_type_collection.nil? && !mods_type_collection.empty?) ? true : false
       end
 
-      def metadata_path field
-        recognised_attributes = [:title, :rights, :description, :language, :subject, :contributor,
-                                  :source, :publisher, :creator, :type, :identifier, :published_date, :creation_date,
-                                  :geographical_coverage, :geographical_coverage_lang, :temporal_coverage,
-                                  :temporal_coverage_lang]
-        if recognised_attributes.include? field
-          [field]
-        elsif m = /^role_(.*)/.match(field.to_s)
-          if DRI::Vocabulary::marcRelators.include? m[1]
-            [field]
-          else
-            []
-          end
-        else
-          []
-        end
-      end
-
-      #
-      #
-      def update_indexed_attributes(params={}, opts={})
-        # if the params are just keys, not an array, make then into an array.
-        new_params = {}
-        params.each do |key, val|
-          if key.is_a? Array
-            new_params[key] = val
-          else
-            new_params[[key.to_sym]] = val
-          end
-        end
-        super(new_params, opts)
-      end
-
-      #
-      #
-      def roles= roles
+      # FIXME
+      def roles=(roles)
         if roles.is_a? Hash
           if roles.has_key?("type") && roles.has_key?("name") && (roles["type"].size == roles["name"].size )
             changed_roles = Hash.new
@@ -456,13 +419,13 @@ module DRI
       # Build the xml doc
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.mods(:version => "3.5", "xmlns:xlink" => "http://www.w3.org/1999/xlink",
-                   "xmlns:xsi" => "http://www.w3.org/2001/XMLSchema-instance",
-                   "xmlns:mods" => MODS_NS,
-                   "xmlns:marcrel" => "http://www.loc.gov/marc.relators/",
-                   "xmlns:dcterms" => "http://purl.org/dc/terms/",
+          xml[MODS_NS_PREFIX].mods(:version => '3.5', 'xmlns:xlink' => 'http://www.w3.org/1999/xlink',
+                   'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                   'xmlns:mods' => MODS_NS,
+                   'xmlns:marcrel' => 'http://www.loc.gov/marc.relators/',
+                   'xmlns:dcterms' => 'http://purl.org/dc/terms/',
                    "xmlns:#{CR_NS_PREFIX}" => CR_NS,
-                   "xsi:schemaLocation" => MODS_SCHEMA) {
+                   'xsi:schemaLocation' => MODS_SCHEMA) {
           }
         end
         return builder.doc
@@ -476,11 +439,11 @@ module DRI
 
 
         # Title_sorted - A SOLR index for sorting titles
-        if (title.length > 0)
+        if title.length > 0
 
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
-          if (sorted_title != "")
+          if sorted_title != ""
             solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
@@ -490,31 +453,26 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => type)
 
         # MODS has several "name" tags, so we merge them together into the SOLR document
-        person_array = person_array_for_index()
+        person_array = person_array_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ""
-        ng_xml.xpath("//text()").each do |text_node|
+        all_metadata = ''
+        ng_xml.xpath('//text()').each do |text_node|
           all_metadata += text_node.text
-          all_metadata += " "
+          all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name("all_metadata", :stored_searchable, type: :text) => [all_metadata])
-
-        # Description
-        #description_array = description_for_index()
-
-        #solr_doc.merge!(ActiveFedora::SolrService.solr_name('description', :stored_searchable, type: :string) => description_array)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # Subject
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :stored_searchable) => subject) unless subject == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('subject', :facetable) => subject) unless subject == []
 
-        subject_name_array = subject_name_for_index()
-        subject_place_array = subject_place_for_index()
-        subject_temporal_array = subject_temporal_for_index()
+        subject_name_array = subject_name_for_index
+        subject_place_array = subject_place_for_index
+        subject_temporal_array = subject_temporal_for_index
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :stored_searchable) => subject_name_array) unless subject_name_array == []
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('name_coverage', :facetable) => subject_name_array) unless subject_name_array == []
@@ -526,7 +484,7 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
         # Indices for external relationships (to be displayed as URL)
-        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym})
+        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend('ext_related_items_ids_').to_sym})
 
         external_rels.each do |elem|
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []
@@ -534,11 +492,11 @@ module DRI
 
         # Type
         if collection?
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable, type: :string) => "Collection")
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable, type: :string) => 'Collection')
         end
 
         # Index creation_date
-        creation_date_idx = creation_date_for_index()
+        creation_date_idx = creation_date_for_index
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => creation_date_idx)
 
         # Index Published Date
@@ -548,51 +506,29 @@ module DRI
         end
 
         # Index date ranges
-        date_ranges = date_ranges_for_index() # ALL the date ranges
-
+        date_ranges = date_ranges_for_index # ALL the date ranges
         # Creation date dateRange index
-        cdate_ranges = date_ranges.select {|key, value| ["creation_date", "captured_date"].include?(key)}
-        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges == {}
+        cdate_ranges = date_ranges.select {|key, value| ['creation_date', 'captured_date'].include?(key)}
+        cdate_index = DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)
+        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index) unless cdate_index.empty?
 
         # Published date dateRange index
-        pdate_ranges = date_ranges.select {|key, value| ["issued_date"].include?(key)}
-        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges == {}
+        pdate_ranges = date_ranges.select {|key, value| ['issued_date'].include?(key)}
+        pdate_index = DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)
+        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index) unless pdate_index.empty?
 
         # Subject date dateRange index
-        sdate_ranges = date_ranges.select {|key, value| ["subject_date", "date_other", "part_date"].include?(key)}
-        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges == {}
-
-        licence_array = licence_for_index()
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('licence', :stored_searchable, type: :string) => licence_array) unless licence_array == []
+        sdate_ranges = date_ranges.select {|key, value| ['subject_date', 'date_other', 'part_date'].include?(key)}
+        sdate_index = DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)
+        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index) unless sdate_index.empty?
 
         solr_doc
       end
 
       # Indexing Methods
       # --------------------------------------------------------------------------------------------------------------
-      # description_for_index NOT NEEDED as indexed in the terminology
-      #def description_for_index
-      #  return abstract if !abstract.empty?
-      #  return toc if !toc.empty?
-      #  unless (note_mods_type.empty? && note_mods_no_type.empty?)
-      #    note_formatted = note_mods_type.collect!.with_index do |name, idx|
-      #      name = "#{name} [#{note_mods_type.type_at[idx]}]"
-      #    end
-      #    return note_formatted | note_mods_no_type
-      #  end
-      #
-      #  return []
-      #end
 
-      def licence_for_index()
-        if (!licence.empty?)
-          licence
-        else
-          return ['Please see rights statement']
-        end
-      end
-
-      def creation_date_for_index()
+      def creation_date_for_index
         return display_single_date_for_index(creation_date) unless creation_date == []
         # Cases below needed as creation_date not only holds single dates and there are 3 possible fields for this date
         return display_date_range_for_index(creation_date_start, creation_date_end) unless creation_date_start == []
@@ -602,23 +538,23 @@ module DRI
         return []
       end
 
-      def person_array_for_index()
+      def person_array_for_index
         return creator | contributor
       end
 
       # These are DRI Subject(Name)
-      def subject_name_for_index()
+      def subject_name_for_index
         return name_coverage
       end
 
       # These are DRI Subject(Place)
-      def subject_place_for_index()
+      def subject_place_for_index
         return geographical_coverage | hierarchical_geographic | cartographics_scale | cartographics_coordinates |
             cartographics_projection | geographic_code
       end
 
       # These are DRI Subject(Place)
-      def subject_temporal_for_index()
+      def subject_temporal_for_index
         return display_single_date_for_index(temporal_coverage) |
             display_single_date_for_index(date_other) |
             display_single_date_for_index(part_date) |
@@ -629,9 +565,9 @@ module DRI
 
       # No date ranges here, single date display (just the year)
       def display_single_date_for_index(date_field=[])
-        date_field.collect! do| value |
+        date_field.collect do| value |
           begin
-            display_date = ISO8601::DateTime.new(value).strftime("%b %d, %Y")
+            display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
             DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
           rescue ISO8601::Errors::StandardError
             DRI::Metadata::Transformations.create_dcmi_period(value) # DCMI Period 'name' is the md value
@@ -641,13 +577,13 @@ module DRI
 
       # Display of date ranges: start_year - end_year
       def display_date_range_for_index(date_start=[], date_end=[])
-        date_range_display = date_start.collect!.with_index do |name, idx|
+        date_range_display = date_start.collect.with_index do |name, idx|
           begin
-            d_start = ISO8601::DateTime.new(name).strftime("%b %d, %Y")
+            d_start = ISO8601::DateTime.new(name).strftime('%b %d, %Y')
 
-            if idx <= (date_end.length - 1)
-              d_end = ISO8601::DateTime.new(date_end[idx]).strftime("%b %d, %Y")
-              DRI::Metadata::Transformations.create_dcmi_period(d_start << " - " << d_end, name, date_end[idx])
+            if date_start.size == date_end.size
+              d_end = ISO8601::DateTime.new(date_end[idx]).strftime('%b %d, %Y')
+              DRI::Metadata::Transformations.create_dcmi_period(d_start << ' - ' << d_end, name, date_end[idx])
             else
               Transformations.create_dcmi_period(d_start, name)
             end
@@ -662,40 +598,25 @@ module DRI
       # Return all date ranges formatted in the right format for indexing and single dates
       # Format: start_date/end_date (ISO8601)
       # @return Hash with all the dates present in the metadata to be indexed as date ranges
-      def date_ranges_for_index()
+      def date_ranges_for_index
         dates_hash = Hash.new
 
-        creation_date_array = creation_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (creation_date_end.length - 1)) ? ("#{name}/#{creation_date_end[idx]}") : name
-        end
-        captured_date_array = captured_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (captured_date_end.length - 1)) ? ("#{name}/#{captured_date_end[idx]}") : name
-        end
-        issued_date_array = issued_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (issued_date_end.length - 1)) ? ("#{name}/#{issued_date_end[idx]}") : name
-        end
-        subject_date_array = subject_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (subject_date_end.length - 1)) ? ("#{name}/#{subject_date_end[idx]}") : name
-        end
-        date_other_array = date_other_start.collect!.with_index do |name, idx|
-          name = (idx <= (date_other_end.length - 1)) ? ("#{name}/#{date_other_end[idx]}") : name
-        end
-        part_date_array = part_date_start.collect!.with_index do |name, idx|
-          name = (idx <= (part_date_end.length - 1)) ? ("#{name}/#{part_date_end[idx]}") : name
-        end
+        creation_date_array = creation_date_start.map.with_index { |name, idx| creation_date_start.size == creation_date_end.size ? ("#{name}/#{creation_date_end[idx]}") : name }
+        captured_date_array = captured_date_start.map.with_index { |name, idx| captured_date_start.size == captured_date_end.size ? ("#{name}/#{captured_date_end[idx]}") : name }
+        issued_date_array = issued_date_start.map.with_index { |name, idx| issued_date_start.size == issued_date_end.size ? ("#{name}/#{issued_date_end[idx]}") : name }
+        subject_date_array = subject_date_start.map.with_index { |name, idx| subject_date_start.size == subject_date_end.size ? ("#{name}/#{subject_date_end[idx]}") : name }
+        date_other_array = date_other_start.map.with_index { |name, idx| date_other_start.size == date_other_end.size ? ("#{name}/#{date_other_end[idx]}") : name }
+        part_date_array = part_date_start.map.with_index { |name, idx| part_date_start.size == part_date_end.size ? ("#{name}/#{part_date_end[idx]}") : name }
 
-        dates_hash["creation_date"] = creation_date_array | creation_date
-        dates_hash["captured_date"] = captured_date_array | captured_date
-        dates_hash["issued_date"] = issued_date_array | published_date
-        dates_hash["subject_date"] = subject_date_array | temporal_coverage
-        # dates_hash["date"] = date # Date as namePart[@type='date'] not being indexed as it is not a subject date
-        dates_hash["date_other"] = date_other_array | date_other
-        dates_hash["part_date"] = part_date_array | part_date
+        dates_hash['creation_date'] = creation_date_array | creation_date
+        dates_hash['captured_date'] = captured_date_array | captured_date
+        dates_hash['issued_date'] = issued_date_array | published_date
+        dates_hash['subject_date'] = subject_date_array | temporal_coverage
+        dates_hash['date_other'] = date_other_array | date_other
+        dates_hash['part_date'] = part_date_array | part_date
 
-        return dates_hash
+        return dates_hash.delete_if { |k, v| v.empty? }
       end
-
-
 
       # --------------------------------------------------------------------------------------------------------------
 
@@ -764,9 +685,9 @@ module DRI
           end
         end
 
-        errors[:mods_id_local] = "not present." unless identifier_result == true
-        errors[:id_uri] = "Invalid URI present" unless uri_result == true
-        errors[:related_items_digital] = "Invalid URI present" unless ext_uri_result == true
+        errors[:mods_id_local] = 'not present.' unless identifier_result == true
+        errors[:id_uri] = 'Invalid URI present' unless uri_result == true
+        errors[:related_items_digital] = 'Invalid URI present' unless ext_uri_result == true
         errors[:title] = "can't be blank" if title_result == false
         errors[:type] = "can't be blank" if type_result == false
 

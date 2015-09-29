@@ -1,4 +1,4 @@
-class CreateModsRelationshipsJob < ActiveFedoraPidBasedJob
+class CreateModsRelationshipsJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :relationships
@@ -7,7 +7,7 @@ class CreateModsRelationshipsJob < ActiveFedoraPidBasedJob
   def run
     sleep 3
     object = DRI::Mods.find(self.pid)
-    object.process_collection_relationships()
+    object.process_collection_relationships
   end
 
 end

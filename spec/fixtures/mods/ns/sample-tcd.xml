@@ -110,7 +110,7 @@
       </mods:copyInformation>
     </mods:holdingSimple>
   </mods:location>
-  <mods:accessCondition type="useAndReproduction">
+  <mods:accessCondition type="use and reproduction">
     <copyrightMD:copyright copyright.status="copyrighted">
       <copyrightMD:rights.holder>Copyright 2014 The Board of Trinity College Dublin. </copyrightMD:rights.holder>
       <copyrightMD:general.note>Images are available for single-use academic and research applications only. Publication, transmission, or display is prohibited without the formal written approval of Trinity College Library Dublin. Please contact the head of Digital Resources and Imaging Services for further information (digitalresources@tcd.ie).</copyrightMD:general.note>

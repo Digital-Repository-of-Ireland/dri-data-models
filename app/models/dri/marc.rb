@@ -3,16 +3,20 @@ class Marc < DRI::Batch
 
   include DRI::ModelSupport::MarcSupport
 
-  contains "descMetadata", class_name: "DRI::Metadata::Marc"
+  contains 'descMetadata', class_name: 'DRI::Metadata::Marc'
 
-  has_attributes :leader, datastream: :descMetadata, multiple: false
-  has_attributes :controlfield, :controlfield_tag, datastream: :descMetadata, multiple: true
-  has_attributes :datafield, :datafield_tag, :datafield_ind1, :datafield_ind2, datastream: :descMetadata, multiple: true
+  property :leader, delegate_to: 'descMetadata', multiple: false
+  property :controlfield, delegate_to: 'descMetadata', multiple: true
+  property :controlfield_tag, delegate_to: 'descMetadata', multiple: true
+  property :datafield, delegate_to: 'descMetadata', multiple: true
+  property :datafield_tag, delegate_to: 'descMetadata', multiple: true
+  property :datafield_ind1, delegate_to: 'descMetadata', multiple: true
+  property :datafield_ind2, delegate_to: 'descMetadata', multiple: true
 
   # MARC record identifier used for internal relationships target, not multi-valued
-  has_attributes :marc_id, datastream: :descMetadata, multiple: false
+  property :marc_id, delegate_to: 'descMetadata', multiple: false
   # MARC record asset identifier used to sort pages/sequenced items
-  has_attributes :id_asset, datastream: :descMetadata, multiple: false
+  property :id_asset, delegate_to: 'descMetadata', multiple: false
 
   # MARC Relationships, mapped from QDC predicate properties
   # 787: Other Relationship Entry; Mapped to DC: relation
@@ -28,21 +32,21 @@ class Marc < DRI::Batch
 
   # Mapped attributes for getting relational information from metadata
   # Internal Relationships
-  has_attributes  :relation_ids_isVersionOf, datastream: :descMetadata, multiple: true
-  has_attributes  :relation_ids_isFormatOf, datastream: :descMetadata, multiple: true
-  has_attributes  :relation_ids_relation, datastream: :descMetadata, multiple: true
+  property  :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true
+  property  :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true
+  property  :relation_ids_relation, delegate_to: 'descMetadata', multiple: true
 
-  has_attributes  :relation_ids_preceding, datastream: :descMetadata, multiple: true
-  has_attributes  :relation_ids_succeeding, datastream: :descMetadata, multiple: true
+  property  :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true
+  property  :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true
 
-  has_attributes :related_material, datastream: :descMetadata, multiple: true
-  has_attributes :alternative_form, datastream: :descMetadata, multiple: true
+  property :related_material, delegate_to: 'descMetadata', multiple: true
+  property :alternative_form, delegate_to: 'descMetadata', multiple: true
 
   # Disabled below - metadata object update triggers the creation of duplicated objects
   # around_save :create_multiple_records
 
   def initialize(params = {})
-    params[:desc_metadata_class] = "DRI::Metadata::Marc"
+    params[:desc_metadata_class] = 'DRI::Metadata::Marc'
     super(params)
   end
 
@@ -50,7 +54,7 @@ class Marc < DRI::Batch
     descMetadata.type
   end
 
-  def update_metadata xml_text
+  def update_metadata(xml_text, ingest=true)
     if (xml_text.is_a? File)
       xml_text = xml_text.read
     end
@@ -66,18 +70,18 @@ class Marc < DRI::Batch
     end
 
     fullMetadata.ng_xml = xml_without_blanks
-    object = split_xml xml_without_blanks.remove_namespaces!
+    object = split_xml(xml_without_blanks.remove_namespaces!)
     descMetadata.ng_xml = object
 
     return true
   end
 
-  def split_xml xml_text
+  def split_xml(xml_text)
     # If collection wrapper present, the first object will have
     # the first marc:record and we then process the rest when saving
-    collection = xml_text.search("//collection")
+    collection = xml_text.search('//collection')
 
-    if (!collection.empty?)
+    if !collection.empty?
       records = collection.children
       record = records[0]
     else

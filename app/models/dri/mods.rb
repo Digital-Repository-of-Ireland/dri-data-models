@@ -2,7 +2,7 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
-    contains "descMetadata", class_name: "DRI::Metadata::Mods"
+    contains 'descMetadata', class_name: 'DRI::Metadata::Mods'
 
     # MODS relationships
     # To express the bi-directionality of the sequencing relationships
@@ -30,63 +30,61 @@ module DRI
     #has_and_belongs_to_many :review, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedReview, class_name: "DRI::Mods"
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    has_attributes :mods_id_local, datastream: :descMetadata, multiple: false
+    property :mods_id_local, delegate_to: 'descMetadata', multiple: false
     # MODS record asset identifier used to sort pages/sequenced items
-    has_attributes :id_asset, datastream: :descMetadata, multiple: false
+    property :id_asset, delegate_to: 'descMetadata', multiple: false
     # MODS rest of identifiers are repeatable
-    has_attributes :identifier, datastream: :descMetadata, multiple: true
-    has_attributes :id_doi, datastream: :descMetadata, multiple: true
-    has_attributes :id_uri, datastream: :descMetadata, multiple: true
+    property :identifier, delegate_to: 'descMetadata', multiple: true
+    property :id_doi, delegate_to: 'descMetadata', multiple: true
+    property :id_uri, delegate_to: 'descMetadata', multiple: true
     # Collection attribute
-    has_attributes :mods_type_collection, datastream: :descMetadata, multiple: false
+    property :mods_type_collection, delegate_to: 'descMetadata', multiple: false
     # Title
-    has_attributes :subtitle, datastream: :descMetadata, multiple: true
+    property :subtitle, delegate_to: 'descMetadata', multiple: true
     # Description
-    has_attributes :abstract, datastream: :descMetadata, multiple: true
-    has_attributes :toc, datastream: :descMetadata, multiple: true
-    has_attributes :note_mods_type, datastream: :descMetadata, multiple: true
-    has_attributes :note_mods_no_type, datastream: :descMetadata, multiple: true
+    property :abstract, delegate_to: 'descMetadata', multiple: true
+    property :toc, delegate_to: 'descMetadata', multiple: true
+    property :note_mods_type, delegate_to: 'descMetadata', multiple: true
+    property :note_mods_no_type, delegate_to: 'descMetadata', multiple: true
     # Source
-    has_attributes :source, datastream: :descMetadata, multiple: true
+    property :source, delegate_to: 'descMetadata', multiple: true
     # Dates
-    has_attributes :date, datastream: :descMetadata, multiple: true
-    has_attributes :date_other, datastream: :descMetadata, multiple: true
-    has_attributes :date_other_start, datastream: :descMetadata, multiple: true
-    has_attributes :date_other_end, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :captured_date_end, datastream: :descMetadata, multiple: true
-    has_attributes :issued_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :issued_date_end, datastream: :descMetadata, multiple: true
-    has_attributes :creation_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :creation_date_end, datastream: :descMetadata, multiple: true
+    property :date, delegate_to: 'descMetadata', multiple: true
+    property :date_other, delegate_to: 'descMetadata', multiple: true
+    property :date_other_start, delegate_to: 'descMetadata', multiple: true
+    property :date_other_end, delegate_to: 'descMetadata', multiple: true
+    property :captured_date, delegate_to: 'descMetadata', multiple: true
+    property :captured_date_start, delegate_to: 'descMetadata', multiple: true
+    property :captured_date_end, delegate_to: 'descMetadata', multiple: true
+    property :issued_date_start, delegate_to: 'descMetadata', multiple: true
+    property :issued_date_end, delegate_to: 'descMetadata', multiple: true
+    property :creation_date_start, delegate_to: 'descMetadata', multiple: true
+    property :creation_date_end, delegate_to: 'descMetadata', multiple: true
 
-    has_attributes :name_coverage, datastream: :descMetadata, multiple: true
+    property :name_coverage, delegate_to: 'descMetadata', multiple: true
     # Geographical, temporal
-    has_attributes :geographical_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :temporal_coverage, datastream: :descMetadata, multiple: true
-    has_attributes :subject_date_start, datastream: :descMetadata, multiple: true
-    has_attributes :subject_date_end, datastream: :descMetadata, multiple: true
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    property :subject_date_start, delegate_to: 'descMetadata', multiple: true
+    property :subject_date_end, delegate_to: 'descMetadata', multiple: true
 
-    # External relationships (contain a URI to resources external to DRI)
-    has_attributes *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("ext_related_items_ids_").to_sym}),
-                   datastream: :descMetadata, multiple: true
-    # Internal Relationships
-    has_attributes  *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend("related_items_ids_").to_sym}),
-                    datastream: :descMetadata, multiple: true
+    self.class_eval do
+      # Roles
+      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Internal Relationships
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # External relationships (contain a URI to resources external to DRI)
+      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+    end
 
-    # Roles
-    has_attributes  *(DRI::Vocabulary::marcRelators.map { |s| s.prepend("role_").to_sym}), datastream: :descMetadata,
-                    multiple: true
-
-    has_attributes :type, datastream: :descMetadata, multiple: true
+    property :type, delegate_to: 'descMetadata', multiple: true
 
     # TODO Disabled for now
     #around_save :create_multiple_records
 
     # Initialize - mods record
     def initialize(args = {})
-      args[:desc_metadata_class] = "DRI::Metadata::Mods"
+      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
       super(args)
     end
 
@@ -94,8 +92,7 @@ module DRI
       super(properties)
     end
 
-    def update_metadata(xml_text)
-      self.trigger_update=(true)
+    def update_metadata(xml_text, ingest=true)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -249,7 +246,7 @@ module DRI
     def create_multiple_records
       yield # Do save the object
 
-      if (self.trigger_update)
+      if self.trigger_ingest
         # Check whether there are namespaces
         #if self.fullMetadata.ng_xml.namespaces.values.include?("http://www.loc.gov/mods/v3")
         # Get the prefix used in the XML for MODS

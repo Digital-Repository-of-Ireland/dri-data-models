@@ -1,5 +1,4 @@
 # spec/metadata.dublin_core_audio_spec.rb
-require 'spec_helper'
 
 describe "DRI::Metadata::Properties" do
 

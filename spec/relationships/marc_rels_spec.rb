@@ -1,4 +1,3 @@
-require 'spec_helper'
 
 describe 'Marc' do
 
@@ -39,7 +38,7 @@ describe 'Marc' do
 
   after(:each) do
     unless @nccb0.new_record?
-      @nccb0.delete
+      #@nccb0.delete
     end
   end
 

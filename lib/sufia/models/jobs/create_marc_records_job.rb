@@ -1,4 +1,4 @@
-class CreateMarcRecordsJob < ActiveFedoraPidBasedJob
+class CreateMarcRecordsJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :marc

@@ -11,20 +11,25 @@ module DRI
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
-  
-    has_many_versions
+    # has_many_versions deprecated
+    #has_many_versions
 
-    has_many :generic_files, class_name: "DRI::GenericFile", as: :batch, dependent: :destroy
+    has_many :generic_files, class_name: 'DRI::GenericFile', as: :batch, dependent: :destroy
 
     # dependent: :destroy -> remove the documentation object if the collection is deleted
-    has_many :documentation_objects, class_name: "DRI::Documentation", as: :documentation_for
+    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
     # Declare a 'extracted' DS, of the following type
-    contains "extracted", class_name: 'DRI::Metadata::Extracted'
+    contains 'extracted', class_name: 'DRI::Metadata::Extracted'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
-    has_attributes :full_text, datastream: :extracted, multiple: true
+    property :full_text, delegate_to: 'extracted', multiple: true
 
+    # Creates a digital object depending on the metadata standard
+    #
+    # @param standard [Symbol] the metadata standard for the new object, `:marc` or `:mods` or `:ead_collection` or `:ead_component` or `:qdc`
+    # @param args [Hash] hash of additional options
+    # @return [DRI::Marc, DRI::EncodedArchivalDescription, DRI::Mods, DRI::QualifiedDublinCore] a new digital object.
     def self.with_standard(standard, args = {})
       case standard
         when :marc
@@ -44,6 +49,11 @@ module DRI
       end
     end
 
+    # Retrieves a digital object from fedora given its pid; creates
+    # a new object if the object does not exist
+    #
+    # @param pid [String] the pid of the object to retrieve
+    # @return [DRI::Batch] a fedora digital object.
     def self.find_or_create(pid)
       begin
         DRI::Batch.find(pid)
@@ -51,13 +61,13 @@ module DRI
         DRI::Batch.create({id: pid})
       end
     end
-   
-    # Updates the metadata class of the current digital object in case we are now working
-    # with a different metadata standard
-    # @param[String,File] xml_text xml metadata content or a File
-    # @return[boolean] true if op successful
-    # Note: Use this in preference over the setting xml directly in the OmDatastreams
-    def update_metadata xml_text
+
+    # @note Use this in preference over setting xml directly in the OmDatastreams
+    # Updates the xml metadata of this object
+    # @param xml_text [String, File] xml string metadata content or a file
+    # @param ingest [Boolean] flag to determine if this is part of an ingest
+    # @return [boolean] true if success; false otherwise
+    def update_metadata(xml_text, ingest=true)
       if (xml_text.is_a? File)
         xml_text = xml_text.read
       end
@@ -67,10 +77,15 @@ module DRI
       return true
     end
 
+    # Asserts the model class
     def assert_content_model
       self.has_model = [self.class.to_s, self.class.superclass.to_s]
     end
 
+    # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
+    # @param solr_doc [Hash] hash to insert the fields into
+    # @param opts [Hash] options hash
+    # @return [Hash] the solr document to be indexed
     def to_solr(solr_doc=Hash.new, opts={})
       solr_doc = super(solr_doc)
 
@@ -87,7 +102,9 @@ module DRI
       solr_doc
     end
 
-    # Indexing object types as a hierarchical tree
+    # Add object types as a hierarchical tree into the Solr fields
+    # @param solr_doc [Hash] hash to insert the fields into
+    # @return [Hash] the solr document to be indexed
     def object_types_to_solr(solr_doc=Hash.new)
       object_types = []
 
@@ -96,7 +113,7 @@ module DRI
       end
 
       if object_types.count < 1
-        object_types.push "Unknown"
+        object_types.push('Unknown')
       end
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
@@ -107,8 +124,10 @@ module DRI
       solr_doc
     end
 
+    # Returns whether the object has a status of 'published'
+    # @return [Boolean] true if status is published
     def published?
-      self.status == "published"
+      self.status == 'published'
     end
 
     private

@@ -5,6 +5,7 @@ module DRI
   autoload :ModelSupport, "dri/model_support"
   autoload :Vocabulary, "dri/vocabulary"
   autoload :Utils, "dri/utils"
+  autoload :Checksum, "dri/checksum"
   autoload :Solr, "solr/query"
   autoload :RDFVocabularies, "dri/rdf_vocabularies"
 end

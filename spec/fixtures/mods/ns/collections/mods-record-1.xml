@@ -47,7 +47,7 @@
   <mods:location>
     <mods:url usage="primary display" access="object in context">http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html</mods:url>
   </mods:location>
-  <mods:accessCondition> Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.
+  <mods:accessCondition type="use and reproduction"> Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.
   </mods:accessCondition>
   <mods:recordInfo>
     <mods:recordContentSource>University of Pennsylvania Digital Library</mods:recordContentSource>
