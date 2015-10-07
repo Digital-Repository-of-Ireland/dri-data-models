@@ -105,7 +105,7 @@ module DRI
         ds_class = ""
         ds = nil
 
-        if new_record? && desc_metadata_class != nil
+        if new_record? && !desc_metadata_class.nil?
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
@@ -122,19 +122,6 @@ module DRI
               return
             end
           end
-        else
-          # When loading the object from Fedora, check what metadata
-          # the XML uses and load the correct class.
-          ds_class = get_metadata_class_from_xml(descMetadata.to_xml)
-
-          if ['DRI::Metadata::EncodedArchivalDescription',
-              'DRI::Metadata::EncodedArchivalDescriptionComponent'].include? ds_class
-            old_digital_object = descMetadata.uri
-            ds = ds_class.constantize.from_xml(descMetadata.to_xml)
-            ds.uri = old_digital_object
-          else
-            return
-          end
         end
 
         if (ds != nil)
@@ -142,6 +129,27 @@ module DRI
           self.attach_file(ds, 'descMetadata')
         end
       end # load_attributes
+
+      def load_attached_files
+        super
+      
+        attach_desc_metadata
+      end
+
+      def attach_desc_metadata
+        ds_class = get_metadata_class_from_xml(descMetadata.to_xml)
+
+        return unless %w(DRI::Metadata::EncodedArchivalDescription 
+                         DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
+
+        old_digital_object = descMetadata.uri
+        ds = ds_class.constantize.from_xml(descMetadata.to_xml)
+        ds.uri = old_digital_object
+          
+        ds.instance_variable_set(:@dsid, 'descMetadata')
+        attached_files[:descMetadata] = ds
+      end
+
     end # module
   end # module
 end # module
