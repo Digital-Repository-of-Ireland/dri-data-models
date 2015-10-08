@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/TR/WD-rdf-syntax#"
+         xmlns:marcrel="http://www.loc.gov/marc.relators/"
+         xmlns:dcterms="http://purl.org/dc/terms/">
+  <rdf:Description about="urn:issn:1361-3197">
+    <dcterms:title>Documentation object</dcterms:title>
+    <dcterms:description>This is a sample documentation object</dcterms:description>
+    <dcterms:subject xml:lang="en">Qualitative interview</dcterms:subject>
+    <dcterms:subject>Social Sciences</dcterms:subject>
+    <dcterms:temporal>name=1990s; start=19900101; end=19991231;</dcterms:temporal>
+    <dcterms:spatial>Spain</dcterms:spatial>
+    <dcterms:Box>name=Ireland; northlimit=55.39; eastlimit=-5.24; southlimit=51.47; westlimit=-10.44;</dcterms:Box>
+    <dcterms:Point>name=Dublin; north=53.3478; east=-6.25972;</dcterms:Point>
+    <dcterms:creator>Sample creator</dcterms:creator>
+    <dcterms:contributor>Contributor 1</dcterms:contributor>
+    <dcterms:issued>name=Jan 2001; start=20010101;</dcterms:issued>
+    <dcterms:publisher>Digital Repository of Ireland</dcterms:publisher>
+    <dcterms:identifier>dri:1232</dcterms:identifier>
+    <dcterms:language>en</dcterms:language>
+    <dcterms:type>Documentation</dcterms:type>
+    <dcterms:rights>All rights reserved</dcterms:rights>
+  </rdf:Description>
+</rdf:RDF>

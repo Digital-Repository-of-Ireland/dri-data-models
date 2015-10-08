@@ -1,6 +1,5 @@
 module DRI
   class EncodedArchivalDescription < DRI::Batch
-
     include DRI::ModelSupport::EadSupport
 
     # Specific EAD terms mapped
@@ -45,7 +44,8 @@ module DRI
     property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
 
     # Related Material
-    # The <relatedmaterial> element is comparable to ISAD(G) data element 3.5.3 and MARC field 544 with indicator 1
+    # The <relatedmaterial> element is comparable to ISAD(G)
+    # data element 3.5.3 and MARC field 544 with indicator 1
     property :related_material, delegate_to: 'descMetadata', multiple: true
 
     # Alternative Form Available
@@ -72,153 +72,150 @@ module DRI
     end
 
     def self.find_or_create(pid)
-      begin
-        DRI::EncodedArchivalDescription.find(pid)
-      rescue ActiveFedora::ObjectNotFoundError
-        DRI::EncodedArchivalDescription.create({id: pid})
-      end
+      DRI::EncodedArchivalDescription.find(pid)
+    rescue ActiveFedora::ObjectNotFoundError
+      DRI::EncodedArchivalDescription.create(id: pid)
     end
 
     def self.ead_dri_terms
       return [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
-              :creation_date, :published_date, :name_coverage, :temporal_coverage, :rights, :subject, :name_subject, :persname_subject,
-              :corpname_subject, :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
+              :creation_date, :published_date, :name_coverage, :temporal_coverage,
+              :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
+              :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
               :related_material, :alternative_form, :language]
     end
 
     def attributes=(properties)
-      modified_attributes = properties.select {|key, value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      modified_attributes = properties.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       super(modified_attributes)
 
-      update_attributes = properties.select {|key, value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      update_attributes = properties.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       self.trigger_update = true unless update_attributes.empty?
-      update_attributes.each { |key, value| self.send("#{key.to_s}=", value) unless value.nil? }
+      update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
 
     def editable_attributes
-      editable_attrs = Hash.new
+      editable_attrs = {}
       DRI::EncodedArchivalDescription.ead_dri_terms.each do |attr|
-        editable_attrs[attr] = self.send("#{attr.to_s}")
+        editable_attrs[attr] = send("#{attr}")
       end
 
       editable_attrs
     end
 
-    def get_hash_attributes
-      self.descMetadata.retrieve_terms_hash
+    def retrieve_hash_attributes
+      descMetadata.retrieve_terms_hash
     end
 
     def creator=(creators)
-      self.descMetadata.add_creator(creators)
+      descMetadata.add_creator(creators)
     end
 
     def contributor=(contributors)
-      self.descMetadata.add_contributor(contributors)
+      descMetadata.add_contributor(contributors)
     end
 
     def desc_scope_content=(descriptions)
-      self.descMetadata.add_desc_scope_content(descriptions)
+      descMetadata.add_desc_scope_content(descriptions)
     end
 
     def desc_abstract=(descriptions)
-      self.descMetadata.add_desc_abstract(descriptions)
+      descMetadata.add_desc_abstract(descriptions)
     end
 
     def desc_biog_hist=(descriptions)
-      self.descMetadata.add_desc_biog_hist(descriptions)
+      descMetadata.add_desc_biog_hist(descriptions)
     end
 
     def creation_date=(dates)
-      self.descMetadata.add_creation_date(dates) unless dates.empty?
+      descMetadata.add_creation_date(dates) unless dates.empty?
     end
 
     def published_date=(dates)
-      self.descMetadata.add_published_date(dates) unless dates.empty?
+      descMetadata.add_published_date(dates) unless dates.empty?
     end
 
     def temporal_coverage=(dates)
-      self.descMetadata.add_temporal_coverage(dates) unless dates.empty?
+      descMetadata.add_temporal_coverage(dates) unless dates.empty?
     end
 
     def name_coverage=(people)
-      self.descMetadata.add_name_coverage(people) unless people.empty?
+      descMetadata.add_name_coverage(people) unless people.empty?
     end
 
     def alternative_form=(materials)
-      self.descMetadata.add_alternative_form(materials) unless materials.empty?
+      descMetadata.add_alternative_form(materials) unless materials.empty?
     end
 
     def related_material=(materials)
-      self.descMetadata.add_related_material(materials) unless materials.empty?
+      descMetadata.add_related_material(materials) unless materials.empty?
     end
 
     def geogname_coverage_access=(locations)
-      self.descMetadata.add_geogname_coverage_access(locations) unless locations.empty?
+      descMetadata.add_geogname_coverage_access(locations) unless locations.empty?
     end
 
     def language=(languages)
-      self.descMetadata.add_language(languages) unless languages.empty?
+      descMetadata.add_language(languages) unless languages.empty?
     end
 
     # Override from collection.rb adding EAD-specific solr additions
-    def collections_to_solr(solr_doc=Hash.new)
+    def collections_to_solr(solr_doc = {})
       solr_doc = super(solr_doc)
-      if descMetadata.class == DRI::Metadata::EncodedArchivalDescriptionComponent && previous_sibling == nil
+
+      if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent) && previous_sibling.nil?
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => '1')
       end
+
       solr_doc
     end
 
     # Override from files.rb adding EAD-specific solr additions
-    def file_metadata_to_solr(solr_doc=Hash.new)
+    def file_metadata_to_solr(solr_doc = {})
       solr_doc = super(solr_doc)
 
       file_type = []
       file_type_display = []
 
-      if is_collection?
-        file_type.push('collection')
+      return solr_doc unless is_collection?
 
-        if !is_root_collection? && !ead_level.blank?
-          file_type_display.push ead_level.strip.capitalize
-        else
-          file_type_display.push('Collection')
-        end
+      file_type.push('collection')
+
+      if !is_root_collection? && !ead_level.blank?
+        file_type_display.push ead_level.strip.capitalize
+      else
+        file_type_display.push('Collection')
       end
+
       solr_doc
     end
 
     # Indexing object types as a hierarchical tree
-    def object_types_to_solr(solr_doc=Hash.new)
-
+    def object_types_to_solr(solr_doc = {})
       # Add title metadata from parent collections
       object_types = []
 
-      #main_category = nil
-
-      self.descMetadata.type.each do | curr_category |
-        object_types.push curr_category.split.map(&:capitalize)*' '
+      descMetadata.type.each do |curr_category|
+        object_types.push(curr_category.split.map(&:capitalize) * ' ')
       end
 
       if object_types.empty?
         case descMetadata
-          when DRI::Metadata::EncodedArchivalDescriptionComponent
-            if descMetadata.collection?
-              object_types.push('Collection')
-            end
-            if ead_level.include? 'otherlevel'
-              object_types.push ead_level_other.split.map(&:capitalize)*' '
-            else
-              object_types.push ead_level.split.map(&:capitalize)*' '
-            end
+        when DRI::Metadata::EncodedArchivalDescriptionComponent
+          object_types.push('Collection') if descMetadata.collection?
+
+          if ead_level.include? 'otherlevel'
+            object_types.push(ead_level_other.split.map(&:capitalize) * ' ')
+          else
+            object_types.push(ead_level.split.map(&:capitalize) * ' ')
+          end
         when DRI::Metadata::EncodedArchivalDescription
           object_types.push('Collection')
         end
       end
 
-      if object_types.count < 1
-        object_types.push('Unknown')
-      end
+      object_types.push('Unknown') if object_types.count < 1
+
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
 
@@ -233,9 +230,7 @@ module DRI
       # Differentiate between ingest and individual object update
       ingest ? (self.trigger_ingest = true) : (self.trigger_update = true)
 
-      if xml_text.is_a?(File)
-        xml_text = xml_text.read
-      end
+      xml_text = xml_text.read if xml_text.is_a?(File)
 
       if ingest
         fullMetadata.ng_xml = xml_text
@@ -246,8 +241,8 @@ module DRI
         if fullMetadata.ng_xml.root.children.empty?
           fullMetadata.ng_xml = xml_text
         end
-        # For EAD XML updates we need to discard any children components in the XML
-        # as only updates of metadata fields is supported (NO hierarchy updates)
+        # For EAD XML updates discard any children components in the XML
+        # as NO hierarchy updates are supported, only MD
         xml_text = split_ead_xml(xml_text, desc_metadata_class)
         descMetadata.ng_xml = xml_text
       end
@@ -263,7 +258,8 @@ module DRI
       else
         xml = Nokogiri::XML xml_text
       end
-      # Remove namespaces from XML - handle EAD XSD (EAD data model is namespace-free)
+      # Remove namespaces from XML - handle EAD XSD
+      # (EAD data model is namespace-free)
       xml.remove_namespaces!
 
       if xml_type == 'DRI::Metadata::EncodedArchivalDescription'
@@ -285,34 +281,37 @@ module DRI
 
     private
 
-    # Called within synchronize_if__changed (around_save callback) if descMetadata updated
+    # Called within synchronize_if__changed (around_save callback)
+    # if descMetadata updated
     def update_full_metadata
-      has_ns = self.fullMetadata.ng_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+      has_ns = fullMetadata.ng_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
 
       if has_ns
-        temp_desc_md = self.descMetadata.ng_xml.clone
+        temp_desc_md = descMetadata.ng_xml.clone
         temp_desc_md.root.add_namespace('ead', 'urn:isbn:1-931666-22-9')
         temp_desc_md.root.add_namespace('xlink', 'http://www.w3.org/1999/xlink')
 
         temp_desc_md.search('//*').each do |n|
           # all ns prefix from root node to every child in the XML
-          n.namespace = temp_desc_md.root.namespace_definitions.find{|ns| ns.prefix=='ead'}
-          if n['href'] # dao @href attr is under xlink ns if using EAD XSD
-            n.attribute('href').namespace = temp_desc_md.root.namespace_definitions.find{|ns| ns.prefix=='xlink'}
+          n.namespace = temp_desc_md.root.namespace_definitions.find { |ns| ns.prefix == 'ead' }
+          # dao @href attr is under xlink ns if using EAD XSD
+          if n['href']
+            n.attribute('href').namespace = temp_desc_md.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' }
           end
         end
         updated_desc_md = temp_desc_md
       else
-        updated_desc_md = self.descMetadata.ng_xml.clone
+        updated_desc_md = descMetadata.ng_xml.clone
       end
 
-      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(self.fullMetadata.ng_xml)
+      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(fullMetadata.ng_xml)
 
-      # copy children components from un-synced fullMetadata as descMetadata does not include them
+      # copy children components from un-synced fullMetadata
+      # as descMetadata does not include them
       unless children_components.empty?
         children_components.each do |node|
           if has_ns
-            results = updated_desc_md.xpath('//ead:dsc', {'xmlns:ead' => 'urn:isbn:1-931666-22-9'})
+            results = updated_desc_md.xpath('//ead:dsc', { 'xmlns:ead' => 'urn:isbn:1-931666-22-9' })
             dsc = results.empty? ? nil : results.first
           else
             dsc = updated_desc_md.at('//dsc')
@@ -328,7 +327,7 @@ module DRI
         end
       end
 
-      self.fullMetadata.ng_xml = updated_desc_md
+      fullMetadata.ng_xml = updated_desc_md
 
       true
     end
@@ -336,30 +335,30 @@ module DRI
     def synchronize_if_changed
       content_changed = false
 
-      if self.descMetadata.synchronize_metadata_on_save == true
-        content_changed = self.descMetadata.changed?
+      if descMetadata.synchronize_metadata_on_save == true
+        content_changed = descMetadata.changed?
       end
 
-      if self.trigger_update
-        # after descMetadata update and before save synchronise fullMetadata with descMetadata
+      if trigger_update
+        # after descMetadata update and before save
+        # synchronise fullMetadata with descMetadata
         update_full_metadata if content_changed
-        self.trigger_update = false if self.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
+        self.trigger_update = false if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
       end
       # Do the object save
       yield
 
-      if content_changed && !new_record?
-        if self.trigger_ingest
-          # This is an EAD ingest, not MD update
-          Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(self.id))
-        elsif self.trigger_update && self.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-          # ONLY for EncodedArchivalDescriptionComponent
-          # descMetadata update, trigger parent fullMetadata sync
-          Sufia.queue.push(UpdateParentMetadataJob.new(self.id))
-          self.trigger_update = false
-        end
+      return unless content_changed && !new_record?
+
+      if trigger_ingest
+        # This is an EAD ingest, not MD update
+        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(id))
+      elsif trigger_update && descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+        # ONLY for EncodedArchivalDescriptionComponent
+        # descMetadata update, trigger parent fullMetadata sync
+        Sufia.queue.push(UpdateParentMetadataJob.new(id))
+        self.trigger_update = false
       end
     end
-
   end # class
 end # module

@@ -300,14 +300,14 @@ module DRI
           t.geographic_code(:proxy => [:main_subject, :geographic_code])
 
           # Roles proxy, similar to QDC
-          DRI::Vocabulary::marcRelators.each do |role|
+          DRI::Vocabulary.marc_relators.each do |role|
             t.send "role_" + role, :path=>"name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \'#{role}\' and (mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'cre' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'aut' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'art' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'ctb' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'rcp' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'pat' and mods:role/mods:roleTerm[@type='code' and @authority='marcrelator'] != 'att')]/mods:namePart[not(@type='date')]",
                    :index_as=>[Descriptors.cleaned_facetable, Descriptors.cleaned_searchable,
                                Descriptors.cleaned_displayable], :namespace_prefix => MODS_NS_PREFIX
           end
 
           # Relationships
-          DRI::Vocabulary::modsRelationshipTypes.each do |rel|
+          DRI::Vocabulary.mods_relationship_types.each do |rel|
             t.send "related_items_ids_" + rel,
                    :path=>"relatedItem[@type='#{rel}']/mods:identifier[@type='local']",
                    :namespace_prefix => MODS_NS_PREFIX
@@ -346,7 +346,7 @@ module DRI
           t.related_items_digital(:path => "//mods:mods/mods:relatedItem/mods:location/mods:url | //mods:mods/mods:location/mods:url")
 
           # //relatedItem[@type='*' and not(mods:identifier[@type='local'])]
-          DRI::Vocabulary::modsRelationshipTypes.each do |rel|
+          DRI::Vocabulary.mods_relationship_types.each do |rel|
             t.send "ext_related_items_ids_" + rel,
                    :path => "relatedItem[@type='#{rel}']/mods:location/mods:url | relatedItem[@type='#{rel}']/mods:location/mods:physicalLocation",
                    :namespace_prefix => MODS_NS_PREFIX
@@ -484,7 +484,7 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array == []
 
         # Indices for external relationships (to be displayed as URL)
-        external_rels = *(DRI::Vocabulary::modsRelationshipTypes.map { |s| s.prepend('ext_related_items_ids_').to_sym})
+        external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym})
 
         external_rels.each do |elem|
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(elem, :stored_searchable) => self.send(elem)) unless self.send(elem) == []

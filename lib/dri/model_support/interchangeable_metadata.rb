@@ -6,21 +6,21 @@ module DRI
       included do
         attr_accessor :desc_metadata_class
 
-        # Descriptive metadata datastream - F4 uses "File attachments" instead of datas
+        # Descriptive metadata DS - F4 uses "File attachments" instead of DSs
         contains 'descMetadata', class_name: 'DRI::Metadata::Base'
         # Complete metadata record datastream
         contains 'fullMetadata', class_name: 'DRI::Metadata::FullMetadata'
 
         after_initialize :load_attributes
 
-        # TODO Check that these match the DRI Level 1 and 2 terms (some are missing)
+        # TODO: Check that these match the DRI Level 1 and 2 terms
         # DRI Mandatory (M)
         # Title (collection-level)
         property :title, delegate_to: 'descMetadata', multiple: true
         # Description (collection-level)
         property :description, delegate_to: 'descMetadata', multiple: true
         # ADDED TYPE, it is compulsory
-        #property :type, delegate_to: 'descMetadata', multiple: true
+        # property :type, delegate_to: 'descMetadata', multiple: true
         # Rights (collection-level)
         property :rights, delegate_to: 'descMetadata', multiple: true
         # Creator (collection-level)
@@ -45,33 +45,26 @@ module DRI
 
       # Should only be set in a new class
       def desc_metadata_class=(desc_metadata_class)
-        if self.new?
-          @desc_metadata_class = desc_metadata_class
-        end
+        @desc_metadata_class = desc_metadata_class if self.new?
       end
 
       private
 
       def custom_validations
-        if descMetadata.class < DRI::Metadata::Base
-          results = descMetadata.custom_validations
+        return true unless descMetadata.class < DRI::Metadata::Base
 
-          if results.empty?
-            return true
-          else
-            results.each do |key, value|
-              errors.add(key, value)
-            end
-            return false
-          end
-        else
-          return true
-        end
+        results = descMetadata.custom_validations
+        return true if results.empty?
+
+        results.each { |key, value| errors.add(key, value) }
+
+        false
       end # custom_validations
 
       def get_metadata_class_from_xml(xml_text)
         result = nil
-        xml = nil
+        ead_components = %w(c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12)
+        marc_components = %w(collection record)
 
         if xml_text.is_a? Nokogiri::XML::Document
           xml = xml_text
@@ -82,64 +75,63 @@ module DRI
         namespace = xml.namespaces
         root_name = xml.root.name
 
-        if namespace.has_value?('http://purl.org/dc/elements/1.1/')
+        if namespace.value?('http://purl.org/dc/elements/1.1/')
           result = 'DRI::Metadata::QualifiedDublinCore'
-        elsif namespace.has_value?('http://www.loc.gov/mods/v3')
+        elsif namespace.value?('http://www.loc.gov/mods/v3')
           result = 'DRI::Metadata::Mods'
-        elsif namespace.has_value?('http://www.loc.gov/MARC21/slim')
+        elsif namespace.value?('http://www.loc.gov/MARC21/slim')
           result = 'DRI::Metadata::Marc'
-        elsif (xml.internal_subset != nil && xml.internal_subset.name == 'ead') || ['ead'].include?(root_name)
+        elsif (xml.internal_subset.present? && xml.internal_subset.name == 'ead') || root_name == 'ead'
           result = 'DRI::Metadata::EncodedArchivalDescription'
-        elsif ['c', 'c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'c09', 'c10', 'c11', 'c12'].include? root_name
+        elsif ead_components.include? root_name
           result = 'DRI::Metadata::EncodedArchivalDescriptionComponent'
-        elsif ['collection', 'record'].include? root_name
+        elsif marc_components.include? root_name
           result = 'DRI::Metadata::Marc'
-        elsif ['mods'].include?(root_name)
+        elsif root_name == 'mods'
           result = 'DRI::Metadata::Mods'
         end
 
-        return result
+        result
       end # get_metadata_class_from_xml
 
       def load_attributes
-        ds_class = ""
+        ead_classes = %w(DRI::Metadata::EncodedArchivalDescription
+                         DRI::Metadata::EncodedArchivalDescriptionComponent)
         ds = nil
 
         if new_record? && !desc_metadata_class.nil?
           # For new objects, check what metadata class was asked for during initialization
           ds_class = @desc_metadata_class.to_s
 
-          if ['DRI::Metadata::EncodedArchivalDescription',
-              'DRI::Metadata::EncodedArchivalDescriptionComponent'].include? ds_class
+          if ead_classes.include? ds_class
             ds = ds_class.constantize.new
           else
             # Load class from :desc_metadata_class which is set ingest_controller
-            if ['DRI::Metadata::EncodedArchivalDescription',
-                'DRI::Metadata::EncodedArchivalDescriptionComponent'].include? desc_metadata_class
+            if ead_classes.include? desc_metadata_class
               ds = desc_metadata_class.constantize.new
             else
-              # if EAD or EADComponent do not create ds
+              # if NOT EAD or EADComponent, do not create DS
               return
             end
           end
         end
 
-        if (ds != nil)
-          ds.instance_variable_set(:@dsid, 'descMetadata')
-          self.attach_file(ds, 'descMetadata')
-        end
+        return if ds.nil?
+
+        ds.instance_variable_set(:@dsid, 'descMetadata')
+        attach_file(ds, 'descMetadata')
       end # load_attributes
 
       def load_attached_files
         super
-      
+
         attach_desc_metadata
       end
 
       def attach_desc_metadata
         ds_class = get_metadata_class_from_xml(descMetadata.to_xml)
 
-        return unless %w(DRI::Metadata::EncodedArchivalDescription 
+        return unless %w(DRI::Metadata::EncodedArchivalDescription
                          DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
 
         old_digital_object = descMetadata.uri
@@ -149,7 +141,6 @@ module DRI
         ds.instance_variable_set(:@dsid, 'descMetadata')
         attached_files[:descMetadata] = ds
       end
-
     end # module
   end # module
 end # module
