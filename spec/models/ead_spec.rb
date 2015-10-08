@@ -38,6 +38,14 @@ describe 'EncodedArchivalDescription' do
       @ead_header.properties.should be_kind_of(DRI::Metadata::Properties)
     end
 
+    it "should have the correct metadata type after a reload" do
+      @ead_header.save
+      @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
+
+      @ead_header.reload
+      @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
+    end
+
     it "should have namespaces removed from the ead datastream" do
       @ead_header = DRI::EncodedArchivalDescription.new :collection
       @header_xml = fixture("ead/collections/ead_header.xml")
