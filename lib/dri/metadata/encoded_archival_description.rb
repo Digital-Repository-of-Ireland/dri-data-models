@@ -608,7 +608,7 @@ module DRI
         if pub_stmt.nil?
           file_desc = ng_xml.at('/ead/eadheader/filedesc')
           pub_stmt = Nokogiri::XML::Node.new('publicationstmt', ng_xml)
-          file_desc.add(pub_stmt)
+          file_desc.add_child(pub_stmt)
         end
         dates[:display].each_with_index do |disp, idx|
           next if disp.empty?
