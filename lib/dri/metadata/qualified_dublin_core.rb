@@ -306,8 +306,22 @@ module DRI
         rights_result = false
         type_result = false
         date_result = false
+        creator_result = false
 
         title.each { |curr_title| title_result = true unless curr_title.blank? }
+        creator.each { |cre| creator_result = true unless cre.blank? }
+
+        unless creator_result == true
+          marc_rels = *(DRI::Vocabulary.marc_relators.map { |s| s.prepend('role_').to_sym })
+          marc_rels.each do |role|
+            send(role).each do |v| 
+              creator_result = true unless v.blank?
+              break if creator_result == true
+            end
+            break if creator_result == true
+          end
+        end
+
         description.each { |curr_description| description_result = true unless curr_description.blank? }
         rights.each { |curr_right| rights_result = true unless curr_right.blank? }
         type.each { |curr_type| type_result = true unless curr_type.blank? }
@@ -320,6 +334,7 @@ module DRI
         external_relation.each { |uri_r| uri_result = true if !uri_r.blank? && Utils.valid_uri?(uri_r) }
 
         errors[:title] = "can\'t be blank" if title_result == false
+        errors[:creator] = "can\'t be blank" if creator_result == false
         errors[:description] = "can\'t be blank" if description_result == false
         errors[:external_relation] = 'includes invalid URI' if external_relation.size > 0 && uri_result == false
         errors[:rights] = "can\'t be blank" if rights_result == false
