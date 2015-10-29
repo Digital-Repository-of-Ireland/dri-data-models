@@ -7,6 +7,7 @@ describe 'QualifiedDublinCore' do
     @audio.type = ['Sound']
 
     @attributes_hash = {
+      'creator' => ['New creator'],
       'title' => ['The Audio Title'],
       'rights' => ['This is a statement about the rights associated with this object'],
       'role_hst' => ['Collins, Michael'],
@@ -172,6 +173,44 @@ describe 'QualifiedDublinCore' do
 
     @audio.title = ['']
     @audio.should_not be_valid
+  end
+
+  it 'should validate the presence of the creator metadata field' do
+    # From ingestion
+    @dc = fixture('audios/dublin_core_audio_nocreator_sample.xml')
+    @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
+    @audio2 = DRI::QualifiedDublinCore.new
+    @audio2.update_metadata(@ds.to_xml)
+    @audio2.should be_valid
+    @audio2.role_edt = []
+    @audio2.role_aut = []
+    @audio2.should_not be_valid
+    expect(@audio2.descMetadata.custom_validations).to include(:creator)
+
+    # From update_attributes assignment
+    @audio = DRI::QualifiedDublinCore.new
+    @attributes_hash[:creator] = ['']
+    @attributes_hash[:role_hst] = ['']
+    @attributes_hash[:role_pro] = ['']
+    @attributes_hash[:role_aut] = ['']
+    @audio.type = ['Sound']
+    @audio.update_attributes(@attributes_hash)
+    @audio.should_not be_valid
+    expect(@audio.descMetadata.custom_validations).to include(:creator)
+
+    # From variable assignment
+    @audio = DRI::QualifiedDublinCore.new
+    @audio.description = ['blah']
+    @audio.rights = ['blah']
+    @audio.creator = []
+    @audio.type = ['Sound']
+    @audio.date = ['1916-04-01']
+    @audio.title = ['The title']
+    @audio.should_not be_valid
+
+    @audio.creator = ['']
+    @audio.should_not be_valid
+    expect(@audio.descMetadata.custom_validations).to include(:creator)
   end
 
   it 'should validate the presence of the description metadata field' do

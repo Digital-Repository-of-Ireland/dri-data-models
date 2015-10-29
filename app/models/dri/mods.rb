@@ -70,11 +70,11 @@ module DRI
 
     self.class_eval do
       # Roles
-      DRI::Vocabulary::marcRelators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
       # Internal Relationships
-      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary::modsRelationshipTypes.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
     end
 
     property :type, delegate_to: 'descMetadata', multiple: true

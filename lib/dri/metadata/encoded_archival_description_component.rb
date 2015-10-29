@@ -375,25 +375,25 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
-        unless creation_date_idx.empty?
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
-        else
+        if creation_date_idx.empty?
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent('creation_date_idx'))
+        else
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
         end
 
         # Published Date
         pdate_array = published_date.collect.with_index do |value, idx|
-          if !published_date(idx).normal_at.empty?
+          if published_date(idx).normal_at.empty?
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          else
             iso_date = published_date(idx).normal_at[0]
 
-            if (iso_date.include?('/'))
+            if iso_date.include?('/')
               range = iso_date.split('/')
               DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
             else
               DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
             end
-          else
-            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
         end
 
@@ -443,7 +443,7 @@ module DRI
       # If the component does not have this information it is then inherited from the immediate parent
       # and returned for its indexing as Rights
       def rights_for_index
-        !rights.empty? ? rights : get_field_from_parent('rights')
+        rights.empty? ? get_field_from_parent('rights') : rights
       end
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
@@ -451,7 +451,9 @@ module DRI
       def creation_date_for_index
        if !creation_date.empty?
           cdate_array = creation_date.collect.with_index do |value, idx|
-            unless creation_date(idx).normal_at.empty?
+            if creation_date(idx).normal_at.empty?
+              DRI::Metadata::Transformations.create_dcmi_period(value)
+            else
               iso_date = creation_date(idx).normal_at[0]
 
               if (iso_date.include?('/'))
@@ -460,14 +462,13 @@ module DRI
               else
                 DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
               end
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value)
             end
           end
-          return cdate_array
+
+          cdate_array
         else
           # Inherit the information
-          return get_field_from_parent('creation_date')
+          get_field_from_parent('creation_date')
         end
       end
 
@@ -480,7 +481,6 @@ module DRI
         ng_xml.search('/*/did/origination/*[not(@role="contributor")]').each { |n| creators_array << (n['role'].nil? ? n.content : "#{n.content} (#{n['role']})") }
 
         creators_array
-
       end
 
       def get_field_from_parent(field_name)
@@ -497,7 +497,7 @@ module DRI
           parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
         end
 
-        !parent_field.nil? ? parent_field : []
+        parent_field.nil? ? [] : parent_field
       end
 
       # Mapping to UI subjects: controlaccess/subject
@@ -525,7 +525,9 @@ module DRI
       # These are DRI Subject(Place)
       def subject_temporal_for_index
         date_array = date.collect.with_index do |value, idx|
-          if !date(idx).normal_at.empty?
+          if date(idx).normal_at.empty?
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          else
             iso_date = date(idx).normal_at[0]
 
             if (iso_date.include?('/'))
@@ -534,13 +536,13 @@ module DRI
             else
               DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
             end
-          else
-            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
         end
 
         temporal_array = temporal_coverage.collect.with_index do |value, idx|
-          if !temporal_coverage(idx).normal_at.empty?
+          if temporal_coverage(idx).normal_at.empty?
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          else
             iso_date = temporal_coverage(idx).normal_at[0]
 
             if (iso_date.include?('/'))
@@ -549,8 +551,6 @@ module DRI
             else
               DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
             end
-          else
-            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
         end
 

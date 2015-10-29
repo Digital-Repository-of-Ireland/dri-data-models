@@ -3,7 +3,7 @@
     xmlns:marcrel="http://www.loc.gov/marc.relators/"
     xmlns:dcterms="http://purl.org/dc/terms/"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd"
+    xsi:schemaLocation="http://www.loc.gov/marc.relators/ marcrel.xsd"
     xsi:noNamespaceSchemaLocation="http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd">
     <dc:title>THE SAMPLE AUDIO TITLE</dc:title>
     <dc:description>SAMPLE DESCRIPTION</dc:description>
