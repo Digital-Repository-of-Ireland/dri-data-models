@@ -24,16 +24,13 @@ module DRI
     end
 
     def self.find_or_create(pid)
-      begin
-        DRI::LinkedData.find(pid)
-      rescue ActiveFedora::ObjectNotFoundError
-        DRI::LinkedData.create({id: pid})
-      end
+      DRI::LinkedData.find(pid)
+    rescue ActiveFedora::ObjectNotFoundError
+      DRI::LinkedData.create(id: pid)
     end
 
-    def to_solr(solr_doc={}, opts={})
+    def to_solr(solr_doc = {}, opts = {})
       super(solr_doc, opts)
     end
-      
   end 
 end # Module DRI

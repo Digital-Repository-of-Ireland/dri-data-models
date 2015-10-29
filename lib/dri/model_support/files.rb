@@ -1,55 +1,14 @@
 module DRI
   module ModelSupport
-  	module Files
+    module Files
       extend ActiveSupport::Concern
       require 'open-uri'
       require 'uri'
       require 'tempfile'
 
-      included do
-        around_save :ingest_files_if_changed
-      end
-
-      def process_ingest_of_file_urls
-        case descMetadata
-          when DRI::Metadata::EncodedArchivalDescription
-          when DRI::Metadata::EncodedArchivalDescriptionComponent
-            self.dao_href.each do |url|
-              if !url.blank?
-                add_file_from_url url.strip
-              end
-            end
-          else # Do nothing
-        end
-      end # process_ingest_of_file_urls
-
-      # Ingest a file (generic_file) from a given URL
-      def add_file_from_url file_url
-        file_name = File.basename(URI(file_url).path)
-        begin
-
-          # We have a copy of the remote file for processing
-          temp_file = Tempfile.new(['tmp', File.extname(file_url)])
-          temp_file.binmode
-          open(file_url) { |data| temp_file.write data.read}
-          temp_file.close
-
-          add_file temp_file, "content", file_name
-          true
-        rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{self.id}\n"
-          logger.error e.backtrace.join("\n")
-          false
-        ensure
-          # Explicitly close the temp file
-          temp_file.close unless temp_file.nil?
-          temp_file.unlink unless temp_file.nil?
-        end
-      end # add_file_from_url
-
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
-      def file_metadata_to_solr(solr_doc=Hash.new)
+      def file_metadata_to_solr(solr_doc = {})
         file_type = []
         file_type_display = []
         file_count = 0
@@ -67,86 +26,72 @@ module DRI
         file_format = []
 
         if is_collection?
-          file_type.push "collection"
-          file_type_display.push "Collection"
+          file_type.push 'collection'
+          file_type_display.push 'Collection'
         end
 
-        # TODO - AMG check generic_file to batch rel is indexed properly
-        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""        
-        results = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
+        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""
+        results = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
 
-        if results != nil
+        unless results.nil?
           results.each do |gf|
             file_count += 1
             if !is_collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
-              file_type = file_type | [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0]]
-              file_type_display = file_type_display | [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0].capitalize]
+              file_type |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0]]
+              file_type_display |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0].capitalize]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer))
-              width = width | [gf[ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer)]]
+              width |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer))
-              height = height | [gf[ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer)]]
+              height |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer))
-              area = area | [gf[ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer)]]
+              area |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer))
-              channels = channels | [gf[ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer)]]
+              channels |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_sortable, type: :integer))
-              bit_depth = bit_depth | [gf[ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_sortable, type: :integer)]]
+              bit_depth |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer))
-              sample_rate = sample_rate | [gf[ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer)]]
+              sample_rate |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer))
-              if (duration_total == nil)
-                duration_total = 0
-              end
+              duration_total = 0 if duration_total.nil?
               duration_total += gf[ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer)]
-              duration = duration | [gf[ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer)]]
+              duration |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer))
-              if (file_size_total == nil)
-                file_size_total = 0
-              end
+              file_size_total = 0 if file_size_total.nil?
               file_size_total += gf[ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer)]
-              file_size = file_size | [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer)]]
+              file_size |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer)]]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable))
-              mime_type = mime_type | gf[ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable)]
+              mime_type |= gf[ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable)]
             end
             if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable))
-              file_format = file_format | gf[ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable)]
+              file_format |= gf[ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable)]
             end
           end
         end
 
         if file_type.empty?
-          # FIXME Use Vocabulary.dcmiType rather that if-elsif
           # As a last resort try to determine the file type from the
           # DCMI vocabulary in the metadata.
-          #
-          type = self.descMetadata.type
-          if type.include?("Sound")
-            file_type.push "audio"
-            file_type_display.push "Audio"
-          elsif type.include?("MovingImage")
-            file_type.push "video"
-            file_type_display.push "Video"
-          elsif type.include?("Text")
-            file_type.push "text"
-            file_type_display.push "Text"
-          elsif type.include?("Image")
-            file_type.push "image"
-            file_type_display.push "Image"
-          elsif (type.include?("Collection") || is_collection?)
-            file_type.push "collection"
-            file_type_display.push "Collection"
-          else
-            file_type.push "unknown"
-            file_type_display.push "Unknown"
+          type = nil
+          descMetadata.type.each do |value|
+            next unless DRI::Vocabulary.dcmi_type.include?(value.capitalize)
+            file_type.push(value)
+            file_type_display.push(value.capitalize)
+            type = value
+            break
+          end
+
+          if type.nil?
+            file_type.push 'unknown'
+            file_type_display.push 'Unknown'
           end
         end
 
@@ -165,13 +110,13 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_searchable, type: :integer) => sample_rate)
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :facetable, type: :integer) => sample_rate)
 
-        if (duration_total != nil)
+        unless duration_total.nil?
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration_total', :stored_sortable, type: :integer) => [duration_total])
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_searchable) => duration)
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :facetable, type: :integer) => duration)
         end
 
-        if (file_size_total != nil)
+        unless file_size_total.nil?
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size_total', :stored_sortable, type: :integer) => [file_size_total])
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_searchable, type: :integer) => file_size)
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :facetable, type: :integer) => file_size)
@@ -193,30 +138,6 @@ module DRI
 
         solr_doc
       end # file_metadata_to_solr
-
-      private
-
-      def ingest_files_if_changed
-        content_changed = false
-
-        if (self.ingest_files_from_metadata == "true" && self.trigger_update)
-          content_changed = self.descMetadata.changed?
-        end
-
-        # Does the actual collection/file save
-        yield
-
-        # Do not process files if object is a collection (DRI Collections do not have assets)
-        unless is_collection?
-          if content_changed && self.generic_files.empty? &&
-              !self.dao_href.empty? && !new_record?
-            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
-          end
-        end
-      end # ingest_files_if_changed
-
     end # module
-
   end # module
-
 end # module

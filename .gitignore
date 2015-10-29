@@ -1,5 +1,6 @@
 Gemfile.lock
 .DS_Store
+.yardoc/
 coverage/
 rdoc/
 test/dummy/log/test.log

@@ -1,4 +1,4 @@
-class SynchronizeChildrenToMetadataJob < ActiveFedoraPidBasedJob
+class SynchronizeChildrenToMetadataJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :synchronize_children_to_metadata

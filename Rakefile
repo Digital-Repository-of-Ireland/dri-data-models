@@ -1,6 +1,7 @@
 #!/usr/bin/env rake
 require 'jettywrapper'
 require 'rspec/core/rake_task'
+require 'yard'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -9,6 +10,7 @@ begin
 rescue LoadError
   puts 'You must `gem install bundler` and `bundle install` to run rake tasks'
 end
+
 begin
   require 'rdoc/task'
 rescue LoadError
@@ -27,7 +29,11 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('README.rdoc')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.rdoc_files.include('lib/dri/metadata/*.rb')
-  rdoc.rdoc_files.include('app/models/*.rb')
+  rdoc.rdoc_files.include('app/models/**/*.rb')
+end
+
+YARD::Rake::YardocTask.new(:yard) do |t|
+  t.files = ['lib/**/*.rb', 'app/models/**/*.rb']
 end
 
 require 'ci/reporter/rake/rspec'

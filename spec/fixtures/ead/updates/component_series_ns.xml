@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<c level="series">
+  <did>
+    <unittitle encodinganalog="3.1.2">Related Material</unittitle>
+    <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="RM" encodinganalog="3.1.1">KDW/RM</unitid>
+    <unitdate datechar="Creation" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+    <physdesc>
+      <extent encodinganalog="3.1.5">3 files</extent>
+    </physdesc>
+    <origination label="Creator:">
+      <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
+    </origination>
+  </did>
+  <scopecontent encodinganalog="3.3.1">
+    <p>This series contains material related to the Kilkenny Design Workshops Archive but not part of that archive. This related material, which comes from the KDW files in the NIVAL Design collection, has been acquired over time from diverse sources including donations from past KDW director Patrick Scott.</p>
+  </scopecontent>
+  <dsc type="combined">
+    <c level="file">
+      <did>
+        <unittitle encodinganalog="3.1.2">Ephemera</unittitle>
+        <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="02" encodinganalog="3.1.1">KDW/RM/02</unitid>
+        <unitdate datechar="Creation" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+        <physdesc>
+          <extent encodinganalog="3.1.5">to be determined</extent>
+        </physdesc>
+        <origination label="Creator:">
+          <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
+        </origination>
+      </did>
+      <scopecontent encodinganalog="3.3.1">
+        <p>This file contains printed material related to a number of KDW activities. These include: invitations and catalogues for KDW organised exhibitions; mail order catalogues; and promotional material.</p>
+      </scopecontent>
+    </c>
+  </dsc>
+</c>

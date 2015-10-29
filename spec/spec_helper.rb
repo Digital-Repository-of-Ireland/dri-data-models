@@ -46,7 +46,7 @@ RSpec.configure do |config|
   # the seed, which is printed after each run.
   #     --seed 1234
   config.order = "random"
-
+  # Explicitly enable both syntaxes
   config.expect_with :rspec do |c|
     c.syntax = [:should, :expect]
   end

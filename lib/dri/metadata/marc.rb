@@ -281,7 +281,7 @@ module DRI
       def type
         #[DRI::Vocabulary::marcType[ng_xml.xpath('substring(//record/leader, 7, 1)')]]
         # Position 7 (for 6th character as substring starts positions in 1 rather that 0)
-        [DRI::Vocabulary::marcType_leader_6[ng_xml.xpath('substring(//leader, 7, 1)')]]
+        [DRI::Vocabulary.marc_type_leader_6[ng_xml.xpath('substring(//leader, 7, 1)')]]
       end
 
       def add_datafields(datafields)

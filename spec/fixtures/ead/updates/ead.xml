@@ -41,9 +41,7 @@
       <unitdate datechar="Creation" normal="1990" encodinganalog="3.1.3">1990</unitdate>
       <unitdate datechar="Creation" encodinganalog="3.1.3">2000</unitdate>
       <physdesc>
-        <extent encodinganalog="3.1.5">
-          23 series containing 2682 files
-          Approximately 2500 sample digital images and documents                </extent>
+        <extent encodinganalog="3.1.5">23 series containing 2682 files.Approximately 2500 sample digital images and documents.</extent>
       </physdesc>
       <repository>
         <corpname>NIVAL</corpname>
@@ -91,5 +89,72 @@
 
         Turpin, John. “The Irish design reform movement of the 1960s”. Design Issues, vol.3, no.1, pp.4-21, Spring 1986</p>
     </bibliography>
+    <dsc type="combined">
+      <c level="series">
+        <did>
+          <unittitle encodinganalog="3.1.2">Related Material</unittitle>
+          <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="RM" encodinganalog="3.1.1">KDW/RM</unitid>
+          <unitdate datechar="publication" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+          <unitdate datechar="publication" normal="19650101" encodinganalog="3.1.3">1965</unitdate>
+          <unitdate datechar="" normal="19650101/19700101" encodinganalog="3.1.3">c. 1965</unitdate>
+          <physdesc>
+            <extent encodinganalog="3.1.5">3 files</extent>
+          </physdesc>
+          <origination label="Creator:">
+            <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
+          </origination>
+        </did>
+        <scopecontent encodinganalog="3.3.1">
+          <p>This series contains material related to the Kilkenny Design Workshops Archive but not part of that archive. This related material, which comes from the KDW files in the NIVAL Design collection, has been acquired over time from diverse sources including donations from past KDW director Patrick Scott.</p>
+        </scopecontent>
+        <dsc type="combined">
+          <c level="file">
+            <did>
+              <unittitle encodinganalog="3.1.2">Ephemera</unittitle>
+              <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="02" encodinganalog="3.1.1">KDW/RM/02</unitid>
+              <unitdate datechar="Creation" normal="19650101/19881231" encodinganalog="3.1.3">1965 - 1988</unitdate>
+              <physdesc>
+                <extent encodinganalog="3.1.5">to be determined</extent>
+              </physdesc>
+              <origination label="Creator:">
+                <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
+              </origination>
+            </did>
+            <scopecontent encodinganalog="3.3.1">
+              <p>This file contains printed material related to a number of KDW activities. These include: invitations and catalogues for KDW organised exhibitions; mail order catalogues; and promotional material.</p>
+            </scopecontent>
+            <dsc type="combined">
+              <c level="item">
+                <did>
+                  <unittitle encodinganalog="3.1.2">Invitation to Kilkenny Design Workshops 1984 retrospective exhibition</unittitle>
+                  <unitid countrycode="IE" repositorycode="IE-DuNIV" identifier="04" encodinganalog="3.1.1">KDW/RM/02/04</unitid>
+                  <unitdate datechar="Creation" normal="19840101/19841231" encodinganalog="3.1.3">1984</unitdate>
+                  <physdesc>
+                    <extent encodinganalog="3.1.5">1 document</extent>
+                    <genreform source="dcmitype">Text</genreform>
+                  </physdesc>
+                  <origination label="Creator:">
+                    <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
+                  </origination>
+                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_r.jpg" actuate="onrequest" show="new">
+                    <daodesc>
+                      <p>Invitation to Kilkenny Design Workshops 1984 retrospective exhibition </p>
+                    </daodesc>
+                  </dao>
+                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_v.jpg" actuate="onrequest" show="new">
+                    <daodesc>
+                      <p>Invitation to Kilkenny Design Workshops 1984 retrospective exhibition </p>
+                    </daodesc>
+                  </dao>
+                </did>
+                <scopecontent encodinganalog="3.3.1">
+                  <p>An invitation to a private viewing of the exhibition, Kilkenny Design: twenty-one years of design in Ireland, at 6:30 pm on Wednesday 14th November 1984 at the Kilkenny Shop Nassau St., Dublin, addressed to Noel Sheridan.</p>
+                </scopecontent>
+              </c>
+            </dsc>
+          </c>
+        </dsc>
+      </c>
+    </dsc>
   </archdesc>
 </ead>

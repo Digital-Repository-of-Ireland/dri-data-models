@@ -1,4 +1,4 @@
-class UpdateIndexJob < ActiveFedoraPidBasedJob
+class UpdateIndexJob < ActiveFedoraIdBasedJob
 
   def queue_name
     :update_index

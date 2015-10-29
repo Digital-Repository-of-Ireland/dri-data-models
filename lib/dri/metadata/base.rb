@@ -3,7 +3,7 @@ module DRI
   module Metadata
 
     class Base < ActiveFedora::OmDatastream
-      has_many_versions
+      #has_many_versions
 
       # Boolean flag for metadata types like EAD where extracts of the metadata
       # may be stored in other Fedora objects. This allows us to add functions
