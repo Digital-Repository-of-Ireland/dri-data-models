@@ -19,6 +19,7 @@ module DRI
         t.ingest_files_from_metadata(:path=>"ingestFilesFromMetadata", :namespace_prefix => nil, :index_as=>[:facetable, :displayable])
         t.master_file_access(:namespace_prefix=>nil, :index_as=>[:stored_searchable, :facetable])
         t.published_at(:namespace_prefix=>nil, :index_as=>[:stored_searchable])
+        t.object_version(:path=>"object_version", :namespace_prefix=>nil)
       end # set_terminology
 
       # Build the default XML document
@@ -27,6 +28,7 @@ module DRI
             xml.properties {
                  xml.status "draft"
                  xml.model_version DriDataModels::VERSION
+                 xml.object_version "1"
             }
           end
           return builder.doc

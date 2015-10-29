@@ -20,7 +20,7 @@ module DRI
         property :ingest_files_from_metadata, delegate_to: 'properties', multiple: false
         property :master_file_access, delegate_to: 'properties', multiple: false
         property :published_at, delegate_to: 'properties', multiple: false
-
+        property :object_version, delegate_to: 'properties', multiple: false
       end
     end
   end
