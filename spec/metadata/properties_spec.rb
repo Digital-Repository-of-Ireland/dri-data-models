@@ -1,15 +1,11 @@
-# spec/metadata.dublin_core_audio_spec.rb
-
-describe "DRI::Metadata::Properties" do
-
+describe 'DRI::Metadata::Properties' do
   before(:each) do
-    @props = fixture("properties/properties_sample.xml")
+    @props = fixture('properties/properties_sample.xml')
     @ds = DRI::Metadata::Properties.from_xml(@props)
   end
 
-  it "should expose system metadata for DRI digital objects" do
-    @ds.status.should == ["published"]
-    @ds.model_version.should == ["0.1.0"]
+  it 'should expose system metadata for DRI digital objects' do
+    expect(@ds.status).to match_array(['published'])
+    expect(@ds.model_version).to match_array(['0.1.0'])
   end
-
 end

@@ -1,7 +1,7 @@
 describe 'Documentation' do
-
   before(:each) do
     @doc = DRI::Documentation.new
+    @dc_obj = DRI::QualifiedDublinCore.new
 
     @attributes_hash = { type: ['Documentation'],
                          title: ['Documentation object'],
@@ -22,6 +22,7 @@ describe 'Documentation' do
 
   after(:each) do
     @doc.delete unless @doc.new_record?
+    @dc_obj.delete unless @dc_obj.new_record?
   end
 
   it 'should assert content model' do
@@ -63,12 +64,23 @@ describe 'Documentation' do
     @doc.source.should == @attributes_hash[:source]
     @doc.geographical_coverage.should == @attributes_hash[:geographical_coverage]
     @doc.temporal_coverage.should == @attributes_hash[:temporal_coverage]
-    @doc.type.should == @attributes_hash[:resource_type]
-    @doc.type = ['Interview guidelines']
+    @doc.type.should == @attributes_hash[:type]
+
     @doc.should be_valid
   end
 
   it 'should assert isDescriptionOf predicate if associated with an object' do
+    profile_key = ActiveFedora::SolrQueryBuilder.solr_name('object_profile', :displayable)
+    @doc.attributes = @attributes_hash
+    @doc.save
+
+    @dc_obj.attributes = @attributes_hash
+    @dc_obj.documentation_objects << @doc
+    @dc_obj.save
+
+    @doc.reload
+    profile_info = JSON.parse(@doc.to_solr[profile_key])
+    expect(profile_info['documentation_for_id']).to eq @dc_obj.id
 
   end
 
@@ -135,6 +147,17 @@ describe 'Documentation' do
   end
 
   it 'should index temporal information' do
+    hash = { temporal_coverage: ['name=1900s; start=19000101; end=19991231',
+                                 'name=2015; start=2015;'] }
+    @obj = DRI::Documentation.new
+    @obj.update_attributes(hash)
 
+    expect(@obj.temporal_coverage).to match_array(['name=1900s; start=19000101; end=19991231', 'name=2015; start=2015;'])
+
+    solr_doc = @obj.descMetadata.to_solr
+    keys = [ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable),
+            DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
+    expect(solr_doc).to include(*keys)
+    expect(solr_doc[keys.last]).to include('1900 1999', '2015 2015')
   end
 end

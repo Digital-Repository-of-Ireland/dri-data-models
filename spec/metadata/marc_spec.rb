@@ -1,3 +1,2 @@
-
-describe "DRI::Metadata::Marc" do
+describe 'DRI::Metadata::Marc' do
 end

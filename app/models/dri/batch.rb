@@ -126,18 +126,5 @@ module DRI
       storage = Storage::S3Interface.new
       storage.delete_bucket(id)
     end
-
-    # Relationships Methods
-
-    #def process_collection_relationships
-    #end
-
-    #def process_relationships()
-    #end
-
-    #def get_relationships_names
-      # Empty Array - NO DRI specific relationships for now Overriden
-      #return {}
-    #end
   end # Class Batch
 end # Module DRI

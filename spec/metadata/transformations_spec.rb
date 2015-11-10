@@ -1,3 +1,2 @@
-
-describe "DRI::Metadata::Transformations" do
+describe 'DRI::Metadata::Transformations' do
 end

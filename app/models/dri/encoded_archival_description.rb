@@ -78,11 +78,12 @@ module DRI
     end
 
     def self.ead_dri_terms
-      return [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
-              :creation_date, :published_date, :name_coverage, :temporal_coverage,
-              :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
-              :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
-              :related_material, :alternative_form, :language]
+      [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
+       :creation_date, :published_date, :name_coverage, :temporal_coverage,
+       :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
+       :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
+       :related_material, :alternative_form, :language
+      ]
     end
 
     def attributes=(properties)

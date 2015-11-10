@@ -25,7 +25,7 @@ module Sufia
           '%W' => 'Digital Repository of Ireland'
         }
         text = []
-        text << "%0 Batch"
+        text << '%0 Batch'
         end_note_format.each do |endnote_key, mapping|
           if mapping.is_a? String
             values = [mapping]
@@ -44,21 +44,21 @@ module Sufia
       # MIME type: 'application/x-openurl-ctx-kev'
       def export_as_openurl_ctx_kev
         export_text = []
-        export_text << "url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adc&rfr_id=info%3Asid%2Fblacklight.rubyforge.org%3Agenerator"
+        export_text << 'url_ver=Z39.88-2004&ctx_ver=Z39.88-2004&rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Adc&rfr_id=info%3Asid%2Fblacklight.rubyforge.org%3Agenerator'
         field_map = {
-          :title => 'title',
-          :creator => 'creator',
-          :subject => 'subject',
-          :description => 'description',
-          :publisher => 'publisher',
-          :contributor => 'contributor',
-          :creation_date => 'date',
-          :type => 'format',
-          :identifier => 'identifier',
-          :language => 'language',
+          title: 'title',
+          creator: 'creator',
+          subject: 'subject',
+          description: 'description',
+          publisher: 'publisher',
+          contributor: 'contributor',
+          creation_date: 'date',
+          type: 'format',
+          identifier: 'identifier',
+          language: 'language',
           #:tag => 'relation',
-          :geographical_coverage => 'coverage',
-          :rights => 'rights'
+          geographical_coverage: 'coverage',
+          rights: 'rights'
         }
         field_map.each do |element, kev|
           values = self.send(element)
@@ -85,27 +85,27 @@ module Sufia
           if author == authors_list.first #first
             authors_list_final.push(author.strip)
           elsif author == authors_list.last #last
-            authors_list_final.push(", &amp; " + author.strip)
+            authors_list_final.push(', &amp; ' + author.strip)
           else #all others
-            authors_list_final.push(", " + author.strip)
+            authors_list_final.push(', ' + author.strip)
           end
         end
         text << authors_list_final.join
 
         unless text.blank?
-          if text[-1,1] != "."
-            text << ". "
+          if text[-1,1] != '.'
+            text << '. '
           else
-            text << " "
+            text << ' '
           end
         end 
         
         # Get Pub Date
-        text << "(" + setup_pub_date("dri") + ") " unless setup_pub_date("dri").nil?
+        text << '(' + setup_pub_date('dri') + ') ' unless setup_pub_date('dri').nil?
 
-        title_info = ""
+        title_info = ''
         title.each do |t|
-          title_info << clean_end_punctuation(CGI::escapeHTML(t)).strip + ", "
+          title_info << clean_end_punctuation(CGI::escapeHTML(t)).strip + ', '
         end
 
         text << title_info unless title_info.blank?
@@ -128,7 +128,7 @@ module Sufia
 
         text << ", DOI: #{self.doi}" unless self.doi.nil? 
         
-        text << "."
+        text << '.'
  
         text.html_safe
       end
@@ -148,9 +148,9 @@ module Sufia
           if author == authors_list.first #first
             authors_list_final.push(author.strip)
           elsif author == authors_list.last #last
-            authors_list_final.push(", &amp; " + author.strip)
+            authors_list_final.push(', &amp; ' + author.strip)
           else #all others
-            authors_list_final.push(", " + author.strip)
+            authors_list_final.push(', ' + author.strip)
           end
         end
         text << authors_list_final.join
@@ -162,17 +162,17 @@ module Sufia
           end
         end
         # Get Pub Date
-        text << "(" + setup_pub_date("apa") + "). " unless setup_pub_date("apa").nil?
+        text << '(' + setup_pub_date('apa') + '). ' unless setup_pub_date('apa').nil?
 
         # setup title info
         title_info = setup_title_info
-        text << "<i>" + title_info + "</i> " unless title_info.nil?
+        text << '<i>' + title_info + '</i> ' unless title_info.nil?
 
         # Publisher info
         text << setup_pub_info unless setup_pub_info.nil?
         unless text.blank?
-          if text[-1,1] != "."
-            text += "."
+          if text[-1,1] != '.'
+            text += '.'
           end
         end
 
@@ -197,44 +197,44 @@ module Sufia
             if author == authors.first #first
               authors_final.push(author)
             elsif author == authors.last #last
-              authors_final.push(", and " + name_reverse(author) + ".")
+              authors_final.push(', and ' + name_reverse(author) + '.')
             else #all others
               authors_final.push(", " + name_reverse(author))
             end
           end
           text << authors_final.join
           unless text.blank?
-            if text[-1,1] != "."
-              text << ". "
+            if text[-1,1] != '.'
+              text << '. '
             else
-              text << " "
+              text << ' '
             end
           end
         else
-          text << authors.first + ", et al. "
+          text << authors.first + ', et al. '
         end
         # setup title
         title_info = setup_title_info
-        text << "<i>" + mla_citation_title(title_info) + "</i> " unless title.blank?
+        text << '<i>' + mla_citation_title(title_info) + '</i> ' unless title.blank?
 
         # Publication
         text << setup_pub_info unless setup_pub_info.nil?
 
         # Get Pub Date
-        date = setup_pub_date("mla")
+        date = setup_pub_date('mla')
         if date.nil?
-          date = "n.d"
+          date = 'n.d'
         end
-        text << ", " + date 
-        if text[-1,1] != "."
-          text << "." unless text.blank?
+        text << ', ' + date
+        if text[-1,1] != '.'
+          text << '.' unless text.blank?
         end
 
         # Set database name
         text << setup_database_name
 
-        text << " Web. "
-        text << access_date_mla + "."
+        text << ' Web. '
+        text << access_date_mla + '.'
 
         text << " <#{self.doi}>" unless self.doi.nil?
 
@@ -242,7 +242,7 @@ module Sufia
       end
 
       def export_as_chicago_citation
-        author_text = ""
+        author_text = ''
         authors = get_all_authors
         unless authors.blank?
           if authors.length > 10
@@ -250,25 +250,25 @@ module Sufia
               if index < 7
                 if index == 0
                   author_text << "#{author}"
-                  if author.ends_with?(",")
-                    author_text << " "
+                  if author.ends_with?(',')
+                    author_text << ' '
                   else
-                    author_text << ", "
+                    author_text << ', '
                   end
                 else
                   author_text << "#{name_reverse(author)}, "
                 end
               end
             end
-            author_text << " et al."
+            author_text << ' et al.'
           elsif authors.length > 1
             authors.each_with_index do |author,index|
               if index == 0
                 author_text << "#{author}"
-                if author.ends_with?(",")
-                  author_text << " "
+                if author.ends_with?(',')
+                  author_text << ' '
                 else
-                  author_text << ", "
+                  author_text << ', '
                 end
               elsif index + 1 == authors.length
                 author_text << "and #{name_reverse(author)}."
@@ -283,16 +283,16 @@ module Sufia
         title_info = ""
         title_info << citation_title(clean_end_punctuation(CGI::escapeHTML(title.first)).strip) unless title.blank?
 
-        pub_info = ""
-        place = ""#self.based_near.first
+        pub_info = ''
+        place = '' # self.based_near.first
         publisher = self.publisher.first
         unless place.blank?
           place = CGI::escapeHTML(place)
           pub_info << place
-          pub_info << ": " unless publisher.blank?
+          pub_info << ': ' unless publisher.blank?
         end
 
-        published_date = setup_pub_date("chicago")
+        published_date = setup_pub_date('chicago')
 
         unless publisher.blank?
           publisher = CGI::escapeHTML(publisher)
@@ -303,7 +303,7 @@ module Sufia
           pub_info << published_date
         end
 
-        citation = ""
+        citation = ''
         citation << "#{author_text} " unless author_text.blank?
         citation << "<i>#{title_info}.</i> " unless title_info.blank?
         citation << "#{pub_info}." unless pub_info.blank?
@@ -316,17 +316,17 @@ module Sufia
       private
 
       def setup_database_name
-        "Digital Repository of Ireland [Distributor]"
+        'Digital Repository of Ireland [Distributor]'
       end
 
       def access_date_mla
         date = Time.now
-        date.strftime("%d %b, %Y")
+        date.strftime('%d %b, %Y')
       end
 
       def access_date_chicago
         date = Time.now
-        date.strftime("%B %-d, %Y")
+        date.strftime('%B %-d, %Y')
       end
 
       def setup_pub_date( format )
@@ -334,10 +334,10 @@ module Sufia
         unless first_date.blank?
           first_date = CGI::escapeHTML(first_date)
           date = Time.parse(first_date) #first_date.gsub(/[^0-9|n\.d\.]/, "")[0,4]
-          date_value = date.strftime("%Y, %B %-d") if format.eql?("apa")
-          date_value = date.strftime("%d %B %Y") if format.eql?("mla")
-          date_value = date.strftime("%Y") if format.eql?("chicago")
-          date_value = date.strftime("%Y") if format.eql?("dri")
+          date_value = date.strftime('%Y, %B %-d') if format.eql?('apa')
+          date_value = date.strftime('%d %B %Y') if format.eql?('mla')
+          date_value = date.strftime('%Y') if format.eql?('chicago')
+          date_value = date.strftime('%Y') if format.eql?('dri')
           return nil if date_value.nil?
         end
         clean_end_punctuation(date_value) if date_value
@@ -361,9 +361,9 @@ module Sufia
       end
 
       def mla_citation_title(text)
-        no_upcase = ["a","an","and","but","by","for","it","of","the","to","with"]
+        no_upcase = %w(a an and but by for it of the to with)
         new_text = []
-        word_parts = text.split(" ")
+        word_parts = text.split(' ')
         word_parts.each do |w|
           if !no_upcase.include? w
             new_text.push(w.capitalize)
@@ -371,21 +371,21 @@ module Sufia
             new_text.push(w)
           end
         end
-        new_text.join(" ")
+        new_text.join(' ')
       end
 
       def citation_title(title_text)
-        prepositions = ["a","about","across","an","and","before","but","by","for","it","of","the","to","with","without"]
+        prepositions = %w(a about across an and before but by for it of the to with without)
         new_text = []
-        title_text.split(" ").each_with_index do |word,index|
+        title_text.split(' ').each_with_index do |word,index|
           if (index == 0 and word != word.upcase) or (word.length > 1 and word != word.upcase and !prepositions.include?(word))
             # the split("-") will handle the capitalization of hyphenated words
-            new_text << word.split("-").map!{|w| w.capitalize }.join("-")
+            new_text << word.split('-').map!{|w| w.capitalize }.join('-')
           else
             new_text << word
           end
         end
-        new_text.join(" ")
+        new_text.join(' ')
       end
 
       def setup_title_info
@@ -402,7 +402,7 @@ module Sufia
       end
 
       def clean_end_punctuation(text)
-        if [".",",",":",";","/"].include? text[-1,1]
+        if %w(. , : ; /).include? text[-1,1]
           return text[0,text.length-1]
         end
         text
@@ -414,7 +414,10 @@ module Sufia
 
       def get_all_authors
         authors = self.creator
-        return authors.empty? ? nil : authors.map { |author| CGI::escapeHTML(author) }
+
+        return nil if authors.empty?
+
+        authors.map { |author| CGI::escapeHTML(author) }
       end
 
       def abbreviate_name(name)
@@ -437,8 +440,8 @@ module Sufia
       def name_reverse(name)
         name = clean_end_punctuation(name)
         return name unless name =~ /,/
-        temp_name = name.split(", ")
-        return temp_name.last + " " + temp_name.first
+        temp_name = name.split(', ')
+        return temp_name.last + ' ' + temp_name.first
       end
 
     end

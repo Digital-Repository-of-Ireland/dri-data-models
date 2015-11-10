@@ -32,9 +32,7 @@
       <mods:namePart type="given">Brendan</mods:namePart>
       <mods:namePart type="termsOfAddress">Saint</mods:namePart>
       <mods:description>The Voyager</mods:description>
-      <!-- mods:date element is no longer available within mods:name -->
-      <!-- <mods:date>approximately 483-577</mods:date> -->
-      <mods:displayForm>Brendan, Saint, the Voyager, approximately 483­577</mods:displayForm>
+      <mods:displayForm>Brendan, Saint, the Voyager, approximately 483-577</mods:displayForm>
     </mods:name>
   </mods:subject>
   <mods:identifier type="local">IE TCD MS 11182</mods:identifier>
@@ -49,4 +47,16 @@
   <mods:originInfo>
     <mods:publisher>Digital Repository of Ireland</mods:publisher>
   </mods:originInfo>
+  <mods:relatedItem type="isReferencedBy">
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>This is the title of the first sub-collection.</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
+  <mods:relatedItem type="host">
+    <mods:identifier type="local">MODS-ID-1234</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
+    </mods:titleInfo>
+  </mods:relatedItem>
 </mods:mods>

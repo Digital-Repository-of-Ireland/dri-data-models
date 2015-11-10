@@ -37,25 +37,26 @@ module DRI
     end
 
     def attributes=(properties)
+      updated_props = properties.clone
       point_hash = { geocode_point: [] }
       box_hash = { geocode_box: [] }
       period_hash = { temporal_coverage_period: [] }
 
       # When updating from DRI form
       # replace type attribute key with resource_type
-      properties.keys.each do |k|
+      updated_props.keys.each do |k|
         next if k.to_sym != :type
 
-        properties[:resource_type] = properties[k]
-        properties.delete(k)
+        updated_props[:resource_type] = updated_props[k]
+        updated_props.delete(k)
         break
       end
 
       # Adding :geocode_point and :geocode_box to properties
       # if :geographical_coverage present
       # for spatial indexing
-      if properties[:geographical_coverage].present?
-        properties[:geographical_coverage].each do |item|
+      if updated_props[:geographical_coverage].present?
+        updated_props[:geographical_coverage].each do |item|
           point_hash[:geocode_point] << item if DRI::Metadata::Transformations.dcmi_point?(item)
           box_hash[:geocode_box] << item if DRI::Metadata::Transformations.dcmi_box?(item)
         end
@@ -64,8 +65,8 @@ module DRI
       # Adding :temporal_coverage_period to properties
       # if :temporal_coverage present
       # for temporal indexing
-      if properties[:temporal_coverage].present?
-        properties[:temporal_coverage].each do |item|
+      if updated_props[:temporal_coverage].present?
+        updated_props[:temporal_coverage].each do |item|
           next unless DRI::Metadata::Transformations.dcmi_period?(item)
 
           period_hash[:temporal_coverage_period] << item
@@ -73,16 +74,16 @@ module DRI
       end
       # avoid overwriting entries with duplicate keys
       if point_hash[:geocode_point].present?
-        properties.merge!(point_hash) { |_k, v0, _v2| v0 }
+        updated_props.merge!(point_hash) { |_k, v0, _v2| v0 }
       end
       if box_hash[:geocode_box].present?
-        properties.merge!(box_hash) { |_k, v0, _v2| v0 }
+        updated_props.merge!(box_hash) { |_k, v0, _v2| v0 }
       end
       if period_hash[:temporal_coverage_period].present?
-        properties.merge!(period_hash) { |_k, v0, _v2| v0 }
+        updated_props.merge!(period_hash) { |_k, v0, _v2| v0 }
       end
 
-      super(properties)
+      super(updated_props)
     end
 
     def roles=(roles)

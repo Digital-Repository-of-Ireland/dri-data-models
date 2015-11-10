@@ -1,3 +1,2 @@
-
-describe "DRI::Metadata::Documentation" do
+describe 'DRI::Metadata::Documentation' do
 end

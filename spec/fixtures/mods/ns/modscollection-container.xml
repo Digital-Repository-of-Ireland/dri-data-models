@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mods:modsCollection xmlns:mods="http://www.loc.gov/mods/v3"
+           xmlns:copyrightMD="http://www.cdlib.org/inside/diglib/copyrightMD"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd"
+           version="3.5">
+  <mods:mods>
+    <!-- identifier will be used for relationships valid URI here -->
+    <mods:identifier type="local">MODS-ID-1234</mods:identifier>
+    <mods:identifier type="uri">http://example.org/collection/1#</mods:identifier>
+    <mods:identifier type="doi">MS11182-030_1</mods:identifier>
+    <!-- The title of the collection -->
+    <mods:titleInfo>
+      <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
+    </mods:titleInfo>
+    <!-- The description of the collection -->
+    <mods:abstract>This is test abstract for the collection: Saint Agnes of Montepulciano.</mods:abstract>
+    <!-- Second mapping for the description of the collection -->
+    <mods:physicalDescription>
+      <mods:extent>This collection comprises 150 records.</mods:extent>
+    </mods:physicalDescription>
+    <!-- The creator of the collection -->
+    <mods:name type="personal">
+      <mods:namePart>Harry Clarke Stained Glass Ltd. (Irish stained glass firm, 1930-1973)</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">cre</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">UNKNOWN</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The contributor of the collection -->
+    <mods:name type="corporate" authority="naf">
+      <mods:namePart>Clarke family</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">ctb</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">contributor</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The language of the collection, multiple languages -->
+    <mods:language>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+      <mods:languageTerm authority="iso639-2b">en</mods:languageTerm>
+    </mods:language>
+    <!-- The type: Collection -->
+    <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+    <!-- Additional type of the collection: Collection -->
+    <mods:genre type="dct">Collection</mods:genre>
+    <!-- The Rights of the collection -->
+    <mods:accessCondition type="use and reproduction">
+      <copyrightMD:copyright copyright.status="copyrighted">
+        <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
+        <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
+      </copyrightMD:copyright>
+    </mods:accessCondition>
+    <!-- The subjects of the collection -->
+    <mods:subject>
+      <mods:topic>This is a general topic for the collection</mods:topic>
+    </mods:subject>
+    <mods:subject>
+      <mods:temporal encoding="w3cdtf" point="start">1980</mods:temporal>
+      <mods:temporal encoding="w3cdtf" point="end">1990</mods:temporal>
+    </mods:subject>
+    <!-- Creation date, Published date -->
+    <mods:originInfo>
+      <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+      <mods:dateIssued encoding="w3cdtf">Beginning of 2000</mods:dateIssued>
+      <mods:publisher>UNKNOWN</mods:publisher>
+    </mods:originInfo>
+    <!-- hasPart: expressing sub-collections, use relatedItem[@type="constituent"] -->
+    <mods:relatedItem type="constituent">
+      <mods:identifier type="local">12345-678-9</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>Brendan the Navigator</mods:title>
+      </mods:titleInfo>
+      <mods:typeOfResource>still image</mods:typeOfResource>
+    </mods:relatedItem>
+    <mods:relatedItem type="constituent">
+      <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>This is the title of the first sub-collection.</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+  </mods:mods>
+  <mods:mods>
+    <!-- identifier will be used for relationships valid URI here -->
+    <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+    <!-- The title of the collection -->
+    <mods:titleInfo>
+      <mods:title>Subcollection 1</mods:title>
+      <!-- Alternative title not allowed in 3.5 <mods:title type="alternative">Saint Agnes of Montepulciano</mods:title> -->
+    </mods:titleInfo>
+    <!-- The description of the collection -->
+    <mods:abstract>This is test abstract for the subcollection: 1</mods:abstract>
+    <!-- The creator of the collection -->
+    <mods:name type="personal">
+      <mods:namePart>AMG</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">cre</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">UNKNOWN</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The contributor of the collection -->
+    <mods:name type="corporate" authority="naf">
+      <mods:namePart>AMG</mods:namePart>
+      <mods:role>
+        <mods:roleTerm authority="marcrelator" type="code">ctb</mods:roleTerm>
+        <mods:roleTerm authority="marcrelator" type="text">contributor</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <!-- The language of the collection, multiple languages -->
+    <mods:language>
+      <mods:languageTerm type="text">English</mods:languageTerm>
+      <mods:languageTerm authority="iso639-2b">en</mods:languageTerm>
+    </mods:language>
+    <!-- The type: Collection -->
+    <mods:typeOfResource collection="yes">mixed material</mods:typeOfResource>
+    <!-- Additional type of the collection: Collection -->
+    <mods:genre type="dct">Collection</mods:genre>
+    <!-- The Rights of the collection -->
+    <mods:accessCondition type="use and reproduction">
+      <copyrightMD:copyright copyright.status="copyrighted">
+        <copyrightMD:rights.holder>Copyright 2014. TCD</copyrightMD:rights.holder>
+        <copyrightMD:general.note>This is a test copyright note.</copyrightMD:general.note>
+      </copyrightMD:copyright>
+    </mods:accessCondition>
+    <!-- Creation date, Published date -->
+    <mods:originInfo>
+      <mods:dateCreated keyDate="yes" encoding="w3cdtf">1889</mods:dateCreated>
+    </mods:originInfo>
+  </mods:mods>
+  <mods:mods>
+    <mods:identifier type="local">12345-678-9</mods:identifier>
+    <mods:titleInfo>
+      <mods:title>St Brendan the navigator holding his church</mods:title>
+    </mods:titleInfo>
+    <mods:name type="personal">
+      <mods:namePart type="family">King</mods:namePart>
+      <mods:namePart type="given">Richard</mods:namePart>
+      <mods:namePart type="date">1907-1974</mods:namePart>
+      <mods:role>
+        <mods:roleTerm type="code" authority="marcrelator">att</mods:roleTerm>
+        <mods:roleTerm type="text" authority="marcrelator">Attributed name</mods:roleTerm>
+      </mods:role>
+    </mods:name>
+    <mods:originInfo>
+      <mods:dateCreated encoding="w3cdtf" point="start">1931-01-01</mods:dateCreated>
+      <mods:dateCreated encoding="w3cdtf" point="end">1973-12-31</mods:dateCreated>
+    </mods:originInfo>
+    <mods:abstract>Colour scheme for a single light stained glass window featuring St. Brendan holding his church, with his ship depicted in a lozenge to his left, and a sea monster entwined around his legs.</mods:abstract>
+    <mods:accessCondition type="use and reproduction">Copyright 2014 The Board of Trinity College Dublin. Images are available for single-use academic application only. Publication, transmission or display is prohibited without formal written approval of Trinity College Library, Dublin.</mods:accessCondition>
+    <mods:typeOfResource>still image</mods:typeOfResource>
+    <mods:subject authority="lcsh">
+      <mods:topic>Drawings, Irish</mods:topic>
+    </mods:subject>
+    <mods:subject authority="lcsh">
+      <mods:topic>Christian saints</mods:topic>
+    </mods:subject>
+    <mods:subject>
+      <mods:name type="personal" authority="naf">
+        <mods:namePart type="given">Brendan</mods:namePart>
+        <mods:namePart type="termsOfAddress">Saint</mods:namePart>
+        <mods:description>The Voyager</mods:description>
+        <mods:displayForm>Brendan, Saint, the Voyager, approximately 483-577</mods:displayForm>
+      </mods:name>
+    </mods:subject>
+    <mods:identifier type="local">IE TCD MS 11182</mods:identifier>
+    <mods:physicalDescription>
+      <mods:form authority="​gmgpc">Drawings</mods:form>
+      <mods:form type="material" authority="aat">paper (fiber product)</mods:form>
+      <mods:form type="material" authority="aat">canvas</mods:form>
+      <mods:form type="material" authority="aat">pencils (drawing and writing equipment)</mods:form>
+      <mods:form type="material" authority="aat">gouache (paint)</mods:form>
+      <mods:note>Pencil and gouache on paper, with canvas backing adhered overall</mods:note>
+    </mods:physicalDescription>
+    <mods:originInfo>
+      <mods:publisher>Digital Repository of Ireland</mods:publisher>
+    </mods:originInfo>
+    <mods:relatedItem type="isReferencedBy">
+      <mods:identifier type="local">http://example.org/subcollection/1#</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>This is the title of the first sub-collection.</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+    <mods:relatedItem type="host">
+      <mods:identifier type="local">MODS-ID-1234</mods:identifier>
+      <mods:titleInfo>
+        <mods:title>Saint Agnes of Montepulciano with emblems of Saint Dominic: a dog carrying a torch, and a ship</mods:title>
+      </mods:titleInfo>
+    </mods:relatedItem>
+  </mods:mods>
+</mods:modsCollection>
