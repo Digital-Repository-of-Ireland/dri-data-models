@@ -1,4 +1,4 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
 # Declare your gem's dependencies in dri_data_models.gemspec.
 # Bundler will treat runtime dependencies like base dependencies, and
@@ -6,9 +6,9 @@ source "http://rubygems.org"
 gemspec
 
 # jquery-rails is used by the dummy application
-gem "jquery-rails"
+gem 'jquery-rails'
 
-gem "sqlite3"
+gem 'sqlite3'
 
 # Declare any dependencies that are still in development here instead of in
 # your gemspec. These might include edge Rails or gems from your path or
@@ -25,16 +25,16 @@ gem 'iso8601'
 #gem 'chronic'
 
 group :development, :test do
-  #gem 'rcov', :platform => :mri_18
-  #gem 'simplecov', :require => false, :platform => [:mri_19, :mri_20]
-  #gem 'simplecov-rcov', :require => false, :platform => [:mri_19, :mri_20]
+  #gem 'rcov', platform: :mri_18
+  #gem 'simplecov', require: false, platform: [:mri_19, :mri_20]
+  #gem 'simplecov-rcov', require: false, platform: [:mri_19, :mri_20]
 
   gem 'guard'
   gem 'guard-rspec'
   gem 'guard-bundler'
-  gem 'rb-inotify', :require => false
-  gem 'rb-fsevent', :require => false
-  gem 'rb-fchange', :require => false
+  gem 'rb-inotify', require: false
+  gem 'rb-fsevent', require: false
+  gem 'rb-fchange', require: false
   gem 'rspec-rails'
   gem 'mocha'
   gem 'factory_girl_rails'
@@ -49,5 +49,5 @@ end
 
 group :test do
   # dri-user-group gem added for the rspec tests
-  gem "user_group", :git => 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', :branch => 'develop'
+  gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'develop'
 end

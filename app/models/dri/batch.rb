@@ -23,6 +23,13 @@ module DRI
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
     property :full_text, delegate_to: 'extracted', multiple: true
 
+    def initialize(args = {})
+      # FIXME: Bug 1320
+      args[:id] = ActiveFedora::Noid::Service.new.mint unless args[:id].present?
+
+      super(args)
+    end
+
     # Creates a digital object depending on the metadata standard
     #
     # @param standard [Symbol] the metadata standard for the new object, `:marc` or `:mods` or `:ead_collection` or `:ead_component` or `:qdc`
