@@ -38,10 +38,10 @@ module DRI
         def collection=(collection)
           if @collection == collection
             @collection = collection
-          # FIXME: Possible Bug: obj.count returns random number even if empty?
-          elsif collection == true && (id.nil? || generic_files.count == 0)
+          # FIXME: #1320
+          elsif collection == true && generic_files.count == 0
             @collection = collection
-          elsif collection == false && (id.nil? || governed_items.count == 0) && (id.nil? || member_collections.count == 0)
+          elsif collection == false && governed_items.count == 0 && member_collections.count == 0
             @collection = collection
           end
         end
@@ -52,20 +52,18 @@ module DRI
       end
 
       def is_collection?
-        # It is a collection if we set it as a collection either through the metadata
-        # or using the collection accessor and it has no GenericFiles
-        # to the object.
-        # FIXME: Possible Bug in active-fedora: generic_files.count/empty?/any? returns > 0 for new objects with id: nil
-        # Temporarily added self.id.nil? to solve the issue
-        (descMetadata.collection? || properties.collection?) && (id.nil? || generic_files.count == 0)
+        # It is a collection if metadata specifies this
+        # or using the collection accessor and it has no associated assets
+        # FIXME: #1320
+        (descMetadata.collection? || properties.collection?) && generic_files.count == 0
       end
 
       def is_root_collection?
         # It is a root collection if it is already defined to be a collection; it has
         # been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
-        # FIXME: Possible Bug: obj.relation.count returns > 0 for has_many associations if id=nil (foreign_key nil)
-        !new_record? && is_collection? && governing_collection.nil? && (id.nil? || member_collections.count == 0)
+        # FIXME: #1320
+        !new_record? && is_collection? && governing_collection.nil? && member_collections.count == 0
       end
 
       private

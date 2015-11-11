@@ -25,6 +25,20 @@ describe 'QualifiedDublinCore' do
 
   end
 
+  it 'returns correct count for has_many associations if new object' do
+    # Issue 1320
+    expect(@audio.generic_files.any?).to eq false
+    expect(@audio.documentation_objects.any?).to eq false
+    expect(@audio.governed_items.any?).to eq false
+    expect(@audio.member_collections.any?).to eq false
+  end
+
+  it 'should be a collection if metadata specifies this' do
+    @audio.type = ['Collection']
+
+    expect(@audio.is_collection?).to eq true
+  end
+
   it 'should assert content model' do
     expect_any_instance_of(DRI::Batch).to receive(:assert_content_model)
     @dc = DRI::Batch.with_standard(:qdc)

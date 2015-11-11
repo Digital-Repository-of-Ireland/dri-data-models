@@ -2,13 +2,13 @@ require 'rsolr'
 
 describe 'EncodedArchivalDescription descMetadata' do
 
-  context "create new ead xml" do
+  context 'create new ead xml' do
     before(:each) do
       @md_collection = DRI::Metadata::EncodedArchivalDescription.new
       @md_component = DRI::Metadata::EncodedArchivalDescriptionComponent.new
     end
 
-    it "should have an xml_template method returning desired xml" do
+    it 'should have an xml_template method returning desired xml' do
       # collection
       empty_xml = @md_collection.class.xml_template
       empty_xml.should be_a_kind_of(Nokogiri::XML::Document)
@@ -23,32 +23,28 @@ describe 'EncodedArchivalDescription descMetadata' do
     end
   end
 
-  context "modify existing ead xml" do
+  context 'modify existing ead xml' do
     before(:each) do
       @md_collection = DRI::Metadata::EncodedArchivalDescription.new
       @md_component = DRI::Metadata::EncodedArchivalDescriptionComponent.new
     end
 
-    it "should update creator nodes" do
-      c_hash = {:display => ['A. Nolan'], :tag => ['persname'], :role => ['photographer']}
+    it 'should update creator nodes' do
+      c_hash = { display: ['A. Nolan'], tag: ['persname'], role: ['photographer'] }
       # Collection
       # Remove origination tag for creators
-      @md_collection.ng_xml.search('//origination').each do |n|
-        n.remove
-      end
+      @md_collection.ng_xml.search('//origination').each(&:remove)
       @md_collection.add_creator(c_hash)
       creators = @md_collection.ng_xml.search('//origination/persname')
       expect(creators.size).to eq 1
 
       # Component
-      @md_component.ng_xml.search('//origination').each do |n|
-        n.remove
-      end
+      @md_component.ng_xml.search('//origination').each(&:remove)
       @md_component.add_creator(c_hash)
       creators = @md_component.ng_xml.search('//origination/persname')
       expect(creators.size).to eq 1
 
-      c_hash = {:display => ['B. Whitehall'], :tag => ['name'], :role => ['designer']}
+      c_hash = { display: ['B. Whitehall'], tag: ['name'], role: ['designer'] }
       # Collection
       @md_collection.add_creator(c_hash)
       creators = @md_collection.ng_xml.search('//origination/*[local-name() = "name" or local-name() = "persname"]')
@@ -64,21 +60,17 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(creators.first.content).to eq('B. Whitehall')
     end
 
-    it "should update contributor nodes" do
+    it 'should update contributor nodes' do
       c_hash = ['A. Nolan']
       # Collection
       # Remove origination tag for contributors
-      @md_collection.ng_xml.search('//origination').each do |n|
-        n.remove
-      end
+      @md_collection.ng_xml.search('//origination').each(&:remove)
       @md_collection.add_contributor(c_hash)
       ctbs = @md_collection.ng_xml.search('//origination/persname[@role="contributor"]')
       expect(ctbs.size).to eq 1
 
       # Component
-      @md_component.ng_xml.search('//origination').each do |n|
-        n.remove
-      end
+      @md_component.ng_xml.search('//origination').each(&:remove)
       @md_component.add_contributor(c_hash)
       ctbs = @md_component.ng_xml.search('//origination/persname[@role="contributor"]')
       expect(ctbs.size).to eq 1
@@ -97,26 +89,22 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(ctbs.first.content).to eq('B. Whitehall')
     end
 
-    it "should update name_coverage nodes" do
+    it 'should update name_coverage nodes' do
       n_hash = {:display => ['A. Nolan'], :tag => ['persname'], :role => ['photographer']}
       # Collection
       # Remove origination tag for controlaccess
-      @md_collection.ng_xml.search('//controlaccess').each do |n|
-        n.remove
-      end
+      @md_collection.ng_xml.search('//controlaccess').each(&:remove)
       @md_collection.add_name_coverage(n_hash)
       names = @md_collection.ng_xml.search('//controlaccess/persname')
       expect(names.size).to eq 1
 
       # Component
-      @md_component.ng_xml.search('//controlaccess').each do |n|
-        n.remove
-      end
+      @md_component.ng_xml.search('//controlaccess').each(&:remove)
       @md_component.add_name_coverage(n_hash)
       names = @md_component.ng_xml.search('//controlaccess/persname')
       expect(names.size).to eq 1
 
-      n_hash = {:display => ['B. Whitehall'], :tag => ['corpname'], :role => ['studio']}
+      n_hash = { display: ['B. Whitehall'], tag: ['corpname'], role: ['studio'] }
       # Collection
       @md_collection.add_name_coverage(n_hash)
       names = @md_collection.ng_xml.search('//controlaccess/*[local-name() = "corpname" or local-name() = "persname"]')
@@ -132,8 +120,8 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(names.first.content).to eq('B. Whitehall')
     end
 
-    it "should update temporal_coverage nodes" do
-      d_hash = {:display => ['Jan 2015'], :datechar => ['coverage'], :normal => ['20150101']}
+    it 'should update temporal_coverage nodes' do
+      d_hash = { display: ['Jan 2015'], datechar: ['coverage'], normal: ['20150101'] }
 
       # Collection
       @md_collection.add_temporal_coverage(d_hash)
@@ -150,7 +138,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(dates.first.content).to eq('Jan 2015')
     end
 
-    it "should update related_material nodes" do
+    it 'should update related_material nodes' do
       rel_hash = ['http://example.org/relatedmaterial']
 
       # Collection
@@ -166,7 +154,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(rels.first['href']).to eq('http://example.org/relatedmaterial')
     end
 
-    it "should update alternative_form nodes" do
+    it 'should update alternative_form nodes' do
       rel_hash = ['http://example.org/altformavail']
 
       # Collection
@@ -182,27 +170,23 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(rels.first['href']).to eq('http://example.org/altformavail')
     end
 
-    it "should update geographical coverage nodes" do
-      geog_hash = {:type => ['logainm'], :display => ['http://example.org/1234']}
+    it 'should update geographical coverage nodes' do
+      geog_hash = { type: ['logainm'], display: ['http://example.org/1234'] }
 
       # Collection
       # Remove controlaccess tag for geographical coverage
-      @md_collection.ng_xml.search('//controlaccess').each do |n|
-        n.remove
-      end
+      @md_collection.ng_xml.search('//controlaccess').each(&:remove)
       @md_collection.add_geogname_coverage_access(geog_hash)
       geogs = @md_collection.ng_xml.search('//controlaccess/geogname')
       expect(geogs.size).to eq 1
 
       # Component
-      @md_component.ng_xml.search('//controlaccess').each do |n|
-        n.remove
-      end
+      @md_component.ng_xml.search('//controlaccess').each(&:remove)
       @md_component.add_geogname_coverage_access(geog_hash)
       geogs = @md_component.ng_xml.search('////controlaccess/geogname')
       expect(geogs.size).to eq 1
 
-      geog_hash = {:type => ['dcterms:Point'], :display => ['name=Dublin; east=-6.266155; north=53.350140;']}
+      geog_hash = { type: ['dcterms:Point'], display: ['name=Dublin; east=-6.266155; north=53.350140;'] }
       # Collection
       @md_collection.add_geogname_coverage_access(geog_hash)
       geogs = @md_collection.ng_xml.search('//controlaccess/geogname')
@@ -216,21 +200,17 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(geogs.first.content).to eq('name=Dublin; east=-6.266155; north=53.350140;')
     end
 
-    it "should update language nodes" do
-      l_hash = {:langcode => ['en'], :text => ['English']}
+    it 'should update language nodes' do
+      l_hash = { langcode: ['en'], text: ['English'] }
       # Collection
       # Remove origination tag for contributors
-      @md_collection.ng_xml.search('//langmaterial').each do |n|
-        n.remove
-      end
+      @md_collection.ng_xml.search('//langmaterial').each(&:remove)
       @md_collection.add_language(l_hash)
       lang = @md_collection.ng_xml.search('//langmaterial/language')
       expect(lang.size).to eq 1
 
       # Component
-      @md_component.ng_xml.search('//langmaterial').each do |n|
-        n.remove
-      end
+      @md_component.ng_xml.search('//langmaterial').each(&:remove)
       @md_component.add_language(l_hash)
       lang = @md_component.ng_xml.search('//langmaterial/language')
       expect(lang.size).to eq 1
@@ -252,12 +232,12 @@ describe 'EncodedArchivalDescription descMetadata' do
     end
   end
 
-  context "validation of DRI compulsory elements" do
+  context 'validation of DRI compulsory elements' do
     before(:each) do
-      @collection_xml = fixture("ead/collections/ead_collection_dtd.xml")
-      @series_xml = fixture("ead/components/component_series.xml")
-      @file_xml = fixture("ead/components/component_file.xml")
-      @item_xml = fixture("ead/components/component_item.xml")
+      @collection_xml = fixture('ead/collections/ead_collection_dtd.xml')
+      @series_xml = fixture('ead/components/component_series.xml')
+      @file_xml = fixture('ead/components/component_file.xml')
+      @item_xml = fixture('ead/components/component_item.xml')
 
       @ead_collection = DRI::EncodedArchivalDescription.new :collection
       @ead_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml, false)
@@ -287,7 +267,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       end
     end
 
-    it "should expose the EAD components' identifiers" do
+    it "should expose the EAD components\' identifiers" do
       expect(@ead_collection.identifier).to match_array(['IE/NIVAL KDW'])
       @ead_collection.country_code.should == 'IE'
       @ead_collection.repository_code.should == 'IE-DuNIV'
@@ -309,7 +289,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_item.identifier_id.should == '04'
     end
 
-    it "should expose the level of the EAD component" do
+    it 'should expose the level of the EAD component' do
       @ead_collection.ead_level.should == 'fonds'
       @ead_series.ead_level.should == 'series'
       @ead_file.ead_level.should == 'file'
@@ -320,7 +300,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_series.ead_level_other.should == 'subcollection'
     end
 
-    it "should use the EAD component level to determine whether the component is a collection or not" do
+    it 'should use the EAD component level to determine whether the component is a collection or not' do
       @ead_file.governed_items << @ead_item
       @ead_file.save
       @ead_series.governed_items << @ead_file
@@ -341,7 +321,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_item.is_root_collection?.should == false
     end
 
-    it "should validate the presence of the title metadata field" do
+    it 'should validate the presence of the title metadata field' do
       @ead_collection.should be_valid
       @ead_collection.title = ['']
       @ead_collection.should_not be_valid
@@ -359,7 +339,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_item.should_not be_valid
     end
 
-    it "should validate the presence of the description metadata fields" do
+    it 'should validate the presence of the description metadata fields' do
       @ead_collection.should be_valid
       @ead_collection.desc_scope_content = ['']
       @ead_collection.desc_abstract = ['']
@@ -367,28 +347,28 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_collection.should_not be_valid
     end
 
-    it "should validate the presence of the rights metadata field" do
+    it 'should validate the presence of the rights metadata field' do
       @ead_collection.should be_valid
       @ead_collection.rights = ['']
       @ead_collection.should_not be_valid
       expect(@ead_collection.descMetadata.custom_validations).to have_key(:rights)
     end
 
-    it "should validate the presence of the creation_date metadata field" do
+    it 'should validate the presence of the creation_date metadata field' do
       @ead_collection.should be_valid
-      @ead_collection.creation_date = {:display => [''], :datechar => [''], :normal => ['']}
+      @ead_collection.creation_date = { display: [''], datechar: [''], normal: [''] }
       @ead_collection.should_not be_valid
       expect(@ead_collection.descMetadata.custom_validations).to have_key(:creation_date)
     end
 
-    it "should validate the presence of the creator metadata field" do
+    it 'should validate the presence of the creator metadata field' do
       @ead_collection.should be_valid
-      @ead_collection.creator = {:display => [''], :role => [''], :tag => ['']}
+      @ead_collection.creator = { display: [''], role: [''], tag: [''] }
       @ead_collection.should_not be_valid
       expect(@ead_collection.descMetadata.custom_validations).to have_key(:creator)
     end
 
-    it "should validate the presence of the level attribute" do
+    it 'should validate the presence of the level attribute' do
       @ead_collection.should be_valid
       @ead_collection.ead_level = ''
       @ead_collection.should_not be_valid
@@ -438,7 +418,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@ead_file.descMetadata.custom_validations).not_to have_key(:ead_level_other)
     end
 
-    it "should validate the presence of an EAD identifier" do
+    it 'should validate the presence of an EAD identifier' do
       @ead_collection.should be_valid
       @ead_collection.identifier = ['']
       @ead_collection.should_not be_valid
@@ -460,7 +440,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@ead_item.descMetadata.custom_validations).to have_key(:identifier)
     end
 
-    it "should validate the presence of the unitid countrycode attribute" do
+    it 'should validate the presence of the unitid countrycode attribute' do
       @ead_collection.should be_valid
       @ead_collection.country_code = ''
       @ead_collection.should_not be_valid
@@ -482,7 +462,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@ead_item.descMetadata.custom_validations).to have_key(:country_code)
     end
 
-    it "should validate the presence of the unitid repositorycode attribute" do
+    it 'should validate the presence of the unitid repositorycode attribute' do
       @ead_collection.should be_valid
       @ead_collection.repository_code = ''
       @ead_collection.should_not be_valid
@@ -504,10 +484,10 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@ead_item.descMetadata.custom_validations).to have_key(:repository_code)
     end
 
-    it "should handle all variations of the EAD component node" do
+    it 'should handle all variations of the EAD component node' do
       variations = ['c01', 'c02', 'c03', 'c04', 'c05', 'c06', 'c07', 'c08', 'c09', 'c10', 'c11', 'c12']
       variations.each do | curr_node_name |
-        file_xml2 = fixture("ead/components/component_file.xml")
+        file_xml2 = fixture('ead/components/component_file.xml')
         curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
         curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
         curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
@@ -519,7 +499,7 @@ describe 'EncodedArchivalDescription descMetadata' do
     end
   end # Context validation of DRI compulsory elements
 
-  context "terminology mappings" do
+  context 'terminology mappings' do
     before(:each) do
       @collection = DRI::EncodedArchivalDescription.new(:collection)
       @collection.identifier = ['IE/NIVAL KDW']
@@ -542,29 +522,29 @@ describe 'EncodedArchivalDescription descMetadata' do
       @component_item.ead_level = 'item'
 
       @attributes_hash = {
-          :title  => ['The test title'],
-          :creator => {:display => ['Creator 1'], :role => ['institution'], :tag => ['persname']},
-          :contributor => ['Contributor 1'],
-          :publisher  => ['Publisher 1'],
-          :desc_scope_content  => ['This is a test description for the object.'],
-          :desc_abstract  => ['This is a test abstract for the object.'],
-          :desc_biog_hist  => ['This is a test biographical history for the object.'],
-          :rights  => ['This is a statement about the rights associated with this object'],
-          :language => {:langcode => ['eng'], :text => ['English']},
-          :type  => ['Collection'],
-          :published_date => {:display => ['2015'], :normal => ['20150101']},
-          :creation_date => {:display => ['2000-2010'], :normal => ['20000101/20101231']},
-          :name_coverage => {:display => ['Designer 1', 'Photographer 1'], :role => ['designer', 'photographer'], :tag => ['persname', 'corpname']},
-          :temporal_coverage => {:normal => ['2005'], :datechar => ['coverage'], :display => ['c. 2005']},
-          :geogname_coverage_access => {:type => ['', 'dcterms:Point', 'logainm'], :display => ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234']},
-          :subject  => ['Ireland','something else'],
-          :name_subject  => ['subject name'],
-          :persname_subject  => ['subject persname'],
-          :corpname_subject  => ['subject corpname'],
-          :geogname_subject  => ['subject geogname'],
-          :famname_subject  => ['subject famname'],
-          :related_material  => ['http://example.org/relmat'],
-          :alternative_form  => ['http://example.org/altform']
+          title: ['The test title'],
+          creator: { display: ['Creator 1'], role: ['institution'], tag: ['persname'] },
+          contributor: ['Contributor 1'],
+          publisher: ['Publisher 1'],
+          desc_scope_content: ['This is a test description for the object.'],
+          desc_abstract: ['This is a test abstract for the object.'],
+          desc_biog_hist: ['This is a test biographical history for the object.'],
+          rights: ['This is a statement about the rights associated with this object'],
+          language: {:langcode => ['eng'], :text => ['English']},
+          type: ['Collection'],
+          published_date: { display: ['2015'], normal: ['20150101'] },
+          creation_date: { display: ['2000-2010'], normal: ['20000101/20101231'] },
+          name_coverage: { display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'] },
+          temporal_coverage: { normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'] },
+          geogname_coverage_access: { type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'] },
+          subject: ['Ireland','something else'],
+          name_subject: ['subject name'],
+          persname_subject: ['subject persname'],
+          corpname_subject: ['subject corpname'],
+          geogname_subject: ['subject geogname'],
+          famname_subject: ['subject famname'],
+          related_material: ['http://example.org/relmat'],
+          alternative_form: ['http://example.org/altform']
       }
     end
 
@@ -580,7 +560,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       end
     end
 
-    it "should expose recommended metadata fields for indexing (ead collection)" do
+    it 'should expose recommended metadata fields for indexing (ead collection)' do
       @collection.attributes = @attributes_hash
 
       solr_keys = ['title_tesim', 'title_sim', 'language_tesim', 'language_sim', 'contributor_sim', 'contributor_tesim',
@@ -660,7 +640,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(alternative_form).to match_array(['http://example.org/altform'])
     end
 
-    it "should expose recommended metadata fields for indexing (ead component)" do
+    it 'should expose recommended metadata fields for indexing (ead component)' do
       @component.attributes = @attributes_hash
 
       solr_keys = ['title_tesim', 'title_sim', 'language_tesim', 'language_sim', 'contributor_sim', 'contributor_tesim',
@@ -740,7 +720,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(alternative_form).to match_array(['http://example.org/altform'])
     end
 
-    it "should index display dates as dcterms:Point (ead collection and component)" do
+    it 'should index display dates as dcterms:Point (ead collection and component)' do
       @collection.attributes = @attributes_hash
       @component.attributes = @attributes_hash
 
@@ -762,7 +742,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@component.descMetadata.creation_date_for_index).to match_array(['name=May 2015;'])
     end
 
-    it "should not index incomplete temporal information (collection)" do
+    it 'should not index incomplete temporal information (collection)' do
       @collection.published_date = {:display => ['2015'], :normal => ['']}
       @collection.creation_date = {:display => ['2000-2010'], :normal => ['']}
       @collection.temporal_coverage = {:normal => [''], :datechar => ['coverage'], :display => ['c. 2005']}
@@ -792,7 +772,7 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     end
 
-    it "should not index incomplete temporal information (component)" do
+    it 'should not index incomplete temporal information (component)' do
       @component.published_date = {:display => ['2015'], :normal => ['']}
       @component.creation_date = {:display => ['2000-2010'], :normal => ['']}
       @component.temporal_coverage = {:normal => [''], :datechar => ['coverage'], :display => ['c. 2005']}
@@ -821,7 +801,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(sdate_range).to be_nil
     end
 
-    it "should not index incomplete geospatial information (collection)" do
+    it 'should not index incomplete geospatial information (collection)' do
       # name=Republic of Ireland; northlimit=55.3826405; eastlimit=-6.0007535; southlimit=51.4201065; westlimit=-10.577897;
       @collection.geogname_coverage_access=({:type => ['dcterms:Box'], :display => ['name=Republic of Ireland; northlimit=55.3826405;']})
 
@@ -852,7 +832,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(geo_json).to match_array(["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.577897,51.4201065],[-6.0007535,51.4201065],[-6.0007535,55.3826405],[-10.577897,55.3826405],[-10.577897,51.4201065]]]},\"properties\":{\"placename\":\"Republic of Ireland\"},\"bbox\":[-10.577897,51.4201065,-6.0007535,55.3826405]}"])
     end
 
-    it "should not index incomplete geospatial information (component)" do
+    it 'should not index incomplete geospatial information (component)' do
       # name=Republic of Ireland; northlimit=55.3826405; eastlimit=-6.0007535; southlimit=51.4201065; westlimit=-10.577897;
       @component.geogname_coverage_access=({:type => ['dcterms:Box'], :display => ['name=Republic of Ireland; northlimit=55.3826405;']})
 

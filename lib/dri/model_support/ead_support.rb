@@ -61,7 +61,7 @@ module DRI
           new_child.manager_users_string = self.manager_users_string
           # ingest_files_from_metadata
           new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
-          checksum_metadata(new_child)
+          DRI::Utils.checksum_metadata(new_child)
           duplicates = object_duplicates?(new_child)
           #duplicates = false
           # Don't add new node if it's invalid
@@ -69,11 +69,11 @@ module DRI
             Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
             new_child.save
             begin
-              create_reader_group(new_child.id) if new_child.is_collection?
+              DRI::Utils.create_reader_group(new_child.id) if new_child.is_collection?
             rescue
               Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
-            retrieve_linked_data(new_child)
+            DRI::Utils.retrieve_linked_data(new_child)
             # add to queue
             prev_obj = new_child
           elsif duplicates
@@ -181,35 +181,6 @@ module DRI
         end
 
         result
-      end
-
-      # Create deafult reader group permissions for the object and save
-      # @param object [DRI::Batch] the object for which to add a default reader group
-      def create_reader_group(id)
-        grp = UserGroup::Group.new(:name => id, :description => "Default Reader group for collection #{id}")
-        grp.reader_group = true
-        grp.save
-      end
-
-      # Adds linked data records for logaimn links present in the metadata (geographical_coverage)
-      # @param obj [DRI::Batch] the object to check
-      def retrieve_linked_data(obj)
-        if AuthoritiesConfig
-          begin
-            Sufia.queue.push(LinkedDataJob.new(obj.id)) unless obj.geographical_coverage.blank?
-          rescue Exception => e
-            Rails.logger.error "Unable to submit linked data job: #{e.message}"
-          end
-        end
-      end
-
-      # Generates metadata checksum for the object
-      # @param object [DRI::Batch] the digital object
-      def checksum_metadata(object)
-        if object.attached_files.has_key?(:descMetadata)
-          xml = object.attached_files[:descMetadata].content
-          object.metadata_md5 = Checksum.md5_string(xml)
-        end
       end
 
       # Triggers the creation of generic files for EAD components if specified in metadata

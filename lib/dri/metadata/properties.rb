@@ -19,16 +19,16 @@ module DRI
         t.ingest_files_from_metadata(namespace_prefix: nil, path: 'ingestFilesFromMetadata', index_as: [:facetable, :displayable])
         t.master_file_access(namespace_prefix: nil, index_as: [:stored_searchable, :facetable])
         t.published_at(namespace_prefix: nil, index_as: [:stored_searchable])
-        t.object_version(:path=>"object_version", :namespace_prefix=>nil)
+        t.object_version(path: 'object_version', namespace_prefix: nil)
       end # set_terminology
 
       # Build the default XML document
       def self.xml_template
           builder = Nokogiri::XML::Builder.new do |xml|
             xml.properties {
-                 xml.status "draft"
+                 xml.status 'draft'
                  xml.model_version DriDataModels::VERSION
-                 xml.object_version "1"
+                 xml.object_version '1'
             }
           end
           builder.doc

@@ -1,240 +1,131 @@
 module DRI
-class Marc < DRI::Batch 
+  class Marc < DRI::Batch
+    include DRI::ModelSupport::MarcSupport
 
-  include DRI::ModelSupport::MarcSupport
+    contains 'descMetadata', class_name: 'DRI::Metadata::Marc'
 
-  contains 'descMetadata', class_name: 'DRI::Metadata::Marc'
+    property :leader, delegate_to: 'descMetadata', multiple: false
+    property :controlfield, delegate_to: 'descMetadata', multiple: true
+    property :controlfield_tag, delegate_to: 'descMetadata', multiple: true
+    property :datafield, delegate_to: 'descMetadata', multiple: true
+    property :datafield_tag, delegate_to: 'descMetadata', multiple: true
+    property :datafield_ind1, delegate_to: 'descMetadata', multiple: true
+    property :datafield_ind2, delegate_to: 'descMetadata', multiple: true
 
-  property :leader, delegate_to: 'descMetadata', multiple: false
-  property :controlfield, delegate_to: 'descMetadata', multiple: true
-  property :controlfield_tag, delegate_to: 'descMetadata', multiple: true
-  property :datafield, delegate_to: 'descMetadata', multiple: true
-  property :datafield_tag, delegate_to: 'descMetadata', multiple: true
-  property :datafield_ind1, delegate_to: 'descMetadata', multiple: true
-  property :datafield_ind2, delegate_to: 'descMetadata', multiple: true
+    # MARC record identifier used for internal rels target,
+    # NOT multi-valued
+    property :marc_id, delegate_to: 'descMetadata', multiple: false
+    # MARC record asset identifier used to sort pages/sequenced items
+    property :id_asset, delegate_to: 'descMetadata', multiple: false
 
-  # MARC record identifier used for internal relationships target, not multi-valued
-  property :marc_id, delegate_to: 'descMetadata', multiple: false
-  # MARC record asset identifier used to sort pages/sequenced items
-  property :id_asset, delegate_to: 'descMetadata', multiple: false
+    # MARC Relationships, mapped from QDC predicate properties
+    # Mapped attributes for getting relational information from metadata
+    # Internal Relationships
+    # 775: Other Edition Entry; Mapped to QDC: isVersionOf
+    property :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true
+    # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
+    property :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true
+    # 787: Other Relationship Entry; Mapped to DC: relation
+    property :relation_ids_relation, delegate_to: 'descMetadata', multiple: true
+    # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
+    property :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true
+    property :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true
 
-  # MARC Relationships, mapped from QDC predicate properties
-  # 787: Other Relationship Entry; Mapped to DC: relation
-  #has_and_belongs_to_many :related, predicate: ::RDF::DC.relation, class_name: "DRI::Marc"
-  # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-  #has_and_belongs_to_many :is_version, predicate: ::RDF::DC.isVersionOf, class_name: "DRI::Marc"
-  # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-  #has_and_belongs_to_many :is_format, predicate: ::RDF::DC.isFormatOf, class_name: "DRI::Marc"
+    property :related_material, delegate_to: 'descMetadata', multiple: true
+    property :alternative_form, delegate_to: 'descMetadata', multiple: true
 
-  # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-  #belongs_to :preceding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedPreceding, class_name: "DRI::Marc"
-  #has_many :succeeding, predicate: DRI::RDFVocabularies::ModsRelsVocabulary.relatedSucceeding, class_name: "DRI::Marc", as: :preceding
+    # Disabled below - metadata object update triggers
+    # the creation of duplicated objects
+    # around_save :create_multiple_records
 
-  # Mapped attributes for getting relational information from metadata
-  # Internal Relationships
-  property  :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true
-  property  :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true
-  property  :relation_ids_relation, delegate_to: 'descMetadata', multiple: true
-
-  property  :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true
-  property  :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true
-
-  property :related_material, delegate_to: 'descMetadata', multiple: true
-  property :alternative_form, delegate_to: 'descMetadata', multiple: true
-
-  # Disabled below - metadata object update triggers the creation of duplicated objects
-  # around_save :create_multiple_records
-
-  def initialize(params = {})
-    params[:desc_metadata_class] = 'DRI::Metadata::Marc'
-    super(params)
-  end
-
-  def type
-    descMetadata.type
-  end
-
-  def update_metadata(xml_text, ingest=true)
-    if (xml_text.is_a? File)
-      xml_text = xml_text.read
+    def initialize(params = {})
+      params[:desc_metadata_class] = 'DRI::Metadata::Marc'
+      super(params)
     end
 
-    if (xml_text.is_a? Nokogiri::XML::Document)
-      xml = xml_text
-    else
-      xml = Nokogiri::XML xml_text
+    def type
+      descMetadata.type
     end
 
-    xml_without_blanks = Nokogiri::XML.parse(xml.to_xml) do |config|
-      config.noblanks
-    end
+    def update_metadata(xml_text, _ingest = true)
+      xml_text = xml_text.read if xml_text.is_a? File
 
-    fullMetadata.ng_xml = xml_without_blanks
-    object = split_xml(xml_without_blanks.remove_namespaces!)
-    descMetadata.ng_xml = object
-
-    return true
-  end
-
-  def split_xml(xml_text)
-    # If collection wrapper present, the first object will have
-    # the first marc:record and we then process the rest when saving
-    collection = xml_text.search('//collection')
-
-    if !collection.empty?
-      records = collection.children
-      record = records[0]
-    else
-      record = xml_text
-    end
-
-    return record.to_xml
-  end
-
-  def attributes=(properties)
-    controlfields = properties.delete('controlfield')
-    datafields = properties.delete('datafield')
-    super(properties)
-
-    self.descMetadata.add_controlfields(controlfields) unless controlfields.nil?
-    self.descMetadata.add_datafields(datafields) unless datafields.nil?
-  end
-
-=begin
-  # Iterate over every collection's object and process relationships
-  #
-  def process_collection_relationships
-    if self.is_collection?
-      # Get all the collection's objects
-      # We need to index the mods element ID to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('collection_id', :stored_searchable, type: :string)}:\"#{self.id.to_s}\""
-
-      query = Solr::Query.new(solr_query)
-      while (query.has_more?)
-        collection_objects_docs = query.pop
-        collection_objects_docs.each do |obj_doc|
-          doc = SolrDocument.new(obj_doc)
-          object = DRI::Marc.find(doc.id)
-          begin
-            Sufia.queue.push(CreateMarcRelationshipsJob.new(object.pid))
-          rescue Exception => e
-            Rails.logger.error(e.message)
-          end
-        end
-      end
-      # Once we've processed all the children, then process this object
-      process_relationships()
-    else
-      # Only process the object's relationships
-      process_relationships()
-      # Rails.logger.error("The object #{self.pid} is not a collection container.")
-    end
-  end # end add_relationships
-
-  def process_relationships()
-    add_dm_relationship(relation_ids_preceding, :preceding)
-    add_dm_relationship(relation_ids_relation, :related)
-    add_dm_relationship(relation_ids_isVersionOf, :is_version)
-    add_dm_relationship(relation_ids_isFormatOf, :is_format)
-
-    # After processing all the relationships for the object, save
-    self.save if self.valid?
-  end
-=end
-
-  def self.relationships
-    return {related: {label: "Is Related To", field: "relation_ids_relation"},
-            is_version: {label: "Is Version Of", field: "relation_ids_isVersionOf"},
-            is_format: {label: "Is Format Of", field: "relation_ids_isFormatOf"},
-            preceding: {label: "Preceding", field: "relation_ids_preceding"},
-            succeeding: {label: "Succeeding", field: "relation_ids_succeeding"}
-    }
-  end
-
-  def self.solr_relationships_field
-    ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)
-  end
-
-  def get_relationships_records
-    return {:related => retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
-            :is_version => retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
-            :is_format => retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
-            :preceding => retrieve_relation_records(relation_ids_preceding, self.class.solr_relationships_field),
-            :succeeding => retrieve_relation_records(relation_ids_succeeding, self.class.solr_relationships_field)
-    }
-  end
-
-  def create_multiple_records
-    yield
-
-    full_metadata_no_ns = self.fullMetadata.ng_xml.clone
-    full_metadata_no_ns.remove_namespaces!
-    if !new_record? && full_metadata_no_ns.search("//record").count > 1
-      begin
-        Sufia.queue.push(CreateMarcRecordsJob.new(self.id))
-      rescue Exception => e
-      end
-    end
-  end
-
-  private
-
-  # Process a specific qdc relationship for the object
-  #
-  def add_dm_relationship(rels_array, rels_name)
-    # Reset previous relationships
-    if self.send("#{rels_name}").respond_to?("push")
-      self.send("#{rels_name}").clear
-    else
-      self.association(rels_name.to_sym).replace(nil)
-    end
-
-    if rels_array.empty?
-      return
-    end
-
-    # Get Root collection of current object.
-    # This is to restrict relationship processing only within the given collection
-    solr_query = "id:\"#{id.to_s}\""
-    # The query service returns back a set of Solr Documents, therefore need to be casted later on
-    solr_docs = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
-
-    if (solr_docs == nil || solr_docs == [])
-      Rails.logger.error("Solr document for object with PID #{self.id} not found in Solr")
-      return
-    end
-
-    doc = SolrDocument.new(solr_docs[0])
-    root_collection = doc[ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)]
-
-    if (root_collection == nil)
-      Rails.logger.error("Root collection ID for object with PID #{self.id} not found in Solr")
-      return
-    end
-
-    rels_array.each do |item_id|
-      # We need to index the identifier element value to be able to search in Solr and then retrieve the document by id
-      solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)}:\"#{item_id.to_s}\""
-      solr_query << " AND #{ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)}:\"#{root_collection.first.to_s}\""
-      marc_item = ActiveFedora::SolrService.query(solr_query, :defType => "edismax")
-
-      if marc_item.empty?
-        Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{self.id}")
+      if xml_text.is_a? Nokogiri::XML::Document
+        xml = xml_text
       else
-        doc = SolrDocument.new(marc_item[0])
-        # Cast the solr document to its corresponding Fedora object
-        marc_obj = DRI::Marc.find(doc.id)
-        unless marc_obj == nil
-          if self.send("#{rels_name}").respond_to?("push")
-            self.send("#{rels_name}").push marc_obj
-          else
-            self.send("#{rels_name}=", marc_obj)
-          end
+        xml = Nokogiri::XML xml_text
+      end
 
-          #self.save if self.valid?
-        end
+      xml_no_blanks = Nokogiri::XML.parse(xml.to_xml, &:noblanks)
+
+      fullMetadata.ng_xml = xml_no_blanks
+      object = split_xml(xml_no_blanks.remove_namespaces!)
+      descMetadata.ng_xml = object
+
+      true
+    end
+
+    def split_xml(xml_text)
+      # If collection wrapper present, the first object will have
+      # the first marc:record and we then process the rest when saving
+      collection = xml_text.search('//collection')
+
+      if !collection.empty?
+        records = collection.children
+        record = records[0]
+      else
+        record = xml_text
+      end
+
+      record.to_xml
+    end
+
+    def attributes=(properties)
+      controlfields = properties.delete('controlfield')
+      datafields = properties.delete('datafield')
+      super(properties)
+
+      descMetadata.add_controlfields(controlfields) unless controlfields.nil?
+      descMetadata.add_datafields(datafields) unless datafields.nil?
+    end
+
+    def self.relationships
+      { related: { label: 'Is Related To', field: 'relation_ids_relation' },
+        is_version: { label: 'Is Version Of', field: 'relation_ids_isVersionOf' },
+        is_format: { label: 'Is Format Of', field: 'relation_ids_isFormatOf' },
+        preceding: { label: 'Preceding', field: 'relation_ids_preceding' },
+        succeeding: { label: 'Succeeding', field: 'relation_ids_succeeding' }
+      }
+    end
+
+    def self.solr_relationships_field
+      ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)
+    end
+
+    def get_relationships_records
+      { related: retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
+        is_version: retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
+        is_format: retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
+        preceding: retrieve_relation_records(relation_ids_preceding, self.class.solr_relationships_field),
+        succeeding: retrieve_relation_records(relation_ids_succeeding, self.class.solr_relationships_field)
+      }
+    end
+
+    private
+
+    def create_multiple_records
+      yield
+
+      full_metadata_no_ns = fullMetadata.ng_xml.clone
+      full_metadata_no_ns.remove_namespaces!
+
+      return if new_record? || full_metadata_no_ns.search('//record').count <= 1
+
+      begin
+        Sufia.queue.push(CreateMarcRecordsJob.new(id))
+      rescue Exception => e
+        Rails.logger.error(e.message)
       end
     end
-  end # end add_dm_relationship
-end
-end
+  end # class
+end # module
