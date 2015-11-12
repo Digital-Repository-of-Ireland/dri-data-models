@@ -25,7 +25,7 @@ module DRI
 
     def initialize(args = {})
       # FIXME: Bug 1320
-      args[:id] = ActiveFedora::Noid::Service.new.mint unless args[:id].present?
+      args[:id] = self.assign_id unless args[:id].present?
 
       super(args)
     end
