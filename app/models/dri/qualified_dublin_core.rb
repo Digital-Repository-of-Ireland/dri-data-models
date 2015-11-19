@@ -73,16 +73,16 @@ module DRI
     end
 
     def get_relationships_records
-      { related: retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
-        referenced: retrieve_relation_records(relation_ids_isReferencedBy, self.class.solr_relationships_field),
-        references: retrieve_relation_records(relation_ids_references, self.class.solr_relationships_field),
-        container: retrieve_relation_records(relation_ids_isPartOf, self.class.solr_relationships_field),
-        parts: retrieve_relation_records(relation_ids_hasPart, self.class.solr_relationships_field),
-        is_version: retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
-        has_versions: retrieve_relation_records(relation_ids_hasVersion, self.class.solr_relationships_field),
-        is_format: retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
-        has_format: retrieve_relation_records(relation_ids_hasFormat, self.class.solr_relationships_field),
-        has_source: retrieve_relation_records(relation_ids_source, self.class.solr_relationships_field)
+      { related: retrieve_relation_records(send(self.class.relationships[:related][:field]), self.class.solr_relationships_field),
+        referenced: retrieve_relation_records(send(self.class.relationships[:referenced][:field]), self.class.solr_relationships_field),
+        references: retrieve_relation_records(send(self.class.relationships[:references][:field]), self.class.solr_relationships_field),
+        container: retrieve_relation_records(send(self.class.relationships[:container][:field]), self.class.solr_relationships_field),
+        parts: retrieve_relation_records(send(self.class.relationships[:parts][:field]), self.class.solr_relationships_field),
+        is_version: retrieve_relation_records(send(self.class.relationships[:is_version][:field]), self.class.solr_relationships_field),
+        has_versions: retrieve_relation_records(send(self.class.relationships[:has_versions][:field]), self.class.solr_relationships_field),
+        is_format: retrieve_relation_records(send(self.class.relationships[:is_format][:field]), self.class.solr_relationships_field),
+        has_format: retrieve_relation_records(send(self.class.relationships[:has_format][:field]), self.class.solr_relationships_field),
+        has_source: retrieve_relation_records(send(self.class.relationships[:has_source][:field]), self.class.solr_relationships_field)
       }
     end
   end # class

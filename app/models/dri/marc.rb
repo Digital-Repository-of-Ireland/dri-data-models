@@ -103,11 +103,11 @@ module DRI
     end
 
     def get_relationships_records
-      { related: retrieve_relation_records(relation_ids_relation, self.class.solr_relationships_field),
-        is_version: retrieve_relation_records(relation_ids_isVersionOf, self.class.solr_relationships_field),
-        is_format: retrieve_relation_records(relation_ids_isFormatOf, self.class.solr_relationships_field),
-        preceding: retrieve_relation_records(relation_ids_preceding, self.class.solr_relationships_field),
-        succeeding: retrieve_relation_records(relation_ids_succeeding, self.class.solr_relationships_field)
+      { related: retrieve_relation_records(send(self.class.relationships[:related][:field]), self.class.solr_relationships_field),
+        is_version: retrieve_relation_records(send(self.class.relationships[:is_version][:field]), self.class.solr_relationships_field),
+        is_format: retrieve_relation_records(send(self.class.relationships[:is_format][:field]), self.class.solr_relationships_field),
+        preceding: retrieve_relation_records(send(self.class.relationships[:preceding][:field]), self.class.solr_relationships_field),
+        succeeding: retrieve_relation_records(send(self.class.relationships[:succeeding][:field]), self.class.solr_relationships_field)
       }
     end
 

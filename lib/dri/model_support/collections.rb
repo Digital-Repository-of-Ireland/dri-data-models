@@ -18,15 +18,15 @@ module DRI
         # NOT USED - Two relationships below for managing
         # a collection's collections
         # (!) ONLY FOR COLLECTIONS
-        belongs_to :parent_collection,
-                   predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
-                   class_name: 'DRI::Batch'
-        has_many :member_collections,
-                 class_name: 'DRI::Batch',
-                 as: :parent_collection
+        #belongs_to :parent_collection,
+        #           predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
+        #           class_name: 'DRI::Batch'
+        #has_many :member_collections,
+        #         class_name: 'DRI::Batch',
+        #         as: :parent_collection
 
         # Additional relationships to keep track of sibling order
-        # important for EAD
+        # used in EAD
         belongs_to :previous_sibling,
                    predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
                    class_name: 'DRI::Batch'
@@ -41,7 +41,7 @@ module DRI
           # FIXME: #1320
           elsif collection == true && generic_files.count == 0
             @collection = collection
-          elsif collection == false && governed_items.count == 0 && member_collections.count == 0
+          elsif collection == false && governed_items.count == 0
             @collection = collection
           end
         end
@@ -63,7 +63,7 @@ module DRI
         # been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME: #1320
-        !new_record? && is_collection? && governing_collection.nil? && member_collections.count == 0
+        !new_record? && is_collection? && governing_collection.nil?
       end
 
       private

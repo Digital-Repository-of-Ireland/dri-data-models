@@ -56,7 +56,7 @@ module DRI
     end
 
     def to_solr(solr_doc = {}, opts = {})
-      solr_doc = super(solr_doc)
+      solr_doc = super(solr_doc, opts)
 
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
       solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
@@ -74,8 +74,8 @@ module DRI
       file_type.push('video') if video?
       file_type.push('image') if image?
       file_type.push('text') if text?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type)
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type)
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
+      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
       solr_doc
     end
@@ -96,7 +96,7 @@ module DRI
 
     def delete_files
       local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
-                                        { f: id, d: 'content' }).order('version DESC').to_a
+                                        f: id, d: 'content').order('version DESC').to_a
       local_file_info.each(&:destroy)
       FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
     end
