@@ -38,9 +38,9 @@ module DRI
         def collection=(collection)
           if @collection == collection
             @collection = collection
-          elsif collection == true && generic_files.count == 0
+          elsif collection == true && !generic_files.any?
             @collection = collection
-          elsif collection == false && governed_items.count == 0
+          elsif collection == false && !governed_items.any?
             @collection = collection
           end
         end
@@ -53,7 +53,7 @@ module DRI
       def is_collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
-        (descMetadata.collection? || properties.collection?) && generic_files.count == 0
+        (descMetadata.collection? || properties.collection?) && !generic_files.any?
       end
 
       def is_root_collection?
