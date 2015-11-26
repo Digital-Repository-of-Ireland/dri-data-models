@@ -31,13 +31,6 @@ module DRI
     property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false
     property :preservation_only, delegate_to: 'dri_properties', multiple: false
 
-    def initialize(args = {})
-      # FIXME: Bug 1320
-      args[:id] = self.assign_id unless args[:id].present?
-
-      super(args)
-    end
-
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
     def update_file_reference(dsid, opts)

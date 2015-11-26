@@ -38,7 +38,6 @@ module DRI
         def collection=(collection)
           if @collection == collection
             @collection = collection
-          # FIXME: #1320
           elsif collection == true && generic_files.count == 0
             @collection = collection
           elsif collection == false && governed_items.count == 0
@@ -54,7 +53,6 @@ module DRI
       def is_collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
-        # FIXME: #1320
         (descMetadata.collection? || properties.collection?) && generic_files.count == 0
       end
 
