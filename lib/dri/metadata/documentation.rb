@@ -5,109 +5,109 @@ module DRI
       #has_many_versions
 
       # It supports all the DRI Compulsory elements
-      property :title, predicate: RDF::DC.title do |index|
+      property :title, predicate: RDF::Vocab::DC.title do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :identifier, predicate: RDF::DC.identifier do |index|
+      property :identifier, predicate: RDF::Vocab::DC.identifier do |index|
         index.as :stored_searchable
       end
 
-      property :creator, predicate: RDF::DC.creator do |index|
+      property :creator, predicate: RDF::Vocab::DC.creator do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable,
                  :sortable
       end
 
-      property :contributor, predicate: RDF::DC.contributor do |index|
+      property :contributor, predicate: RDF::Vocab::DC.contributor do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_facetable
       end
 
-      property :publisher, predicate: RDF::DC.publisher do |index|
+      property :publisher, predicate: RDF::Vocab::DC.publisher do |index|
         index.as DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :description, predicate: RDF::DC.description do |index|
+      property :description, predicate: RDF::Vocab::DC.description do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :rights, predicate: RDF::DC.rights do |index|
+      property :rights, predicate: RDF::Vocab::DC.rights do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :language, predicate: RDF::DC.language do |index|
+      property :language, predicate: RDF::Vocab::DC.language do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata:: Descriptors.language_facetable
       end
 
-      property :date, predicate: RDF::DC.date do |index|
+      property :date, predicate: RDF::Vocab::DC.date do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :creation_date, predicate: RDF::DC.created do |index|
+      property :creation_date, predicate: RDF::Vocab::DC.created do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :published_date, predicate: RDF::DC.issued do |index|
+      property :published_date, predicate: RDF::Vocab::DC.issued do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :subject, predicate: RDF::DC.subject do |index|
+      property :subject, predicate: RDF::Vocab::DC.subject do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :resource_type, predicate: RDF::DC.type do |index|
+      property :resource_type, predicate: RDF::Vocab::DC.type do |index|
         index.as DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :format, predicate: RDF::DC.format do |index|
+      property :format, predicate: RDF::Vocab::DC.format do |index|
         index.as DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :source, predicate: RDF::DC.source do |index|
+      property :source, predicate: RDF::Vocab::DC.source do |index|
         index.as DRI::Metadata::Descriptors.cleaned_displayable,
                  DRI::Metadata::Descriptors.cleaned_facetable
       end
 
-      property :coverage, predicate: RDF::DC.coverage do |index|
+      property :coverage, predicate: RDF::Vocab::DC.coverage do |index|
         index.as DRI::Metadata::Descriptors.cleaned_displayable,
                  DRI::Metadata::Descriptors.cleaned_searchable
       end
 
-      property :geographical_coverage, predicate: RDF::DC.spatial do |index|
+      property :geographical_coverage, predicate: RDF::Vocab::DC.spatial do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :temporal_coverage, predicate: RDF::DC.temporal do |index|
+      property :temporal_coverage, predicate: RDF::Vocab::DC.temporal do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
                  DRI::Metadata::Descriptors.cleaned_facetable,
                  DRI::Metadata::Descriptors.cleaned_displayable
       end
 
-      property :geocode_point, predicate: RDF::DC.Point
+      property :geocode_point, predicate: RDF::Vocab::DC.Point
 
-      property :geocode_box, predicate: RDF::DC.Box
+      property :geocode_box, predicate: RDF::Vocab::DC.Box
 
-      property :temporal_coverage_period, predicate: RDF::DC.Period
+      property :temporal_coverage_period, predicate: RDF::Vocab::DC.Period
 
-      property :relation, predicate: RDF::DC.relation do |index|
+      property :relation, predicate: RDF::Vocab::DC.relation do |index|
         index.as :stored_searchable, :facetable
       end
 
