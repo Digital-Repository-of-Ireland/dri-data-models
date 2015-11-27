@@ -544,7 +544,8 @@ describe 'EncodedArchivalDescription descMetadata' do
           geogname_subject: ['subject geogname'],
           famname_subject: ['subject famname'],
           related_material: ['http://example.org/relmat'],
-          alternative_form: ['http://example.org/altform']
+          alternative_form: ['http://example.org/altform'],
+          format: ['395 files']
       }
     end
 
@@ -573,7 +574,8 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'creation_date_idx_tesim', 'published_date_tesim', 'cdateRange', 'pdateRange', 'sdateRange', 'geospatial',
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
-                   'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim']
+                   'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
+                   'format_sim', 'format_tesim']
 
       expect(@collection.descMetadata.to_solr.keys).to match_array(solr_keys)
       solr_doc = @collection.descMetadata.to_solr
@@ -610,6 +612,7 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       alternative_form = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('alternative_form', :stored_searchable)]
       related_material = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('related_material', :stored_searchable)]
+      format = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('format', :stored_searchable)]
 
       expect(title).to match_array(['The test title'])
       expect(description).to match_array(['This is a test description for the object.'])
@@ -638,6 +641,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(geo_json).to match_array(["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-6.266155,53.35014]},\"properties\":{\"placename\":\"Dublin\"}}"])
       expect(related_material).to match_array(['http://example.org/relmat'])
       expect(alternative_form).to match_array(['http://example.org/altform'])
+      expect(format).to match_array(['395 files'])
     end
 
     it 'should expose recommended metadata fields for indexing (ead component)' do
@@ -653,7 +657,8 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'creation_date_idx_tesim', 'published_date_tesim', 'cdateRange', 'pdateRange', 'sdateRange', 'geospatial',
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
-                   'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim']
+                   'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
+                   'format_sim', 'format_tesim']
 
       expect(@component.descMetadata.to_solr.keys).to match_array(solr_keys)
       solr_doc = @component.descMetadata.to_solr
@@ -690,6 +695,7 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       alternative_form = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('alternative_form', :stored_searchable)]
       related_material = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('related_material', :stored_searchable)]
+      format = solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('format', :stored_searchable)]
 
       expect(title).to match_array(['The test title'])
       expect(description).to match_array(['This is a test description for the object.'])
@@ -718,6 +724,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(geo_json).to match_array(["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-6.266155,53.35014]},\"properties\":{\"placename\":\"Dublin\"}}"])
       expect(related_material).to match_array(['http://example.org/relmat'])
       expect(alternative_form).to match_array(['http://example.org/altform'])
+      expect(format).to match_array(['395 files'])
     end
 
     it 'should index display dates as dcterms:Point (ead collection and component)' do

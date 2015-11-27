@@ -1,43 +1,47 @@
 module DRI
   module Metadata
-  	module Descriptors
-  	  require 'iso-639'
+    module Descriptors
+      require 'iso-639'
 
-  	  # Creates a facet index in SOLR for ISO 639.2 language codes 
-  	  def self.language_facetable
-      	@language ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: language_converter)
+      # Creates a facet index in SOLR for ISO 639.2 language codes
+      def self.language_facetable
+        @language ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued,
+                                               converter: language_converter)
       end
 
-       # Creates a searchable index in SOLR
+      # Creates a searchable index in SOLR
       def self.cleaned_searchable
-        @searchable||= Solrizer::Descriptor.new(Solrizer::DefaultDescriptors.stored_searchable_field_definition, converter: input_converter, requires_type: true)
+        @searchable ||= Solrizer::Descriptor.new(Solrizer::DefaultDescriptors.stored_searchable_field_definition,
+                                                 converter: input_converter,
+                                                 requires_type: true)
       end
 
       def self.cleaned_displayable
-        @displayable||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: input_converter)
+        @displayable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued,
+                                                  converter: input_converter)
       end
 
-
-       # Creates a facet index in SOLR
+      # Creates a facet index in SOLR
       def self.cleaned_facetable
-        @facetable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued, converter: facet_converter)
+        @facetable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued,
+                                                converter: facet_converter)
       end
 
       # Converts an RFC 5646 or ISO 639.1 language code into an ISO 639.2 code
       def self.language_converter
-      	lambda do |type|
-      		lambda do |val|
-      			begin
-      				standardise_language_code val
-      			rescue
-      				nil
-      			end
-      		end
-      	end
+        lambda do |_type|
+          lambda do |val|
+            begin
+              standardise_language_code val
+            rescue
+              nil
+            end
+          end
+        end
       end
 
       def self.facet_converter
-        lambda do |type|
+        lambda do |_type|
           lambda do |val|
             begin
               standardise_facet val
@@ -49,15 +53,15 @@ module DRI
       end
 
       def self.input_converter
-        lambda do |type|
+        lambda do |_type|
           lambda do |val|
             begin
               clean_val = val.strip
 
-              if clean_val.downcase == "n/a"
-                "N/A"
+              if clean_val.downcase == 'n/a'
+                'N/A'
               else
-                !clean_val.empty? ? clean_val : nil
+                clean_val.empty? ? nil : clean_val
               end
             rescue
               nil
@@ -66,17 +70,17 @@ module DRI
         end
       end
 
-      def standardise_facet(val="")
+      def standardise_facet(val = '')
         clean_val = val.strip
 
-        if clean_val.blank? || clean_val.downcase == "n/a" || clean_val.empty?
+        if clean_val.blank? || clean_val.downcase == 'n/a' || clean_val.empty?
           nil
         else
           clean_val.capitalize
         end
       end
 
-      def self.standardise_language_code(val="")
+      def self.standardise_language_code(val = '')
         # If using RFC 5646, then val will be of the
         # format language-script-region-variant
         #
@@ -92,18 +96,17 @@ module DRI
 
         # If result is nil, as a last resort check if they wrote
         # the language name in english.
-        if result == nil
+        if result.nil?
           result = ISO_639.find_by_english_name(clean_val.capitalize)
         end
-    
-        if result == nil
+
+        if result.nil?
           nil
         else
           # Return the 3-letter ISO 639.2 code
           result.alpha3_bibliographic
         end
       end
-
-  	end
+    end
   end
 end

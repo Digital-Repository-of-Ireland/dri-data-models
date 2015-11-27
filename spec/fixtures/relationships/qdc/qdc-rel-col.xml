@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qualifieddc xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:dc="http://purl.org/dc/elements/1.1/"
+             xmlns:dcterms="http://purl.org/dc/terms/"
+             xmlns:marcrel="http://www.loc.gov/marc.relators/"
+             xsi:schemaLocation="http://www.loc.gov/marc.relators/ marcrel.xsd"
+             xsi:noNamespaceSchemaLocation="http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd">
+  <dc:identifier>MAGOH</dc:identifier>
+  <dc:title>Magdalene Oral History collection</dc:title>
+  <dc:creator>O'Donnell, Katherine</dc:creator>
+  <dc:subject>Mother and baby homes</dc:subject>
+  <dc:subject>Illegitimate births</dc:subject>
+  <dc:subject>Magdalene laundries</dc:subject>
+  <dc:description>Collection of interview transcripts and audio recordings from the research project Magdalene Institutions: Recording an Oral and Archival History that was led by Dr Katherine O&#x2019;Donnell.</dc:description>
+  <dc:publisher>Irish Qualitative Data Archive</dc:publisher>
+  <dcterms:created xsi:type="dcterms:Period">name=2010 - 2013; start=2010-01-01; end=2013-12-31;</dcterms:created>
+  <dc:type xsi:type="dcterms:DCMIType">Collection</dc:type>
+  <dc:type>Oral histories</dc:type>
+  <dc:type>Interviews (data collection)</dc:type>
+  <dc:format>pdf</dc:format>
+  <dcterms:source xsi:type="dcterms:URI">http://www.iqda.ie/content/magdalene-oral-history-collection</dcterms:source>
+  <dc:language xsi:type="dcterms:ISO639-2">eng</dc:language>
+  <dcterms:temporal xsi:type="dcterms:Period">name=Twentieth Century Ireland; start=1900-01-01; end=1999-12-31;</dcterms:temporal>
+  <dcterms:spatial xsi:type="dcterms:Point">name=Republic of Ireland; east=-8.289325250000001; north=53.401373500000005;</dcterms:spatial>
+  <dc:rights>All rights reserved.</dc:rights>
+  <dcterms:hasPart>MAGOH01</dcterms:hasPart>
+</qualifieddc>

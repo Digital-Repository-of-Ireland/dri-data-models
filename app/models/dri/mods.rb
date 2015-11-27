@@ -256,17 +256,17 @@ module DRI
     end
 
     def get_relationships_records
-      { preceding: retrieve_relation_records(related_items_ids_preceding, self.class.solr_relationships_field),
-        succeeding: retrieve_relation_records(related_items_ids_succeeding, self.class.solr_relationships_field),
-        original: retrieve_relation_records(related_items_ids_original, self.class.solr_relationships_field),
-        host: retrieve_relation_records(related_items_ids_host, self.class.solr_relationships_field),
-        constituents: retrieve_relation_records(related_items_ids_constituent, self.class.solr_relationships_field),
-        series: retrieve_relation_records(related_items_ids_series, self.class.solr_relationships_field),
-        other_version: retrieve_relation_records(related_items_ids_otherVersion, self.class.solr_relationships_field),
-        other_format: retrieve_relation_records(related_items_ids_otherFormat, self.class.solr_relationships_field),
-        referenced_by: retrieve_relation_records(related_items_ids_isReferencedBy, self.class.solr_relationships_field),
-        references: retrieve_relation_records(related_items_ids_references, self.class.solr_relationships_field),
-        review: retrieve_relation_records(related_items_ids_reviewOf, self.class.solr_relationships_field)
+      { preceding: retrieve_relation_records(send(self.class.relationships[:preceding][:field]), self.class.solr_relationships_field),
+        succeeding: retrieve_relation_records(send(self.class.relationships[:succeeding][:field]), self.class.solr_relationships_field),
+        original: retrieve_relation_records(send(self.class.relationships[:original][:field]), self.class.solr_relationships_field),
+        host: retrieve_relation_records(send(self.class.relationships[:host][:field]), self.class.solr_relationships_field),
+        constituents: retrieve_relation_records(send(self.class.relationships[:constituents][:field]), self.class.solr_relationships_field),
+        series: retrieve_relation_records(send(self.class.relationships[:series][:field]), self.class.solr_relationships_field),
+        other_version: retrieve_relation_records(send(self.class.relationships[:other_version][:field]), self.class.solr_relationships_field),
+        other_format: retrieve_relation_records(send(self.class.relationships[:other_format][:field]), self.class.solr_relationships_field),
+        referenced_by: retrieve_relation_records(send(self.class.relationships[:referenced_by][:field]), self.class.solr_relationships_field),
+        references: retrieve_relation_records(send(self.class.relationships[:references][:field]), self.class.solr_relationships_field),
+        review: retrieve_relation_records(send(self.class.relationships[:review][:field]), self.class.solr_relationships_field)
       }
     end
 

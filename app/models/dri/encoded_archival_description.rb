@@ -56,6 +56,7 @@ module DRI
     property :geocode_point, delegate_to: 'descMetadata', multiple: true
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
     property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
+    property :format, delegate_to: 'descMetadata', multiple: true
 
     around_save :synchronize_if_changed
 
@@ -82,7 +83,7 @@ module DRI
        :creation_date, :published_date, :name_coverage, :temporal_coverage,
        :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
        :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
-       :related_material, :alternative_form, :language
+       :related_material, :alternative_form, :language, :format
       ]
     end
 

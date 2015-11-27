@@ -129,6 +129,7 @@ module DRI
 
         t.phys_desc(path: 'physdesc') {
           t.genre_form(path: 'genreform')
+          t.extent(path: 'extent')
         }
         t.dao_desc {
           t.p(ref: [:p])
@@ -232,6 +233,7 @@ module DRI
         # Eadlevel - otherlevel
         t.ead_level_other(proxy: [:ead, :arch_desc, :other_level_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
+        t.format(proxy: [:ead, :arch_desc, :did, :phys_desc, :extent], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Dao
         t.dao_proxy(proxy: [:dao])
         t.dao_did(proxy: [:ead, :arch_desc, :did, :dao])
@@ -903,6 +905,7 @@ module DRI
 
         terms_hash[:related_material] = related_material
         terms_hash[:alternative_form] = alternative_form
+        terms_hash[:format] = self.format
 
         language_hash = {}
         language_hash[:text] = []
