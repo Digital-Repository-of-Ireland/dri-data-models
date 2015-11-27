@@ -39,7 +39,7 @@ describe 'QualifiedDublinCore' do
     it 'should be a collection if metadata specifies this' do
       @audio.type = ['Collection']
 
-      expect(@audio.is_collection?).to eq true
+      expect(@audio.collection?).to eq true
     end
 
     it 'should assert content model' do

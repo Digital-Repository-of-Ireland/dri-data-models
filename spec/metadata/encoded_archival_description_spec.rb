@@ -308,17 +308,17 @@ describe 'EncodedArchivalDescription descMetadata' do
       @ead_collection.governed_items << @ead_series
       @ead_collection.save
 
-      @ead_collection.is_collection?.should == true
-      @ead_collection.is_root_collection?.should == true
+      @ead_collection.collection?.should == true
+      @ead_collection.root_collection?.should == true
 
-      @ead_series.is_collection?.should == true
-      @ead_series.is_root_collection?.should == false
+      @ead_series.collection?.should == true
+      @ead_series.root_collection?.should == false
 
-      @ead_file.is_collection?.should == true
-      @ead_file.is_root_collection?.should == false
+      @ead_file.collection?.should == true
+      @ead_file.root_collection?.should == false
 
-      @ead_item.is_collection?.should == false
-      @ead_item.is_root_collection?.should == false
+      @ead_item.collection?.should == false
+      @ead_item.root_collection?.should == false
     end
 
     it 'should validate the presence of the title metadata field' do

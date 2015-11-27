@@ -25,7 +25,7 @@ module DRI
         sample_rate = []
         file_format = []
 
-        if is_collection?
+        if collection?
           file_type.push 'collection'
           file_type_display.push 'Collection'
         end
@@ -36,7 +36,7 @@ module DRI
         unless results.nil?
           results.each do |gf|
             file_count += 1
-            if !is_collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
+            if !collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
               file_type |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0]]
               file_type_display |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0].capitalize]
             end

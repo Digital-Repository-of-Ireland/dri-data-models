@@ -179,11 +179,11 @@ module DRI
       file_type = []
       file_type_display = []
 
-      return solr_doc unless is_collection?
+      return solr_doc unless collection?
 
       file_type.push('collection')
 
-      if !is_root_collection? && !ead_level.blank?
+      if !root_collection? && !ead_level.blank?
         file_type_display.push ead_level.strip.capitalize
       else
         file_type_display.push('Collection')
