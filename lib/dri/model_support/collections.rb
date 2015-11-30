@@ -18,10 +18,10 @@ module DRI
         # NOT USED - Two relationships below for managing
         # a collection's collections
         # (!) ONLY FOR COLLECTIONS
-        #belongs_to :parent_collection,
+        # belongs_to :parent_collection,
         #           predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
         #           class_name: 'DRI::Batch'
-        #has_many :member_collections,
+        # has_many :member_collections,
         #         class_name: 'DRI::Batch',
         #         as: :parent_collection
 
@@ -50,18 +50,18 @@ module DRI
         end
       end
 
-      def is_collection?
+      def collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
         (descMetadata.collection? || properties.collection?) && !generic_files.any?
       end
 
-      def is_root_collection?
+      def root_collection?
         # It is a root collection if it is already defined to be a collection; it has
         # been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME: #1320
-        !new_record? && is_collection? && governing_collection.nil?
+        !new_record? && collection? && governing_collection.nil?
       end
 
       private
@@ -105,8 +105,8 @@ module DRI
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
         end
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :facetable) => is_collection?)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :stored_searchable) => is_collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :facetable) => collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :stored_searchable) => collection?)
 
         solr_doc
       end # collections_to_solr

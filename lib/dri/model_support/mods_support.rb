@@ -42,7 +42,7 @@ module DRI
 
         # Assign collection membership - only for collections
         # (hasCollectionMember and isMemberOfCollection)
-        # if new_object.is_collection? && self.is_collection?
+        # if new_object.collection? && self.collection?
         #   new_object.parent_collection = self
         # end
 

@@ -280,10 +280,10 @@ describe 'Mods' do
 
     it 'should use the type attr to determine whether is a collection' do
       @mods_col.save
-      expect(@mods_col.is_collection?).to eq true
-      expect(@mods_col.is_root_collection?).to eq true
+      expect(@mods_col.collection?).to eq true
+      expect(@mods_col.root_collection?).to eq true
 
-      expect(@mods_record.is_collection?).to eq false
+      expect(@mods_record.collection?).to eq false
     end
 
     it 'indexes valid temporal metadata' do
