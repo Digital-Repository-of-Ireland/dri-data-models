@@ -1,13 +1,19 @@
 require 'uri'
 
+# DRI namespace
 module DRI
+  # Module Utils - general utilities methods
   module Utils
+    # Adds the configured namespace in the app settings
+    # to a given digital object PID
+    #
+    # @param pid [String] the PID
     def self.split_id(pid)
       pid.sub("#{Rails.application.config.id_namespace}:", '')
     end
 
     # Validates a String URI
-    # @param[String] the string URI
+    # @param string_uri [String] the string URI
     # return true if valid URI; false otherwise
     #
     def self.valid_uri?(string_uri)
@@ -19,7 +25,8 @@ module DRI
     end
 
     # Returns a Hash with the components of a DCMI Period encoded string
-    # @param[String] the encoded DCMI Period
+    #
+    # @param encoded_period [String] the encoded DCMI Period
     # @return Hash with the DCMI Period components
     #
     def self.decode_dcmi_period(encoded_period)
@@ -38,9 +45,9 @@ module DRI
     end
 
     # Returns a Hash with the components of a DCMI Point encoded string
-    # @param[String] the encoded DCMI Period
-    # @return Hash with the DCMI Point components
     #
+    # @param encoded_point [String] the encoded DCMI Period
+    # @return Hash with the DCMI Point components
     def self.decode_dcmi_point(encoded_point)
       # TODO: Implement
       dcmi_point_hash = {}
@@ -50,9 +57,10 @@ module DRI
 
     # Apply XSLT transformation to input XML. To transform existing
     # descriptive metadata (DC, MODS, EAD) into oai_dc metadata
-    # @param[String] xslt_path relative path to the XSLT directory
-    # @param[Nokogiri::Document] xml the source xml to be transformed
-    # @return Nokogiri::XML the resulting xml after XSLT transformation
+    #
+    # @param xslt_path [String] relative path to the XSLT directory
+    # @param xml [Nokogiri::Document] the source xml to be transformed
+    # @return [Nokogiri::XML] the resulting xml after XSLT transformation
     #
     def self.apply_xslt_transformation(xslt_path, xml)
       template = Nokogiri::XSLT(File.read(File.join(__dir__, xslt_path)))
@@ -61,6 +69,7 @@ module DRI
     end
 
     # Generates metadata checksum for the object
+    #
     # @param object [DRI::Batch] the digital object
     def self.checksum_metadata(object)
       if object.attached_files.key?(:descMetadata)
@@ -69,8 +78,9 @@ module DRI
       end
     end
 
-    # Create deafult reader group permissions for the object and save
-    # @param object [DRI::Batch] the object for which
+    # Create default reader group permissions for the object and save
+    #
+    # @param id [DRI::Batch] the PID of the collection object for which
     # to add a default reader group
     def self.create_reader_group(id)
       grp = UserGroup::Group.new(name: id,
@@ -81,6 +91,7 @@ module DRI
 
     # Adds linked data records for logaimn links present
     # in the metadata (geographical_coverage)
+    #
     # @param obj [DRI::Batch] the object to check
     def self.retrieve_linked_data(obj)
       if AuthoritiesConfig

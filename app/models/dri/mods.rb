@@ -1,4 +1,6 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI Mods digital objects extending from DRI::Batch
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
@@ -84,6 +86,8 @@ module DRI
       super(args)
     end
 
+    #
+    # @return [Array<Symbol>] MODS DRI terms symbols array
     def self.mods_dri_terms
       [:title, :creator, :contributor, :desc_abstract, :desc_note,
        :desc_physdesc_note, :desc_toc, :origin_metadata, :rights,
@@ -92,6 +96,9 @@ module DRI
       ]
     end
 
+    # AF Override
+    # Set the object's attributes
+    # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       modified_attributes = properties.select { |key, _value| !DRI::Mods.mods_dri_terms.include? key.to_sym }
       super(modified_attributes)
@@ -102,6 +109,8 @@ module DRI
       attached_files[:fullMetadata].content = attached_files[:descMetadata].content
     end
 
+    #
+    # @return [Hash] hash with all the values for the MODS DRI editable terms
     def editable_attributes
       editable_attrs = {}
 
@@ -112,14 +121,28 @@ module DRI
       editable_attrs
     end
 
+    # Returns a Hash with all the values for the DRI editable metadata fields
+    # to be populated in a UI Edit form
+    #
+    # @return [Hash] Hash of DRI MODS metadata
     def retrieve_hash_attributes
       descMetadata.retrieve_terms_hash
     end
 
+    # Dynamically generate the attribute setters for the marcrelator
+    # individual roles methods
+    # e.g. role_cre (creator), role_ctb (contributor)
+    # def role_cre(values)
+    # ...
+    # end
     class_eval do
       DRI::Vocabulary.marc_relators.each do |role|
+        # name: role_xxx, where xxx is the marcrelator code
         method_name = "#{role.prepend('role_')}"
+
         define_method "#{method_name}=" do |values|
+          # the descMetadata roles method expect a Hash with
+          # 'name', 'type', 'authority' keys
           values_hash = { 'name' => [], 'type' => [], 'authority' => [] }
           values.each do |v|
             values_hash['name'] << v
@@ -132,58 +155,104 @@ module DRI
             values_hash['type'] << method_name
             values_hash['authority'] << ''
           end
+
           self.roles = values_hash
         end
       end
     end
 
+    # Roles attribute setter
+    #
+    # @param [Hash] roles hash with metadata marcrelator values
+    # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+    # @option roles [Array<String>] :type the marcrelator codes
+    # @option roles [Array<String>] :authority the values for the authority attribute e.g. marcrel
     def roles=(roles)
       descMetadata.roles = roles
     end
 
+    # creator attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] creators the array of creator metadata values to set
     def creator=(creators)
+      # default marcrel code for creator cre
       self.role_cre = creators if creators.is_a?(Array)
     end
 
+    # contributor attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] contributors the array of contributor metadata values to set
     def contributor=(contributors)
+      # default marcrel code for creator ctb
       self.role_ctb = contributors if contributors.is_a?(Array)
     end
 
+    # origin_metadata attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] origin the array of values to set for mods:originInfo metadata
     def origin_metadata=(origin)
       descMetadata.add_origin_metadata(origin)
     end
 
+    # origin_metadata attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash, Array<String>] statement the array or hash of values to set for mods:accessCondition metadata
     def rights=(statement)
       if statement.is_a? Hash
+        # mods:accessCondition contains nested copyrightmd metadata e.g.
+        # <mods:accessCondition>
+        #   <copyrightMD:copyright copyright.status="copyrighted" publication.status=”published”>
+        #     <copyrightMD:rights.holder>Copyright 2014</copyrightMD:rights.holder>
+        #     <copyrightMD:general.note>Images are available for single-use</copyrightMD:general.note>
+        #   </copyrightMD:copyright>
+        # </mods:accessCondition>
+        # Expected format: statement = {status: [], rights: [], note: []}
         descMetadata.add_rights(statement)
       else
+        # mods:accessCondition contains just text, so statement = Array<String>
         descMetadata.rights = statement
       end
     end
 
     # TODO: Revise the rights attr getter
+    # rights attribute getter
+    # @return [Array<String>] the metadata values for rights field
     def rights
+      # default to values from mods:accessCondition using
+      # copyghtmd schema
       return copyrightmd_rights unless copyrightmd_rights.empty?
 
       descMetadata.rights
     end
 
+    # subject_metadata attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] subjects the array of values to set for mods:subject/mods:topic metadata
     def subject_metadata=(subjects)
       descMetadata.add_subject(subjects)
     end
 
+    # type attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] type the hash of values to set for mods:typeOfResource metadata
+    # @option type [Boolean] :collection array of flags to specify whether collection or object record
+    # @option type [Array<String>] :content the array of values for the content of mods:typeOfResource
     def type=(type)
       descMetadata.add_type(type)
     end
 
+    # mods_genre attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] genres the hash of values to set for mods:genre metadata
+    # @option genres [Boolean] :authority array of authority attribute values for mods:genre
+    # @option genres [Array<String>] :content the array of values for the content of mods:genre
     def mods_genre=(genres)
       descMetadata.add_mods_genre(genres)
     end
 
+    # geographical_coverage attribute getter
+    # @return [Array<String>] the metadata values for geographical coverage field
     def geographical_coverage
       descMetadata.geographical_coverage | descMetadata.geocode_logainm
     end
 
+    # language attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] languages the hash of values to set for mods:language metadata
+    # @option genres [Boolean] :authority array of authority attribute values for mods:genre
+    # @option genres [Array<String>] :content the array of values for the content of mods:genre
     def language=(languages)
       descMetadata.add_language(languages)
     end
@@ -230,12 +299,22 @@ module DRI
       Nokogiri::XML(new_xml.to_xml)
     end
 
+    # Retrieve an existing Fedora DRI::Mods object;
+    # creates a new one if object not found for a given PID
+    #
+    # @param [String] pid the object's PID
+    # @return [DRI::Mods] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::Mods.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::Mods.create(id: pid)
     end
 
+    # For relationships display in the UI, creates Hash where the keys are
+    # relationship names, which contain a displayable label and the model metadata field
+    # for the given relationship
+    #
+    # @return [Hash] relationships hash including label/field
     def self.relationships
       { preceding: { label: 'Preceding', field: 'related_items_ids_preceding' },
         succeeding: { label: 'Succeeding', field: 'related_items_ids_succeeding' },
@@ -251,10 +330,15 @@ module DRI
       }
     end
 
+    # Return the solr field name for the mods identifier used in metadata MODS relationships
+    # i.e. mods_id_local_tesim
+    # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
       ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)
     end
 
+    # Return a Hash including all the PIDs of fedora objects by relationship type
+    # @return [Hash] the hash of MODS relationships with the Fedora PIDs of the related objects
     def get_relationships_records
       { preceding: retrieve_relation_records(send(self.class.relationships[:preceding][:field]), self.class.solr_relationships_field),
         succeeding: retrieve_relation_records(send(self.class.relationships[:succeeding][:field]), self.class.solr_relationships_field),

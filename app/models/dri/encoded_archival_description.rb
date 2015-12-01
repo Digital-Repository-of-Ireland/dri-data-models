@@ -1,4 +1,6 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI EAD digital objects extending from DRI::Batch
   class EncodedArchivalDescription < DRI::Batch
     include DRI::ModelSupport::EadSupport
 
@@ -58,8 +60,9 @@ module DRI
     property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
     property :format, delegate_to: 'descMetadata', multiple: true
 
-    around_save :synchronize_if_changed
+    around_save :synchronize_if_changed # trigger EAD children creation
 
+    # Override constructor
     def initialize(type, args = {})
       case type
       when :collection
@@ -72,12 +75,19 @@ module DRI
       super(args)
     end
 
+    # Retrieve an existing Fedora DRI::EncodedArchivalDescription object;
+    # creates a new one if object not found for a given PID
+    #
+    # @param [String] pid the object's PID
+    # @return [DRI::EncodedArchivalDescription] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::EncodedArchivalDescription.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::EncodedArchivalDescription.create(id: pid)
     end
 
+    #
+    # @return [Array<Symbol>] EAD DRI terms symbols array
     def self.ead_dri_terms
       [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
        :creation_date, :published_date, :name_coverage, :temporal_coverage,
@@ -87,6 +97,9 @@ module DRI
       ]
     end
 
+    # AF Override
+    # Set the object's attributes
+    # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       modified_attributes = properties.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       super(modified_attributes)
@@ -96,6 +109,8 @@ module DRI
       update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
 
+    #
+    # @return [Hash] hash with all the values for the EAD DRI editable terms
     def editable_attributes
       editable_attrs = {}
       DRI::EncodedArchivalDescription.ead_dri_terms.each do |attr|
@@ -105,58 +120,108 @@ module DRI
       editable_attrs
     end
 
+    # Returns a Hash with all the values for the DRI editable metadata fields
+    # to be populated in a UI Edit form
+    #
+    # @return [Hash] Hash of DRI EAD metadata
     def retrieve_hash_attributes
       descMetadata.retrieve_terms_hash
     end
 
+    # Creator attribute setter (to create the associated metadata elements in the DS XML)
+    # @param creators [Hash] the hash of metadata values for creators
+    # @option creators [Array<String>] :display the content for the creator nodes
+    # @option creators [Array<String>] :role the values for the role attribute for creator nodes
+    # @option creators [Array<String>] :tag the tag name to use in creator nodes
     def creator=(creators)
       descMetadata.add_creator(creators)
     end
 
+    # contributor attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] contributors the array of contributor metadata values to set
     def contributor=(contributors)
       descMetadata.add_contributor(contributors)
     end
 
+    # desc_scope_content attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] descriptions the array of scope content metadata values to set
     def desc_scope_content=(descriptions)
       descMetadata.add_desc_scope_content(descriptions)
     end
 
+    # desc_abstract attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] descriptions the array of abstract metadata values to set
     def desc_abstract=(descriptions)
       descMetadata.add_desc_abstract(descriptions)
     end
 
+    # desc_biog_hist attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] descriptions the array of biographical history metadata values to set
     def desc_biog_hist=(descriptions)
       descMetadata.add_desc_biog_hist(descriptions)
     end
 
+    # creation_date attribute setter (to create the associated metadata elements in the DS XML)
+    #
+    # @param [Hash] dates hash of creation date metadata values to set
+    # @option dates [Array<String>] :display array of metadata values for date display
+    # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
     def creation_date=(dates)
       descMetadata.add_creation_date(dates) unless dates.empty?
     end
 
+    # published_date attribute setter (to create the associated metadata elements in the DS XML)
+    #
+    # @param [Hash] dates hash of published date metadata values to set
+    # @option dates [Array<String>] :display array of metadata values for date display
+    # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
     def published_date=(dates)
       descMetadata.add_published_date(dates) unless dates.empty?
     end
 
+    # temporal_coverage attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] dates hash of temporal coverage metadata values to set
+    # @option dates [Array<String>] :display array of metadata values for date display
+    # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
+    # @option dates [Array<String>] :datechar array of metadata values specifying the type of date
     def temporal_coverage=(dates)
       descMetadata.add_temporal_coverage(dates) unless dates.empty?
     end
 
+    # name_coverage attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] people the array of name coverage metadata values to set
+    # @option people [Array<String>] :display the content for the nodes
+    # @option people [Array<String>] :role the role attributes for the nodes
+    # @option people [Array<String>] :tag the names of the tags to use when creating the XML elements
     def name_coverage=(people)
       descMetadata.add_name_coverage(people) unless people.empty?
     end
 
+    # alternative_form attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] materials the array of alternative form metadata values to set
     def alternative_form=(materials)
       descMetadata.add_alternative_form(materials) unless materials.empty?
     end
 
+    # related_material attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Array<String>] materials the array of related material metadata values to set
     def related_material=(materials)
       descMetadata.add_related_material(materials) unless materials.empty?
     end
 
+    # geogname_coverage_access attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] locations hash of geographical coverage metadata values to set
+    # @option locations [Array<String>] :display the content for the nodes
+    # @option locations [Array<String>] :role the role attributes for the nodes
+    # @option locations [Array<String>] :tag the names of the tags to use when creating the XML elements
     def geogname_coverage_access=(locations)
       descMetadata.add_geogname_coverage_access(locations) unless locations.empty?
     end
 
+    # language attribute setter (to create the associated metadata elements in the DS XML)
+    # @param [Hash] languages hash of language metadata values to set
+    # @option languages [Array<String>] :langcode the iso639-2b code attribute values for the nodes
+    # @option languages [Array<String>] :text the displayable language names for the nodes
     def language=(languages)
       descMetadata.add_language(languages) unless languages.empty?
     end
@@ -225,8 +290,8 @@ module DRI
     end
 
     # Updates the XML metadata for the object's descMetadata datastream
-    # @param [String, File] xml_text String or file containing xml metadata to be updated
-    # @param [Boolean] ingest true if ingest operation; false if metadata update operation
+    # @param xml_text [String, File] String or file containing xml metadata to be updated
+    # @param ingest [Boolean] true if ingest operation; false if metadata update operation
     # @return [Boolean] true if xml updated successfully; false otherwise
     def update_metadata(xml_text, ingest=true)
       # Differentiate between ingest and individual object update

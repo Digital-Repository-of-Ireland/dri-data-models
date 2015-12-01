@@ -27,36 +27,64 @@ module DRI
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
 
     class_eval do
-      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
-      # Internal Relationships
-      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('relation_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # Dynamically populate the marcrelator code model attributes
+      # e.g. role_cre (creator), role_ctb (contributor), ...
+      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym,
+                                                       delegate_to: 'descMetadata',
+                                                       multiple: true }
+      # Internal Relationships (dynamically populate the model attributes)
+      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('relation_ids_').to_sym,
+                                                                delegate_to: 'descMetadata',
+                                                                multiple: true }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      # (dynamically populate the model attributes)
+      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym,
+                                                                delegate_to: 'descMetadata',
+                                                                multiple: true }
     end
 
+    # Override constructor
     def initialize(args = {})
       args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
       super(args)
     end
 
+    #
+    # @return [String] the AF digital object model name
     def model_name
       DRI::Batch.model_name
     end
 
+    # Roles attribute setter
+    #
+    # @param [Hash] roles hash with metadata marcrelator values
+    # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+    # @option roles [Array<String>] :type the marcrelator codes
     def roles=(roles)
       descMetadata.roles = roles if descMetadata.is_a?(DRI::Metadata::QualifiedDublinCore)
     end
 
+    # Override AF attributes setter
     def attributes=(properties)
       super(properties)
     end
 
+    # Retrieve an existing Fedora DRI::QualifiedDublinCore object;
+    # creates a new one if object not found for a given PID
+    #
+    # @param [String] pid the object's PID
+    # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::QualifiedDublinCore.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::QualifiedDublinCore.create(id: pid)
     end
 
+    # For relationships display in the UI, creates Hash where the keys are
+    # relationship names, which contain a displayable label and the model metadata field
+    # for the given relationship
+    #
+    # @return [Hash] relationships hash including label/field
     def self.relationships
       { related: { label: 'Is Related To', field: 'relation_ids_relation' },
         referenced: { label: 'Is Referenced By', field: 'relation_ids_isReferencedBy' },
@@ -71,10 +99,15 @@ module DRI
       }
     end
 
+    # Return the solr field name for the mods identifier used in metadata QDC relationships
+    # i.e. qdc_id_tesim
+    # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
       ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)
     end
 
+    # Return a Hash including all the PIDs of fedora objects by relationship type
+    # @return [Hash] the hash of QDC relationships with the Fedora PIDs of the related objects
     def get_relationships_records
       { related: retrieve_relation_records(send(self.class.relationships[:related][:field]), self.class.solr_relationships_field),
         referenced: retrieve_relation_records(send(self.class.relationships[:referenced][:field]), self.class.solr_relationships_field),

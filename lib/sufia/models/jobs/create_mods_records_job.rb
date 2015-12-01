@@ -1,5 +1,5 @@
+# Implements a resque job to handle the creation of MARC records
 class CreateModsRecordsJob < ActiveFedoraIdBasedJob
-
   def queue_name
     :mods
   end
@@ -9,5 +9,4 @@ class CreateModsRecordsJob < ActiveFedoraIdBasedJob
     mods_object = DRI::Mods.find(self.pid)
     mods_object.create_mods_records
   end
-
 end
