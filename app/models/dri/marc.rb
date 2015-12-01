@@ -1,4 +1,6 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI Marc digital objects extending from DRI::Batch
   class Marc < DRI::Batch
     include DRI::ModelSupport::MarcSupport
 

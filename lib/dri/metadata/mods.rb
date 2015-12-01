@@ -1,4 +1,6 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with MODS.
     class Mods < DRI::Metadata::Base
@@ -883,13 +885,12 @@ module DRI
         end
       end
 
-      # add_rights
-
-      # Subjects is an array of Hashes
-      # [{ values: [{tag: '', content: ''}], authority: '' }, {...}]
-      # where :values is an Array of Hashes, depending on the tag
-      # 'topic'
-      #
+      # Create the XML nodes for subject terms within the MODS metadata
+      # @param subjects [Hash] hash of metadata values for subject terms
+      # @option subjects [Array<String>] :authority
+      # @option subjects [Array<Hash>] :values
+      # @option values [Array<String>] :tag
+      # @option values [Array<String>] :content
       def add_subject(subjects)
         return unless subjects.is_a? Array
 
@@ -945,8 +946,6 @@ module DRI
           record.add_child(subject_node) unless subject_node.children.empty?
         end
       end
-
-      # add_subject
 
       def add_type(types)
         return unless types.is_a? Hash

@@ -624,9 +624,9 @@ module DRI
 
       # Updates every person element under origination (creators)
       # @param creators [Hash] the attributes and content required to create a persname
-      # @option :display [Array<String>] the content for the node
-      # @option :role [Array<String>] the role attribute for the node
-      # @option :tag [Array<String>] the name of the person tag to add
+      # @option creators [Array<String>] :display the content for the node
+      # @option creators [Array<String>] :role the role attribute for the node
+      # @option creators [Array<String>] :tag the name of the person tag to add
       def add_creator(creators)
         return unless creators.is_a?(Hash)
         creators.symbolize_keys!

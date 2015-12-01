@@ -1,12 +1,18 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI Documentation digital objects
+  # extending from DRI::Batch
   class Documentation < DRI::Batch
     # Override interchangeable_metadata definition of descMetadata
     contains 'descMetadata', class_name: 'DRI::Metadata::Documentation'
 
+    # one-to-one AF association to DRI::Batch (documentation for)
     belongs_to :documentation_for,
                predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf,
                class_name: 'DRI::Batch'
 
+    # Accessors for DRI's metadata terms specific to
+    # DRI::Documentation digital objects (based on QDC)
     property :date, delegate_to: 'descMetadata', multiple: true
     property :source, delegate_to: 'descMetadata', multiple: true
     property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
@@ -20,6 +26,7 @@ module DRI
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
     property :relation, delegate_to: 'descMetadata', multiple: true
 
+    #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
         property s.prepend('role_').to_sym,
@@ -28,14 +35,20 @@ module DRI
       end
     end
 
+    # Override constructor
     def initialize(args = {})
       args[:desc_metadata_class] = 'DRI::Metadata::Documentation'
+
       super(args)
     end
 
-    def update_metadata(xml_text, ingest = true)
-    end
+    # Override - ingest from RDF-XML files not supported
+    # for DRI::Documentation objects
+    def update_metadata(_xml_text, _ingest = true) end
 
+    # AF Override
+    # Set the object's attributes
+    # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       updated_props = properties.clone
       point_hash = { geocode_point: [] }
@@ -73,37 +86,47 @@ module DRI
         end
       end
       # avoid overwriting entries with duplicate keys
-      if point_hash[:geocode_point].present?
-        updated_props.merge!(point_hash) { |_k, v0, _v2| v0 }
-      end
-      if box_hash[:geocode_box].present?
-        updated_props.merge!(box_hash) { |_k, v0, _v2| v0 }
-      end
-      if period_hash[:temporal_coverage_period].present?
-        updated_props.merge!(period_hash) { |_k, v0, _v2| v0 }
-      end
+      updated_props.merge!(point_hash) { |_k, v0, _v2| v0 } if point_hash[:geocode_point].present?
+      updated_props.merge!(box_hash) { |_k, v0, _v2| v0 } if box_hash[:geocode_box].present?
+      updated_props.merge!(period_hash) { |_k, v0, _v2| v0 } if period_hash[:temporal_coverage_period].present?
 
       super(updated_props)
     end
 
+    # Roles attribute setter
+    #
+    # @param [Hash] roles hash with metadata marcrelator values
+    # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+    # @option roles [Array<String>] :type the marcrelator codes
     def roles=(roles)
-      descMetadata.roles = roles if descMetadata.is_a?(DRI::Metadata::Documentation)
+      descMetadata.roles = roles if descMetadata.is_a? DRI::Metadata::Documentation
     end
 
+    # Type attribute getter
+    #
+    # @return [Array<String>] the array of metadata type values
     def type
       descMetadata.resource_type
     end
 
+    # Type attribute setter
+    # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
       self.resource_type = type
     end
 
+    # Retrieve an existing Fedora DRI::Documentation object;
+    # creates a new one if object not found for a given PID
+    #
+    # @param [String] pid the object's PID
+    # @return [DRI::Documentation] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::Documentation.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::Documentation.create(id: pid)
     end
 
+    # Override from DRI::Batch, default AF method
     def to_solr(solr_doc = {}, opts = {})
       super(solr_doc, opts)
     end
@@ -116,11 +139,13 @@ module DRI
 
     # Override from interchangeable_metadata
     # Documentation does not inherit from DRI::Metadata::Base
+    # Perform additional DRI validations before saving the object
     def custom_validations
       results = descMetadata.custom_validations
       return true if results.empty?
 
       results.each { |key, value| errors.add(key, value) }
+
       false
     end # custom_validations
   end

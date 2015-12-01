@@ -1,4 +1,7 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI::LinkedData digital objects extending from AF Base
+  # for Logainm places
   class LinkedData < ActiveFedora::Base
     include Sufia::Noid
 
@@ -23,12 +26,18 @@ module DRI
       super(properties)
     end
 
+    # Retrieve an existing Fedora DRI::LinkedData object;
+    # creates a new one if object not found for a given PID
+    #
+    # @param [String] pid the object's PID
+    # @return [DRI::LinkedData] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::LinkedData.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::LinkedData.create(id: pid)
     end
 
+    # Override from AF method
     def to_solr(solr_doc = {}, opts = {})
       super(solr_doc, opts)
     end
