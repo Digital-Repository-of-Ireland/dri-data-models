@@ -3,6 +3,8 @@ Gemfile.lock
 .yardoc/
 coverage/
 rdoc/
+# Ignore yard doc folder
+doc/
 test/dummy/log/test.log
 tmp/
 *.sqlite3

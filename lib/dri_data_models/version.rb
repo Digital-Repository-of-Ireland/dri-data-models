@@ -1,3 +1,3 @@
 module DriDataModels
-  VERSION = "2.2.9"
+  VERSION = '2.2.9'
 end

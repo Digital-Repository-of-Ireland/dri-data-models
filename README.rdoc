@@ -1,31 +1,33 @@
 = DriDataModels
 
-This is the prototype Ruby Gem for the Digital
-Repository of Ireland's Hydra data models.
+This is the Ruby Gem for the Digital
+Repository of Ireland's Hydra-based data models.
 
-DRI data model (which is stable to develop against) has the following features:
+DRI data models gem (which is stable to develop against) has the following features:
 
 Core Features:
 
-* Collections Object
-* Digital Object
-  - Audio Data type
-  - PDF Data type
+* Collection/Sub-collection Objects
+* Metadata Digital Objects
+* DRI Generic Files (for digital assets)
 
 Supported metadata formats/standards
 
-* Qualified Dublin Core
+* Simple/Qualified Dublin Core (DC/QDC)
+* Encoding Archival Initiative (EAD)
+* Metadata Object Description Schema (MODS)
+* Machine-Readable Cataloging (MARC-XML)
 
 == Requirements
 
-* Hydra-head 5.0.0 or greater.
+* Hydra-head 9.0 or greater.
 
 == Usage
 
 To use this data model in your hydra application please add the following
 to your Gemfile
 
-  gem 'dri_data_models', :git => 'git@dev.forasfeasa.ie:dri_data_models.git'
+  gem 'dri_data_models', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri_data_models.git'
 
 Note: the above repository url will be changing in the near future.
 

@@ -1,4 +1,11 @@
+# Namespace for classes and modules that handle DRI digital objects
+# extending from active-fedora
+#
 module DRI
+  # DRI Batch, generic DRI digital object
+  # Digital objects in DRI that handle the supported metadata standards
+  # inherit from this class
+  #
   class Batch < ActiveFedora::Base
     include Sufia::ModelMethods
     include Sufia::Noid
@@ -11,23 +18,30 @@ module DRI
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
-    # has_many_versions deprecated
-    # has_many_versions
 
+    # one-to-many AF relationship to associate digital assets with their batch object
     has_many :generic_files, class_name: 'DRI::GenericFile', as: :batch, dependent: :destroy
+    # one-to-many AF relationship to associate documentation objects
     has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
     # Declare a 'extracted' DS, of the following type
+    # Unused for NOW
     contains 'extracted', class_name: 'DRI::Metadata::Extracted'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
+    # Unused for NOW
     property :full_text, delegate_to: 'extracted', multiple: true
 
     # Creates a digital object depending on the metadata standard
     #
-    # @param standard [Symbol] the metadata standard for the new object, `:marc` or `:mods` or `:ead_collection` or `:ead_component` or `:qdc`
+    # @param standard [Symbol] the metadata standard for the new object
+    # @option standard [Symbol] :marc
+    # @option standard [Symbol] :mods
+    # @option standard [Symbol] :ead_collection
+    # @option standard [Symbol] :ead_component
+    # @option standard [Symbol] :qdc
     # @param args [Hash] hash of additional options
-    # @return [DRI::Marc, DRI::EncodedArchivalDescription, DRI::Mods, DRI::QualifiedDublinCore] a new digital object.
+    # @return the new digital object
     def self.with_standard(standard, args = {})
       case standard
       when :marc
@@ -48,10 +62,10 @@ module DRI
     end
 
     # Retrieves a digital object from fedora given its pid; creates
-    # a new object if the object does not exist
+    # a new object if object not found
     #
     # @param pid [String] the pid of the object to retrieve
-    # @return [DRI::Batch] a fedora digital object.
+    # @return [DRI::Batch] the digital object.
     def self.find_or_create(pid)
       DRI::Batch.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
@@ -60,8 +74,9 @@ module DRI
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
     # Updates the xml metadata of this object
+    #
     # @param xml_text [String, File] xml string metadata content or a file
-    # @param ingest [Boolean] flag to determine if this is part of an ingest
+    # @param _ingest [Boolean] flag to determine if this is part of an ingest
     # @return [boolean] true if success; false otherwise
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a?(File)
@@ -75,11 +90,13 @@ module DRI
       self.has_model = [self.class.to_s, self.class.superclass.to_s]
     end
 
-    # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
+    # Return a Hash representation of this object where keys
+    # in the hash are appropriate Solr field names.
+    #
     # @param solr_doc [Hash] hash to insert the fields into
-    # @param opts [Hash] options hash
+    # @param _opts [Hash] options hash
     # @return [Hash] the solr document to be indexed
-    def to_solr(solr_doc = {}, opts = {})
+    def to_solr(solr_doc = {}, _opts = {})
       solr_doc = super(solr_doc)
 
       solr_doc.merge! collections_to_solr
@@ -96,6 +113,7 @@ module DRI
     end
 
     # Add object types as a hierarchical tree into the Solr fields
+    #
     # @param solr_doc [Hash] hash to insert the fields into
     # @return [Hash] the solr document to be indexed
     def object_types_to_solr(solr_doc = {})
@@ -115,6 +133,7 @@ module DRI
     end
 
     # Returns whether the object has a status of 'published'
+    #
     # @return [Boolean] true if status is published
     def published?
       status == 'published'
