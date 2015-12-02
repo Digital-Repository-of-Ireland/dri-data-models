@@ -1,21 +1,34 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements general, common methods, used in descMetadata classes for handling metadata transformations for
+    # indexing
     module Transformations
       require 'iso8601'
 
+      # The name of the Solr field for indexing temporal metadata (creation date)
       CREATION_DATE_RANGE_SOLR_FIELD = 'cdateRange'
+      # The name of the Solr field for indexing temporal metadata (published date)
       PUBLISHED_DATE_RANGE_SOLR_FIELD = 'pdateRange'
+      # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
+      # The name of the Solr field for indexing geographical metadata
       GEOSPATIAL_SOLR_FIELD = 'geospatial'
+
+      # The name of the Solr field for indexing coordinates geographical metadata (geojson index)
       # Solrizer only creates _tesim; for BL Maps we need _ssim
       GEOJSON_SOLR_FIELD = 'geojson_ssim'
+      # The name of the Solr field for indexing placenames for geographical metadata (geojson index)
       PLACENAME_SOLR_FIELD = 'placename_field'
 
       # A function to convert an array of names that conform to archiving formatting
       # standards into human-readable names
       # so that a double-quotes search can pick up the full name
-      # eg. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
+      # E.g. "Lewis, Daniel, Day-" is "Daniel Day-Lewis" and
       # "Valera, Eamon, de" is "Eamon de Valera"
+      # @param [Array<String>] names the array of metadata people's names
+      # @return [Array<String>] the array of transformed metadata people's names
       def self.transform_name(names = [])
         results = []
 
@@ -65,6 +78,10 @@ module DRI
         results
       end
 
+      # A function to convert a title string removing definite articles, unneccessary spaces, etc.
+      #
+      # @param [String] title_string the metadata title string
+      # @return [String] the transformed metadata title string
       def self.transform_title_for_sort(title_string = '')
         # Space out non-word and non-number characters
         # and 'squeeze' the spaces
@@ -80,8 +97,9 @@ module DRI
       end
 
       # Parse geospatial data sourced from the metadata into Point or BBox for indexing into Solr
-      # @param[Hash] geodata hash containing all the geo values from the metadata
-      # @return Array of formatted coordinates or bbox for indexing
+      #
+      # @param [Hash] geodata the hash containing all the geo values from the metadata
+      # @return [Array<String>] the array of formatted coordinates or bbox for indexing
       #
       def self.transform_geospatial(geodata = {})
         results = {}
@@ -138,7 +156,12 @@ module DRI
         results
       end
 
-      def self.get_geo_point(value)
+      # Parse geospatial data sourced from the metadata and transform into DCMI Point encoding
+      #
+      # @param [String] value the metadata coordinates string
+      # @return [Array<String>] the transformed metadata coordinates formatter as DCMI Point into a Hash
+      #
+      def self.get_geo_point(value = nil)
         return {} if value.nil?
 
         point = {}
@@ -157,7 +180,12 @@ module DRI
         point
       end
 
-      def self.get_geo_box(value)
+      # Parse geospatial data sourced from the metadata and transform into DCMI Box encoding
+      #
+      # @param [String] value the metadata coordinates string
+      # @return [Hash] the transformed metadata coordinates formatter as DCMI Box into a Hash
+      #
+      def self.get_geo_box(value = nil)
         return {} if value.nil?
 
         box = {}
@@ -185,8 +213,11 @@ module DRI
       #---------------------------------------------------------------------------------------------------------------
 
       # Parse dates sourced from the metadata into properly formatted date ranges for indexing into Solr
-      # @param[Hash] dates hash containing all the dates values from the metadata
-      # @return Array of formatted dates for indexing (start_date end_date)
+      #
+      # @param [Hash] dates hash containing all the dates values from the metadata
+      # @option dates [Array] :start the array of start dates from metadata
+      # @option dates [Array] :end the array of end dates from metadata
+      # @return [String] the array of formatted dates strings for indexing (start_date end_date)
       #
       def self.transform_date_ranges(dates = {})
         results = []
@@ -207,8 +238,8 @@ module DRI
       # Parse a date string into an appropriate format for indexing
       # It supports parsing of DCMI Point encoded string as well as ISO8601 string-encoded dates
       # If the date is not in a valid format it will be ignored
-      # @param[String]
-      # @return Hash hash containing start and date fields, with their values
+      # @param [String] value the date string
+      # @return [Hash] hash containing start and date fields, with their values
       def self.get_date_range(value)
         return {} if value.nil?
 
@@ -245,6 +276,10 @@ module DRI
         range
       end
 
+      # Transforms a date range string in ISO8601 (e.g. YYYYmmdd/YYYYmmdd) into a string in the 'YYYY YYYY' format
+      # for indexing of date ranges into Solr (pairs of start year end year separated by a blank space)
+      # @param [String] val the date string
+      # @return [Array<String>] the array containing start and date years for date range indexing
       def self.transform_date(val = '')
         dates = []
 
@@ -271,6 +306,10 @@ module DRI
         dates
       end # transform_date
 
+      # Determines whether a date string is formatted according to ISO8601
+      #
+      # @param [String] value the date string
+      # @return [Boolean] true if ISO8601 formatted; false otherwise
       def self.iso8601?(value)
         begin
           if value.is_a?(Date) || value.is_a?(Time)
@@ -278,17 +317,19 @@ module DRI
           elsif !value.empty?
             ISO8601::DateTime.new(value)
           end
-          return true
+
+          true
         rescue ISO8601::Errors::StandardError => e
           Rails.logger.error("Unable to parse `#{value}' as a date-time object. Error: #{e}.")
-          return false
+
+          false
         end
       end
 
-      #---------------------
-      # Helper Functions
-      #---------------------
-
+      # Determines whether a date string is formatted according to DCMI Period
+      #
+      # @param [String] value the date string
+      # @return [Boolean] true if DCMI Period formatted; false otherwise
       def self.dcmi_period?(value)
         result = false
 
@@ -301,6 +342,10 @@ module DRI
         result
       end
 
+      # Determines whether a geocode string is formatted according to DCMI Point
+      #
+      # @param [String] value the geocode string
+      # @return [Boolean] true if DCMI Point formatted; false otherwise
       def self.dcmi_point?(value)
         result = false
 
@@ -313,6 +358,10 @@ module DRI
         result
       end
 
+      # Determines whether a geocode string is formatted according to DCMI Box
+      #
+      # @param [String] value the geocode string
+      # @return [Boolean] true if DCMI Box formatted; false otherwise
       def self.dcmi_box?(value)
         result = false
 
@@ -327,6 +376,13 @@ module DRI
         result
       end
 
+      # Returns a DCMI Period formatted string
+      #
+      # @param [String] name the display name string for the date
+      # @param [String] sdate the start date string
+      # @param [String] edate the end date string
+      # @param [String] scheme the encoding scheme for the date string, e.g. ISO8601
+      # @return [String] the DCMI Period formatted string
       def self.create_dcmi_period(name, sdate = '', edate = '', scheme = '')
         name_comp = "name=#{name};"
         sdate_comp = "#{sdate != '' ? 'start=' << sdate << ';' : ''}"
@@ -336,7 +392,10 @@ module DRI
         "#{name_comp} #{sdate_comp} #{edate_comp} #{scheme_comp}".rstrip
       end
 
-      # Taken from maps_controller and adapted
+      # Transforms a geocode into a Geo Json Hash
+      # @param [String] name the displayable place name for a geocode value
+      # @param [String] coords the string including the coordinates for a geocode value
+      # @param [Hash] the hash including the geocode value formatted in GEO Json
       def self.geojson_string_from_coords(name, coords)
         geojson_hash = { type: 'Feature', geometry: {}, properties: {} }
 
@@ -371,6 +430,12 @@ module DRI
         geojson_hash.to_json.to_s
       end
 
+      # Transforms a geocode string encoded using DCMI Point or Box into a suitable formatted string of
+      # coordinates for their indexing in the geographical indices.
+      # E.g. Box: 'eastlimit, northlimit, westlimit, southlimit'
+      #      Point: 'east north'
+      # @param [String] geo_string the geocode string encoded in DCMI Point or Box
+      # @return [String] the string containing the geocode coordinates suitable for geographic indexing
       def self.get_spatial_coordinates(geo_string)
         coordinates = ''
 
@@ -412,6 +477,8 @@ module DRI
 
         coordinates
       end
+
+      private
 
       def self.all_keys?(key_array = [], hash = {})
         key_array.all? { |s| hash.key? s }

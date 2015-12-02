@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes AF properties, digital object management methods that are common to all the DRI digital object classes
     module Files
       extend ActiveSupport::Concern
       require 'open-uri'
@@ -8,6 +11,8 @@ module DRI
 
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
+      # @param solr_doc [Hash] the solr document hash for the object
+      # @return [Hash] solr_doc hash for index
       def file_metadata_to_solr(solr_doc = {})
         file_type = []
         file_type_display = []

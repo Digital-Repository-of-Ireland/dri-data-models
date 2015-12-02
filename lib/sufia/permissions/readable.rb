@@ -1,8 +1,13 @@
+# Sufia namespace
 module Sufia
+  # Permissions namespace
   module Permissions
+    # Override from Sufia
     module Readable
       extend ActiveSupport::Concern
 
+      # Determine whether an object has public access status
+      # @return [Boolean] true if public; false otherwise
       def public?
         governing_object = self.batch
 
@@ -12,21 +17,26 @@ module Sufia
           return false if governing_object.nil?
         end        
 
-        governing_object.master_file_access == "public"
+        governing_object.master_file_access == 'public'
       end
 
+      # Determine whether the object has a preservation only access status
+      # @return [Boolean] true if preservation; false otherwise
       def preservation?
-        self.preservation_only == "true"
+        self.preservation_only == 'true'
       end
 
+      # Determine whether the object has a registered access status
+      # @return [Boolean] true if registered; false otherwise
       def registered?
         read_groups.include?('registered')
       end
 
+      # Determine whether the object has a private access status
+      # @return [Boolean] true if private; false otherwise
       def private?
         !(public? || registered?)
       end
-
     end
   end
 end

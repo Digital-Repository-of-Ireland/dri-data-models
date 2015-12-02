@@ -1,10 +1,13 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes methods to handle EAD metadata, children component creation/management
     module EadSupport
       extend ActiveSupport::Concern
 
       included do
-        around_save :ingest_files_if_changed
+        around_save :ingest_files_if_changed # callback for generating EAD Generic Files from ead:dao links
 
         attr_accessor :trigger_ingest
         attr_accessor :trigger_update
@@ -101,6 +104,8 @@ module DRI
       end # process_ingest_of_file_urls
 
       # Ingest a file (generic_file) from a given URL
+      # @param file_url [String] the URL of the ead:dao asset to add
+      # @return [Boolean] true if succesful; false otherwise
       def add_file_from_url(file_url)
         file_name = File.basename(URI(file_url).path)
         begin

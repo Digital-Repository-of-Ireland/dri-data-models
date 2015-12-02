@@ -1,9 +1,12 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes methods to handle MARC metadata, record creation
     module ModsSupport
       extend ActiveSupport::Concern
 
-      # Implement Mods-specific helper functions
+      # Creates a set of DRI::Mods digital objects from the MODS record metadata
       def create_mods_records
         return if self.new_record?
 
@@ -31,6 +34,9 @@ module DRI
         end
       end # create_mods_records
 
+      # Created a new DRI::Mods digital object and sets its descMetadata from XML
+      # @param [String] xml the XML metadata for the digital object to be created
+      #
       def create_object(xml)
         new_object = DRI::Batch.with_standard :mods
         new_object.governing_collection = self

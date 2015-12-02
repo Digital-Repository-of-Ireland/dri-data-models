@@ -1,6 +1,9 @@
+# DRI namespace
 module DRI
+  # RDFVocabularies namespace
   module RDFVocabularies
-    class ModsRelsVocabulary < RDF::Vocabulary("http://www.loc.gov/mods/rdf/v1#")
+    # Defines DRI MDOS relationships RDF properties
+    class ModsRelsVocabulary < RDF::Vocabulary('http://www.loc.gov/mods/rdf/v1#')
       # MODS RDF relationships (http://www.loc.gov/standards/mods/modsrdf-primer.html#relatedItem)
       # preceding, succeeding, original, host, constituent, series,
       # otherVersion, otherFormat, isReferencedBy, references, reviewOf

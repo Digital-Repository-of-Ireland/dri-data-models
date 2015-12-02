@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes methods to handle MARC metadata, record creation
     module MarcSupport
       extend ActiveSupport::Concern
 
