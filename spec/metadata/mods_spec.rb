@@ -246,7 +246,7 @@ describe 'Mods' do
                                    { tag: 'name', display: 'St. Agnes of Montepulciano', role: 'pat', authority: '' }], authority: 'local' }]
 
       @attributes_hash = { title: ['Clarke Studios: Photographs'],
-                           creator: { display: ['Test creator'], role: ['aut'], authority: ['lhsc']},
+                           creator: { display: ['Test creator'], role: ['aut'], authority: ['lhsc'] },
                            contributor: { display: ['Test contributor'], role: ['ctb'], authority: ['']},
                            desc_abstract: ['Clarke Studios: Photographs is a subsection of the Clarke Stained Glass Studios Collection, and contains photographs of designs, stained glass windows and Clarke Studios staff'],
                            desc_phys_desc: ['Test physical description'],

@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # An ActiveFedora datastream that interacts with MARC-XML Metadata.
     class Marc < DRI::Metadata::Base
       # OM terminology mapping to a Marc Collection
       # df=datafield, sf=subfield
@@ -113,6 +116,7 @@ module DRI
         t.alternative_form(path: "record/datafield[@tag='530']/subfield[@code='u']", index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
       end # set_terminology
 
+      # Determine whether the metadata describes a collection
       # From: Appendix 2 - Conversion rules for Leader06 - dc:Type mapping
       # http://www.loc.gov/marc/marc2dc.html
       def collection?
@@ -125,7 +129,9 @@ module DRI
         (leader_6_type == 'p' || leader_7_type == 'c') ? true : false
       end
 
-      # Build the xml doc
+      # Returns an empty, default MARC XML template
+      #
+      # @return [Nokogiri::Document] the MARC XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.record('xmlns:marc' => 'http://www.loc.gov/MARC21/slim',
@@ -142,6 +148,11 @@ module DRI
         builder.doc
       end
 
+      # Override from AF Solrizer for datastreams
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
@@ -177,14 +188,15 @@ module DRI
         solr_doc
       end
 
-      # Creates an array of all names stored in the metadata
+      # Returns all metadata related to people names for Solr indexing
+      # People facet
+      # @return [Array<String>] array of all people names metadata values for Solr indexing
       def person_array_for_index
         contributor | creator | publisher
       end
 
-      #
-      # return Hash with creation_date array
-      #
+      # Returns all metadata related to creation date for Solr indexing
+      # @return [Hash] the hash with creation_date array
       def creation_date_for_index
         dates_hash = {}
 
@@ -203,6 +215,9 @@ module DRI
         dates_hash
       end
 
+      # Implement additional DRI metadata validations as this class does not inherit
+      # from DRI::Metadata::Base
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
         errors = {}
 
@@ -238,10 +253,15 @@ module DRI
         errors
       end
 
+      # Returns the type values from the metadata
+      # @return [Array<String>] the array of type values
       def type
         [DRI::Vocabulary.marc_type_leader_6[ng_xml.xpath('substring(//leader, 7, 1)')]]
       end
 
+      # Creates the MARC datafield XML elements.
+      # Used when updating the MARC metadata via attribute accessors (marc:datafield)
+      # @param [Array<String>] datafields array of values for creating marc:datafield XML elements
       def add_datafields(datafields)
         ng_xml.search('//datafield').each(&:remove)
 
@@ -265,6 +285,9 @@ module DRI
         end
       end
 
+      # Creates the MARC controlfields XML elements.
+      # Used when updating the MARC metadata via attribute accessors (marc:controlfields)
+      # @param [Array<String>] controlfields array of values for creating marc:controlfields XML elements
       def add_controlfields(controlfields)
         ng_xml.search('//controlfield').each(&:remove)
         record = ng_xml.at('record')
@@ -278,6 +301,8 @@ module DRI
         end
       end
 
+      # Loads the MARC Vocabulary from the YAML file
+      #
       def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end

@@ -290,8 +290,8 @@ module DRI
     end
 
     # Updates the XML metadata for the object's descMetadata datastream
-    # @param xml_text [String, File] String or file containing xml metadata to be updated
-    # @param ingest [Boolean] true if ingest operation; false if metadata update operation
+    # @param [String, File] xml_text String or file containing xml metadata to be updated
+    # @param [Boolean] ingest  true if ingest operation; false if metadata update operation
     # @return [Boolean] true if xml updated successfully; false otherwise
     def update_metadata(xml_text, ingest=true)
       # Differentiate between ingest and individual object update

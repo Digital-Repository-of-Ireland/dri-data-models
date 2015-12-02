@@ -1,4 +1,6 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
     class QualifiedDublinCore < DRI::Metadata::Base
@@ -83,10 +85,18 @@ module DRI
 
       end
 
+      # synchronize_metadata_on_save attribute getter
+      # For non-EAD digital objects this is always false (disable)
+      # @return [Boolean] true if object support children metadata objects creation; false otherwise
       def synchronize_metadata_on_save
+        # Default to false as QDC object
         false
       end
 
+      # Override from DRI::Metadata::Base.
+      # Returns an array with the values of a metadata field if present as an object's attribute
+      # @param [String] field the name of the metadata field
+      # @return [Array<String>] the array of field metadata values
       def metadata_path(field)
         recognised_attributes = [:title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
                                  :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
@@ -100,6 +110,9 @@ module DRI
         end
       end
 
+      # Override from OmDatastream. Update Solr indexed attributes based on metadata
+      # @param [Hash] params the hash of attributes to update
+      # @param [Hash] opts the hash of custom options
       def update_indexed_attributes(params = {}, opts = {})
         # if the params are just keys, not an array, make then into an array.
         new_params = {}
@@ -110,9 +123,18 @@ module DRI
             new_params[[key.to_sym]] = val
           end
         end
+
         super(new_params, opts)
       end
 
+      # Roles attribute setter
+      # @example Sample Hash:
+      #   { 'name' => ['Test host', 'new producer'],
+      #     'type' => ['role_hst', 'role_pro']
+      #   }
+      # @param [Hash] roles hash with metadata marcrelator values
+      # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+      # @option roles [Array<String>] :type the marcrelator codes
       def roles=(roles)
         return unless roles.is_a?(Hash)
         return unless roles.key?('type') && roles.key?('name') && (roles['type'].size == roles['name'].size)
@@ -129,7 +151,9 @@ module DRI
         changed_roles.keys.each { |role| send("#{role}=", changed_roles[role]) }
       end
 
-      # Build the xml doc
+      # Returns an empty, default QDC XML template
+      #
+      # @return [Nokogiri::Document] the QDC XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.qualifieddc('xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
@@ -146,7 +170,12 @@ module DRI
         builder.doc
       end
 
+      # Override from AF Solrizer for datastreams.
       # merge in special facets (e.g. person) into solr document
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
@@ -236,6 +265,9 @@ module DRI
         solr_doc
       end
 
+      # Transforms metadata date strings into DCMI Period encoded strings for displayable indices
+      # @param [String] date_field the date string
+      # @return [String] the DCMI Period encoded date string for display
       def display_date_for_index(date_field)
         date_field = date_field.delete_if { |v| /^null$/i.match(v) }
         date_field.collect do |value|
@@ -257,6 +289,8 @@ module DRI
       end
 
       # Some indexes may need to be split up into different languages
+      # @param [String] index_name the name of the index field to split by language
+      # @return [Hash] the hash with indices split by language
       def split_array_into_languages(index_name = '')
         results = {}
 
@@ -284,7 +318,9 @@ module DRI
         results
       end
 
-      # Creates an array of all names stored in the metadata
+      # Returns all metadata related to people names for Solr indexing
+      # People facet
+      # @return [Array<String>] array of all people names metadata values for Solr indexing
       def person_array
         people = contributor | publisher
         people |= creator.reject { |c| /^null$/i.match(c) }
@@ -293,10 +329,14 @@ module DRI
         people
       end
 
+      # Determine whether the metadata describes a collection
       def collection?
         type.include? 'Collection'
       end
 
+      # Implement additional DRI metadata validations as this class does not inherit
+      # from DRI::Metadata::Base
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
         errors = {}
 

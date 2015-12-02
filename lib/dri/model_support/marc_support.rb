@@ -6,6 +6,7 @@ module DRI
     module MarcSupport
       extend ActiveSupport::Concern
 
+      # Creates a set of DRI::Marc digital objects from the MARC record metadata
       def create_marc_records
         return if self.new_record?
 
@@ -19,6 +20,9 @@ module DRI
         records[1..-1].each { |r| create_object(r.to_xml) }
       end
 
+      # Create a new DRI::Marc digital object and sets its descMetadata from XML
+      # @param [String] xml the XML metadata for the digital object to be created
+      #
       def create_object(xml)
         new_object = DRI::Batch.with_standard(:marc)
         if governing_collection.nil?

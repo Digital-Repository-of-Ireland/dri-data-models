@@ -8,7 +8,8 @@ module DRI
       # Boolean flag for metadata types like EAD where extracts of the metadata
       # may be stored in other Fedora objects. This allows us to add functions
       # to synchronize the XML between several objects
-      # @see DRI::EncodedArchivalDescription#synchronize_if_changed
+      # @see DRI::Metadata::EncodedArchivalDescription#synchronize_metadata_on_save
+      # @see DRI::Metadata::EncodedArchivalDescriptionComponent#synchronize_metadata_on_save
       attr_accessor :synchronize_metadata_on_save
 
       # Determine whether the metadata spefies that this object is a collection

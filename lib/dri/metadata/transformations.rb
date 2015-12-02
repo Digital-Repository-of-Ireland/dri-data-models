@@ -395,7 +395,7 @@ module DRI
       # Transforms a geocode into a Geo Json Hash
       # @param [String] name the displayable place name for a geocode value
       # @param [String] coords the string including the coordinates for a geocode value
-      # @param [Hash] the hash including the geocode value formatted in GEO Json
+      # @return [Hash] the hash including the geocode value formatted in GEO Json
       def self.geojson_string_from_coords(name, coords)
         geojson_hash = { type: 'Feature', geometry: {}, properties: {} }
 

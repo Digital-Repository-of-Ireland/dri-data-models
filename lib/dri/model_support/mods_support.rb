@@ -34,7 +34,7 @@ module DRI
         end
       end # create_mods_records
 
-      # Created a new DRI::Mods digital object and sets its descMetadata from XML
+      # Create a new DRI::Mods digital object and sets its descMetadata from XML
       # @param [String] xml the XML metadata for the digital object to be created
       #
       def create_object(xml)

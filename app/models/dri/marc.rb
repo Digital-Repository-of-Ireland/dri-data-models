@@ -52,6 +52,10 @@ module DRI
       descMetadata.type
     end
 
+    # Updates the XML metadata for the object's descMetadata datastream
+    # @param [String, File] xml_text String or file containing xml metadata to be updated
+    # @param [Boolean] _ingest  true if ingest operation; false if metadata update operation
+    # @return [Boolean] true if xml updated successfully; false otherwise
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a? File
 
@@ -70,6 +74,10 @@ module DRI
       true
     end
 
+    # If the marc:collection wrapper is used in the XML metadata then
+    # remove all MODS records from the XML
+    # @param [Nokogiri::XML] xml_text the XML metadata for the object
+    # @return [Nokogiri::XML] the modified XML document
     def split_xml(xml_text)
       # If collection wrapper present, the first object will have
       # the first marc:record and we then process the rest when saving

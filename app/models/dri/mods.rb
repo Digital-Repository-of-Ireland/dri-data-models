@@ -191,7 +191,7 @@ module DRI
       descMetadata.add_origin_metadata(origin)
     end
 
-    # origin_metadata attribute setter (to create the associated metadata elements in the DS XML)
+    # access_condition (rights) attribute setter (to create the associated metadata elements in the DS XML)
     # @param [Hash, Array<String>] statement the array or hash of values to set for mods:accessCondition metadata
     def rights=(statement)
       if statement.is_a? Hash
@@ -257,6 +257,10 @@ module DRI
       descMetadata.add_language(languages)
     end
 
+    # Updates the XML metadata for the object's descMetadata datastream
+    # @param [String, File] xml_text String or file containing xml metadata to be updated
+    # @param [Boolean] _ingest  true if ingest operation; false if metadata update operation
+    # @return [Boolean] true if xml updated successfully; false otherwise
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a? File
 
@@ -275,6 +279,10 @@ module DRI
       true
     end
 
+    # If the mods:modsCollection wrapper is used in the XML metadata then
+    # remove all MODS records from the XML
+    # @param [Nokogiri::XML] xml_text the XML metadata for the object
+    # @return [Nokogiri::XML] the modified XML document
     def split_xml(xml_text)
       # This is an individual record, therefore return all XML
       return xml_text if xml_text.search('/mods:modsCollection').empty?

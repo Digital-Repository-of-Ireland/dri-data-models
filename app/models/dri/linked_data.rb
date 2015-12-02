@@ -22,6 +22,9 @@ module DRI
     property :language, delegate_to: 'descMetadata', multiple: true
     property :spatial, delegate_to: 'descMetadata', multiple: true
 
+    # AF Override
+    # Set the object's attributes
+    # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       super(properties)
     end

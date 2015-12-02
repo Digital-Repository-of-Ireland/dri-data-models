@@ -4,11 +4,15 @@ module DRI
   module Metadata
     # An ActiveFedora datastream that interacts with MODS.
     class Mods < DRI::Metadata::Base
-      # MODS XML constants.
+      # MODS prefix for the MODS XSD namespace
       MODS_NS_PREFIX = 'mods'
+      # The MODS XSD namespace URL
       MODS_NS = 'http://www.loc.gov/mods/v3'
+      # The MODS XSD schema location
       MODS_SCHEMA = 'http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-5.xsd'
+      # copyrightMD prefix for the copyrightMD XSD namespace
       CR_NS_PREFIX = 'copyrightMD'
+      # The copyrightMD XSD namespace URL
       CR_NS = 'http://www.cdlib.org/inside/diglib/copyrightMD'
 
       # Set OM (Opinionated Metadata) terminology
@@ -369,11 +373,13 @@ module DRI
         # Roles proxy, similar to QDC
         DRI::Vocabulary.marc_relators.each do |role|
           if DRI::Vocabulary.marc_relators_index? role
+            # Marc_relators that can be indexed
             t.send "role_#{role}",
                  path: "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \"#{role}\"]/mods:namePart[not(@type=\"date\")]",
                  index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable],
                  namespace_prefix: MODS_NS_PREFIX
           else
+            # create marc relator terms but do not index them
             t.send "role_#{role}",
                    path: "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \"#{role}\"]/mods:namePart[not(@type=\"date\")]",
                    namespace_prefix: MODS_NS_PREFIX
@@ -458,11 +464,22 @@ module DRI
         t.subject_metadata(proxy: [:mods, :main_subject])
       end # set_terminology
 
+      # Determine whether the metadata describes a collection
       # Collection if typeOfResource[@collection="yes"]
       def collection?
         mods_type_collection.present? ? true : false
       end
 
+      # Roles attribute setter
+      # @example Sample Hash:
+      #   { 'name' => ['Test host', 'new producer'],
+      #     'type' => ['role_hst', 'role_pro'],
+      #     'authority' => ['lhsc', '']
+      #   }
+      # @param [Hash] roles hash with metadata marcrelator values
+      # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+      # @option roles [Array<String>] :type the marcrelator codes
+      # @option roles [Array<String>] :authority the values for the role authority
       def roles=(roles)
         return unless roles.is_a?(Hash) &&
                       roles.key?('type') &&
@@ -485,9 +502,10 @@ module DRI
         changed_roles.keys.each { |role| add_role(role, changed_roles[role]) }
       end
 
+      # Adds a mods:name element with role information to the XML metadata
+      # @see DRI::Metadata::Mods#roles=
       # @param [String] code marc_relator code string
       # @param [Array] value array [value, authority]
-      #
       def add_role(code, value)
         return if !DRI::Vocabulary.marc_relators.include?(code)
         xpath = "/mods:mods/mods:name[mods:role/mods:roleTerm[@type=\"code\"]=\"#{code}\"]"
@@ -505,7 +523,9 @@ module DRI
         end
       end
 
-      # Build the xml doc
+      # Returns an empty, default MODS XML template
+      #
+      # @return [Nokogiri::Document] the MODS XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
           xml[MODS_NS_PREFIX].mods(version: '3.5',
@@ -543,10 +563,11 @@ module DRI
         builder.doc
       end
 
-      # Overriden. Solr indexing of custom fields
-      # @param[Hash] solr_doc the Solr document to be merged
-      # @param[Hash] opts
-      #
+      # Override from AF Solrizer for datastreams
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
@@ -650,32 +671,27 @@ module DRI
         solr_doc
       end
 
-      # Indexing Methods
-      # --------------------------------------------------------------------------------------------------------------
-
+      # Transforms all the creation_date metadata values into DCMI Period encoded date strings
+      # @return [Array<String>] the array of DCMI Period formatted values for dates
       def creation_date_for_index
         unless creation_date.empty? && creation_date_start.empty?
           return display_single_date_for_index(creation_date) |
-            display_date_range_for_index(creation_date_start, creation_date_end)
+                 display_date_range_for_index(creation_date_start, creation_date_end)
         end
-        # 3 possible fields for this date
-        #unless published_date.empty? && issued_date_start.empty?
-        #  return display_single_date_for_index(published_date) |
-        #    display_date_range_for_index(issued_date_start, issued_date_end)
-        #end
-
-        #unless captured_date.empty? && captured_date_start.empty?
-        #  return display_single_date_for_index(captured_date) |
-        #     display_date_range_for_index(captured_date_start, captured_date_end)
-        #end
 
         []
       end
 
+      # Returns all metadata related to people names for Solr indexing
+      # People facet
+      # @return [Array<String>] array of all people names metadata values for Solr indexing
       def person_array_for_index
         creator | contributor | name_coverage
       end
 
+      # Returns all metadata related to name subjects for Solr indexing
+      # These are DRI's Subject (Name) values
+      # @return [Array<String>] array of all subject names metadata values for Solr indexing
       def subject_name_for_index
         names_array = []
         query = '/mods:mods/mods:subject/mods:name'
@@ -690,13 +706,17 @@ module DRI
         names_array
       end
 
-      # These are DRI Subject(Place)
+      # Returns all metadata related to place/location subjects for Solr indexing
+      # These are DRI Subject (Place) values
+      # @return [Array<String>] array of all subject place metadata values for Solr indexing
       def subject_place_for_index
         geographical_coverage | mods_hierarchical_geographic | mods_cartographics_scale |
           mods_cartographics_coordinates | mods_cartographics_projection | mods_geographic_code | geocode_logainm
       end
 
-      # These are DRI Subject(Place)
+      # Returns all metadata related to temporal subjects for Solr indexing
+      # These are DRI Subject (Temporal) values
+      # @return [Array<String>] array of all subject temporal metadata values for Solr indexing
       def subject_temporal_for_index
         display_single_date_for_index(temporal_coverage) |
           display_single_date_for_index(other_date) |
@@ -706,7 +726,10 @@ module DRI
           display_date_range_for_index(part_date_start, part_date_end)
       end
 
+      # Transforms an array of individual dates into DCMI period encoded for indexing into Solr
       # No date ranges here, single date display (just the year)
+      # @param [Array<String>] date_field the metadata values for dates
+      # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_single_date_for_index(date_field = [])
         date_field.collect do |value|
           begin
@@ -719,7 +742,11 @@ module DRI
         end
       end
 
+      # Transforms arrays of start and end dates into DCMI period encoded for indexing into Solr
       # Display of date ranges: start_year - end_year
+      # @param [Array<String>] date_start the metadata values for start dates
+      # @param [Array<String>] date_end the metadata values for end dates
+      # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_date_range_for_index(date_start = [], date_end = [])
         date_range_display = date_start.collect.with_index do |name, idx|
           begin
@@ -741,7 +768,7 @@ module DRI
 
       # Return all date ranges formatted in the right format for indexing and single dates
       # Format: start_date/end_date (ISO8601)
-      # @return Hash with all the dates present in the metadata to be indexed as date ranges
+      # @return [Hash] the hash with all the dates present in the metadata to be indexed as date ranges
       def date_ranges_for_index
         dates_hash = {}
 
@@ -762,15 +789,25 @@ module DRI
         dates_hash.delete_if { |_k, v| v.empty? }
       end
 
+      # Returns an array of types from the metadata (capitalised)
+      # @return [Array<String>] the array of type values for Solr indexing
       def type_for_index
         # mods:typeOfResource last
+        # Return also mods:genre values as Types if object is a collection of mods:typeOfResource is not present
         return mods_genre.map(&:capitalize) | type.map(&:capitalize) if mods_type_collection.present? || !type.present?
 
         type.map(&:capitalize)
       end
 
-      # Methods for attribute updates
-
+      # Creates MODS name XML elements from an array of metadata values.
+      # Updates every mods:name (for creators)
+      # @see DRI::Mods#creator=
+      # @example Sample Hash:
+      #   { display: ['Test creator'], role: ['aut'], authority: ['lhsc'] }
+      # @param [Hash] creators the attributes and content required to create a mods:name element for creator
+      # @option creators [Array<String>] :display the content for the node
+      # @option creators [Array<String>] :role the role attribute for the node
+      # @option creators [Array<String>] :authority the value for the authority attribute of the mods:name element
       def add_creator(creators)
         return unless creators.is_a? Hash
 
@@ -797,6 +834,15 @@ module DRI
         end
       end
 
+      # Creates MODS name XML elements from an array of metadata values.
+      # Updates every mods:name (for contributors)
+      # @see DRI::Mods#contributor=
+      # @example Sample Hash:
+      #   { display: ['Test contributor'], role: ['ctb'], authority: ['lhsc'] }
+      # @param [Hash] contributors the attributes and content required to create a mods:name element for contributor
+      # @option contributors [Array<String>] :display the content for the node
+      # @option contributors [Array<String>] :role the role attribute for the node
+      # @option contributors [Array<String>] :authority the value for the authority attribute of the mods:name element
       def add_contributor(contributors)
         return unless contributors.is_a? Hash
 
@@ -823,6 +869,14 @@ module DRI
         end
       end
 
+      # Creates MODS elements within mods:originInfo XML elements from an array of metadata values
+      # Updates every mods:originInfo (for Origination Information: dates, publisher... see MODS Schema)
+      # @see DRI::Mods#origin_metadata=
+      # @example Sample Hash:
+      #   [{ '0' => { tag: 'dateCreated', start: '18930101', end: '19721231', encoding: 'iso8601' },
+      #      '1' => { tag: 'dateIssued', start: '1972', end: '', encoding: 'iso8601' } },
+      #    { '0' => { tag: 'publisher', content: 'Publisher name 1' } }]
+      # @param [Array<Hash>] origin the attributes and content required to create a any sub-elements nested within mods:originInfo
       def add_origin_metadata(origin)
         return unless origin.is_a? Array
 
@@ -864,8 +918,15 @@ module DRI
         end # iterate over all origin info nodes
       end
 
-      # add_origin_metadata
-
+      # Creates MODS elements within mods:accessCondition XML elements from an array of metadata values
+      # Updates every mods:accessCondition (for Rights)
+      # @see DRI::Mods#rights=
+      # @example Sample Hash:
+      #   { status: ['copyrighted'], rights: ['All rigths reserved'], note: [''] }
+      # @param [Hash] statement the attributes and content required to create a mods:accessCondition element for rights
+      # @option statement [Array<String>] :rights the content for the copyrightMD:copyright node
+      # @option statement [Array<String>] :note the content for the copyrightMD:note element
+      # @option statement [Array<String>] :status the value for the copyright.status attribute of the copyrightMD:copyright element
       def add_rights(statement)
         return unless statement.is_a? Hash
 
@@ -886,11 +947,17 @@ module DRI
       end
 
       # Create the XML nodes for subject terms within the MODS metadata
-      # @param subjects [Hash] hash of metadata values for subject terms
-      # @option subjects [Array<String>] :authority
-      # @option subjects [Array<Hash>] :values
-      # @option values [Array<String>] :tag
-      # @option values [Array<String>] :content
+      # @example Sample Hash:
+      #   [{ values: [{ tag: 'topic', content: 'Stained glass' },
+      #               { tag: 'temporal', start: '18900101', end: '19721231', encoding: 'w3cdtf' },
+      #               { tag: 'temporal', start: '20150101', end: '', encoding: 'iso8601' }], authority: 'lcsh' },
+      #    { values: [{ tag: 'topic', content: 'Correspondence' },
+      #               { tag: 'name', display: 'St. Agnes of Montepulciano', role: 'pat', authority: '' }], authority: 'local' }]
+      # @param [Hash] subjects the hash of metadata values for subject terms
+      # @option subjects [Array<String>] :authority the authority name for the subject element
+      # @option subjects [Array<Hash>] :values the hash of subject elements
+      # @option values [Array<String>] :tag the tag name for the subject element
+      # @option values [Array<String>] :content the content for the subject node
       def add_subject(subjects)
         return unless subjects.is_a? Array
 
@@ -947,6 +1014,14 @@ module DRI
         end
       end
 
+      # Creates MODS type XML elements from a Hash of metadata values.
+      # Updates every mods:typeOfResource element
+      # @see DRI::Mods#type=
+      # @example Sample Hash:
+      #   { content: ['collections (object groupings)', 'Photographs'], collection: true }
+      # @param [Hash] types hash of genre metadata values to set
+      # @option types [Array<String>] :content the array of metadata genre values
+      # @option types [Array<String>] :collection flag to specify whether the type is collection
       def add_type(types)
         return unless types.is_a? Hash
 
@@ -972,6 +1047,14 @@ module DRI
         end
       end
 
+      # Creates MODS genre XML elements from a Hash of metadata values.
+      # Updates every genre element
+      # @see DRI::Mods#mods_genre=
+      # @example Sample Hash:
+      #   { authority: ['aat', ''], content: ['collections (object groupings)', 'Photographs'] }
+      # @param [Hash] genres hash of genre metadata values to set
+      # @option genres [Array<String>] :content the array of metadata genre values
+      # @option genres [Array<String>] :authority the array of value for the elements' authority attribute
       def add_mods_genre(genres)
         return unless genres.is_a? Hash
 
@@ -993,6 +1076,10 @@ module DRI
         end
       end
 
+      # Creates MODS language XML elements from an array of metadata values.
+      # Updates every language element (language metadata)
+      # @see DRI::Mods#language=
+      # @param [Array<String>] languages array of language metadata values to set
       def add_language(languages)
         xpath = '/mods:mods/mods:language'
         ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
@@ -1014,6 +1101,12 @@ module DRI
         end
       end
 
+      # Creates an array of MODS names elemnts
+      # @param [String] content the value for the element's content
+      # @param [String] code the value for the mods:roleTerm marcrelator code
+      # @param [String] text the value for the mods:roleTerm marcrelator text term
+      # @param [String] authority the value of the authority attribute for the MODS name element
+      # @return [Array<Nokogiri::XML::Node>] the array of MODS people/names XML nodes
       def name_template(content, code, text, authority = nil)
         name = Nokogiri::XML::Node.new('mods:name', ng_xml)
         name['authority'] = authority unless authority.nil? || authority.empty?
@@ -1042,6 +1135,12 @@ module DRI
         name
       end
 
+      # Creates an array of MODS dates elemnts
+      # @param [String] tag the name of the tag to use for the dates being added
+      # @param [String] enc the value for encoding attribute of the dates being added
+      # @param [String] sdate the value for the start date value for the element
+      # @param [String] edate the value for the end date value for the element
+      # @return [Array<Nokogiri::XML::Node>] the array of MODS date XML nodes
       def date_template(tag, enc, sdate, edate = nil)
         return nil unless DRI::Vocabulary.mods_date_tags.include?(tag) && !sdate.empty?
 
@@ -1062,6 +1161,12 @@ module DRI
         [start_date]
       end
 
+
+      # Creates a mods:accessCondition element template and returns the newly created node
+      # @param [String] content the value for the element's content
+      # @param [String] note the value for the note element's content
+      # @param [String] status the value for copyright.status attribute in the element
+      # @return [Nokogiri::XML::Node] the mods:accessCondition node
       def rights_template(content, note = '', status = '')
         rights_node = Nokogiri::XML::Node.new("#{MODS_NS_PREFIX}:accessCondition", ng_xml)
         rights_node['type'] = 'use and reproduction'
@@ -1083,6 +1188,37 @@ module DRI
         rights_node
       end
 
+      # Returns a Hash with all the values for the DRI editable metadata fields
+      # to be populated in a UI Edit form
+      # @see DRI::Mods#retrieve_hash_attributes
+      # @example Sample return hash:
+      #   { title: ['Clarke Studios: Photographs'],
+      #     desc_abstract: ['Clarke Studios: Photographs is a subsection of the Clarke Stained Glass Studios Collection'],
+      #     desc_note: ['Test note'],
+      #     desc_toc: ['Test table of contents'],
+      #     desc_physdesc_note: ['Note under physical description'],
+      #     rights: ['Copyright 2015 The Board of Trinity College Dublin. '],
+      #     origin_metadata: [{ '0' => { tag: 'dateCreated', start: '18930101', end: '19721231', encoding: 'iso8601' },
+      #                         '1' => { tag: 'dateIssued', start: '1972', end: '', encoding: 'iso8601' } },
+      #                       { '0' => { tag: 'publisher', content: 'Publisher name 1' } }],
+      #     subject_metadata: @subjects_hash,
+      #     type: { collection: true, content: ['mixed material']},
+      #     mods_genre: { authority: ['aat', ''], content: ['collections (object groupings)', 'Photographs'] },
+      #     language: ['English'],
+      #     roles: { 'name' => ['Test host', 'new producer'],
+      #              'type' => ['role_hst', 'role_pro'],
+      #              'authority' => ['lhsc', ''] }
+      #   }
+      #
+      # @example And @subjects_hash is an Array of:
+      #   [{ values: [{ tag: 'topic', content: 'Stained glass' },
+      #                { tag: 'temporal', start: '18900101', end: '19721231', encoding: 'w3cdtf' },
+      #                { tag: 'temporal', start: '20150101', end: '', encoding: 'iso8601' }], authority: 'lcsh' },
+      #     { values: [{ tag: 'topic', content: 'Correspondence' },
+      #                { tag: 'name', display: 'St. Agnes of Montepulciano', role: 'pat' },
+      #                { tag: 'geographic', content: 'Killeshandra', uri: 'http://data.logainm.ie/place/5104' }], authority: 'local' }]
+      # ]
+      # @return [Hash] Hash of DRI MODS metadata
       def retrieve_terms_hash
         terms_hash = {}
         terms_hash[:title] = title
@@ -1230,6 +1366,11 @@ module DRI
         terms_hash
       end
 
+      # Looks all dates included in a given mods:originInfo element and determines whether
+      # they are all iso8601 or w3cdtf encoded, and valid
+      # @param [Nokogiri::Node] origin_node the mods:originInfo node to validate
+      # @param [Nokogiri::Node] date_tag the name of the date tag to validate
+      # @return [Boolean] true if valid, encoded dates; false otherwise
       def validate_dates(origin_node, date_tag)
         date_nodes = origin_node.children.select { |node| node.local_name == date_tag }
 
@@ -1247,6 +1388,9 @@ module DRI
         start_count == end_count && start_count <= 1 ? true : false
       end
 
+      # Looks all dates included in all mods:originInfo elements and determines whether
+      # they are all iso8601 or w3cdtf encoded, and valid
+      # @return [Boolean] true if valid, encoded dates; false otherwise
       def validate_all_dates
         origin_nodes = ng_xml.search('//mods:originInfo', { 'xmlns:mods' => MODS_NS })
 
@@ -1263,6 +1407,9 @@ module DRI
         true
       end
 
+      # Implement additional DRI metadata validations as this class does not inherit
+      # from DRI::Metadata::Base
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
         errors = {}
 
