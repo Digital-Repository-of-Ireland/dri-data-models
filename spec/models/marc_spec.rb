@@ -2,8 +2,13 @@ describe 'Marc' do
   context 'object methods' do
     before(:each) do
       @item_xml = fixture('marc/sandburg.xml')
+      @item_null_xml = fixture('marc/sandburg_null.xml')
+
       @marc_item = DRI::Marc.new
       @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
+
+      @marc_item_null = DRI::Marc.new
+      @marc_item_null.update_metadata DRI::Metadata::Marc.from_xml(@item_null_xml).to_xml
 
     end
 
@@ -39,6 +44,12 @@ describe 'Marc' do
 
       marc_namespace = { 'xmlns:marc' => 'http://www.loc.gov/MARC21/slim' }
       expect(@marc_item.descMetadata.ng_xml.namespaces).not_to include(marc_namespace)
+    end
+
+    it 'should remove null values from creator metadata for index' do
+      solr_doc = @marc_item_null.descMetadata.to_solr
+
+      expect(solr_doc['creator_tesim'].any? { |v| !/^null$/i.match(v) }).to eq true
     end
 
     after(:each) do
