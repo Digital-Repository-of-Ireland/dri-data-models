@@ -309,21 +309,6 @@ module DRI
       def self.marc_vocabulary
         @marc ||= YAML.load(File.read(File.expand_path('../../vocabulary_marc.yaml', __FILE__)))
       end
-
-      # Remove null values from a given field within
-      # the solr document for this object
-      # @param [Hash] solr_doc the solr document hash
-      # @param [String] field the solr field key
-      # @return [hash] the solr document hash
-      def remove_null_values(solr_doc, field)
-        [:stored_searchable, :facetable].each do |index_type|
-          if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].present?
-            solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
-          end
-        end
-
-        solr_doc
-      end
     end
   end
 end

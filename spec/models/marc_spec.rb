@@ -49,7 +49,7 @@ describe 'Marc' do
     it 'should remove null values from creator metadata for index' do
       solr_doc = @marc_item_null.descMetadata.to_solr
 
-      expect(solr_doc['creator_tesim'].any? { |v| !/^null$/i.match(v) }).to eq true
+      expect(solr_doc['creator_tesim'].any? { |v| /^null$/i.match(v) }).to eq false
     end
 
     after(:each) do
