@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<qualifieddc xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:marcrel="http://www.loc.gov/marc.relators/"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd"
+    xsi:noNamespaceSchemaLocation="http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd">
+    <dc:title>THE SAMPLE AUDIO TITLE</dc:title>
+    <dc:description>SAMPLE DESCRIPTION</dc:description>
+    <dc:subject>subject1</dc:subject>
+    <dc:subject>subject2</dc:subject>
+    <dc:subject>subject3</dc:subject>
+    <dcterms:temporal xsi:type="dcterms:Period">name=SAMPLE CENTURY; start=1900; end=1999;</dcterms:temporal>
+    <dcterms:temporal xml:lang="es">Approx. Siglo XXI</dcterms:temporal>
+    <dcterms:spatial xml:lang="gle">Co. na Gaillimhe</dcterms:spatial>
+    <dcterms:spatial xsi:type="dcterms:Point">name=Kilkenny; east=-7.2561; north=52.6477;</dcterms:spatial>
+    <dc:rights>All rights reserved</dc:rights>
+    <dc:creator>Gallagher, Damien</dc:creator>
+    <marcrel:hst>Valera, Eamon, de</marcrel:hst>
+    <dc:contributor>Collins, Michael</dc:contributor>
+    <dc:contributor>Connolly, James</dc:contributor>
+    <dcterms:issued>2000-01-01</dcterms:issued>
+    <dc:publisher>Digital Repository of Ireland</dc:publisher>
+    <dc:identifier>dri:1232</dc:identifier>
+    <dc:language>en</dc:language>
+    <dc:type>Sound</dc:type>
+</qualifieddc>

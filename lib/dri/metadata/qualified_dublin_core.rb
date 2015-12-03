@@ -293,6 +293,7 @@ module DRI
       # @return [Hash] the hash with indices split by language
       def split_array_into_languages(index_name = '')
         results = {}
+        filtered_fields = %w(temporal_coverage geographical_coverage)
 
         return results if index_name.empty?
 
@@ -301,6 +302,8 @@ module DRI
         array_values = array_values.reject(&:empty?)
 
         array_values.each_with_index do |value, i|
+          next if filtered_fields.include?(index_name) &&
+                    DRI::Metadata::Transformations.dcmi_encoded?(value)
           value_lang = send(index_name, i).send("#{index_name}_lang")
 
           foo = 'eng'
@@ -308,10 +311,10 @@ module DRI
           foo = DRI::Metadata::Descriptors.standardise_language_code(foo)
           foo = 'eng' if foo.nil?
 
-          if !results.key?("#{index_name}_#{foo}")
-            results["#{index_name}_#{foo}"] = [value]
-          else
+          if results.key?("#{index_name}_#{foo}")
             results["#{index_name}_#{foo}"] |= [value]
+          else
+            results["#{index_name}_#{foo}"] = [value]
           end
         end
 

@@ -360,6 +360,35 @@ describe 'QualifiedDublinCore' do
     end
   end
 
+  context 'indexing' do
+    # Before each test create test objects
+    before(:each) do
+      @obj_xml = fixture('audios/dublin_core_audio_lang_sample.xml')
+      @obj = DRI::QualifiedDublinCore.new
+      @obj.update_metadata DRI::Metadata::Marc.from_xml(@obj_xml).to_xml
+    end
+
+    after(:each) do
+      @obj.delete unless @obj.new_record?
+    end
+
+    it 'excludes DCMI Point, Box, Period metadata values from languages-based indices' do
+      solr_doc = @obj.descMetadata.to_solr
+      lang_keys = ['temporal_coverage_spa_tesim',
+                   'temporal_coverage_tesim',
+                   'geographical_coverage_gle_tesim',
+                   'geographical_coverage_tesim']
+
+      expect(solr_doc.keys).to include(*lang_keys)
+      expect(solr_doc['temporal_coverage_spa_tesim']).to match(['Approx. Siglo XXI'])
+      expect(solr_doc['temporal_coverage_tesim']).to match(['name=SAMPLE CENTURY; start=1900; end=1999;',
+                                                            'name=Approx. Siglo XXI;'])
+      expect(solr_doc['geographical_coverage_gle_tesim']).to match(['Co. na Gaillimhe'])
+      expect(solr_doc['geographical_coverage_tesim']).to match(['Co. na Gaillimhe',
+                                                                'name=Kilkenny; east=-7.2561; north=52.6477;'])
+    end
+  end
+
   context 'relationships' do
     # Before each test create test objects
     before(:each) do

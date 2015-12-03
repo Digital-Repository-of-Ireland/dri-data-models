@@ -376,6 +376,13 @@ module DRI
         result
       end
 
+      # Determines whether a string is encoded using DCMI Box, Point or Period
+      # @param [String] value the string to check
+      # @return [Boolean] true if DCMI Box, Point or Period encoded; false otherwise
+      def self.dcmi_encoded?(value)
+        dcmi_box?(value) || dcmi_period?(value) || dcmi_point?(value)
+      end
+
       # Returns a DCMI Period formatted string
       #
       # @param [String] name the display name string for the date
