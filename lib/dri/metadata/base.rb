@@ -50,7 +50,6 @@ module DRI
 
         solr_doc
       end
-
     end
   end
 end

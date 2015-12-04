@@ -319,6 +319,9 @@ module DRI
 
     # If this is EAD, put the full XML in fullMetadata and
     # return XML with the component's children removed
+    # @param [Nokogiri::XML] xml_text the XML metadata for the object
+    # @param [String] xml_type the type of object (DRI::Batch class)
+    # @return [Nokogiri::XML] the modified XML document
     def split_ead_xml(xml_text, xml_type)
       if xml_text.is_a?(Nokogiri::XML::Document)
         xml = xml_text
@@ -402,9 +405,7 @@ module DRI
     def synchronize_if_changed
       content_changed = false
 
-      if descMetadata.synchronize_metadata_on_save == true
-        content_changed = descMetadata.changed?
-      end
+      content_changed = descMetadata.changed? if descMetadata.synchronize_metadata_on_save == true
 
       if trigger_update
         # after descMetadata update and before save
@@ -412,6 +413,7 @@ module DRI
         update_full_metadata if content_changed
         self.trigger_update = false if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescription)
       end
+
       # Do the object save
       yield
 
