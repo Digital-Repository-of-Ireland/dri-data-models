@@ -98,7 +98,9 @@ module DRI
     end
 
     # AF Override
-    # Set the object's attributes
+    # Update the object's properties, and sets the trigger_update flag to synchonise EAD parent
+    # metadata when updating the object's metadata
+    # @see DRI::ModelSupport::EadSupport#trigger_update
     # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       modified_attributes = properties.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
