@@ -40,8 +40,9 @@ module DRI
           t.type(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           t.identifier(namespace_prefix: 'dc')
-          # For sorting in the UI, same as MODS and MARC
+          # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
           t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [:stored_sortable])
+          # Used for QDC metadata relationships, as the local, unique record ID
           t.qdc_id(ref: :identifier, index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Qualified Dublin Core fields

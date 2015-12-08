@@ -20,7 +20,9 @@ module DRI
     property :format, delegate_to: 'descMetadata', multiple: true
     property :coverage, delegate_to: 'descMetadata', multiple: true
     property :identifier, delegate_to: 'descMetadata', multiple: true
-    # Used for relationships
+
+    # id_asset is used for sorting digital objects by order/sequence
+    # used in catalog_controller in the dri-app
     property :id_asset, delegate_to: 'descMetadata', multiple: false
     property :qdc_id, delegate_to: 'descMetadata', multiple: true
     property :geocode_point, delegate_to: 'descMetadata', multiple: true
