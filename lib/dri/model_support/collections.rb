@@ -1,74 +1,77 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes AF properties, collection management methods that are common to all the DRI digital object classes
     module Collections
       extend ActiveSupport::Concern
 
       included do
+        # Flag to determine whether the digital object is a collection
         attr_accessor :collection
 
+        # one-to-one AF association to associate the parent of the given object
         belongs_to :governing_collection,
                    predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
                    class_name: 'DRI::Batch'
+        # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
                  predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
                  class_name: 'DRI::Batch',
                  as: :governing_collection,
                  dependent: :destroy
 
-        # NOT USED - Two relationships below for managing
-        # a collection's collections
-        # (!) ONLY FOR COLLECTIONS
-        #belongs_to :parent_collection,
-        #           predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
-        #           class_name: 'DRI::Batch'
-        #has_many :member_collections,
-        #         class_name: 'DRI::Batch',
-        #         as: :parent_collection
-
         # Additional relationships to keep track of sibling order
         # used in EAD
+        # one-to-one AF association to associate the preceding EAD child component for the given object
         belongs_to :previous_sibling,
                    predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
                    class_name: 'DRI::Batch'
+        # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling,
                  predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
                  class_name: 'DRI::Batch',
                  as: :previous_sibling
 
+        # Collection flag attribute setter
+        #
         def collection=(collection)
           if @collection == collection
             @collection = collection
-          elsif collection == true && !generic_files.any?
+          elsif collection == true && !generic_files.any? # NO digital assets associated
             @collection = collection
-          elsif collection == false && !governed_items.any?
+          elsif collection == false && !governed_items.any? # NO digital object children
             @collection = collection
           end
         end
 
+        # Collection flag getter
         def collection
-          @collection == true || @collection == false ? @collection : false
+          # if @collection not set, then default to false
+          (@collection == true || @collection == false) ? @collection : false
         end
       end
 
-      def is_collection?
+      # Determine whether the digital object is a collection
+      # @return [Boolean] true if collection; false otherwise
+      def collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
         (descMetadata.collection? || properties.collection?) && !generic_files.any?
       end
 
-      def is_root_collection?
+      # Determine whether the digital object is a root, container collection
+      # @return [Boolean] true if rootcollection; false otherwise
+      def root_collection?
         # It is a root collection if it is already defined to be a collection; it has
         # been already saved in Fedora; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME: #1320
-        !new_record? && is_collection? && governing_collection.nil?
+        !new_record? && collection? && governing_collection.nil?
       end
 
       private
 
-      #
-      # @param[Hash]
-      #
       def collections_to_solr(solr_doc = {})
         # Add title metadata from parent collections
         ancestor_titles = []
@@ -105,8 +108,8 @@ module DRI
           solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
         end
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :facetable) => is_collection?)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :stored_searchable) => is_collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :facetable) => collection?)
+        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_collection', :stored_searchable) => collection?)
 
         solr_doc
       end # collections_to_solr

@@ -246,7 +246,7 @@ describe 'Mods' do
                                    { tag: 'name', display: 'St. Agnes of Montepulciano', role: 'pat', authority: '' }], authority: 'local' }]
 
       @attributes_hash = { title: ['Clarke Studios: Photographs'],
-                           creator: { display: ['Test creator'], role: ['aut'], authority: ['lhsc']},
+                           creator: { display: ['Test creator'], role: ['aut'], authority: ['lhsc'] },
                            contributor: { display: ['Test contributor'], role: ['ctb'], authority: ['']},
                            desc_abstract: ['Clarke Studios: Photographs is a subsection of the Clarke Stained Glass Studios Collection, and contains photographs of designs, stained glass windows and Clarke Studios staff'],
                            desc_phys_desc: ['Test physical description'],
@@ -280,10 +280,10 @@ describe 'Mods' do
 
     it 'should use the type attr to determine whether is a collection' do
       @mods_col.save
-      expect(@mods_col.is_collection?).to eq true
-      expect(@mods_col.is_root_collection?).to eq true
+      expect(@mods_col.collection?).to eq true
+      expect(@mods_col.root_collection?).to eq true
 
-      expect(@mods_record.is_collection?).to eq false
+      expect(@mods_record.collection?).to eq false
     end
 
     it 'indexes valid temporal metadata' do

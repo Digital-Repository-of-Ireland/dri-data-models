@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes AF properties, digital object management methods that are common to all the DRI digital object classes
     module Files
       extend ActiveSupport::Concern
       require 'open-uri'
@@ -8,6 +11,8 @@ module DRI
 
       # Gathers the file characteristics from the Batch's GenericFiles
       # and adds them to the Batch's Solr document
+      # @param solr_doc [Hash] the solr document hash for the object
+      # @return [Hash] solr_doc hash for index
       def file_metadata_to_solr(solr_doc = {})
         file_type = []
         file_type_display = []
@@ -25,7 +30,7 @@ module DRI
         sample_rate = []
         file_format = []
 
-        if is_collection?
+        if collection?
           file_type.push 'collection'
           file_type_display.push 'Collection'
         end
@@ -36,7 +41,7 @@ module DRI
         unless results.nil?
           results.each do |gf|
             file_count += 1
-            if !is_collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
+            if !collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
               file_type |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0]]
               file_type_display |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0].capitalize]
             end

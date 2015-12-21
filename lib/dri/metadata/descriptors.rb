@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements helper methods for metadata indexing using Solrizer. Methods mostly used in OM terminologies
     module Descriptors
       require 'iso-639'
 
@@ -16,6 +19,7 @@ module DRI
                                                  requires_type: true)
       end
 
+      # Creates a cleaned, displayable index in Solr
       def self.cleaned_displayable
         @displayable ||= Solrizer::Descriptor.new(:string, :indexed, :multivalued,
                                                   converter: input_converter)
@@ -32,7 +36,7 @@ module DRI
         lambda do |_type|
           lambda do |val|
             begin
-              standardise_language_code val
+              standardise_language_code(val)
             rescue
               nil
             end
@@ -40,11 +44,12 @@ module DRI
         end
       end
 
+      # Cleans the values of Solr Faceted fields
       def self.facet_converter
         lambda do |_type|
           lambda do |val|
             begin
-              standardise_facet val
+              standardise_facet(val)
             rescue
               nil
             end
@@ -52,17 +57,16 @@ module DRI
         end
       end
 
+      # Cleans the values of Solr displayable, searchable fields
       def self.input_converter
         lambda do |_type|
           lambda do |val|
             begin
               clean_val = val.strip
 
-              if clean_val.downcase == 'n/a'
-                'N/A'
-              else
-                clean_val.empty? ? nil : clean_val
-              end
+              return 'N/A' if clean_val.downcase == 'n/a'
+
+              clean_val.empty? ? nil : clean_val
             rescue
               nil
             end
@@ -70,16 +74,20 @@ module DRI
         end
       end
 
+      # Standardise facet values: capitalise, inserts nil if empty values
+      # @param [String] val the facet value to index
+      # @return [String] the cleaned value to index
       def standardise_facet(val = '')
         clean_val = val.strip
 
-        if clean_val.blank? || clean_val.downcase == 'n/a' || clean_val.empty?
-          nil
-        else
-          clean_val.capitalize
-        end
+        return nil if clean_val.blank? || clean_val.downcase == 'n/a' || clean_val.empty?
+
+        clean_val.capitalize
       end
 
+      # Standardise language codes to be indexed RFC 5646, ISO_639.
+      # @param [String] val the language code
+      # @return [String] the converted language code to index
       def self.standardise_language_code(val = '')
         # If using RFC 5646, then val will be of the
         # format language-script-region-variant
@@ -96,16 +104,12 @@ module DRI
 
         # If result is nil, as a last resort check if they wrote
         # the language name in english.
-        if result.nil?
-          result = ISO_639.find_by_english_name(clean_val.capitalize)
-        end
+        result = ISO_639.find_by_english_name(clean_val.capitalize) if result.nil?
 
-        if result.nil?
-          nil
-        else
-          # Return the 3-letter ISO 639.2 code
-          result.alpha3_bibliographic
-        end
+        return nil if result.nil?
+
+        # Return the 3-letter ISO 639.2 code
+        result.alpha3_bibliographic
       end
     end
   end

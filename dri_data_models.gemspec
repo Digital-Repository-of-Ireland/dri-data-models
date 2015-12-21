@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = 'Damien Gallagher'
   s.email       = 'damien.gallagher@nuim.ie'
   s.homepage    = 'http://www.dri.ie'
-  s.summary     = 'Hydra metadata and data models needed for a DRI Hydra-Head.'
-  s.description = 'Hydra metadata and data models needed for a DRI Hydra-Head.'
+  s.summary     = 'DRI metadata and data models needed for a DRI Hydra-Head.'
+  s.description = 'DRI metadata and data models needed for a DRI Hydra-Head.'
 
   s.required_ruby_version = '>= 1.9.3'
 

@@ -1,10 +1,16 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Implements common methods to handle metadata relationships retrieval
     module RelationshipsSupport
       extend ActiveSupport::Concern
 
+      # Retrieve from Solr the list of PIDs for the fedora objects with the given metadata local identifiers
       #
-      #
+      # @param rels_array [Array<String>] array of metadata identifiers to query for relationships
+      # @param solr_id_field [String] the name of the solr metadata identifier field to query
+      # @return [Array<String>] array of Fedora digital object PIDs
       def retrieve_relation_records(rels_array, solr_id_field)
         records = []
 
@@ -30,6 +36,8 @@ module DRI
         records
       end # end retrieve_relation_records
 
+      #
+      # @return [String] the PID for the root collection parent of the given object
       def root_collection
         root = nil
 

@@ -1,10 +1,13 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes methods to handle EAD metadata, children component creation/management
     module EadSupport
       extend ActiveSupport::Concern
 
       included do
-        around_save :ingest_files_if_changed
+        around_save :ingest_files_if_changed # callback for generating EAD Generic Files from ead:dao links
 
         attr_accessor :trigger_ingest
         attr_accessor :trigger_update
@@ -23,20 +26,18 @@ module DRI
 
       # Process a component's children and create associated objects in Fedora
       def synchronize_children_to_metadata
-        if self.new_record?
-          return
-        end
+        return if self.new_record?
 
         metadata_child_index = 0
         prev_obj = nil
         metadata_children = []
 
         # Remove Ead namespaces
-        full_metadata_nons = self.fullMetadata.ng_xml.clone
+        full_metadata_nons = fullMetadata.ng_xml.clone
         full_metadata_nons.remove_namespaces!
 
         # Find the immediate children of this collection in the metadata
-        case self.descMetadata.class.to_s
+        case descMetadata.class.to_s
         when 'DRI::Metadata::EncodedArchivalDescription'
           metadata_children = full_metadata_nons.xpath('/ead/archdesc/dsc/*')
         when 'DRI::Metadata::EncodedArchivalDescriptionComponent'
@@ -45,31 +46,31 @@ module DRI
           metadata_children = []
         end
 
-        while metadata_child_index < metadata_children.length do
+        while metadata_child_index < metadata_children.length
           # Create a new child
           new_child = DRI::EncodedArchivalDescription.new(:component)
           new_child.update_metadata metadata_children[metadata_child_index].to_xml
           new_child.previous_sibling = prev_obj unless prev_obj.nil?
           new_child.governing_collection = self
           # Add depositor, status and permissions from parent
-          new_child.depositor = self.depositor
-          new_child.status = self.status
+          new_child.depositor = depositor
+          new_child.status = status
           # Copy permissions from parent
-          new_child.read_groups_string = self.read_groups_string
-          new_child.edit_groups_string = self.edit_groups_string
-          new_child.manager_groups_string = self.manager_groups_string
-          new_child.manager_users_string = self.manager_users_string
+          new_child.read_groups_string = read_groups_string
+          new_child.edit_groups_string = edit_groups_string
+          new_child.manager_groups_string = manager_groups_string
+          new_child.manager_users_string = manager_users_string
           # ingest_files_from_metadata
-          new_child.ingest_files_from_metadata = self.ingest_files_from_metadata
+          new_child.ingest_files_from_metadata = ingest_files_from_metadata
           DRI::Utils.checksum_metadata(new_child)
           duplicates = object_duplicates?(new_child)
-          #duplicates = false
+          # duplicates = false
           # Don't add new node if it's invalid
           if new_child.valid? && !duplicates
             Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
             new_child.save
             begin
-              DRI::Utils.create_reader_group(new_child.id) if new_child.is_collection?
+              DRI::Utils.create_reader_group(new_child.id) if new_child.collection?
             rescue
               Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
@@ -94,31 +95,34 @@ module DRI
         case descMetadata
         when DRI::Metadata::EncodedArchivalDescription
         when DRI::Metadata::EncodedArchivalDescriptionComponent
-          self.dao_href_proxy.each do |url|
-            if !url.blank?
-              add_file_from_url url.strip
-            end
+          dao_href_proxy.each do |url|
+            add_file_from_url(url.strip) unless url.blank?
           end
         else # Do nothing
+          return
         end
       end # process_ingest_of_file_urls
 
       # Ingest a file (generic_file) from a given URL
-      def add_file_from_url file_url
+      # @param file_url [String] the URL of the ead:dao asset to add
+      # @return [Boolean] true if succesful; false otherwise
+      def add_file_from_url(file_url)
         file_name = File.basename(URI(file_url).path)
         begin
 
           # We have a copy of the remote file for processing
           temp_file = Tempfile.new(['tmp', File.extname(file_url)])
           temp_file.binmode
-          open(file_url) { |data| temp_file.write data.read}
+          open(file_url) { |data| temp_file.write data.read }
           temp_file.close
 
-          add_file temp_file, "content", file_name
+          add_file(temp_file, 'content', file_name)
+
           true
         rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{self.id}\n"
+          logger.error "Error loading url: #{file_url} PID: #{id}\n"
           logger.error e.backtrace.join("\n")
+
           false
         ensure
           # Explicitly close the temp file
@@ -132,7 +136,7 @@ module DRI
       # @return [Nokogiri::XML::NodeSet] the children ead:components for the given node
       def self.get_ead_metadata_components(node)
         if node.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
-          ns_dcl = {'xmlns:ead' => 'urn:isbn:1-931666-22-9'}
+          ns_dcl = { 'xmlns:ead' => 'urn:isbn:1-931666-22-9' }
           # Nodes for EAD root collection (as path differs)
           return node.xpath('/ead:ead/ead:archdesc/ead:dsc/*', ns_dcl) unless node.xpath('/*/ead:archdesc', ns_dcl).empty?
           # Nodes for components grouped under dsc
@@ -173,33 +177,40 @@ module DRI
       def object_duplicates?(object)
         result = false
 
-        if object.governing_collection.present?
-          collection_id = object.governing_collection.id
-          solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)}:\"#{object.metadata_md5}\" AND #{ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)}:\"#{collection_id}\""
-          documents = ActiveFedora::SolrService.query(solr_query, :defType => 'edismax', :rows => '10', :fl => 'id').delete_if { |obj| obj["id"] == object.id }
-          result = true unless documents.empty?
-        end
+        return result unless object.governing_collection.present?
+
+        parent_id = object.governing_collection_id
+        md_hash_key = ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)
+        governed_key = ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
+
+        solr_query = "#{md_hash_key}:\"#{object.metadata_md5}\" AND #{governed_key}:\"#{parent_id}\""
+        documents = ActiveFedora::SolrService.query(solr_query,
+                                                    defType: 'edismax',
+                                                    rows: '10',
+                                                    fl: 'id').delete_if { |obj| obj['id'] == object.id }
+        result = true unless documents.empty?
 
         result
       end
 
-      # Triggers the creation of generic files for EAD components if specified in metadata
+      # Triggers the creation of generic files
+      # for EAD components if specified in metadata
       def ingest_files_if_changed
         content_changed = false
 
-        if self.ingest_files_from_metadata == 'true' && self.trigger_ingest
-          content_changed = self.descMetadata.changed?
+        if ingest_files_from_metadata == 'true' && trigger_ingest
+          content_changed = descMetadata.changed?
         end
 
         # Does the actual collection/file save
         yield
 
         # Do not process files if object is a collection (DRI Collections do not have assets)
-        unless is_collection?
-          if content_changed && self.generic_files.empty? &&
-              !self.dao_href_proxy.empty? && !new_record?
-            Sufia.queue.push(IngestFilesFromMetadataJob.new(self.id))
-          end
+        return if collection?
+
+        if content_changed && generic_files.empty? &&
+            !dao_href_proxy.empty? && !new_record?
+          Sufia.queue.push(IngestFilesFromMetadataJob.new(id))
         end
       end # ingest_files_if_changed
     end # module

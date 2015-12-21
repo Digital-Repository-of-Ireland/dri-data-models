@@ -1,3 +1,6 @@
+# FITS Metadata datastream, defines the XML terminology
+# for this OM-based datastream
+#
 class FitsDatastream < ActiveFedora::OmDatastream
   include OM::XML::Document
 
@@ -135,6 +138,9 @@ class FitsDatastream < ActiveFedora::OmDatastream
     t.frame_rate(proxy: [:metadata, :video, :frame_rate])
   end
 
+  # Returns an empty, default FITS XML document
+  #
+  # @return [Nokogiri::Document] the FITS XML document
   def self.xml_template
     builder = Nokogiri::XML::Builder.new do |xml|
       xml.fits(xmlns: 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output',

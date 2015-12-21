@@ -1,10 +1,11 @@
+# DRI namespace
 module DRI
-
+  # Metadata namespace
   module Metadata
-
+    # Implements the descMetadata datastream for DRI::EncodedArchivalDescription digital objects
+    # extends from DRI::Metadata::Base
     class EncodedArchivalDescriptionComponent < DRI::Metadata::Base
-
-      # OM (Opinionated Metadata) terminology mapping to an EAD Component tag
+      # OM (Opinionated Metadata) terminology mapping to an EAD Components (Sub-collections or Objects)
       set_terminology do |t|
         t.root(path: '*', namespace_prefix: nil)
 
@@ -20,23 +21,23 @@ module DRI
         t.name_cvg(ref: :name, path: 'name[not(parent::origination) and not(@role="subject")]')
 
         t.pers_name(path: 'persname') {
-          t.role(path: {attribute: 'role'})
+          t.role(path: { attribute: 'role' })
         }
         t.pers_name_cvg(ref: :pers_name, path: 'persname[not(parent::origination) and not(@role="subject")]')
 
         t.corp_name(path: 'corpname') {
-          t.role(path: {attribute: 'role'})
+          t.role(path: { attribute: 'role' })
         }
         t.corp_name_cvg(ref: :corp_name, path: 'corpname[not(parent::origination) and not(@role="subject")]')
 
         t.fam_name(path: 'famname') {
-          t.role(path: {attribute: 'role'})
+          t.role(path: { attribute: 'role' })
         }
         t.fam_name_cvg(ref: :fam_name, path: 'famname[not(parent::origination) and not(@role="subject")]')
 
         t.date {
-          t.normal_at(path: {attribute: 'normal'})
-          t.type_at(path: {attribute: 'type'})
+          t.normal_at(path: { attribute: 'normal' })
+          t.type_at(path: { attribute: 'type' })
         }
         t.date_text(ref: :date, attributes: { normal: :none })
 
@@ -96,8 +97,8 @@ module DRI
         }
 
         t.unit_date(path: 'unitdate') {
-          t.normal_at(path: {attribute: 'normal'})
-          t.datechar_at(path: {attribute: 'datechar'})
+          t.normal_at(path: { attribute: 'normal' })
+          t.datechar_at(path: { attribute: 'datechar' })
         }
         t.unit_date_display(ref: :unit_date, attributes: { normal: :none })
         t.unit_date_other(ref: :unit_date, path: 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]')
@@ -110,7 +111,7 @@ module DRI
           t.p(ref: [:p])
         }
         t.dao {
-          t.href_at(path: {attribute: 'href'})
+          t.href_at(path: { attribute: 'href' })
           t.dao_desc(ref: [:dao_desc], path: 'daodesc')
         }
 
@@ -123,7 +124,7 @@ module DRI
           t.ext_ref(ref: [:ext_ref])
         }
 
-        t.alt_form(path: "altformavail") {
+        t.alt_form(path: 'altformavail') {
           t.p(ref: [:p])
           t.ext_ref_p(ref: [:ext_ref_p])
         }
@@ -259,28 +260,34 @@ module DRI
         t.published_date_idx(path: '/*/did/unitdate[@datechar="publication"]/@normal')
         t.temporal_coverage_idx(path: 'did/unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
         t.date_idx(proxy: [:date, :normal_at])
-
       end # set_terminology
 
+      # synchronize_metadata_on_save attribute getter
+      # Flag used to indicate whether EAD component children creation should be triggered
+      # when saving an EAD parent component
+      # @see DRI::EncodedArchivalDescription#synchronize_if_changed
+      # @return [Boolean] true if object support children metadata objects creation; false otherwise
       def synchronize_metadata_on_save
         @synchronize_metadata_on_save || true
       end
 
-      # Build the xml doc
+      # Returns an empty, default EAD component XML template
+      #
+      # @return [Nokogiri::Document] the EAD component XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.c(:level => '') {
+          xml.c(level: '') {
             xml.did {
               xml.unittitle # title
-              xml.unitid(:identifier => '', :repositorycode => '', :countrycode => 'IE') # identifier
-              xml.unitdate(:datechar => 'creation', :normal => '') # creation_date
-              xml.unitdate(:datechar => 'publication', :normal => '') # published_date
+              xml.unitid(identifier: '', repositorycode: '', countrycode: 'IE') # identifier
+              xml.unitdate(datechar: 'creation', normal: '') # creation_date
+              xml.unitdate(datechar: 'publication', normal: '') # published_date
               xml.origination {
-                xml.persname(:role => 'creator')
-                xml.persname(:role => 'contributor')
+                xml.persname(role: 'creator')
+                xml.persname(role: 'contributor')
               }
               xml.langmaterial {
-                xml.language(:langcode => 'en')
+                xml.language(langcode: 'en')
               }
               xml.physdesc {
                 xml.genreform # type
@@ -290,31 +297,29 @@ module DRI
             xml.userestrict # rights
             xml.controlaccess {
               xml.subject # subject
-              xml.persname(:role => 'subject')
-              xml.geogname(:role => 'subject')
+              xml.persname(role: 'subject')
+              xml.geogname(role: 'subject')
             }
           }
         end
 
-        return builder.doc
+        builder.doc
       end
 
-      def retrieve_xpath
-        self.class.terminology.xpath_for(:title)
-      end
-
-      def to_solr(solr_doc=Hash.new, opts = {})
-        solr_doc = super(solr_doc)
+      # Override from AF Solrizer for datastreams
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
+      def to_solr(solr_doc = {}, opts = {})
+        solr_doc = super(solr_doc, opts)
 
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title', :stored_searchable, type: :string) => title)
         # Title
         # title_sorted - A SOLR index for sorting titles
         if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-
-          unless sorted_title.empty?
-            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
-          end
+          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title]) unless sorted_title.empty?
         end
 
         # Type
@@ -404,24 +409,24 @@ module DRI
         date_ranges = date_ranges_for_index # ALL the date ranges
 
         # Creation date dateRange index
-        cdate_ranges = date_ranges.select {|key, value| ['creation_date'].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(cdate_ranges)) unless cdate_ranges.empty?
+        cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
+        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)) unless cdate_ranges.empty?
 
         # Published date dateRange index
-        pdate_ranges = date_ranges.select {|key, value| ['published_date'].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(pdate_ranges)) unless pdate_ranges.empty?
+        pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
+        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)) unless pdate_ranges.empty?
 
         # Subject date dateRange index
-        sdate_ranges = date_ranges.select {|key, value| ['subject_date'].include?(key)}
-        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations::transform_date_ranges(sdate_ranges)) unless sdate_ranges.empty?
+        sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
+        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)) unless sdate_ranges.empty?
 
         # Geospatial indexing
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
-        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({'geographical_coverage' => geocode_point | geocode_box})
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => geocode_point | geocode_box })
 
-        uris = geocode_logainm.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
         if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({'geographical_coverage' => uris})
+          linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
           geospatial_hash[:coords].concat(linked_data[:coords])
           geospatial_hash[:name].concat(linked_data[:name])
@@ -434,9 +439,11 @@ module DRI
         solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
 
         solr_doc
-      end #to_solr
+      end # to_solr
 
-      # Index Helper Methods
+      # Returns all metadata related to people names for Solr indexing
+      # People facet
+      # @return [Array<String>] array of all people names metadata values for Solr indexing
       def person_array_for_index
         name_coverage | persname_coverage | corpname_coverage | famname_coverage | creator | contributor
       end
@@ -451,7 +458,7 @@ module DRI
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
       def creation_date_for_index
-       if !creation_date.empty?
+        if !creation_date.empty?
           cdate_array = creation_date.collect.with_index do |value, idx|
             if creation_date(idx).normal_at.empty?
               DRI::Metadata::Transformations.create_dcmi_period(value)
@@ -474,10 +481,18 @@ module DRI
         end
       end
 
+      # Returns all metadata related to creator for Solr indexing
+      # @return [Array<String>] array of all creator metadata values, formatted to include role info, for Solr indexing
       def creator_for_index
         creator.empty? ? get_field_from_parent('creator') : creator_with_roles
       end
 
+      # Returns all metadata related to creator for Solr indexing
+      # Including role information if present
+      # @example Example of creator formatting with role
+      #   <ead:persname role="creator">M. Walcott</ead:persname> is indexed as:
+      #   "M. Walcott (Creator)"
+      # @return [Array<String>] array of all creator metadata values, formatted to include role info, for Solr indexing
       def creator_with_roles
         creators_array = []
         ng_xml.search('/*/did/origination/*[not(@role="contributor")]').each { |n| creators_array << (n['role'].nil? ? n.content : "#{n.content} (#{n['role']})") }
@@ -485,6 +500,9 @@ module DRI
         creators_array
       end
 
+      # Return the values of the metadata field inherited from the parent
+      # @param [String] field_name the metadata field name
+      # @return [Array<String>] the array of metadata field values from the parent
       def get_field_from_parent(field_name)
         parent_field = nil
         fedora_object = nil
@@ -493,8 +511,8 @@ module DRI
         fedora_object = DRI::EncodedArchivalDescription.find(obj_id) unless obj_id.nil?
 
         unless fedora_object.nil? || fedora_object.governing_collection.nil?
-          solr_query = "id:\"#{fedora_object.governing_collection_id.to_s}\""
-          docs = ActiveFedora::SolrService.query(solr_query, :defType => 'edismax')
+          solr_query = "id:\"#{fedora_object.governing_collection_id}\""
+          docs = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
 
           parent_field = docs.first[ActiveFedora::SolrQueryBuilder.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
         end
@@ -502,12 +520,17 @@ module DRI
         parent_field.nil? ? [] : parent_field
       end
 
-      # Mapping to UI subjects: controlaccess/subject
+      # Returns all metadata related to subjects for Solr indexing
+      # Mapping to UI Subjects: controlaccess/subject or subject
+      # These are generic subjects similar to dc:coverage
+      # @return [Array<String>] array of all subject metadata values for Solr indexing
       def subject_for_index
         subject | subject_anywhere | name_subject | persname_subject | corpname_subject | geogname_subject | famname_subject
       end
 
-      # These are DRI Subject(Name)
+      # Returns all metadata related to name subjects for Solr indexing
+      # These are DRI's Subject(Name) values
+      # @return [Array<String>] array of all subject names metadata values for Solr indexing
       def subject_name_for_index
         persname_roles = pers_name_cvg.map.with_index { |n, idx| pers_name_cvg(idx).role.empty? ? n : (n + " (#{pers_name_cvg(idx).role[0]})") }
         name_roles = name_cvg.map.with_index { |n, idx| name_cvg(idx).role.empty? ? n : (n + " (#{name_cvg(idx).role[0]})") }
@@ -517,14 +540,18 @@ module DRI
         name_roles | persname_roles | corpname_roles | famname_roles
       end
 
-      # These are DRI Subject(Place)
+      # Returns all metadata related to place/location subjects for Solr indexing
+      # These are DRI Subject(Place) values
+      # @return [Array<String>] array of all subject place metadata values for Solr indexing
       def subject_place_for_index
         geo_roles = geog_name_cvg.map.with_index { |n, idx| geog_name_cvg(idx).role.empty? ? n : (n + " (#{geog_name_cvg(idx).role[0]})") }
 
         geo_roles
       end
 
-      # These are DRI Subject(Place)
+      # Returns all metadata related to temporal subjects for Solr indexing
+      # These are DRI Subject(Temporal) values
+      # @return [Array<String>] array of all subject temporal metadata values for Solr indexing
       def subject_temporal_for_index
         date_array = date.collect.with_index do |value, idx|
           if date(idx).normal_at.empty?
@@ -532,7 +559,7 @@ module DRI
           else
             iso_date = date(idx).normal_at[0]
 
-            if (iso_date.include?('/'))
+            if iso_date.include?('/')
               range = iso_date.split('/')
               DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
             else
@@ -559,11 +586,11 @@ module DRI
         temporal_array | date_array
       end
 
-      # Return all date ranges formatted in the right format for indexing and single dates
-      # Format: start_date/end_date (ISO8601)
-      # @return Hash with all the dates present in the metadata to be indexed as date ranges
+      # Returns all date ranges formatted in ISO8601 for indexing
+      # @note EAD date format: start/end [YYYYmmdd/YYYYmmdd | YYYY/YYYY]
+      # @return [Hash] the hash with all the dates present in the metadata to be indexed as date ranges
       def date_ranges_for_index
-        dates_hash = Hash.new
+        dates_hash = {}
 
         cdate_array = creation_date_idx.empty? ? get_field_from_parent('creation_date_idx') : creation_date_idx
 
@@ -584,135 +611,165 @@ module DRI
         type | level.map(&:capitalize) | ead_level_other.map(&:capitalize)
       end
 
+      # Determine whether the metadata describes a collection
+      # (specified in the EAD component metadata)
       def collection?
+        # level value other than item means it is a collection
+        # from (DRI crosswalk)
         ead_level == ['item'] ? false : true
       end
 
+      # Creates EAD scopecontent XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_scope_content=
+      # @param [Array<String>] desc_array array of metadata values for scope content field
       def add_desc_scope_content(desc_array)
-        ng_xml.search('/*/scopecontent').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/scopecontent').each(&:remove)
 
         comp = ng_xml.root
         sc = Nokogiri::XML::Node.new('scopecontent', ng_xml)
         desc_array.each do |desc|
-          unless desc.empty?
-            p = Nokogiri::XML::Node.new('p', ng_xml)
-            p.content = desc
-            sc.add_child(p)
-          end
+          next if desc.empty?
+
+          p = Nokogiri::XML::Node.new('p', ng_xml)
+          p.content = desc
+          sc.add_child(p)
         end
         comp.add_child(sc) unless sc.children.empty?
       end
 
+      # Creates EAD abstract XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_abstract=
+      # @param [Array<String>] desc_array array of metadata values for abstract field
       def add_desc_abstract(desc_array)
-        ng_xml.search('/*/did/abstract').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/did/abstract').each(&:remove)
 
         did_node = ng_xml.at('/*/did')
         desc_array.each do |desc|
-          unless desc.empty?
-            abstract = Nokogiri::XML::Node.new('abstract', ng_xml)
-            abstract.content = desc
-            did_node.add_child(abstract)
-          end
+          next if desc.empty?
+
+          abstract = Nokogiri::XML::Node.new('abstract', ng_xml)
+          abstract.content = desc
+          did_node.add_child(abstract)
         end
       end
 
+      # Creates EAD bioghist XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_biog_hist=
+      # @param [Array<String>] desc_array array of metadata values for biographical history field
       def add_desc_biog_hist(desc_array)
-        ng_xml.search('/*/bioghist').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/bioghist').each(&:remove)
 
         comp = ng_xml.root
         bh = Nokogiri::XML::Node.new('bioghist', ng_xml)
         desc_array.each do |desc|
-          unless desc.empty?
-            p = Nokogiri::XML::Node.new('p', ng_xml)
-            p.content = desc
-            bh.add_child(p)
-          end
+          next if desc.empty?
+
+          p = Nokogiri::XML::Node.new('p', ng_xml)
+          p.content = desc
+          bh.add_child(p)
         end
         comp.add_child(bh) unless bh.children.empty?
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (creation date)
+      # @see DRI::EncodedArchivalDescription#creation_date=
+      # @example Sample Hash:
+      #   { display: ['2015'], normal: ['20150101'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_creation_date(dates)
-        dates.symbolize_keys! if dates.is_a?(Hash)
-        if dates.is_a?(Hash) && [:display, :normal].all? { |s| dates.key? s } && dates[:display].size == dates[:normal].size
+        return unless dates.is_a?(Hash)
+        dates.symbolize_keys!
+        valid_keys = [:display, :normal].all? { |s| dates.key? s }
+        return unless valid_keys && dates[:display].size == dates[:normal].size
 
-          ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each do |n|
-            n.remove
-          end
+        ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each(&:remove)
 
-          did_node = ng_xml.at('/*/did')
-          dates[:display].each_with_index do |disp, idx|
-            unless disp.empty?
-              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
-              node.content = disp
-              node['datechar'] = 'creation'
-              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
-              did_node.add_child(node)
-            end
-          end
+        did_node = ng_xml.at('/*/did')
+        dates[:display].each_with_index do |disp, idx|
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+          node.content = disp
+          node['datechar'] = 'creation'
+          node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+          did_node.add_child(node)
         end
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (published date)
+      # @see DRI::EncodedArchivalDescription#published_date=
+      # @example Sample Hash:
+      #   { display: ['2015'], normal: ['20150101'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_published_date(dates)
-        dates.symbolize_keys! if dates.is_a?(Hash)
-        if dates.is_a?(Hash) && [:display, :normal].all? { |s| dates.key? s } && dates[:display].size == dates[:normal].size
+        return unless dates.is_a?(Hash)
+        dates.symbolize_keys!
+        valid_keys = [:display, :normal].all? { |s| dates.key? s }
+        return unless valid_keys && dates[:display].size == dates[:normal].size
 
-          ng_xml.search('/*/did/unitdate[@datechar="publication"]').each do |n|
-            n.remove
-          end
+        ng_xml.search('/*/did/unitdate[@datechar="publication"]').each(&:remove)
 
-          did_node = ng_xml.at('/*/did')
-          dates[:display].each_with_index do |disp, idx|
-            unless disp.empty?
-              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
-              node.content = disp
-              node['datechar'] = 'publication'
-              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
-              did_node.add_child(node)
-            end
-          end
+        did_node = ng_xml.at('/*/did')
+        dates[:display].each_with_index do |disp, idx|
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+          node.content = disp
+          node['datechar'] = 'publication'
+          node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+          did_node.add_child(node)
         end
       end
 
+      # Creates EAD persname, name, corpname, famname XML elements from an array of metadata values
       # Updates every person element under origination (creators)
+      # @see DRI::EncodedArchivalDescription#creator=
+      # @example Sample Hash:
+      #   { display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'] }
       # @param creators [Hash] the attributes and content required to create a persname
-      # @option :display [Array<String>] the content for the node
-      # @option :role [Array<String>] the role attribute for the node
-      # @option :tag [Array<String>] the name of the person tag to add
+      # @option creators [Array<String>] :display the content for the node
+      # @option creators [Array<String>] :role the role attribute for the node
+      # @option creators [Array<String>] :tag the name of the person tag to add
       def add_creator(creators)
-        creators.symbolize_keys! if creators.is_a?(Hash)
-        if creators.is_a?(Hash) && [:tag, :display, :role].all? { |s| creators.key? s } &&
-            (creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size)
-          ng_xml.search('/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each do |n|
-            n.remove
-          end
+        return unless creators.is_a?(Hash)
+        creators.symbolize_keys!
+        valid_keys = [:tag, :display, :role].all? { |s| creators.key? s }
+        return unless valid_keys && creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size
 
-          origination = ng_xml.at('/*/did/origination')
-          if origination.nil?
-            did_node = ng_xml.at('/*/did')
-            origination = Nokogiri::XML::Node.new('origination', ng_xml)
-            did_node.add_child(origination)
-          end
-          creators[:display].each_with_index do |disp, idx|
-            if DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx]) && !disp.empty?
-              node = Nokogiri::XML::Node.new(creators[:tag][idx], ng_xml)
-              node.content = disp
-              node[:role] = creators[:role][idx] unless creators[:role][idx].empty?
-              origination.add_child(node)
-            end
-          end
+        ng_xml.search('/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each(&:remove)
+
+        origination = ng_xml.at('/*/did/origination')
+        if origination.nil?
+          did_node = ng_xml.at('/*/did')
+          origination = Nokogiri::XML::Node.new('origination', ng_xml)
+          did_node.add_child(origination)
+        end
+        creators[:display].each_with_index do |disp, idx|
+          next unless DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx])
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new(creators[:tag][idx], ng_xml)
+          node.content = disp
+          node[:role] = creators[:role][idx] unless creators[:role][idx].empty?
+          origination.add_child(node)
         end
       end
 
+      # Creates EAD persname XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (contributor)
+      # @see DRI::EncodedArchivalDescription#contributor=
+      # @param [Array<String>] contributors array of metadata values for persname field (role contributor)
       def add_contributor(contributors)
-        ng_xml.search('/*/did/origination/persname[@role="contributor"]').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/did/origination/persname[@role="contributor"]').each(&:remove)
 
         origination = ng_xml.at('/*/did/origination')
         if origination.nil?
@@ -721,176 +778,234 @@ module DRI
           did_node.add_child(origination)
         end
         contributors.each do |disp|
-          unless disp.empty?
-            node = Nokogiri::XML::Node.new('persname', ng_xml)
-            node.content = disp
-            node[:role] = 'contributor'
-            origination.add_child(node)
-          end
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new('persname', ng_xml)
+          node.content = disp
+          node[:role] = 'contributor'
+          origination.add_child(node)
         end
       end
 
-      #
+      # Creates EAD persname, name, corpname or famname XML elements from an array of metadata values.
+      # Updates every person element under controlaccess (name coverage metadata)
+      # @see DRI::EncodedArchivalDescription#name_coverage=
+      # @example Sample Hash:
+      #   { display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'] }
       # @param people [Hash] the attributes and content required to create a persname
       # @option :display [Array<String>] the content for the node
       # @option :role [Array<String>] the role attribute for the node
       # @option :tag [Array<String>] the name of the person tag to add
       def add_name_coverage(people)
-        people.symbolize_keys! if people.is_a?(Hash)
-        if people.is_a?(Hash) && [:tag, :display, :role].all? { |s| people.key? s } &&
-            (people[:display].size == people[:role].size && people[:role].size == people[:tag].size)
-          ng_xml.search('/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each do |n|
-            n.remove
-          end
+        return unless people.is_a?(Hash)
+        people.symbolize_keys!
+        valid_keys = [:tag, :display, :role].all? { |s| people.key? s }
+        return unless valid_keys && people[:display].size == people[:role].size && people[:role].size == people[:tag].size
 
-          control_a = ng_xml.at('/*/controlaccess')
-          if control_a.nil?
-            c_node = ng_xml.root
-            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
-            c_node.add_child(control_a)
-          end
-          people[:display].each_with_index do |disp, idx|
-            if DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx]) && !disp.empty?
-              node = Nokogiri::XML::Node.new(people[:tag][idx], ng_xml)
-              node.content = disp
-              node[:role] = people[:role][idx] unless people[:role][idx].empty?
-              control_a.add_child(node)
-            end
-          end
+        ng_xml.search('/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each(&:remove)
+
+        control_a = ng_xml.at('/*/controlaccess')
+        if control_a.nil?
+          c_node = ng_xml.root
+          control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+          c_node.add_child(control_a)
+        end
+        people[:display].each_with_index do |disp, idx|
+          next unless DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx])
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new(people[:tag][idx], ng_xml)
+          node.content = disp
+          node[:role] = people[:role][idx] unless people[:role][idx].empty?
+          control_a.add_child(node)
         end
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Updates every unitdate element under archdesc/did (temporal coverage metadata)
+      # @see DRI::EncodedArchivalDescription#temporal_coverage=
+      # @example Sample Hash:
+      #   { normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
+      # @option dates [Array<String>] :datechar array of metadata values for the datechar EAD attribute (type of date)
       def add_temporal_coverage(dates)
-        dates.symbolize_keys! if dates.is_a?(Hash)
-        if dates.is_a?(Hash) && [:display, :normal, :datechar].all? { |s| dates.key? s } &&
-            (dates[:display].size == dates[:normal].size && dates[:normal].size == dates[:datechar].size)
+        return unless dates.is_a?(Hash)
+        dates.symbolize_keys!
+        valid_keys = [:display, :normal, :datechar].all? { |s| dates.key? s }
+        return unless valid_keys && dates[:display].size == dates[:normal].size && dates[:normal].size == dates[:datechar].size
 
-          ng_xml.search('/*/did/unitdate[not(@datechar="creation") and not(@datechar="publication")]').each do |n|
-            n.remove
-          end
+        ng_xml.search('/*/did/unitdate[not(@datechar="creation") and not(@datechar="publication")]').each(&:remove)
 
-          did_node = ng_xml.at('/*/did')
-          dates[:display].each_with_index do |disp, idx|
-            unless disp.empty?
-              node = Nokogiri::XML::Node.new('unitdate', ng_xml)
-              node.content = disp
-              node['datechar'] = dates[:datechar][idx]
-              node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
-              did_node.add_child(node)
-            end
-          end
+        did_node = ng_xml.at('/*/did')
+        dates[:display].each_with_index do |disp, idx|
+          next if disp.empty?
+
+          node = Nokogiri::XML::Node.new('unitdate', ng_xml)
+          node.content = disp
+          node['datechar'] = dates[:datechar][idx]
+          node['normal'] = dates[:normal][idx] unless dates[:normal][idx].empty?
+          did_node.add_child(node)
         end
       end
 
+      # Creates EAD relatedmaterial XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (Links to related materials)
+      # @see DRI::EncodedArchivalDescription#related_material=
+      # @param [Array<String>] materials array of metadata values for relatedmaterial field (relatedmaterial)
       def add_related_material(materials)
-        links = materials.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+        links = materials.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
-        ng_xml.search('/*/relatedmaterial').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/relatedmaterial').each(&:remove)
 
         c_node = ng_xml.root
         # Add related materials that are not external links
         links.each do |link|
-          unless link.empty?
-            node = Nokogiri::XML::Node.new('relatedmaterial', ng_xml)
-            ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
-            ext_ref['href'] = link
-            node.add_child(ext_ref)
-            c_node.add_child(node)
-          end
+          next if link.empty?
+
+          node = Nokogiri::XML::Node.new('relatedmaterial', ng_xml)
+          ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
+          ext_ref['href'] = link
+          node.add_child(ext_ref)
+          c_node.add_child(node)
         end
       end
 
+      # Creates EAD altformavail XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (Alternative form available)
+      # @see DRI::EncodedArchivalDescription#alternative_form=
+      # @param [Array<String>] materials array of metadata values for persname field (altformavail)
       def add_alternative_form(materials)
-        links = materials.select{ |i| i[/\A#{URI::regexp(['http', 'https'])}\z/] }
+        links = materials.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
-        ng_xml.search('/*/altformavail').each do |n|
-          n.remove
-        end
+        ng_xml.search('/*/altformavail').each(&:remove)
 
         c_node = ng_xml.root
         links.each do |link|
-          unless link.empty?
-            node = Nokogiri::XML::Node.new('altformavail', ng_xml)
-            p = Nokogiri::XML::Node.new('p', ng_xml)
-            ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
-            ext_ref['href'] = link
-            p.add_child(ext_ref)
-            node.add_child(p)
-            c_node.add_child(node)
-          end
+          next if link.empty?
+
+          node = Nokogiri::XML::Node.new('altformavail', ng_xml)
+          p = Nokogiri::XML::Node.new('p', ng_xml)
+          ext_ref = Nokogiri::XML::Node.new('extref', ng_xml)
+          ext_ref['href'] = link
+          p.add_child(ext_ref)
+          node.add_child(p)
+          c_node.add_child(node)
         end
       end
 
+      # Creates EAD geogname XML elements from an array of metadata values.
+      # Updates every geogname element under controlaccess (geographical coverage metadata)
+      # @see DRI::EncodedArchivalDescription#geogname_coverage_access=
+      # @example Sample Hash:
+      #   { type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'] }
+      # @param [Hash] locations hash of geogname metadata values to set
+      # @option locations [Array<String>] :display array of metadata values for date display
+      # @option locations [Array<String>] :type array of metadata values specifying the type of geocode (logainm, DCMI:Point or DCMI:Box, empty for free-text)
       def add_geogname_coverage_access(locations)
-        locations.symbolize_keys! if locations.is_a?(Hash)
-        if locations.is_a?(Hash) && [:type, :display].all? { |s| locations.key? s } &&
-            (locations[:type].size == locations[:display].size)
+        return unless locations.is_a?(Hash)
+        locations.symbolize_keys!
+        valid_keys = [:type, :display].all? { |s| locations.key? s }
+        return unless valid_keys && locations[:type].size == locations[:display].size
 
-          ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each do |n|
-            n.remove
-          end
+        ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each(&:remove)
 
-          control_a = ng_xml.at('/*/controlaccess')
-          if control_a.nil?
-            c_node = ng_xml.root
-            control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
-            c_node.add_child(control_a)
-          end
-          locations[:display].each_with_index do |loc, idx|
-            unless loc.empty?
-              node = Nokogiri::XML::Node.new('geogname', ng_xml)
-              node.content = loc
-              unless locations[:type][idx].empty?
-                case locations[:type][idx]
-                when 'dcterms:Point'
-                  node['rules'] = 'dcterms:Point'
-                when 'dcterms:Box'
-                  node['rules'] = 'dcterms:Box'
-                when 'logainm'
-                  node['source'] = 'logainm'
-                else
-                end
-              end
-              control_a.add_child(node)
+        control_a = ng_xml.at('/*/controlaccess')
+        if control_a.nil?
+          c_node = ng_xml.root
+          control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
+          c_node.add_child(control_a)
+        end
+        locations[:display].each_with_index do |loc, idx|
+          next if loc.empty?
+          node = Nokogiri::XML::Node.new('geogname', ng_xml)
+          node.content = loc
+          unless locations[:type][idx].empty?
+            case locations[:type][idx]
+            when 'dcterms:Point'
+              node['rules'] = 'dcterms:Point'
+            when 'dcterms:Box'
+              node['rules'] = 'dcterms:Box'
+            when 'logainm'
+              node['source'] = 'logainm'
             end
           end
+          control_a.add_child(node)
         end
       end
 
+      # Creates EAD langmaterial/language XML elements from an array of metadata values.
+      # Updates every language element under langmaterial (language metadata)
+      # @see DRI::EncodedArchivalDescription#language=
+      # @example Sample Hash:
+      #   { langcode: ['eng'], text: ['English'] }
+      # @param [Hash] languages hash of geogname metadata values to set
+      # @option languages [Array<String>] :langcode the iso639-2b code attribute values for the nodes
+      # @option languages [Array<String>] :text the displayable language names for the nodes
       def add_language(languages)
-        languages.symbolize_keys! if languages.is_a?(Hash)
-        if languages.is_a?(Hash) && [:langcode, :text].all? { |s| languages.key? s } &&
-            (languages[:langcode].size == languages[:text].size)
+        return unless languages.is_a?(Hash)
 
-          ng_xml.search('/*/did/langmaterial/language').each do |n|
-            n.remove
-          end
+        languages.symbolize_keys!
+        valid_keys = [:langcode, :text].all? { |s| languages.key? s }
 
-          lang_mat = ng_xml.at('/*/did/langmaterial')
-          if lang_mat.nil?
-            did_node = ng_xml.at('/*/did')
-            lang_mat = Nokogiri::XML::Node.new('langmaterial', ng_xml)
-            did_node.add_child(lang_mat)
-          end
-          languages[:text].each_with_index do |lang, idx|
-            unless lang.empty?
-              node = Nokogiri::XML::Node.new('language', ng_xml)
-              node.content = lang
-              node['langcode'] = languages[:langcode][idx] unless languages[:langcode][idx].empty?
-              lang_mat.add_child(node)
-            end
-          end
+        return unless valid_keys && languages[:langcode].size == languages[:text].size
+
+        ng_xml.search('/*/did/langmaterial/language').each(&:remove)
+
+        lang_mat = ng_xml.at('/*/did/langmaterial')
+        if lang_mat.nil?
+          did_node = ng_xml.at('/*/did')
+          lang_mat = Nokogiri::XML::Node.new('langmaterial', ng_xml)
+          did_node.add_child(lang_mat)
+        end
+        languages[:text].each_with_index do |lang, idx|
+          next if lang.empty?
+
+          node = Nokogiri::XML::Node.new('language', ng_xml)
+          node.content = lang
+          node['langcode'] = languages[:langcode][idx] unless languages[:langcode][idx].empty?
+          lang_mat.add_child(node)
         end
       end
 
+      # Returns a Hash with all the values for the DRI editable metadata fields
+      # to be populated in a UI Edit form
+      # @see DRI::EncodedArchivalDescription#retrieve_hash_attributes
+      # @example Sample return hash:
+      #   {
+      #     title: ['The test title'],
+      #     creator: { display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'] },
+      #     contributor: ['Contributor 1'],
+      #     desc_scope_content: ['This is a test description for the object.'],
+      #     desc_abstract: ['This is a test abstract for the object.'],
+      #     desc_biog_hist: ['This is a test biographical history for the object.'],
+      #     rights: ['This is a statement about the rights associated with this object'],
+      #     type: ['Collection'],
+      #     published_date: { display: ['2015'], normal: ['20150101'] },
+      #     creation_date: { display: ['2000-2010'], normal: ['20000101/20101231'] },
+      #     name_coverage: { display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'] },
+      #     geogname_coverage_access: { type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'] },
+      #     temporal_coverage: { normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'] },
+      #     subject: ['Ireland', 'something else'],
+      #     name_subject: ['subject name'],
+      #     persname_subject: ['subject persname'],
+      #     corpname_subject: ['subject corpname'],
+      #     geogname_subject: ['subject geogname'],
+      #     famname_subject: ['subject famname'],
+      #     publisher: ['Publisher 1'],
+      #     related_material: ['http://example.org/relmat'],
+      #     alternative_form: ['http://example.org/altform'],
+      #     language: { langcode: ['eng'], text: ['English'] },
+      #     format: ['395 files']
+      #   }
+      # @return [Hash] Hash of DRI EAD metadata
       def retrieve_terms_hash
-        terms_hash = Hash.new
+        terms_hash = {}
         terms_hash[:title] = title
 
         # Creator
-        creator_hash = Hash.new
+        creator_hash = {}
         creator_hash[:display] = []
         creator_hash[:role] = []
         creator_hash[:tag] = []
@@ -910,7 +1025,7 @@ module DRI
         terms_hash[:rights] = rights
         terms_hash[:type] = type
 
-        published_date_hash = Hash.new
+        published_date_hash = {}
         published_date_hash[:display] = []
         published_date_hash[:normal] = []
         ng_xml.search('/*/did/unitdate[@datechar="publication"]').each do |node|
@@ -919,7 +1034,7 @@ module DRI
         end
         terms_hash[:published_date] = published_date_hash
 
-        creation_date_hash = Hash.new
+        creation_date_hash = {}
         creation_date_hash[:display] = []
         creation_date_hash[:normal] = []
         ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each do |node|
@@ -928,7 +1043,7 @@ module DRI
         end
         terms_hash[:creation_date] = creation_date_hash
 
-        name_coverage_hash = Hash.new
+        name_coverage_hash = {}
         name_coverage_hash[:display] = []
         name_coverage_hash[:role] = []
         name_coverage_hash[:tag] = []
@@ -939,20 +1054,20 @@ module DRI
         end
         terms_hash[:name_coverage] = name_coverage_hash
 
-        geogname_coverage_access_hash = Hash.new
+        geogname_coverage_access_hash = {}
         geogname_coverage_access_hash[:display] = []
         geogname_coverage_access_hash[:type] = []
         ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each do |node|
           geogname_coverage_access_hash[:display] << node.content
-          if !node['source'].nil?
-            geogname_coverage_access_hash[:type] << node['source']
-          else
+          if node['source'].nil?
             geogname_coverage_access_hash[:type] << (node['rules'].nil? ? '' : node['rules'])
+          else
+            geogname_coverage_access_hash[:type] << node['source']
           end
         end
         terms_hash[:geogname_coverage_access] = geogname_coverage_access_hash
 
-        temporal_coverage_hash = Hash.new
+        temporal_coverage_hash = {}
         temporal_coverage_hash[:display] = []
         temporal_coverage_hash[:normal] = []
         temporal_coverage_hash[:datechar] = []
@@ -975,7 +1090,7 @@ module DRI
         terms_hash[:alternative_form] = alternative_form
         terms_hash[:format] = self.format
 
-        language_hash = Hash.new
+        language_hash = {}
         language_hash[:text] = []
         language_hash[:langcode] = []
         language.each_with_index do |value, idx|
@@ -992,7 +1107,7 @@ module DRI
       # @param [DRI::EncodedArchivalDescription] parent the parent object for which to update fullMetadata ds
       # @param [DRI::Metadata::FullMetadata] full_metadata the child component's fullMetadata ds
       def update_parent_metadata(parent, full_metadata)
-        return if parent == nil # Return if we have no parent to sync with
+        return if parent.nil? # Return if we have no parent to sync with
 
         parent_md_xml = parent.fullMetadata.ng_xml.clone
 
@@ -1006,12 +1121,8 @@ module DRI
         component_node = parent_md_xml.at(query)
 
         # Remove non-significant white space text nodes before comparing content
-        child_xml = Nokogiri::XML.parse(full_metadata.ng_xml.to_s) do |config|
-          config.noblanks
-        end
-        parent_xml = Nokogiri::XML.parse(component_node.to_s) do |config|
-          config.noblanks
-        end
+        child_xml = Nokogiri::XML.parse(full_metadata.ng_xml.to_s, &:noblanks)
+        parent_xml = Nokogiri::XML.parse(component_node.to_s, &:noblanks)
 
         if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
           # if parent metadata uses EAD XSD, need to add the ns prefixes and declarations
@@ -1021,19 +1132,18 @@ module DRI
 
           child_xml.search('//*').each do |n|
             # all ns prefix from root node to every child in the XML
-            n.namespace = child_xml.root.namespace_definitions.find{|ns| ns.prefix=='ead'}
+            n.namespace = child_xml.root.namespace_definitions.find { |ns| ns.prefix == 'ead' }
             if n['href'] # dao @href attr is under xlink ns if using EAD XSD
-              n.attribute('href').namespace = child_xml.root.namespace_definitions.find{|ns| ns.prefix=='xlink'}
+              n.attribute('href').namespace = child_xml.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' }
             end
           end
 
           # Need to remove the added ns declarations to the component before comparing
-          child_xml_str = child_xml.root.serialize(save_with:0).gsub("\n",'').
-              gsub('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ', '')
+          child_xml_str = child_xml.root.serialize(save_with:0).gsub("\n", '').gsub('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ', '')
 
-          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).gsub("\n",''))
+          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).gsub("\n", ''))
         else
-          same_metadata = child_xml.root.serialize(save_with:0).gsub("\n",'') == parent_xml.root.serialize(save_with:0).gsub("\n",'')
+          same_metadata = child_xml.root.serialize(save_with:0).gsub("\n", '') == parent_xml.root.serialize(save_with:0).gsub("\n", '')
         end
         # Check if the component node in parent XML is different
         unless component_node.nil? || same_metadata
@@ -1049,20 +1159,23 @@ module DRI
           if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
             Sufia.queue.push(UpdateParentMetadataJob.new(parent.id))
           end
+
           return true
         end
 
-        if !component_node.nil?
-          Rails.logger.info("update_parent_metadata for #{parent.id}: No differences in fullMetadata")
-          "update_parent_metadata for #{parent.id}: No differences in fullMetadata"
-        else
+        if component_node.nil?
           Rails.logger.error("update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata")
           "update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata"
+        else
+          Rails.logger.info("update_parent_metadata for #{parent.id}: No differences in fullMetadata")
+          "update_parent_metadata for #{parent.id}: No differences in fullMetadata"
         end
-      end #update_parent_metadata
+      end # update_parent_metadata
 
+      # Implement additional DRI metadata validations
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
-        errors = Hash.new
+        errors = {}
 
         # DRI Mandatory elements (At collection-level)
         title_result = false
@@ -1075,38 +1188,23 @@ module DRI
         ead_level_other_result = false
 
         # Title
-        title.each do |curr_title|
-          title_result = true unless curr_title.blank?
-        end
+        title_result = true if title.any? { |v| !v.blank? }
 
         # EAD-specific
-        unless !DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-          unless !DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-            ead_level.each do |curr_ead_level|
-              ead_level_result = true unless curr_ead_level.blank?
-            end
-
-            ead_level_other.each do |curr_ead_level|
-              ead_level_other_result = true unless curr_ead_level.blank?
-            end
-          end
+        if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
+          ead_level_result = true if ead_level.any? { |v| !v.blank? }
+          ead_level_other_result = true if ead_level_other.any? { |v| !v.blank? }
         end
 
         # For validation of unitid or eadid we now use identifier
         # For EAD header maps to eadid and for components maps to unitid
-        identifier.each_with_index do |curr_unit_id, index|
-          # Handle the case where multiple unitid are present: only the first should carry the attributes
-          if index == 0
-            unit_id_result = true unless curr_unit_id.blank?
-            country_code.each do |curr_cc|
-              cc_result = true unless curr_cc.blank?
-            end
-
-            repository_code.each do |curr_rc|
-              rc_result = true unless curr_rc.blank?
-            end
-          end
-        end
+        first_id = identifier[0]
+        first_cc = country_code[0]
+        first_rc = repository_code[0]
+        # Handle the case where multiple unitid are present: only the first should carry the attributes
+        unit_id_result = true unless first_id.blank?
+        cc_result = true unless first_cc.blank?
+        rc_result = true unless first_rc.blank?
 
         # DRI
         errors[:title] = "can't be blank" if title_result == false
@@ -1122,19 +1220,16 @@ module DRI
         # 1. unitid must be present
         # 1.1 the attribute mainagencycode is recommended for unitid
         # 1.2 the attribute countrycode is recommended for unitid
-        if (unit_id_result == false)
+        if unit_id_result == false
           errors[:identifier] = "can't be blank"
-        elsif (cc_result == false || rc_result == false)
-          errors[:identifier] = "invalid use"
+        elsif cc_result == false || rc_result == false
+          errors[:identifier] = 'invalid use'
           errors[:country_code] = "can't be blank" if cc_result == false
           errors[:repository_code] = "can't be blank" if rc_result == false
         end
 
         errors
-      end #custom_validations
-
-    end #class
-
-  end #module
-
-end #module
+      end # custom_validations
+    end # class
+  end # module
+end # module

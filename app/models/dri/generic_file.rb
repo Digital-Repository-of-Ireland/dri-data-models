@@ -1,4 +1,9 @@
+# DRI namespace
 module DRI
+  # Implementation of DRI EAD generic files (digital assets) extending from AF Base
+  # and associated to Digital Objects extending from DRI::Batch:
+  # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
+  # DRI::Documentation
   class GenericFile < ActiveFedora::Base
     include Sufia::ModelMethods
     include Sufia::Noid
@@ -18,14 +23,18 @@ module DRI
     include Sufia::GenericFile::Batches
     include Sufia::GenericFile::Indexing
 
-    before_destroy :delete_files
+    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
-    belongs_to :batch, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'DRI::Batch'
+    # one-to-one AF association to associate DRI::Batch
+    belongs_to :batch,
+               predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf,
+               class_name: 'DRI::Batch'
 
     # Declare a 'dri_properties' DS, of the following type
     contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
 
-    # Declare the attributes of 'dri_properties' DS - 'checksum_md5...' - and that the DS is non-repeatable
+    # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
+    # the DS is non-repeatable
     property :checksum_md5, delegate_to: 'dri_properties', multiple: false
     property :checksum_sha256, delegate_to: 'dri_properties', multiple: false
     property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false
@@ -33,6 +42,10 @@ module DRI
 
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
+    #
+    # @param dsid [String] the datastream's identifier
+    # @param opts [Hash] hash of additional options
+    # @return [Boolean] true if operation successful; false otherwise
     def update_file_reference(dsid, opts)
       options = {}
 
@@ -44,10 +57,13 @@ module DRI
       true
     end
 
+    # Return number of milliseconds for the duration of this asset file
+    # @return [Integer] number of milliseconds
     def milliseconds
       characterization.milliseconds.blank? ? characterization.video_milliseconds : characterization.milliseconds
     end
 
+    # Override from AF method
     def to_solr(solr_doc = {}, opts = {})
       solr_doc = super(solr_doc, opts)
 
@@ -73,10 +89,10 @@ module DRI
       solr_doc
     end
 
-    ## Extract the metadata from the content datastream and record it in the characterization datastream
-    ## Issue
-    ## Override to fix issue with sample_rate or height or width md terms from FITS being generated as float
-    ## as opposed to integer strings. this was causing Solr errors when indexing as the Solr fields are integers
+    # Extract the metadata from the content datastream and record it in the characterization datastream
+    # Issue #
+    # Override to fix issue with sample_rate or height or width md terms from FITS being generated as float
+    # as opposed to integer strings. this was causing Solr errors when indexing as the Solr fields are integers
     def characterize
       metadata = content.extract_metadata
       characterization.ng_xml = round_float_values(metadata) if metadata.present?

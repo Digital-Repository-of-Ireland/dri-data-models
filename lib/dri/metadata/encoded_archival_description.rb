@@ -1,7 +1,11 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements the descMetadata datastream for DRI::EncodedArchivalDescription ROOT collection digital objects
+    # extends from DRI::Metadata::Base
     class EncodedArchivalDescription < DRI::Metadata::Base
-      # OM (Opinionated Metadata) terminology mapping to an EAD Collection
+      # OM (Opinionated Metadata) terminology mapping to an EAD ROOT Collection
       set_terminology do |t|
         t.root(path: 'ead', namespace_prefix: nil)
 
@@ -282,12 +286,18 @@ module DRI
         t.date_idx(proxy: [:date_cvg, :normal_at])
       end # set_terminology
 
-      # synchronize_metadata_on_save
+      # synchronize_metadata_on_save attribute getter
+      # Flag used to indicate whether EAD component children creation should be triggered
+      # when saving an EAD parent component
+      # @see DRI::EncodedArchivalDescription#synchronize_if_changed
+      # @return [Boolean] true if object support children metadata objects creation; false otherwise
       def synchronize_metadata_on_save
         @synchronize_metadata_on_save || true
       end
 
-      # Build the xml doc
+      # Returns an empty, default EAD finding aid XML template
+      #
+      # @return [Nokogiri::Document] the EAD XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.doc.create_internal_subset('ead', '+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN', '')
@@ -334,9 +344,11 @@ module DRI
         builder.doc
       end # xml_template
 
-      #
-      # @param solr_doc [Hash]
-      # @return [Hash]
+      # Override from AF Solrizer for datastreams
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
@@ -449,8 +461,8 @@ module DRI
         solr_doc
       end # solr_doc
 
-      # Index Helper Methods
-
+      #
+      # @return [String] the formatted date string in DCMI Period encoding
       def iso_to_dcmi_period(display, date)
         if date.include?('/')
           range = date.split('/')
@@ -460,10 +472,19 @@ module DRI
         end
       end
 
+      # Returns all metadata related to people names for Solr indexing
+      # People facet
+      # @return [Array<String>] array of all people names metadata values for Solr indexing
       def person_array_for_index
         creator | pers_name | corp_name | name | fam_name
       end
 
+      # Returns all metadata related to creator for Solr indexing
+      # Including role information if present
+      # @example Example of creator formatting with role
+      #   <ead:persname role="creator">M. Walcott</ead:persname> is indexed as:
+      #   "M. Walcott (Creator)"
+      # @return [Array<String>] array of all creator metadata values, formatted to include role info, for Solr indexing
       def creator_for_index
         creators_array = []
         query = '/ead/archdesc/did/origination/*[not(@role="contributor")]'
@@ -472,13 +493,17 @@ module DRI
         creators_array
       end
 
-      # Mapping to UI subjects: controlaccess/subject or subject
+      # Returns all metadata related to subjects for Solr indexing
+      # Mapping to UI Subjects: controlaccess/subject or subject
       # These are generic subjects similar to dc:coverage
+      # @return [Array<String>] array of all subject metadata values for Solr indexing
       def subject_for_index
         subject | subject_archdesc | subject_anywhere | persname_subject | name_subject | corpname_subject | famname_subject | geogname_subject
       end
 
-      # These are DRI Subject(Name)
+      # Returns all metadata related to name subjects for Solr indexing
+      # These are DRI's Subject (Name) values
+      # @return [Array<String>] array of all subject names metadata values for Solr indexing
       def subject_name_for_index
         persname_roles = pers_name_cvg.map.with_index { |n, idx| pers_name_cvg(idx).role.empty? ? n : (n + " (#{pers_name_cvg(idx).role[0]})") }
         name_roles = name_cvg.map.with_index { |n, idx| name_cvg(idx).role.empty? ? n : (n + " (#{name_cvg(idx).role[0]})") }
@@ -488,14 +513,18 @@ module DRI
         name_roles | persname_roles | corpname_roles | famname_roles
       end
 
-      # These are DRI Subject(Place)
+      # Returns all metadata related to place/location subjects for Solr indexing
+      # These are DRI Subject (Place) values
+      # @return [Array<String>] array of all subject place metadata values for Solr indexing
       def subject_place_for_index
         geo_roles = geog_name_cvg.map.with_index { |n, idx| geog_name_cvg(idx).role.empty? ? n : (n + " (#{geog_name_cvg(idx).role[0]})") }
 
         geo_roles
       end
 
-      # These are DRI Subject(Temporal)
+      # Returns all metadata related to temporal subjects for Solr indexing
+      # These are DRI Subject (Temporal) values
+      # @return [Array<String>] array of all subject temporal metadata values for Solr indexing
       def subject_temporal_for_index
         date_array = date_cvg.collect.with_index do |value, idx|
           if date_cvg(idx).normal_at.empty?
@@ -518,9 +547,9 @@ module DRI
         temporal_array | date_array
       end
 
+      # Returns all date ranges formatted in ISO8601 for indexing
       # @note EAD date format: start/end [YYYYmmdd/YYYYmmdd | YYYY/YYYY]
-      # Return all date ranges formatted in ISO8601 for indexing
-      # @return Hash with all the dates present in the metadata to be indexed as date ranges
+      # @return [Hash] the hash with all the dates present in the metadata to be indexed as date ranges
       def date_ranges_for_index
         dates_hash = {}
 
@@ -531,10 +560,17 @@ module DRI
         dates_hash
       end
 
+      # Determine whether the metadata describes a collection
       def collection?
+        # This a descMetadata class for EAD ROOT collections
+        # Always true
         true
       end
 
+      # Creates EAD scopecontent XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_scope_content=
+      # @param [Array<String>] desc_array array of metadata values for scope content field
       def add_desc_scope_content(desc_array)
         ng_xml.search('/ead/archdesc/scopecontent').each(&:remove)
 
@@ -550,6 +586,10 @@ module DRI
         archdesc_node.add_child(sc) unless sc.children.empty?
       end
 
+      # Creates EAD abstract XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_abstract=
+      # @param [Array<String>] desc_array array of metadata values for abstract field
       def add_desc_abstract(desc_array)
         ng_xml.search('/ead/archdesc/did/abstract').each(&:remove)
 
@@ -563,6 +603,10 @@ module DRI
         end
       end
 
+      # Creates EAD bioghist XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors
+      # @see DRI::EncodedArchivalDescription#desc_biog_hist=
+      # @param [Array<String>] desc_array array of metadata values for biographical history field
       def add_desc_biog_hist(desc_array)
         ng_xml.search('/ead/archdesc/bioghist').each(&:remove)
 
@@ -578,6 +622,14 @@ module DRI
         archdesc_node.add_child(bh) unless bh.children.empty?
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (creation date)
+      # @see DRI::EncodedArchivalDescription#creation_date=
+      # @example Sample Hash:
+      #   { display: ['2015'], normal: ['20150101'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_creation_date(dates)
         return unless dates.is_a?(Hash)
         dates.symbolize_keys!
@@ -598,6 +650,14 @@ module DRI
         end
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (published date)
+      # @see DRI::EncodedArchivalDescription#published_date=
+      # @example Sample Hash:
+      #   { display: ['2015'], normal: ['20150101'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_published_date(dates)
         return unless dates.is_a?(Hash)
         dates.symbolize_keys!
@@ -622,11 +682,15 @@ module DRI
         end
       end
 
+      # Creates EAD persname, name, corpname, famname XML elements from an array of metadata values
       # Updates every person element under origination (creators)
-      # @param creators [Hash] the attributes and content required to create a persname
-      # @option :display [Array<String>] the content for the node
-      # @option :role [Array<String>] the role attribute for the node
-      # @option :tag [Array<String>] the name of the person tag to add
+      # @see DRI::EncodedArchivalDescription#creator=
+      # @example Sample Hash:
+      #   { display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'] }
+      # @param [Hash] creators the attributes and content required to create a persname
+      # @option creators [Array<String>] :display the content for the node
+      # @option creators [Array<String>] :role the role attribute for the node
+      # @option creators [Array<String>] :tag the name of the person tag to add
       def add_creator(creators)
         return unless creators.is_a?(Hash)
         creators.symbolize_keys!
@@ -652,6 +716,10 @@ module DRI
         end
       end
 
+      # Creates EAD persname XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (contributor)
+      # @see DRI::EncodedArchivalDescription#contributor=
+      # @param [Array<String>] contributors array of metadata values for persname field (role contributor)
       def add_contributor(contributors)
         ng_xml.search('/ead/archdesc/did/origination/persname[@role="contributor"]').each(&:remove)
 
@@ -671,7 +739,11 @@ module DRI
         end
       end
 
-      #
+      # Creates EAD persname, name, corpname or famname XML elements from an array of metadata values.
+      # Updates every person element under controlaccess (name coverage metadata)
+      # @see DRI::EncodedArchivalDescription#name_coverage=
+      # @example Sample Hash:
+      #   { display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'] }
       # @param people [Hash] the attributes and content required to create a persname
       # @option :display [Array<String>] the content for the node
       # @option :role [Array<String>] the role attribute for the node
@@ -701,6 +773,15 @@ module DRI
         end
       end
 
+      # Creates EAD unitdate XML elements from an array of metadata values.
+      # Updates every unitdate element under archdesc/did (temporal coverage metadata)
+      # @see DRI::EncodedArchivalDescription#temporal_coverage=
+      # @example Sample Hash:
+      #   { normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'] }
+      # @param [Hash] dates hash of creation date metadata values to set
+      # @option dates [Array<String>] :display array of metadata values for date display
+      # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
+      # @option dates [Array<String>] :datechar array of metadata values for the datechar EAD attribute (type of date)
       def add_temporal_coverage(dates)
         return unless dates.is_a?(Hash)
         dates.symbolize_keys!
@@ -722,6 +803,10 @@ module DRI
         end
       end
 
+      # Creates EAD relatedmaterial XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (Links to related materials)
+      # @see DRI::EncodedArchivalDescription#related_material=
+      # @param [Array<String>] materials array of metadata values for relatedmaterial field (relatedmaterial)
       def add_related_material(materials)
         links = materials.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
@@ -740,6 +825,10 @@ module DRI
         end
       end
 
+      # Creates EAD altformavail XML elements from an array of metadata values.
+      # Used when updating metadata via attribute accessors (Alternative form available)
+      # @see DRI::EncodedArchivalDescription#alternative_form=
+      # @param [Array<String>] materials array of metadata values for persname field (altformavail)
       def add_alternative_form(materials)
         links = materials.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
@@ -759,6 +848,14 @@ module DRI
         end
       end
 
+      # Creates EAD geogname XML elements from an array of metadata values.
+      # Updates every geogname element under controlaccess (geographical coverage metadata)
+      # @see DRI::EncodedArchivalDescription#geogname_coverage_access=
+      # @example Sample Hash:
+      #   { type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'] }
+      # @param [Hash] locations hash of geogname metadata values to set
+      # @option locations [Array<String>] :display array of metadata values for date display
+      # @option locations [Array<String>] :type array of metadata values specifying the type of geocode (logainm, DCMI:Point or DCMI:Box, empty for free-text)
       def add_geogname_coverage_access(locations)
         return unless locations.is_a?(Hash)
         locations.symbolize_keys!
@@ -792,6 +889,14 @@ module DRI
         end
       end
 
+      # Creates EAD langmaterial/language XML elements from a Hash of metadata values.
+      # Updates every language element under langmaterial (language metadata)
+      # @see DRI::EncodedArchivalDescription#language=
+      # @example Sample Hash:
+      #   { langcode: ['eng'], text: ['English'] }
+      # @param [Hash] languages hash of language metadata values to set
+      # @option languages [Array<String>] :langcode the iso639-2b code attribute values for the nodes
+      # @option languages [Array<String>] :text the displayable language names for the nodes
       def add_language(languages)
         return unless languages.is_a?(Hash)
 
@@ -818,6 +923,37 @@ module DRI
         end
       end
 
+      # Returns a Hash with all the values for the DRI editable metadata fields
+      # to be populated in a UI Edit form
+      # @see DRI::EncodedArchivalDescription#retrieve_hash_attributes
+      # @example Sample return hash:
+      #   {
+      #     title: ['The test title'],
+      #     creator: { display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'] },
+      #     contributor: ['Contributor 1'],
+      #     desc_scope_content: ['This is a test description for the object.'],
+      #     desc_abstract: ['This is a test abstract for the object.'],
+      #     desc_biog_hist: ['This is a test biographical history for the object.'],
+      #     rights: ['This is a statement about the rights associated with this object'],
+      #     type: ['Collection'],
+      #     published_date: { display: ['2015'], normal: ['20150101'] },
+      #     creation_date: { display: ['2000-2010'], normal: ['20000101/20101231'] },
+      #     name_coverage: { display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'] },
+      #     geogname_coverage_access: { type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'] },
+      #     temporal_coverage: { normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'] },
+      #     subject: ['Ireland', 'something else'],
+      #     name_subject: ['subject name'],
+      #     persname_subject: ['subject persname'],
+      #     corpname_subject: ['subject corpname'],
+      #     geogname_subject: ['subject geogname'],
+      #     famname_subject: ['subject famname'],
+      #     publisher: ['Publisher 1'],
+      #     related_material: ['http://example.org/relmat'],
+      #     alternative_form: ['http://example.org/altform'],
+      #     language: { langcode: ['eng'], text: ['English'] },
+      #     format: ['395 files']
+      #   }
+      # @return [Hash] Hash of DRI EAD metadata
       def retrieve_terms_hash
         terms_hash = {}
         terms_hash[:title] = title
@@ -919,10 +1055,13 @@ module DRI
         terms_hash
       end
 
-      # No parent to update as Root collection
+      # No parent to update as this object is a EAD ROOT Collection
       def update_parent_metadata(_parent, _full_metadata)
       end
 
+      # Implement additional DRI metadata validations as this class does not inherit
+      # from DRI::Metadata::Base
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
         errors = {}
 
@@ -942,30 +1081,30 @@ module DRI
         ead_level_other_result = false
 
         # Title
-        title.each { |curr_title| title_result = true unless curr_title.blank? }
+        title_result = true if title.any? { |v| !v.blank? }
         # Creator
-        creator.each { |curr_creator| creator_result = true unless curr_creator.blank? }
+        creator_result = true if creator.any? { |v| !v.blank? }
         # Description
-        description.each { |curr_description| description_result = true unless curr_description.blank? }
+        description_result = true if description.any? { |v| !v.blank? }
         # Creation date
-        creation_date.each { |curr_cdate| creation_date_result = true unless curr_cdate.blank? }
+        creation_date_result = true if creation_date.any? { |v| !v.blank? }
         # Rights
-        rights.each { |curr_r| rights_result = true unless curr_r.blank? }
+        rights_result = true if rights.any? { |v| !v.blank? }
 
         # EAD-specific
         if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-          ead_level.each { |curr_ead_level| ead_level_result = true unless curr_ead_level.blank? }
-          ead_level_other.each { |curr_ead_level| ead_level_other_result = true unless curr_ead_level.blank? }
+          ead_level_result = true if ead_level.any? { |v| !v.blank? }
+          ead_level_other_result = true if ead_level_other.any? { |v| !v.blank? }
         end
 
         # Identifier validation
-        identifier.each { |curr_ead_id| ead_id_result = true unless curr_ead_id.blank? }
+        ead_id_result = true if identifier.any? { |v| !v.blank? }
         # Validation for eadid, @countrycode is a mandatory attribute
         # for eadid element
-        country_code.each { |curr_cc| cc_result = true unless curr_cc.blank? }
+        cc_result = true if country_code.any? { |v| !v.blank? }
         # Validation for eadid, @mainagencycode (repository_code here)
         # is mandatory for eadid element
-        repository_code.each { |curr_rc| rc_result = true unless curr_rc.blank? }
+        rc_result = true if repository_code.any? { |v| !v.blank? }
 
         # DRI Compulsory elements
         errors[:title] = "can\'t be blank" if title_result == false

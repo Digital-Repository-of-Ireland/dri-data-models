@@ -33,50 +33,50 @@ RDoc::Task.new(:rdoc) do |rdoc|
 end
 
 YARD::Rake::YardocTask.new(:yard) do |t|
-  t.files = ['lib/**/*.rb', 'app/models/**/*.rb']
+  t.files = ['lib/**/*.rb', 'app/models/**/*.rb', 'lib/dri/metadata/*.rb']
 end
 
 require 'ci/reporter/rake/rspec'
-RSpec::Core::RakeTask.new(:rspec => ['ci:setup:rspec']) do |spec|
+RSpec::Core::RakeTask.new(rspec: ['ci:setup:rspec']) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end
 
 namespace :jetty do
 
-  desc "return development jetty to its pristine state, as pulled from git"
+  desc 'return development jetty to its pristine state, as pulled from git'
   task :reset => ['jetty:stop'] do
-    system("cd jetty && git reset --hard HEAD && git clean -dfx && cd ..")
+    system('cd jetty && git reset --hard HEAD && git clean -dfx && cd ..')
     sleep 2
   end
 
 end
 
 namespace :jetty do
-  SOLR_DIR = "solr_conf/conf"
+  SOLR_DIR = 'solr_conf/conf'
 
-  desc "Config Jetty"
+  desc 'Config Jetty'
   task :config do
-    Rake::Task["jetty:config_solr"].reenable
-    Rake::Task["jetty:config_solr"].invoke
-    Rake::Task["jetty:config_fedora"].reenable
-    Rake::Task["jetty:config_fedora"].invoke
+    Rake::Task['jetty:config_solr'].reenable
+    Rake::Task['jetty:config_solr'].invoke
+    Rake::Task['jetty:config_fedora'].reenable
+    Rake::Task['jetty:config_fedora'].invoke
   end
 
-  desc "Copies the default SOLR config for the bundled Hydra Testing Server"
+  desc 'Copies the default SOLR config for the bundled Hydra Testing Server'
   task :config_solr do
     FileList["#{SOLR_DIR}/*"].each do |f|
-      cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
-      cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
+      cp("#{f}", 'jetty/solr/development-core/conf/', verbose: true)
+      cp("#{f}", 'jetty/solr/test-core/conf/', verbose: true)
     end
 
   end
 
-  desc "Copies a custom fedora config for the bundled jetty"
+  desc 'Copies a custom fedora config for the bundled jetty'
   task :config_fedora do
     fcfg = 'fedora_conf/federated.json'
     if File.exists?(fcfg)
-      puts "copying over federated.json"
+      puts 'copying over federated.json'
       cp("#{fcfg}", APP_ROOT + '/jetty/etc/', :verbose => true)
     else
       puts "#{fcfg} file not found -- skipping fedora config"
@@ -84,9 +84,9 @@ namespace :jetty do
   end
 end
 
-desc "Run Continuous Integration"
-task :ci => ['jetty:reset','jetty:config','ci:setup:rspec'] do
-  ENV['environment'] = "test"
+desc 'Run Continuous Integration'
+task ci: ['jetty:reset','jetty:config','ci:setup:rspec'] do
+  ENV['environment'] = 'test'
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 120
   error = Jettywrapper.wrap(jetty_params) do
@@ -94,7 +94,7 @@ task :ci => ['jetty:reset','jetty:config','ci:setup:rspec'] do
   end
   raise "test failures: #{error}" if error
 
-  Rake::Task["rdoc"].invoke
+  Rake::Task['yard'].invoke
 end
 
-task :default => :rspec
+task default: :rspec

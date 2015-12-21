@@ -1,5 +1,9 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements descMetadata DRI properties for DRI metadata digital objects
+    # Common to all supported metadata standards (MODS, EAD, MARC and QDC)
     class Properties < ActiveFedora::OmDatastream
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|
@@ -24,16 +28,19 @@ module DRI
 
       # Build the default XML document
       def self.xml_template
-          builder = Nokogiri::XML::Builder.new do |xml|
-            xml.properties {
-                 xml.status 'draft'
-                 xml.model_version DriDataModels::VERSION
-                 xml.object_version '1'
-            }
-          end
-          builder.doc
+        builder = Nokogiri::XML::Builder.new do |xml|
+          xml.properties {
+            xml.status 'draft'
+            xml.model_version DriDataModels::VERSION
+            xml.object_version '1'
+          }
+        end
+
+        builder.doc
       end
 
+      # Determine whether the metadata describes a collection
+      # @return [Boolean] true if metadata specified this is a collection; false otherwise
       def collection?
         object_type.include? 'Collection'
       end

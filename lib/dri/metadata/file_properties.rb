@@ -1,5 +1,8 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements descMetadata DRI properties for DRI Generic Files
     class FileProperties < ActiveFedora::OmDatastream
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|
@@ -19,7 +22,6 @@ module DRI
           end
           return builder.doc
       end
-
     end
   end
 end

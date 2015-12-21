@@ -1,9 +1,10 @@
+# DRI namespace
 module DRI
+  # Metadata namespace
   module Metadata
+    # Implements the descMetadata datastream for DRI::Documentation digital objects as an AF
+    # RDFXMLDatastream
     class Documentation < ActiveFedora::RDFXMLDatastream
-      # Versionable, included as this DS does not inherit from DRI::MetadataBase
-      # has_many_versions
-
       # It supports all the DRI Compulsory elements
       property :title, predicate: RDF::Vocab::DC.title do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,
@@ -120,15 +121,26 @@ module DRI
         end
       end
 
+      # Determine whether the metadata describes a collection
       def collection?
+        # Always false, documentation objects can't be collections
         false
       end
 
       # Implement this method as implemented also in DRI::Metadata::Base
+      # and this class does not inherit from Base
       def to_xml
         serialize
       end
 
+      # Roles attribute setter
+      # @example Sample Hash:
+      #   { 'name' => ['Test host', 'new producer'],
+      #     'type' => ['role_hst', 'role_pro']
+      #   }
+      # @param [Hash] roles hash with metadata marcrelator values
+      # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
+      # @option roles [Array<String>] :type the marcrelator codes
       def roles=(roles)
         return unless roles.is_a?(Hash)
         return unless roles.key?('type') && roles.key?('name') && (roles['type'].size == roles['name'].size)
@@ -145,6 +157,11 @@ module DRI
         changed_roles.keys.each { |role| send("#{role}=", changed_roles[role]) }
       end
 
+      # Override from AF Solrizer for datastreams
+      # Update solr_doc Hash for index into Solr from the metadata
+      # @param [Hash] solr_doc the solr document hash
+      # @param [Hash] opts additional custom options
+      # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
@@ -216,6 +233,9 @@ module DRI
         solr_doc
       end
 
+      # Transforms metadata date strings into DCMI Period encoded strings for displayable indices
+      # @param [String] date_field the date string
+      # @return [String] the DCMI Period encoded date string for display
       def display_date_for_index(date_field)
         date_field = date_field.delete_if { |v| /^null$/i.match(v) }
 
@@ -237,6 +257,8 @@ module DRI
         end
       end
 
+      # Returns an array of symbols for all the DRI::Documentation metadata supported properties
+      # @return [Array<Symbol>] the array of DRI::Documentation properties
       def documentation_properties
         [:creator, :title, :subject, :description, :contributor, :publisher,
          :language, :date, :source, :geographical_coverage, :temporal_coverage,
@@ -255,10 +277,18 @@ module DRI
         people
       end
 
+      # Returns the array of types from metadata
+      # @return [Array] array of type values from metadata
       def type
         resource_type
       end
 
+      # Remove null values from a given field within
+      # the solr document for this object
+      #
+      # @param [Hash] solr_doc the solr document hash
+      # @param [String] field the solr field key
+      # @return [hash] the solr document hash
       def remove_null_values(solr_doc, field)
         index_types = [:stored_searchable, :facetable]
         index_types.each do |type|
@@ -270,6 +300,9 @@ module DRI
         solr_doc
       end
 
+      # Implement additional DRI metadata validations as this class does not inherit
+      # from DRI::Metadata::Base
+      # @return [Hash] the hash with any errors from validation
       def custom_validations
         errors = {}
 
@@ -297,6 +330,7 @@ module DRI
         errors
       end # custom_validations
 
+      # Override from ActiveFedora::RDFXMLDatastream
       def apply_prefix(name, _file_path)
         "#{name}"
       end

@@ -1,10 +1,13 @@
+# DRI namespace
 module DRI
+  # ModelSupport namespace
   module ModelSupport
+    # Includes the AF properties for DRI properties metadata
     module Properties
       extend ActiveSupport::Concern
 
       included do
-      	contains 'properties', class_name: 'DRI::Metadata::Properties'
+        contains 'properties', class_name: 'DRI::Metadata::Properties'
 
         property :status, delegate_to: 'properties', multiple: false
         property :object_type, delegate_to: 'properties', multiple: true

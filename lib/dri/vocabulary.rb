@@ -1,5 +1,9 @@
+# DRI namespace
 module DRI
+  # Vocabulary module
   module Vocabulary
+    #
+    # @return [Array] array of marcrelator codes
     def self.marc_relators
       ['acp',
        'act',
@@ -217,6 +221,10 @@ module DRI
       ]
     end
 
+    # Returns a hash of marcrelator codes for creator and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marcrelator codes for creator
     def self.marc_relators_creator
       { 'aut' => 'Author',
         'art' => 'Artist',
@@ -225,13 +233,21 @@ module DRI
       }
     end
 
+    # Returns a hash of marcrelator codes for contributor and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marcrelator codes for contributor
     def self.marc_relators_contributor
       { 'ctb' => 'Contributor',
         'pat' => 'Patron',
         'rcp' => 'Addressee'
       }
     end
-    
+
+    # Returns a hash of marcrelator codes and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marcrelator codes
     def self.marc_relators_display
       { 'abr' => 'Abridger',
         'acp' => 'Art copyist',
@@ -504,6 +520,9 @@ module DRI
       }
     end
 
+    # Return the controlled list of values for dcterms:DCMIType
+    # vocabulary
+    # @return [Array<String>] array of DCMIType values
     def self.dcmi_type
       ['Collection',
        'Dataset',
@@ -520,6 +539,10 @@ module DRI
       ]
     end
 
+    # Returns a hash of marc codes for type and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marc codes for type
     def self.marc_type
       { 'a' => 'Language material',
         'c' => 'Notated music',
@@ -537,6 +560,10 @@ module DRI
         't' => 'Manuscript language material' }
     end
 
+    # Returns a hash of marc leader character 6 options and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marc leader character 6 values
     def self.marc_type_leader_6
       { 'a' => 'Language material',
         'c' => 'Notated music',
@@ -554,6 +581,10 @@ module DRI
         't' => 'Manuscript language material' }
     end
 
+    # Returns a hash of marc leader character 7 options and their
+    # corresponding display values
+    #
+    # @return [Hash] hash of marc leader character 7 values
     def self.marc_type_leader_7
       { 'a' => 'Monographic component part',
         'b' => 'Serial component part',
@@ -626,7 +657,8 @@ module DRI
       ]
     end
 
-    # MODS Relationship Types
+    # Returns an array of MODS Relationship Types
+    # @return [Array<String>] the array of MODS rels types
     def self.mods_relationship_types
       ['preceding',
        'succeeding',
@@ -642,7 +674,8 @@ module DRI
       ]
     end
 
-    # QDC Relationship Types
+    # Returns an array of QDC Relationship Types
+    # @return [Array<String>] the array of QDC rels types
     def self.qdc_relationship_types
       ['relation',
        'isPartOf',
@@ -657,6 +690,9 @@ module DRI
       ]
     end
 
+    # Returns an array of possible values for the level attribute
+    # of ead:c, ead:c01-ead:c12 component tags
+    # @return [Array<String>] the array of values for level attribute
     def self.ead_level_values
       ['collection',
        'fonds',
@@ -672,6 +708,9 @@ module DRI
       ]
     end
 
+    # Returns an array of EAD people tags than can be used within
+    # ead:origination elements
+    # @return [Array<String>] the array of ead:origination nested people tags
     def self.ead_people_tags
       ['name',
        'persname',
@@ -679,6 +718,9 @@ module DRI
        'famnane']
     end
 
+    # Returns an array of MODS date tags than can be used within
+    # mods:originInfo elements
+    # @return [Array<String>] the array of mods:originInfo nested date tags
     def self.mods_date_tags
       ['dateCreated',
        'dateIssued',
@@ -691,6 +733,9 @@ module DRI
       ]
     end
 
+    # Returns an array of MODS tags than can be used within
+    # mods:originInfo elements
+    # @return [Array<String>] the array of mods:originInfo nested tags
     def self.mods_origin_info_tags
       ['dateCreated',
        'dateIssued',
@@ -707,6 +752,8 @@ module DRI
       ]
     end
 
+    # Returns an array of MODS possible values for the content of mods:typeOfResource
+    # @return [Array<String>] the array of values for mods:typeOfResource
     def self.mods_type_resource_values
       [ 'text',
         'cartographic',
@@ -721,10 +768,15 @@ module DRI
       ]
     end
 
+    # Returns an array of MODS encoding values for dates
+    # @return [Array<String>] the array of date encoding values
     def self.mods_date_encoding
       ['iso8601', 'w3cdtf']
     end
 
+    # Determines whether the values for the metadata field should be indexed
+    # Used in DRI::Metadata::Mods for MODS role_cre and role_ctb fields
+    # @return [Boolean>] true if can be indexed; false otherwise
     def self.marc_relators_index?(code)
       return false if code == 'cre' || code == 'ctb'
 
