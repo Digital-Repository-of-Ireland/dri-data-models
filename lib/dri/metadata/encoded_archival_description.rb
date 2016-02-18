@@ -217,7 +217,7 @@ module DRI
         t.desc_scope_content(proxy: [:ead, :arch_desc, :scope_content, :p])
         t.desc_dao_desc(proxy: [:ead, :arch_desc, :did, :dao, :dao_desc, :p])
 
-        t.creator(path: '/ead/archdesc/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
+        t.creator(path: '/ead/archdesc/did/origination/text()[normalize-space()] | /ead/archdesc/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
         t.creator_role(proxy: [:ead, :arch_desc, :did, :origination, :person_creator])
         t.creator_name(proxy: [:ead, :arch_desc, :did, :origination, :name])
         t.creator_persname(proxy: [:ead, :arch_desc, :did, :origination, :pers_name])
@@ -1088,6 +1088,7 @@ module DRI
         description_result = true if description.any? { |v| !v.blank? }
         # Creation date
         creation_date_result = true if creation_date.any? { |v| !v.blank? }
+        creation_date_result = true if temporal_coverage.any? { |v| !v.blank? }
         # Rights
         rights_result = true if rights.any? { |v| !v.blank? }
 
