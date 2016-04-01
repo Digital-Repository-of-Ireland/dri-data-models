@@ -70,7 +70,7 @@ module DRI
       DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
     end
 
-    property :type, delegate_to: 'descMetadata', multiple: true
+    property :resource_type, delegate_to: 'descMetadata', multiple: true
     property :mods_genre, delegate_to: 'descMetadata', multiple: true
 
     property :origin_metadata, delegate_to: 'descMetadata', multiple: true
@@ -126,7 +126,12 @@ module DRI
     #
     # @return [Hash] Hash of DRI MODS metadata
     def retrieve_hash_attributes
-      descMetadata.retrieve_terms_hash
+      retrieved_attributes = descMetadata.retrieve_terms_hash
+      if retrieved_attributes.key?(:resource_type)
+        retrieved_attributes[:type] = retrieved_attributes.delete(:resource_type)
+      end
+
+      retrieved_attributes
     end
 
     # Dynamically generate the attribute setters for the marcrelator
@@ -225,6 +230,12 @@ module DRI
     # @param [Array<String>] subjects the array of values to set for mods:subject/mods:topic metadata
     def subject_metadata=(subjects)
       descMetadata.add_subject(subjects)
+    end
+
+    # type attribute getter
+    # @return [Array<String>] array of type metadata term values
+    def type
+      descMetadata.resource_type
     end
 
     # type attribute setter (to create the associated metadata elements in the DS XML)

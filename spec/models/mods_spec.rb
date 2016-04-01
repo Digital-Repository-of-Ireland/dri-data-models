@@ -30,10 +30,11 @@ describe 'Mods' do
       expect(@collection.new_record?).to eq false
     end
 
-    it 'should create a new object if there is existing object for a given id' do
+    it 'should create a new object if there isnt an existing object for a given id' do
       @mods_record.save
-      @collection = DRI::Mods.find_or_create('fake-id')
+      @collection = DRI::Mods.find_or_create('fake-mods-id')
       expect(@collection.new_record?).to eq true
+      @collection.delete
     end
 
     it 'should be a kind of Batch and Mods' do

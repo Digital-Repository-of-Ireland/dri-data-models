@@ -35,10 +35,18 @@ module DRI
 
     # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
     # the DS is non-repeatable
-    property :checksum_md5, delegate_to: 'dri_properties', multiple: false
-    property :checksum_sha256, delegate_to: 'dri_properties', multiple: false
-    property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false
-    property :preservation_only, delegate_to: 'dri_properties', multiple: false
+    property :checksum_md5, delegate_to: 'dri_properties', multiple: false do |index|
+      index.as :stored_searchable
+    end
+    property :checksum_sha256, delegate_to: 'dri_properties', multiple: false do |index|
+      index.as :stored_searchable
+    end
+    property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false do |index|
+      index.as :stored_searchable
+    end
+    property :preservation_only, delegate_to: 'dri_properties', multiple: false do |index|
+      index.as :stored_searchable
+    end
 
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
@@ -67,24 +75,24 @@ module DRI
     def to_solr(solr_doc = {}, opts = {})
       solr_doc = super(solr_doc, opts)
 
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
       unless width.empty? || height.empty?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i * height[0].to_i])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i * height[0].to_i])
       end
 
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
 
       file_type = []
       file_type.push('audio') if audio?
       file_type.push('video') if video?
       file_type.push('image') if image?
       file_type.push('text') if text?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
       solr_doc
     end

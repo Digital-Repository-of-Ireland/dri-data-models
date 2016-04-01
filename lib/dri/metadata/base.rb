@@ -43,8 +43,8 @@ module DRI
       # @return [hash] the solr document hash
       def remove_null_values(solr_doc, field)
         [:stored_searchable, :facetable].each do |index_type|
-          if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].present?
-            solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
+          if solr_doc[ActiveFedora.index_field_mapper.solr_name(field, index_type)].present?
+            solr_doc[ActiveFedora.index_field_mapper.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
           end
         end
 
