@@ -26,37 +26,37 @@ module DRI
           t.subject_lang(proxy: [:subject, :subject_lang])
           t.date(namespace_prefix: 'dc')
           t.contributor(path: 'contributor', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(path: 'source', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable]) {
+          t.source(path: 'source', namespace_prefix: 'dc') {
             t.source_lang(path: { attribute: 'xml:lang' })
           }
           t.publisher(path: 'publisher', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.coverage(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+          t.coverage(namespace_prefix: 'dc') {
             t.coverage_lang(path: { attribute: 'xml:lang' })
           }
-          t.relation(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
-          t.external_relation(path: 'relation', namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' }, index_as: [Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.relation(namespace_prefix: 'dc')
+          t.external_relation(path: 'relation', namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' })
           t.creator(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
-          t.format(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.type(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.format(namespace_prefix: 'dc')
+          t.resource_type(path: 'type', namespace_prefix: 'dc')
 
           t.identifier(namespace_prefix: 'dc')
           # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
-          t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [:stored_sortable])
+          t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc')
           # Used for QDC metadata relationships, as the local, unique record ID
-          t.qdc_id(ref: :identifier, index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.qdc_id(ref: :identifier)
 
           # Qualified Dublin Core fields
           t.published_date(path: 'issued', namespace_prefix: 'dcterms')
           t.creation_date(path: 'created', namespace_prefix: 'dcterms')
-          t.geographical_coverage(path: 'spatial', namespace_prefix: 'dcterms', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
+          t.geographical_coverage(path: 'spatial', namespace_prefix: 'dcterms', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable,  Descriptors.cleaned_displayable]) {
             t.geographical_coverage_lang(path: { attribute: 'xml:lang' })
           }
           t.temporal_coverage(path: 'temporal', namespace_prefix: 'dcterms') {
             t.temporal_coverage_lang(path: { attribute: 'xml:lang' })
           }
-          t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' }, index_as:  [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' }, index_as:  [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.name_coverage(path: 'dpc', namespace_prefix: 'marcrel', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
+          t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' })
+          t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' })
+          t.name_coverage(path: 'dpc', namespace_prefix: 'marcrel') {
             t.name_coverage_lang(path: { attribute: 'xml:lang' })
           }
 
@@ -181,26 +181,26 @@ module DRI
         solr_doc = super(solr_doc, opts)
 
         # Index dates here, for display
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # title_sorted - A SOLR index for sorting titles
         if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           unless sorted_title.empty?
-            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
@@ -210,7 +210,7 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # Split facets into different languages based on xml:lang
         faceted_language_indexes = {}
@@ -225,15 +225,15 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages('name_coverage')
 
         faceted_language_indexes.each do |key, value|
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(key, :facetable, type: :text) => value)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :stored_searchable, type: :text) => value)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => value)
         end
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.qdc_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
 
         external_rels.each do |elem|
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
         end
 
 
@@ -259,9 +259,9 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
 
         solr_doc
       end
@@ -335,7 +335,7 @@ module DRI
 
       # Determine whether the metadata describes a collection
       def collection?
-        type.include? 'Collection'
+        resource_type.include? 'Collection'
       end
 
       # Implement additional DRI metadata validations as this class does not inherit
@@ -368,7 +368,7 @@ module DRI
 
         description.each { |curr_description| description_result = true unless curr_description.blank? }
         rights.each { |curr_right| rights_result = true unless curr_right.blank? }
-        type.each { |curr_type| type_result = true unless curr_type.blank? }
+        resource_type.each { |curr_type| type_result = true unless curr_type.blank? }
 
         date.each { |curr_date| date_result = true unless curr_date.blank? }
         creation_date.each { |curr_date| date_result = true unless curr_date.blank? } unless date_result

@@ -166,29 +166,29 @@ module DRI
         solr_doc = super(solr_doc, opts)
 
         # Index dates here, for display
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage_period) | display_date_for_index(date))
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage_period) | display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('creation_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('published_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)].present?
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :stored_searchable) => resource_type)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('type', :facetable) => resource_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => resource_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => resource_type)
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # title_sorted - A SOLR index for sorting titles
         unless title.empty?
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           unless sorted_title.empty?
-            solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
@@ -200,7 +200,7 @@ module DRI
           all_metadata += get_values(property).join(' ')
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # dateRangeField is defined in Solr's schema.xml
         # as a field of type date_range
@@ -226,9 +226,9 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) if geospatial_hash[:coords].present?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) if geospatial_hash[:name].present?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) if geospatial_hash[:name].present?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) if geospatial_hash[:json].present?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) if geospatial_hash[:name].present?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) if geospatial_hash[:name].present?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) if geospatial_hash[:json].present?
 
         solr_doc
       end
@@ -292,8 +292,8 @@ module DRI
       def remove_null_values(solr_doc, field)
         index_types = [:stored_searchable, :facetable]
         index_types.each do |type|
-          if solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, type)].present?
-            solr_doc[ActiveFedora::SolrQueryBuilder.solr_name(field, type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
+          if solr_doc[ActiveFedora.index_field_mapper.solr_name(field, type)].present?
+            solr_doc[ActiveFedora.index_field_mapper.solr_name(field, type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
           end
         end
 

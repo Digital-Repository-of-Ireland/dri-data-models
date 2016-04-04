@@ -41,11 +41,12 @@ describe 'Documentation' do
     expect(@doc2.new_record?).to eq false
   end
 
-  it 'should create a new object if there is existing object for a given id' do
+  it 'should create a new object if there isnt an existing object for a given id' do
     @doc.update_attributes(@attributes_hash)
     @doc.save
-    @doc2 = DRI::Documentation.find_or_create('fake-id')
+    @doc2 = DRI::Documentation.find_or_create('fake-doc-id')
     expect(@doc2.new_record?).to eq true
+    @doc2.delete
   end
 
   it 'should retrieve an existing object from fedora' do
@@ -70,7 +71,7 @@ describe 'Documentation' do
   end
 
   it 'should assert isDescriptionOf predicate if associated with an object' do
-    profile_key = ActiveFedora::SolrQueryBuilder.solr_name('object_profile', :displayable)
+    profile_key = ActiveFedora.index_field_mapper.solr_name('object_profile', :displayable)
     @doc.attributes = @attributes_hash
     @doc.save
 
@@ -128,13 +129,13 @@ describe 'Documentation' do
 
     solr_doc = @obj.descMetadata.to_solr
     keys = [DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD,
-            ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable),
-            ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text),
-            ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol)]
+            ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable),
+            ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text),
+            ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)]
     expect(solr_doc).to include(*keys)
 
     geojson_value = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-6.25972,53.3478]},\"properties\":{\"placename\":\"Dublin\"}}", "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.44,51.47],[-5.24,51.47],[-5.24,55.39],[-10.44,55.39],[-10.44,51.47]]]},\"properties\":{\"placename\":\"Ireland\"},\"bbox\":[-10.44,51.47,-5.24,55.39]}"]
-    geo_json_key = ActiveFedora::SolrQueryBuilder.solr_name('geojson', :stored_searchable, type: :symbol)
+    geo_json_key = ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)
     expect(solr_doc[geo_json_key]).to match_array(geojson_value)
 
     geospatial_value = ['-6.25972 53.3478', '-10.44 51.47 -5.24 55.39']
@@ -142,7 +143,7 @@ describe 'Documentation' do
     expect(solr_doc[geospatial_key]).to match_array(geospatial_value)
 
     placename_value = ['Dublin', 'Ireland']
-    placename_key = ActiveFedora::SolrQueryBuilder.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)
+    placename_key = ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)
     expect(solr_doc[placename_key]).to match_array(placename_value)
   end
 
@@ -155,7 +156,7 @@ describe 'Documentation' do
     expect(@obj.temporal_coverage).to match_array(['name=1900s; start=19000101; end=19991231', 'name=2015; start=2015;'])
 
     solr_doc = @obj.descMetadata.to_solr
-    keys = [ActiveFedora::SolrQueryBuilder.solr_name('temporal_coverage', :stored_searchable),
+    keys = [ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable),
             DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
     expect(solr_doc).to include(*keys)
     expect(solr_doc[keys.last]).to include('1900 1999', '2015 2015')

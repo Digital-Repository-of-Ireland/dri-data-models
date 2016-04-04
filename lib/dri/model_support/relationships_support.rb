@@ -18,7 +18,7 @@ module DRI
 
         unless root.nil?
           rels_array.each do |item_id|
-            root_key = ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)
+            root_key = ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable, type: :string)
             # We need to index the identifier element value to be able to search in Solr
             # and then retrieve the document by id
             solr_query = "#{solr_id_field}:\"#{item_id}\""
@@ -47,7 +47,7 @@ module DRI
         if solr_docs.nil? || solr_docs.empty?
           Rails.logger.error("Solr document for object #{id} not found in Solr")
         else
-          solr_key = ActiveFedora::SolrQueryBuilder.solr_name('root_collection_id', :stored_searchable, type: :string)
+          solr_key = ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable, type: :string)
           root = solr_docs[0][solr_key]
 
           if root.nil?

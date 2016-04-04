@@ -53,7 +53,7 @@ module DRI
     # Alternative Form Available
     property :alternative_form, delegate_to: 'descMetadata', multiple: true
 
-    property :type, delegate_to: 'descMetadata', multiple: true
+    property :resource_type, delegate_to: 'descMetadata', multiple: true
 
     property :geocode_point, delegate_to: 'descMetadata', multiple: true
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
@@ -92,7 +92,7 @@ module DRI
       [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
        :creation_date, :published_date, :name_coverage, :temporal_coverage,
        :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
-       :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :type,
+       :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :resource_type,
        :related_material, :alternative_form, :language, :format
       ]
     end
@@ -103,10 +103,22 @@ module DRI
     # @see DRI::ModelSupport::EadSupport#trigger_update
     # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
-      modified_attributes = properties.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      updated_props = properties.clone
+
+      # When updating from DRI form
+      # replace type attribute key with resource_type
+      updated_props.keys.each do |k|
+        next if k.to_sym != :type
+
+        updated_props[:resource_type] = updated_props[k]
+        updated_props.delete(k)
+        break
+      end
+
+      modified_attributes = updated_props.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       super(modified_attributes)
 
-      update_attributes = properties.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      update_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       self.trigger_update = true unless update_attributes.empty?
       update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
@@ -120,6 +132,19 @@ module DRI
       end
 
       editable_attrs
+    end
+
+    # Type attribute getter
+    #
+    # @return [Array<String>] the array of metadata type values
+    def type
+      descMetadata.resource_type
+    end
+
+    # Type attribute setter
+    # @param [Array<String>] type the array of metadata type values to set
+    def type=(type)
+      self.resource_type = type
     end
 
     # Returns a Hash with all the values for the DRI editable metadata fields
@@ -233,7 +258,7 @@ module DRI
       solr_doc = super(solr_doc)
 
       if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent) && previous_sibling.nil?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => '1')
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
       end
 
       solr_doc
@@ -264,7 +289,7 @@ module DRI
       # Add title metadata from parent collections
       object_types = []
 
-      descMetadata.type.each do |curr_category|
+      descMetadata.resource_type.each do |curr_category|
         object_types.push(curr_category.split.map(&:capitalize) * ' ')
       end
 
@@ -285,8 +310,8 @@ module DRI
 
       object_types.push('Unknown') if object_types.count < 1
 
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :displayable) => object_types)
 
       solr_doc
     end

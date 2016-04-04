@@ -35,49 +35,49 @@ module DRI
           file_type_display.push 'Collection'
         end
 
-        solr_query = "#{ActiveFedora::SolrQueryBuilder.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""
+        solr_query = "#{ActiveFedora.index_field_mapper.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""
         results = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
 
         unless results.nil?
           results.each do |gf|
             file_count += 1
-            if !collection? && gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable))
-              file_type |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0]]
-              file_type_display |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable)][0].capitalize]
+            if !collection? && gf.key?(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable))
+              file_type |= [gf[ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable)][0]]
+              file_type_display |= [gf[ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable)][0].capitalize]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer))
-              width |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer))
+              width |= [gf[ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer))
-              height |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer))
+              height |= [gf[ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer))
-              area |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('area', :stored_sortable, type: :integer))
+              area |= [gf[ActiveFedora.index_field_mapper.solr_name('area', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer))
-              channels |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('channels', :stored_sortable, type: :integer))
+              channels |= [gf[ActiveFedora.index_field_mapper.solr_name('channels', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_sortable, type: :integer))
-              bit_depth |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('bit_depth', :stored_sortable, type: :integer))
+              bit_depth |= [gf[ActiveFedora.index_field_mapper.solr_name('bit_depth', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer))
-              sample_rate |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_sortable, type: :integer)]]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer))
+              sample_rate |= [gf[ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer))
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer))
               duration_total = 0 if duration_total.nil?
-              duration_total += gf[ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer)]
-              duration |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_sortable, type: :integer)]]
+              duration_total += gf[ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer)]
+              duration |= [gf[ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer))
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer))
               file_size_total = 0 if file_size_total.nil?
-              file_size_total += gf[ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer)]
-              file_size |= [gf[ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_sortable, type: :integer)]]
+              file_size_total += gf[ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer)]
+              file_size |= [gf[ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer)]]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable))
-              mime_type |= gf[ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable)]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('mime_type', :stored_searchable))
+              mime_type |= gf[ActiveFedora.index_field_mapper.solr_name('mime_type', :stored_searchable)]
             end
-            if gf.key?(ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable))
-              file_format |= gf[ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable)]
+            if gf.key?(ActiveFedora.index_field_mapper.solr_name('file_format', :stored_searchable))
+              file_format |= gf[ActiveFedora.index_field_mapper.solr_name('file_format', :stored_searchable)]
             end
           end
         end
@@ -85,61 +85,61 @@ module DRI
         if file_type.empty?
           # As a last resort try to determine the file type from the
           # DCMI vocabulary in the metadata.
-          type = nil
-          descMetadata.type.each do |value|
+          resource_type = nil
+          type.each do |value|
             next unless DRI::Vocabulary.dcmi_type.include?(value.capitalize)
             file_type.push(value)
             file_type_display.push(value.capitalize)
-            type = value
+            resource_type = value
             break
           end
 
-          if type.nil?
+          if resource_type.nil?
             file_type.push 'unknown'
             file_type_display.push 'Unknown'
           end
         end
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_searchable, type: :integer) => width)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :facetable, type: :integer) => width)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :stored_searchable, type: :integer) => height)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('height', :facetable, type: :integer) => height)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :stored_searchable, type: :integer) => area)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('area', :facetable, type: :integer) => area)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('channels', :stored_searchable, type: :integer) => channels)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('channels', :facetable, type: :integer) => channels)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :stored_searchable, type: :integer) => bit_depth)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('bit_depth', :facetable, type: :integer) => bit_depth)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :stored_searchable, type: :integer) => width)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('width', :facetable, type: :integer) => width)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :stored_searchable, type: :integer) => sample_rate)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('sample_rate', :facetable, type: :integer) => sample_rate)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_searchable, type: :integer) => width)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :facetable, type: :integer) => width)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_searchable, type: :integer) => height)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :facetable, type: :integer) => height)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('area', :stored_searchable, type: :integer) => area)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('area', :facetable, type: :integer) => area)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('channels', :stored_searchable, type: :integer) => channels)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('channels', :facetable, type: :integer) => channels)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('bit_depth', :stored_searchable, type: :integer) => bit_depth)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('bit_depth', :facetable, type: :integer) => bit_depth)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_searchable, type: :integer) => width)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :facetable, type: :integer) => width)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_searchable, type: :integer) => sample_rate)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :facetable, type: :integer) => sample_rate)
 
         unless duration_total.nil?
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration_total', :stored_sortable, type: :integer) => [duration_total])
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :stored_searchable) => duration)
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('duration', :facetable, type: :integer) => duration)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration_total', :stored_sortable, type: :integer) => [duration_total])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration', :stored_searchable) => duration)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration', :facetable, type: :integer) => duration)
         end
 
         unless file_size_total.nil?
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size_total', :stored_sortable, type: :integer) => [file_size_total])
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :stored_searchable, type: :integer) => file_size)
-          solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_size', :facetable, type: :integer) => file_size)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size_total', :stored_sortable, type: :integer) => [file_size_total])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_searchable, type: :integer) => file_size)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :facetable, type: :integer) => file_size)
         end
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => file_type)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :facetable) => file_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type)
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type_display', :stored_searchable) => file_type_display)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_type_display', :facetable) => file_type_display)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :stored_searchable) => file_type_display)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :facetable) => file_type_display)
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :stored_searchable) => mime_type)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('mime_type', :facetable) => mime_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('mime_type', :stored_searchable) => mime_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('mime_type', :facetable) => mime_type)
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_format', :stored_searchable) => file_format)
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_format', :facetable) => file_format)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_format', :stored_searchable) => file_format)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_format', :facetable) => file_format)
 
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('file_count', :stored_sortable, type: :integer) => [file_count])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_count', :stored_sortable, type: :integer) => [file_count])
 
         solr_doc
       end # file_metadata_to_solr
