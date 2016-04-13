@@ -10,23 +10,51 @@ module DRI
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
     property :date, delegate_to: 'descMetadata', multiple: true
-    property :relation, delegate_to: 'descMetadata', multiple: true
-    property :external_relation, delegate_to: 'descMetadata', multiple: true
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
+    property :relation, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable
+    end
+    property :external_relation, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable
+    end
+    property :source, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable
+    end
+    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, 
+               DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true
-    property :type, delegate_to: 'descMetadata', multiple: true
-    property :format, delegate_to: 'descMetadata', multiple: true
-    property :coverage, delegate_to: 'descMetadata', multiple: true
+    property :name_coverage, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
+               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :resource_type, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
+               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :format, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
+               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :coverage, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     property :identifier, delegate_to: 'descMetadata', multiple: true
 
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
-    property :id_asset, delegate_to: 'descMetadata', multiple: false
-    property :qdc_id, delegate_to: 'descMetadata', multiple: true
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true
+    property :id_asset, delegate_to: 'descMetadata', multiple: false do |index|
+      index.as :stored_sortable
+    end
+    property :qdc_id, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :geocode_point, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :geocode_box, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
 
     class_eval do
       # Dynamically populate the marcrelator code model attributes
@@ -68,6 +96,18 @@ module DRI
 
     # Override AF attributes setter
     def attributes=(properties)
+      updated_props = properties.clone
+
+      # When updating from DRI form
+      # replace type attribute key with resource_type
+      updated_props.keys.each do |k|
+        next if k.to_sym != :type
+
+        updated_props[:resource_type] = updated_props[k]
+        updated_props.delete(k)
+        break
+      end
+
       super(properties)
     end
 
@@ -77,9 +117,22 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::QualifiedDublinCore.find(pid)
+      obj = DRI::QualifiedDublinCore.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::QualifiedDublinCore.create(id: pid)
+    end
+
+    # Type attribute getter
+    #
+    # @return [Array<String>] the array of metadata type values
+    def type
+      descMetadata.resource_type
+    end
+
+    # Type attribute setter
+    # @param [Array<String>] type the array of metadata type values to set
+    def type=(type)
+      self.resource_type = type
     end
 
     # For relationships display in the UI, creates Hash where the keys are
@@ -105,7 +158,7 @@ module DRI
     # i.e. qdc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora::SolrQueryBuilder.solr_name('qdc_id', :stored_searchable, type: :string)
+      ActiveFedora.index_field_mapper.solr_name('qdc_id', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type

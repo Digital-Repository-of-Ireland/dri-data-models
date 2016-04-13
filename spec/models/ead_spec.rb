@@ -32,7 +32,7 @@ describe 'EncodedArchivalDescription' do
 
     it 'should create a new object if there is existing object for a given id' do
       @ead_header.save
-      @collection = DRI::EncodedArchivalDescription.find_or_create('fake-id')
+      @collection = DRI::EncodedArchivalDescription.find_or_create('fake-ead-id')
       expect(@collection.new_record?).to eq true
     end
 
@@ -94,10 +94,10 @@ describe 'EncodedArchivalDescription' do
                         'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim', 'is_first_sibling_tesim']
 
       expect(@ead_header.collections_to_solr.keys).to match_array(collection_keys)
-      expect(@ead_header.collections_to_solr).not_to have_key(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable))
+      expect(@ead_header.collections_to_solr).not_to have_key(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable))
 
       expect(@component.collections_to_solr.keys).to match_array(component_keys)
-      expect(@component.collections_to_solr).to include(ActiveFedora::SolrQueryBuilder.solr_name('is_first_sibling', :stored_searchable) => '1')
+      expect(@component.collections_to_solr).to include(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
     end
 
     it "should add file metadata information to the object\'s solr document" do
@@ -122,10 +122,10 @@ describe 'EncodedArchivalDescription' do
       @component.language = {langcode: ['eng'], text: ['English']}
 
       expect(@ead_header.file_metadata_to_solr.keys).to match_array(file_md_keys)
-      expect(@ead_header.file_metadata_to_solr).to include(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => ['collection'])
+      expect(@ead_header.file_metadata_to_solr).to include(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => ['collection'])
 
       expect(@component.file_metadata_to_solr.keys).to match_array(file_md_keys)
-      expect(@component.file_metadata_to_solr).to include(ActiveFedora::SolrQueryBuilder.solr_name('file_type', :stored_searchable) => ['collection'])
+      expect(@component.file_metadata_to_solr).to include(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => ['collection'])
     end
 
     it "should add object type information to the object\'s solr document" do
@@ -146,7 +146,7 @@ describe 'EncodedArchivalDescription' do
       @component.creation_date = {display: ['2000-2010'], normal: ['20000101/20101231']}
       @component.language = {langcode: ['eng'], text: ['English']}
 
-      solr_field = ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable)
+      solr_field = ActiveFedora.index_field_mapper.solr_name('object_type', :displayable)
 
       expect(@ead_header.object_types_to_solr.keys).to match_array(object_type_keys)
       expect(@ead_header.object_types_to_solr).to include(solr_field => ['Collection'])

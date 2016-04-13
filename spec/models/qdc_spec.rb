@@ -31,9 +31,11 @@ describe 'QualifiedDublinCore' do
 
     it 'returns correct count for has_many associations if new object' do
       # Issue 1320
-      expect(@audio.generic_files.any?).to eq false
-      expect(@audio.documentation_objects.any?).to eq false
-      expect(@audio.governed_items.any?).to eq false
+      #puts "Governed #{@audio.governed_items.inspect}"
+      #puts "Doc #{@audio.documentation_objects.inspect}"
+      expect(@audio.generic_files.empty?).to be true
+      expect(@audio.documentation_objects.empty?).to be true
+      expect(@audio.governed_items.empty?).to be true
     end
 
     it 'should be a collection if metadata specifies this' do
@@ -49,6 +51,15 @@ describe 'QualifiedDublinCore' do
 
     it 'should have asserted the content model' do
       expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::Batch'])
+    end
+
+    
+    it 'should create a new object if there isnt an existing object for a given id' do
+      @audio.update_attributes(@attributes_hash)
+      @audio.save
+      @audio2 = DRI::QualifiedDublinCore.find_or_create('fake-dc-id')
+      expect(@audio2.new_record?).to eq true
+      @audio2.delete
     end
 
     it 'should load from xml' do

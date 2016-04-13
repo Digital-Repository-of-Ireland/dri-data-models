@@ -16,25 +16,43 @@ module DRI
 
     # MARC record identifier used for internal rels target,
     # NOT multi-valued
-    property :marc_id, delegate_to: 'descMetadata', multiple: false
+    property :marc_id, delegate_to: 'descMetadata', multiple: false do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     # MARC record asset identifier used to sort pages/sequenced items
-    property :id_asset, delegate_to: 'descMetadata', multiple: false
+    property :id_asset, delegate_to: 'descMetadata', multiple: false do |index|
+      index.as :stored_sortable
+    end
 
     # MARC Relationships, mapped from QDC predicate properties
     # Mapped attributes for getting relational information from metadata
     # Internal Relationships
     # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-    property :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true
+    property :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-    property :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true
+    property :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     # 787: Other Relationship Entry; Mapped to DC: relation
-    property :relation_ids_relation, delegate_to: 'descMetadata', multiple: true
+    property :relation_ids_relation, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
     # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-    property :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true
-    property :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true
+    property :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
 
-    property :related_material, delegate_to: 'descMetadata', multiple: true
-    property :alternative_form, delegate_to: 'descMetadata', multiple: true
+    property :related_material, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
+    property :alternative_form, delegate_to: 'descMetadata', multiple: true do |index|
+      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
+    end
 
     # Disabled below - metadata object update triggers
     # the creation of duplicated objects
@@ -121,7 +139,7 @@ module DRI
     # i.e. marc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora::SolrQueryBuilder.solr_name('marc_id', :stored_searchable, type: :string)
+      ActiveFedora.index_field_mapper.solr_name('marc_id', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type

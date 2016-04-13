@@ -10,9 +10,9 @@ else
   printf "ERROR: An RVM installation was not found.\n"
 fi
 
-rvm use ruby-2.1.5 || exit 100
-rvm use ruby-2.1.5@build --create || exit 100
-rvm --force gemset empty ruby-2.1.5@build || exit 100
+rvm use ruby-2.2.4 || exit 100
+rvm use ruby-2.2.4@build --create || exit 100
+rvm --force gemset empty ruby-2.2.4@build || exit 100
 
 case $1 in
 patch)

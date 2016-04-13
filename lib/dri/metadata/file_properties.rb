@@ -8,10 +8,10 @@ module DRI
       set_terminology do |t|
         # Selects the root node of the XML document
         t.root(path: 'properties', xmlns: '', namespace_prefix: nil)
-        t.checksum_md5(namespace_prefix: nil, index_as:[:stored_searchable])
-        t.checksum_sha256(namespace_prefix: nil, index_as:[:stored_searchable])
-        t.checksum_rmd160(namespace_prefix: nil, index_as:[:stored_searchable])
-        t.preservation_only(namespace_prefix: nil, index_as:[:stored_searchable])
+        t.checksum_md5(namespace_prefix: nil)
+        t.checksum_sha256(namespace_prefix: nil)
+        t.checksum_rmd160(namespace_prefix: nil)
+        t.preservation_only(namespace_prefix: nil)
       end # set_terminology
 
       # Build the default XML document

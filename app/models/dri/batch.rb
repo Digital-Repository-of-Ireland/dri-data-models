@@ -20,7 +20,7 @@ module DRI
     after_destroy :delete_bucket
 
     # one-to-many AF relationship to associate digital assets with their batch object
-    has_many :generic_files, class_name: 'DRI::GenericFile', as: :batch, dependent: :destroy
+    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :batch, dependent: :destroy
     # one-to-many AF relationship to associate documentation objects
     has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
@@ -119,14 +119,18 @@ module DRI
     def object_types_to_solr(solr_doc = {})
       object_types = []
 
-      descMetadata.type.each { |cat| object_types.push cat.split.map(&:capitalize)*' ' }
-
+      type.each { |cat| object_types.push cat.split.map(&:capitalize)*' ' }
       object_types.push('Unknown') if object_types.count < 1
 
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :displayable) => object_types)
+
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => type)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => type)
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => type)
+
       if rights.empty?
-        solr_doc.merge!(ActiveFedora::SolrQueryBuilder.solr_name('rights', :stored_searchable) => ['No rights statement'])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('rights', :stored_searchable) => ['No rights statement'])
       end
 
       solr_doc

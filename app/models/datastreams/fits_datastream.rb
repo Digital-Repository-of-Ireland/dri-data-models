@@ -26,7 +26,7 @@ class FitsDatastream < ActiveFedora::OmDatastream
     t.filestatus { 
       t.well_formed(path: 'well-formed')
       t.valid(path: 'valid')
-      t.status_message(path: 'message')
+      t.message(path: 'message')
     }
     t.metadata {
       t.document {
@@ -93,7 +93,7 @@ class FitsDatastream < ActiveFedora::OmDatastream
     t.copyright_note(proxy: [:fileinfo, :copyright_note])
     t.well_formed(proxy: [:filestatus, :well_formed])
     t.valid(proxy: [:filestatus, :valid])
-    t.status_message(proxy: [:filestatus, :status_message])
+    t.message(proxy: [:filestatus, :message])
     t.file_title(proxy: [:metadata, :document, :file_title])
     t.file_author(proxy: [:metadata, :document, :file_author])
     t.page_count(proxy: [:metadata, :document, :page_count])
