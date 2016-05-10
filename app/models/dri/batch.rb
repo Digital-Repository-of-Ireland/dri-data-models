@@ -146,7 +146,8 @@ module DRI
     private
 
     def delete_bucket
-      storage = Storage::S3Interface.new
+      storage = Storage::Service.new
+      storage.connect
       storage.delete_bucket(id)
     end
   end # Class Batch
