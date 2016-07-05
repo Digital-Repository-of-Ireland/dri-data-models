@@ -41,7 +41,7 @@ group :development, :test do
   gem 'database_cleaner'
   gem 'faker'
   gem 'ci_reporter_rspec'  
-  gem 'paper_trail', '~> 3.0.6'
+  gem 'paper_trail', '4.2.0'
   gem 'yard'
 end
 
