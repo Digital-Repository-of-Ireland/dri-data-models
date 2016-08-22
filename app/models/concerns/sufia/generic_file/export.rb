@@ -136,8 +136,6 @@ module Sufia
         text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.nil?
 
         text << ", DOI: #{doi}" unless doi.nil?
-        
-        text << '.'
  
         text.html_safe
       end
