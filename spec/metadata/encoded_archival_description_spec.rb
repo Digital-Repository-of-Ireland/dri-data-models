@@ -354,11 +354,12 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@ead_collection.descMetadata.custom_validations).to have_key(:rights)
     end
 
-    it 'should validate the presence of the creation_date metadata field' do
+    it 'should validate the presence of a date metadata field' do
       @ead_collection.should be_valid
       @ead_collection.creation_date = { display: [''], datechar: [''], normal: [''] }
+      @ead_collection.temporal_coverage = { display: [''], datechar: [''], normal: [''] }
       @ead_collection.should_not be_valid
-      expect(@ead_collection.descMetadata.custom_validations).to have_key(:creation_date)
+      expect(@ead_collection.descMetadata.custom_validations).to have_key(:date)
     end
 
     it 'should validate the presence of the creator metadata field' do

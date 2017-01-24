@@ -1070,7 +1070,7 @@ module DRI
         title_result = false
         creator_result = false
         description_result = false
-        creation_date_result = false
+        date_result = false
         rights_result = false
 
         # EAD-specific validation from best practices
@@ -1086,9 +1086,9 @@ module DRI
         creator_result = true if creator.any? { |v| !v.blank? }
         # Description
         description_result = true if description.any? { |v| !v.blank? }
-        # Creation date
-        creation_date_result = true if creation_date.any? { |v| !v.blank? }
-        creation_date_result = true if temporal_coverage.any? { |v| !v.blank? }
+        # A date is required
+        date_result = true if creation_date.any? { |v| !v.blank? }
+        date_result = true if temporal_coverage.any? { |v| !v.blank? }
         # Rights
         rights_result = true if rights.any? { |v| !v.blank? }
 
@@ -1111,7 +1111,7 @@ module DRI
         errors[:title] = "can\'t be blank" if title_result == false
         errors[:creator] = "can\'t be blank" if creator_result == false
         errors[:description] = "can\'t be blank" if description_result == false
-        errors[:creation_date] = "can\'t be blank" if creation_date_result == false
+        errors[:date] = "can\'t be blank" if date_result == false
         errors[:rights] = "can\'t be blank" if rights_result == false
 
         # Specific EAD validation
