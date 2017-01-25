@@ -69,6 +69,9 @@ module DRI
           if new_child.valid? && !duplicates
             Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
             new_child.save
+            # Do the preservation actions
+            preservation = Preservation::Preservator.new(new_child)
+            preservation.preserve(true, true, ['descMetadata','properties'])
             begin
               DRI::Utils.create_reader_group(new_child.id) if new_child.collection?
             rescue

@@ -32,7 +32,7 @@ module DRI
           xml.properties {
             xml.status 'draft'
             xml.model_version DriDataModels::VERSION
-            xml.object_version '1'
+            xml.object_version 1
           }
         end
 

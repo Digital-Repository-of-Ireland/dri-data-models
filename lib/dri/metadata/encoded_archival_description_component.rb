@@ -194,7 +194,7 @@ module DRI
         t.desc_scope_content(proxy: [:c, :scope_content, :p])
         t.desc_note(proxy: [:c, :did, :note])
 
-        t.creator(path: '/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
+        t.creator(path: '/*/did/origination/text()[normalize-space()]  | /*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
         t.creator_role(proxy: [:c, :did, :origination, :person_creator])
         t.creator_name(proxy: [:c, :did, :origination, :name])
         t.creator_persname(proxy: [:c, :did, :origination, :pers_name])
