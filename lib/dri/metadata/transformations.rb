@@ -134,7 +134,8 @@ module DRI
               end
               # [west_long south_lat east_long north_lat]
               if self.all_keys?(box_keys, box)
-                results[:coords] << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
+                # Solr 5 changed format to ENVELOPE(minX, maxX, maxY, minY)
+                results[:coords] << "ENVELOPE(#{box['westlimit']}, #{box['eastlimit']}, #{box['northlimit']}, #{box['southlimit']})"
                 results[:name] << box['name']
                 results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
               end
