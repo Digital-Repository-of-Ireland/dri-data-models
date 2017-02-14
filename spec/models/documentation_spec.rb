@@ -138,7 +138,7 @@ describe 'Documentation' do
     geo_json_key = ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)
     expect(solr_doc[geo_json_key]).to match_array(geojson_value)
 
-    geospatial_value = ['-6.25972 53.3478', '-10.44 51.47 -5.24 55.39']
+    geospatial_value = ['-6.25972 53.3478', 'ENVELOPE(-10.44, 51.47, -5.24, 55.39)']
     geospatial_key = DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD
     expect(solr_doc[geospatial_key]).to match_array(geospatial_value)
 
