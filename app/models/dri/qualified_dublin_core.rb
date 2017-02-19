@@ -1,6 +1,6 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects extending from DRI::Batch
+  # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Batch
   class QualifiedDublinCore < DRI::Batch
 
     contains 'descMetadata', class_name: 'DRI::Metadata::QualifiedDublinCore'

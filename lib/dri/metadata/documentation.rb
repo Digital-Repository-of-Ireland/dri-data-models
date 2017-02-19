@@ -168,7 +168,7 @@ module DRI
         # Index dates here, for display
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage_period) | display_date_for_index(date))
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage_period))
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
         solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
@@ -207,10 +207,12 @@ module DRI
         # (solr.SpatialRecursivePrefixTreeFieldType)
         cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'creation_date' => creation_date })
         pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => published_date })
-        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date, 'temporal_coverage' => temporal_coverage | temporal_coverage_period })
+        ddateRanges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
+        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'temporal_coverage' => temporal_coverage | temporal_coverage_period })
 
         solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges.empty?
         solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges.empty?
+        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => pdate_ranges) unless ddate_ranges.empty?
         solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges.empty?
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
