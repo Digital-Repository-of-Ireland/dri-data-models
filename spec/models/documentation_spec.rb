@@ -159,6 +159,6 @@ describe 'Documentation' do
     keys = [ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable),
             DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
     expect(solr_doc).to include(*keys)
-    expect(solr_doc[keys.last]).to include('1900 1999', '2015 2015')
+    expect(solr_doc[keys.last]).to include('[19000101 TO 19991231]', '2015')
   end
 end

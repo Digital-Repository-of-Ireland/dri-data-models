@@ -207,12 +207,12 @@ module DRI
         # (solr.SpatialRecursivePrefixTreeFieldType)
         cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'creation_date' => creation_date })
         pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => published_date })
-        ddateRanges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
+        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
         sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'temporal_coverage' => temporal_coverage | temporal_coverage_period })
 
         solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges.empty?
         solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges.empty?
-        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => pdate_ranges) unless ddate_ranges.empty?
+        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges.empty?
         solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges.empty?
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
@@ -249,8 +249,8 @@ module DRI
               value
             else
               # Date range in ISO8601 format?
-              sdate = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
-              DRI::Metadata::Transformations.create_dcmi_period(value, sdate)
+              formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
+              DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
             end
           rescue ISO8601::Errors::StandardError
             # DCMI Period 'name' is the md value
