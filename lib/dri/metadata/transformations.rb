@@ -302,7 +302,7 @@ module DRI
               ISO8601::DateTime.new(date)
               date
             rescue ISO8601::Errors::StandardError => e
-              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601. Error: #{e}.")
+              Rails.logger.error("Date #{date} not indexed as it is not compliant with ISO8601. Error: #{e}.")
               return []
             end
           end
