@@ -173,11 +173,12 @@ module DRI
 
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
-          if k.eql?('east')
+          case k
+          when 'east'
             point['east'] = v.strip
-          elsif k.eql?('north')
+          when 'north'
             point['north'] = v.strip
-          elsif k.eql?('name')
+          when 'name'
             point['name'] = v.strip
           end
         end
@@ -197,15 +198,16 @@ module DRI
 
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
-          if k.eql?('northlimit')
+          case k
+          when 'northlimit'
             box['northlimit'] = v.strip
-          elsif k.eql?('eastlimit')
+          when 'eastlimit'
             box['eastlimit'] = v.strip
-          elsif k.eql?('southlimit')
+          when 'southlimit'
             box['southlimit'] = v.strip
-          elsif k.eql?('westlimit')
+          when 'westlimit'
             box['westlimit'] = v.strip
-          elsif k.eql?('name')
+          when 'name'
             box['name'] = v.strip
           end
         end
@@ -282,9 +284,12 @@ module DRI
       def self.date_range_years(ranges)
         years = []
         ranges.each do |range|
-          start = range.delete('[').delete(']').split(/\sTO\s/).first
-          years << ISO8601::DateTime.new(start).year
+          endpoints = range.gsub(/\[(.*)\]/, '\1').split(/\sTO\s/)
+          endpoints.each do |point|
+            years << ISO8601::DateTime.new(point).year
+          end
         end
+
         years
       end
 

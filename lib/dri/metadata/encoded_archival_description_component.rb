@@ -410,15 +410,28 @@ module DRI
 
         # Creation date dateRange index
         cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
-        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)) unless cdate_ranges.empty?
+        cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
+        if cdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
+          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years[0])
+        end
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
-        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)) unless pdate_ranges.empty?
+        pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
+        if pdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index)
+          pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years[0])
+        end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
-        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)) unless sdate_ranges.empty?
+        sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
+        if sdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+        end
 
         # Geospatial indexing
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
