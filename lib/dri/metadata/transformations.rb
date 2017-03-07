@@ -17,6 +17,8 @@ module DRI
       DATE_RANGE_SOLR_FIELD = 'ddateRange'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
+      SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'
+      SUBJECT_DATE_RANGE_END_SOLR_FIELD = 'sdate_range_end_isi'
       # The name of the Solr field for indexing geographical metadata
       GEOSPATIAL_SOLR_FIELD = 'geospatial'
 

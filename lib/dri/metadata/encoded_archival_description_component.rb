@@ -431,6 +431,9 @@ module DRI
         sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
         if sdate_index.present?
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
         end
 
         # Geospatial indexing

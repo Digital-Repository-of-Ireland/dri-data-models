@@ -172,7 +172,7 @@ module DRI
         temporal_coverage_dates = display_date_for_index(temporal_coverage_period)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
-        
+
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
         solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
@@ -227,6 +227,9 @@ module DRI
         
         if sdate_ranges.present?
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges)
+          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_ranges).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
         end
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
