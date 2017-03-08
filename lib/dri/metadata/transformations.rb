@@ -10,9 +10,13 @@ module DRI
       # The name of the Solr field for indexing temporal metadata (creation date)
       CREATION_DATE_RANGE_SOLR_FIELD = 'cdateRange'
       CREATION_DATE_YEAR_SOLR_FIELD = 'cdate_year_iim'
+      CREATION_DATE_RANGE_START_SOLR_FIELD = 'cdate_range_start_isi'
+      CREATION_DATE_RANGE_END_SOLR_FIELD = 'cdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (published date)
       PUBLISHED_DATE_RANGE_SOLR_FIELD = 'pdateRange'
       PUBLISHED_DATE_YEAR_SOLR_FIELD = 'pdate_year_iim'
+      PUBLISHED_DATE_RANGE_START_SOLR_FIELD = 'pdate_range_start_isi'
+      PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (date)
       DATE_RANGE_SOLR_FIELD = 'ddateRange'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
