@@ -1,7 +1,7 @@
 #!/usr/bin/env rake
-require 'jettywrapper'
 require 'rspec/core/rake_task'
 require 'yard'
+require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -20,6 +20,9 @@ rescue LoadError
 end
 
 Bundler::GemHelper.install_tasks
+Dir.glob(File.expand_path('../tasks/*.rake', __FILE__)).each do |f|
+  load(f)
+end
 
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
@@ -42,57 +45,12 @@ RSpec::Core::RakeTask.new(rspec: ['ci:setup:rspec']) do |spec|
   spec.pattern += FileList['spec/*_spec.rb']
 end
 
-namespace :jetty do
-
-  desc 'return development jetty to its pristine state, as pulled from git'
-  task :reset => ['jetty:stop'] do
-    system('cd jetty && git reset --hard HEAD && git clean -dfx && cd ..')
-    sleep 2
-  end
-
-end
-
-namespace :jetty do
-  SOLR_DIR = 'solr_conf/conf'
-
-  desc 'Config Jetty'
-  task :config do
-    Rake::Task['jetty:config_solr'].reenable
-    Rake::Task['jetty:config_solr'].invoke
-    Rake::Task['jetty:config_fedora'].reenable
-    Rake::Task['jetty:config_fedora'].invoke
-  end
-
-  desc 'Copies the default SOLR config for the bundled Hydra Testing Server'
-  task :config_solr do
-    FileList["#{SOLR_DIR}/*"].each do |f|
-      cp("#{f}", 'jetty/solr/development-core/conf/', verbose: true)
-      cp("#{f}", 'jetty/solr/test-core/conf/', verbose: true)
-    end
-
-  end
-
-  desc 'Copies a custom fedora config for the bundled jetty'
-  task :config_fedora do
-    fcfg = 'fedora_conf/federated.json'
-    if File.exists?(fcfg)
-      puts 'copying over federated.json'
-      cp("#{fcfg}", APP_ROOT + '/jetty/etc/', :verbose => true)
-    else
-      puts "#{fcfg} file not found -- skipping fedora config"
-    end
-  end
-end
-
 desc 'Run Continuous Integration'
-task ci: ['jetty:reset','jetty:config','ci:setup:rspec'] do
+task :ci do
   ENV['environment'] = 'test'
-  jetty_params = Jettywrapper.load_config
-  jetty_params[:startup_wait]= 120
-  error = Jettywrapper.wrap(jetty_params) do
+  with_test_server do
     Rake::Task['rspec'].invoke
   end
-  raise "test failures: #{error}" if error
 
   Rake::Task['yard'].invoke
 end

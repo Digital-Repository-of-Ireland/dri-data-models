@@ -138,7 +138,7 @@ describe 'Documentation' do
     geo_json_key = ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)
     expect(solr_doc[geo_json_key]).to match_array(geojson_value)
 
-    geospatial_value = ['-6.25972 53.3478', '-10.44 51.47 -5.24 55.39']
+    geospatial_value = ['-6.25972 53.3478', 'ENVELOPE(-10.44, -5.24, 55.39, 51.47)']
     geospatial_key = DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD
     expect(solr_doc[geospatial_key]).to match_array(geospatial_value)
 
@@ -159,6 +159,6 @@ describe 'Documentation' do
     keys = [ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable),
             DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
     expect(solr_doc).to include(*keys)
-    expect(solr_doc[keys.last]).to include('1900 1999', '2015 2015')
+    expect(solr_doc[keys.last]).to include('[19000101 TO 19991231]', '2015')
   end
 end

@@ -183,7 +183,13 @@ module DRI
         # Index dates here, for display
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => display_date_for_index(temporal_coverage) | display_date_for_index(date))
+        
+        temporal_coverage_dates = display_date_for_index(temporal_coverage)
+        if temporal_coverage_dates.present?
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+        end
+
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
         solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
@@ -240,11 +246,34 @@ module DRI
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
         cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'creation_date' => creation_date })
         pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => published_date })
-        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date, 'temporal_coverage' => temporal_coverage })
+        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
+        sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'temporal_coverage' => temporal_coverage })
 
-        solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges) unless cdate_ranges == []
-        solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges) unless pdate_ranges == []
-        solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges) unless sdate_ranges == []
+        if cdate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges)
+          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_ranges)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+        end
+
+        if pdate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)
+          pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_ranges)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+        end
+        
+        if sdate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges)
+          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_ranges).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
+        end
+
+        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
+        
 
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => geocode_point | geocode_box })
@@ -259,8 +288,11 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        
+        unless geospatial_hash[:name].empty?
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
+        end
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
 
         solr_doc
@@ -279,8 +311,8 @@ module DRI
               value
             else
               # Date range in ISO8601 format?
-              sdate = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
-              DRI::Metadata::Transformations.create_dcmi_period(value, sdate)
+              formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
+              DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
             end
           rescue ISO8601::Errors::StandardError
             # DCMI Period 'name' is the md value
@@ -294,8 +326,7 @@ module DRI
       # @return [Hash] the hash with indices split by language
       def split_array_into_languages(index_name = '')
         results = {}
-        filtered_fields = %w(temporal_coverage geographical_coverage)
-
+        
         return results if index_name.empty?
 
         array_values = send(index_name)
@@ -303,19 +334,23 @@ module DRI
         array_values = array_values.reject(&:empty?)
 
         array_values.each_with_index do |value, i|
-          next if filtered_fields.include?(index_name) &&
-                    DRI::Metadata::Transformations.dcmi_encoded?(value)
+          if index_name == 'temporal_coverage' && DRI::Metadata::Transformations.dcmi_period?(value)
+            period = DRI::Metadata::Transformations.transform_period(value)
+            next unless period[:name].present?
+            value = period[:name]
+          elsif index_name == 'geographical_coverage' && DRI::Metadata::Transformations.dcmi_encoded?(value)
+            next
+          end
+          
           value_lang = send(index_name, i).send("#{index_name}_lang")
 
-          foo = 'eng'
-          foo = value_lang[0].strip if value_lang.length > 0
-          foo = DRI::Metadata::Descriptors.standardise_language_code(foo)
-          foo = 'eng' if foo.nil?
-
-          if results.key?("#{index_name}_#{foo}")
-            results["#{index_name}_#{foo}"] |= [value]
+          lang_code = value_lang.length > 0 ? value_lang[0].strip : 'eng'
+          lang_code = DRI::Metadata::Descriptors.standardise_language_code(lang_code) || 'eng'
+          
+          if results.key?("#{index_name}_#{lang_code}")
+            results["#{index_name}_#{lang_code}"] |= [value]
           else
-            results["#{index_name}_#{foo}"] = [value]
+            results["#{index_name}_#{lang_code}"] = [value]
           end
         end
 

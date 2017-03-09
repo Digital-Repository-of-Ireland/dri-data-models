@@ -13,5 +13,5 @@ tmp/
 spec/reports/*
 spec/test_app/config/predicate_mappings.yml
 .ruby-version
-jetty/
 .byebug_history
+fcrepo4-test-data/

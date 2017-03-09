@@ -572,7 +572,9 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'alternative_form_tesim', 'alternative_form_sim', 'title_sorted_ssi', 'person_sim', 'person_tesim',
                    'all_metadata_tesim', 'name_coverage_tesim', 'name_coverage_sim', 'geographical_coverage_tesim',
                    'geographical_coverage_sim', 'creation_date_tesim', 'temporal_coverage_tesim', 'temporal_coverage_sim',
-                   'creation_date_idx_tesim', 'published_date_tesim', 'cdateRange', 'pdateRange', 'sdateRange', 'geospatial',
+                   'creation_date_idx_tesim', 'published_date_tesim', 'cdate_year_iim', 'pdate_year_iim', 'cdateRange',
+                   'cdate_range_start_isi', 'cdate_range_end_isi', 'pdate_range_start_isi', 'pdate_range_end_isi',
+                   'pdateRange', 'sdateRange', 'sdate_range_end_isi', 'sdate_range_start_isi', 'geospatial',
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
@@ -630,12 +632,12 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(persname_subject).to match_array(['subject persname'])
       expect(geogname_subject).to match_array(['subject geogname'])
       expect(creation_date).to match_array(['name=2000-2010; start=20000101; end=20101231;'])
-      expect(cdate_range).to match_array(['2000 2010'])
+      expect(cdate_range).to match_array(['[20000101 TO 20101231]'])
       expect(creation_date_idx).to match_array(['20000101/20101231'])
       expect(published_date).to match_array(['name=2015; start=20150101;'])
-      expect(pdate_range).to match_array(['2015 2015'])
+      expect(pdate_range).to match_array(['20150101'])
       expect(temporal_coverage).to match_array(['name=c. 2005; start=2005;'])
-      expect(sdate_range).to match_array(['2005 2005'])
+      expect(sdate_range).to match_array(['2005'])
       expect(geographical_coverage).to match_array(['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'])
       expect(place_name).to match_array(['Dublin'])
       expect(geo_spatial).to match_array(['-6.266155 53.350140'])
@@ -656,6 +658,8 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'all_metadata_tesim', 'name_coverage_tesim', 'name_coverage_sim', 'geographical_coverage_tesim',
                    'geographical_coverage_sim', 'creation_date_tesim', 'temporal_coverage_tesim', 'temporal_coverage_sim',
                    'creation_date_idx_tesim', 'published_date_tesim', 'cdateRange', 'pdateRange', 'sdateRange', 'geospatial',
+                   'cdate_year_iim', 'pdate_year_iim', 'sdate_range_end_isi', 'sdate_range_start_isi',
+                   'cdate_range_start_isi', 'cdate_range_end_isi', 'pdate_range_start_isi', 'pdate_range_end_isi',
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
@@ -713,12 +717,12 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(persname_subject).to match_array(['subject persname'])
       expect(geogname_subject).to match_array(['subject geogname'])
       expect(creation_date).to match_array(['name=2000-2010; start=20000101; end=20101231;'])
-      expect(cdate_range).to match_array(['2000 2010'])
+      expect(cdate_range).to match_array(['[20000101 TO 20101231]'])
       expect(creation_date_idx).to match_array(['20000101/20101231'])
       expect(published_date).to match_array(['name=2015; start=20150101;'])
-      expect(pdate_range).to match_array(['2015 2015'])
+      expect(pdate_range).to match_array(['20150101'])
       expect(temporal_coverage).to match_array(['name=c. 2005; start=2005;'])
-      expect(sdate_range).to match_array(['2005 2005'])
+      expect(sdate_range).to match_array(['2005'])
       expect(geographical_coverage).to match_array(['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'])
       expect(place_name).to match_array(['Dublin'])
       expect(geo_spatial).to match_array(['-6.266155 53.350140'])
@@ -738,7 +742,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       solr_doc = @collection.descMetadata.to_solr
       creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
       expect(creation_date).to match_array(['name=2000-2010; start=20000101; end=20101231;'])
-      expect(solr_doc['cdateRange']).to match_array(['2000 2010'])
+      expect(solr_doc['cdateRange']).to match_array(['[20000101 TO 20101231]'])
 
       expect(@component.creation_date).to match_array(['2000-2010'])
       expect(@component.creation_date_idx).to match_array(['20000101/20101231'])
@@ -836,7 +840,7 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       expect(geographical_coverage).to match_array(['name=Republic of Ireland; northlimit=55.3826405; eastlimit=-6.0007535; southlimit=51.4201065; westlimit=-10.577897;'])
       expect(place_name).to match_array(['Republic of Ireland'])
-      expect(geo_spatial).to match_array(['-10.577897 51.4201065 -6.0007535 55.3826405'])
+      expect(geo_spatial).to match_array(['ENVELOPE(-10.577897, -6.0007535, 55.3826405, 51.4201065)'])
       expect(geo_json).to match_array(["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.577897,51.4201065],[-6.0007535,51.4201065],[-6.0007535,55.3826405],[-10.577897,55.3826405],[-10.577897,51.4201065]]]},\"properties\":{\"placename\":\"Republic of Ireland\"},\"bbox\":[-10.577897,51.4201065,-6.0007535,55.3826405]}"])
     end
 
@@ -867,7 +871,7 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       expect(geographical_coverage).to match_array(['name=Republic of Ireland; northlimit=55.3826405; eastlimit=-6.0007535; southlimit=51.4201065; westlimit=-10.577897;'])
       expect(place_name).to match_array(['Republic of Ireland'])
-      expect(geo_spatial).to match_array(['-10.577897 51.4201065 -6.0007535 55.3826405'])
+      expect(geo_spatial).to match_array(['ENVELOPE(-10.577897, -6.0007535, 55.3826405, 51.4201065)'])
       expect(geo_json).to match_array(["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.577897,51.4201065],[-6.0007535,51.4201065],[-6.0007535,55.3826405],[-10.577897,55.3826405],[-10.577897,51.4201065]]]},\"properties\":{\"placename\":\"Republic of Ireland\"},\"bbox\":[-10.577897,51.4201065,-6.0007535,55.3826405]}"])
     end
   end

@@ -9,10 +9,20 @@ module DRI
 
       # The name of the Solr field for indexing temporal metadata (creation date)
       CREATION_DATE_RANGE_SOLR_FIELD = 'cdateRange'
+      CREATION_DATE_YEAR_SOLR_FIELD = 'cdate_year_iim'
+      CREATION_DATE_RANGE_START_SOLR_FIELD = 'cdate_range_start_isi'
+      CREATION_DATE_RANGE_END_SOLR_FIELD = 'cdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (published date)
       PUBLISHED_DATE_RANGE_SOLR_FIELD = 'pdateRange'
+      PUBLISHED_DATE_YEAR_SOLR_FIELD = 'pdate_year_iim'
+      PUBLISHED_DATE_RANGE_START_SOLR_FIELD = 'pdate_range_start_isi'
+      PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
+      # The name of the Solr field for indexing temporal metadata (date)
+      DATE_RANGE_SOLR_FIELD = 'ddateRange'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
+      SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'
+      SUBJECT_DATE_RANGE_END_SOLR_FIELD = 'sdate_range_end_isi'
       # The name of the Solr field for indexing geographical metadata
       GEOSPATIAL_SOLR_FIELD = 'geospatial'
 
@@ -134,7 +144,8 @@ module DRI
               end
               # [west_long south_lat east_long north_lat]
               if self.all_keys?(box_keys, box)
-                results[:coords] << "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}"
+                # Solr 5 changed format to ENVELOPE(minX, maxX, maxY, minY)
+                results[:coords] << "ENVELOPE(#{box['westlimit']}, #{box['eastlimit']}, #{box['northlimit']}, #{box['southlimit']})"
                 results[:name] << box['name']
                 results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
               end
@@ -168,11 +179,12 @@ module DRI
 
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
-          if k.eql?('east')
+          case k
+          when 'east'
             point['east'] = v.strip
-          elsif k.eql?('north')
+          when 'north'
             point['north'] = v.strip
-          elsif k.eql?('name')
+          when 'name'
             point['name'] = v.strip
           end
         end
@@ -192,15 +204,16 @@ module DRI
 
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
-          if k.eql?('northlimit')
+          case k
+          when 'northlimit'
             box['northlimit'] = v.strip
-          elsif k.eql?('eastlimit')
+          when 'eastlimit'
             box['eastlimit'] = v.strip
-          elsif k.eql?('southlimit')
+          when 'southlimit'
             box['southlimit'] = v.strip
-          elsif k.eql?('westlimit')
+          when 'westlimit'
             box['westlimit'] = v.strip
-          elsif k.eql?('name')
+          when 'name'
             box['name'] = v.strip
           end
         end
@@ -223,11 +236,11 @@ module DRI
         results = []
         dates.each do |_key, value|
           value.each do |date_string|
-            range = get_date_range(date_string)
+            range = date_range(date_string)
             if range.key?('start') && range.key?('end')
-              results << "#{range['start']} #{range['end']}"
+              results << "[#{range['start']} TO #{range['end']}]"
             elsif range.key?('start')
-              results << "#{range['start']} #{range['start']}"
+              results << "#{range['start']}"
             end
           end
         end
@@ -240,7 +253,7 @@ module DRI
       # If the date is not in a valid format it will be ignored
       # @param [String] value the date string
       # @return [Hash] hash containing start and date fields, with their values
-      def self.get_date_range(value)
+      def self.date_range(value)
         return {} if value.nil?
 
         range = {}
@@ -249,10 +262,12 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
           begin
-            if k.eql?('start')
-              range['start'] = ISO8601::DateTime.new(v).year
-            elsif k.eql?('end')
-              range['end'] = ISO8601::DateTime.new(v).year
+            if k == 'start'
+              ISO8601::DateTime.new(v)
+              range['start'] = v
+            elsif k == 'end'
+              ISO8601::DateTime.new(v)
+              range['end'] = v
             end
           rescue ISO8601::Errors::StandardError => e
             Rails.logger.error("Date #{v} not indexed as it is not compliant with ISO8601. Error: #{e}.")
@@ -260,43 +275,52 @@ module DRI
           end
         end
 
-        if !range.empty?
-          if range.key?('start') && !range.key?('end')
-            range['end'] = range['start'] # date_end = date_start
-          end
-        else
+        if range.empty?
           # Is it a ISO8601 date range (start/end)?
-          date_array = transform_date(value)
+          date_array = transform_iso8601_range(value)
           unless date_array.empty?
             range['start'] = date_array[0]
-            range['end'] = date_array[1]
+            range['end'] = date_array[1] if date_array.length > 1
           end
         end
 
         range
       end
 
-      # Transforms a date range string in ISO8601 (e.g. YYYYmmdd/YYYYmmdd) into a string in the 'YYYY YYYY' format
-      # for indexing of date ranges into Solr (pairs of start year end year separated by a blank space)
+      def self.date_range_years(ranges)
+        years = []
+        ranges.each do |range|
+          endpoints = range.gsub(/\[(.*)\]/, '\1').split(/\sTO\s/)
+          endpoints.each do |point|
+            years << ISO8601::DateTime.new(point).year
+          end
+        end
+
+        years
+      end
+
+      # Transforms a date range string in ISO8601 (e.g. YYYYmmdd/YYYYmmdd) into a format
+      # for indexing of date ranges into Solr
       # @param [String] val the date string
-      # @return [Array<String>] the array containing start and date years for date range indexing
-      def self.transform_date(val = '')
+      # @return [Array<String>] the array containing start and end dates for date range indexing
+      def self.transform_iso8601_range(val = '')
         dates = []
 
         if val.include?('/')
           range = val.split('/')
-          dates = range.collect!.each do |dat|
+          dates = range.collect!.each do |date|
             begin
-              ISO8601::DateTime.new(dat).year unless dat.include?('/')
+              ISO8601::DateTime.new(date)
+              date
             rescue ISO8601::Errors::StandardError => e
-              Rails.logger.error("Date #{dat} not indexed as it is not compliant with ISO8601. Error: #{e}.")
+              Rails.logger.error("Date #{date} not indexed as it is not compliant with ISO8601. Error: #{e}.")
               return []
             end
           end
         else
           begin
-            # Single date, therefore end date = start date (for correct date range indexing)
-            dates[0] = dates[1] = ISO8601::DateTime.new(val).year
+            ISO8601::DateTime.new(val)
+            dates[0] = val
           rescue ISO8601::Errors::StandardError => e
             Rails.logger.error("Date #{val} not indexed as it is not compliant with ISO8601. Error: #{e}.")
             return []
@@ -304,7 +328,19 @@ module DRI
         end
 
         dates
-      end # transform_date
+      end # transform_iso8601_range
+
+      def self.transform_period(value)
+        return {} if value.nil?
+        
+        results = {}
+        value.split(/\s*;\s*/).each do |component|
+         (k,v) = component.split(/\s*=\s*/)
+         results[k.to_sym] = v unless v.nil? || v.empty?
+        end
+
+        results
+      end
 
       # Determines whether a date string is formatted according to ISO8601
       #

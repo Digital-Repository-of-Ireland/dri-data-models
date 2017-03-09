@@ -627,6 +627,9 @@ module DRI
         # Index creation_date
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => creation_date_for_index)
 
+        # Index creation_date
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => date_for_index)
+
         # Index Published Date
         unless published_date.empty? && issued_date_start.empty?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
@@ -638,17 +641,40 @@ module DRI
         # Creation date dateRange index
         cdate_ranges = date_ranges.select { |key, _value| ['creation_date', 'captured_date'].include?(key) }
         cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
-        solr_doc.merge!(Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index) unless cdate_index.empty?
+        if cdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
+          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
+          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+        end
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['issued_date'].include?(key) }
         pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
-        solr_doc.merge!(Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index) unless pdate_index.empty?
+        if pdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index)
+          pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
+          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+        end
+
+        # date dateRange index
+        ddate_ranges = date_ranges.select { |key, _value| ['date_other', 'part_date'].include?(key) }
+        ddate_index = DRI::Metadata::Transformations.transform_date_ranges(ddate_ranges)
+        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => ddate_index) unless ddate_index.empty?
+
 
         # Subject date dateRange index
-        sdate_ranges = date_ranges.select { |key, _value| ['subject_date', 'date_other', 'part_date'].include?(key) }
+        sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
         sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
-        solr_doc.merge!(Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index) unless sdate_index.empty?
+        if sdate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
+        end
 
         # Geospatial indexing
         # Index logainm URIs in the appropriate geographic indices
@@ -680,6 +706,16 @@ module DRI
         end
 
         []
+      end
+
+      # Returns all metadata related to date for Solr indexing
+      # These are date values
+      # @return [Array<String>] array of all date metadata values for Solr indexing
+      def date_for_index
+       display_single_date_for_index(other_date) |
+          display_single_date_for_index(part_date) |
+          display_date_range_for_index(other_date_start, other_date_end) |
+          display_date_range_for_index(part_date_start, part_date_end)
       end
 
       # Returns all metadata related to people names for Solr indexing
@@ -719,11 +755,7 @@ module DRI
       # @return [Array<String>] array of all subject temporal metadata values for Solr indexing
       def subject_temporal_for_index
         display_single_date_for_index(temporal_coverage) |
-          display_single_date_for_index(other_date) |
-          display_single_date_for_index(part_date) |
-          display_date_range_for_index(subject_date_start, subject_date_end) |
-          display_date_range_for_index(other_date_start, other_date_end) |
-          display_date_range_for_index(part_date_start, part_date_end)
+          display_date_range_for_index(subject_date_start, subject_date_end)
       end
 
       # Transforms an array of individual dates into DCMI period encoded for indexing into Solr

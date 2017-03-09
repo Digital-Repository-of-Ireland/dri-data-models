@@ -43,6 +43,9 @@ group :development, :test do
   gem 'ci_reporter_rspec'  
   gem 'paper_trail', '4.2.0'
   gem 'yard'
+
+  gem 'solr_wrapper', '0.19'
+  gem 'fcrepo_wrapper', '0.6.0'
 end
 
 group :test do
