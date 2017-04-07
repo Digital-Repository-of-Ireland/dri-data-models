@@ -3,7 +3,7 @@ module DRI
   # Implementation of DRI::LinkedData digital objects extending from AF Base
   # for Logainm places
   class LinkedData < ActiveFedora::Base
-    include Sufia::Noid
+    include DRI::Noid
 
     contains 'descMetadata', class_name: 'DRI::Metadata::LinkedData'
 

@@ -1,6 +1,5 @@
-module Sufia
-  module GenericFile
-    module Characterization
+module DRI::Asset
+  module Characterization
       extend ActiveSupport::Concern
       included do
         contains "characterization", class_name: 'FitsDatastream'
@@ -79,8 +78,13 @@ module Sufia
 
       # Populate GenericFile's properties with fields from FITS (e.g. Author from pdfs)
       def append_metadata
+        fits_to_desc_mapping = {
+          :file_title => :title,
+          :file_author => :creator
+        }
+
         terms = characterization_terms
-        Sufia.config.fits_to_desc_mapping.each_pair do |k, v|
+        fits_to_desc_mapping.each_pair do |k, v|
           next unless terms.key?(k)
           Array.wrap(terms[k]).each do |term_value|
             proxy_term = send(v)
@@ -109,5 +113,4 @@ module Sufia
         h
       end
     end
-  end
 end

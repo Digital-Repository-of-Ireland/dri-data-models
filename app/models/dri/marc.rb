@@ -169,7 +169,7 @@ module DRI
       return if new_record? || full_metadata_no_ns.search('//record').count <= 1
 
       begin
-        Sufia.queue.push(CreateMarcRecordsJob.new(id))
+        DRI.queue.push(CreateMarcRecordsJob.new(id))
       rescue Exception => e
         Rails.logger.error(e.message)
       end

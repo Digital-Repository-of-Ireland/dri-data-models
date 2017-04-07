@@ -1,9 +1,5 @@
-# Sufia namespace
-module Sufia
-  # GenericFile namespace
-  module GenericFile
-    # Override Sufia's MimeType module
-    module MimeTypes
+module DRI::Asset
+  module MimeTypes
       extend ActiveSupport::Concern
       # Check if pdf file
       # @return [Boolean] true if mime_type included in pdf mimetypes
@@ -73,5 +69,4 @@ module Sufia
         end
       end
     end
-  end
 end

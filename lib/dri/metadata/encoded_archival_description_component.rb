@@ -1177,7 +1177,7 @@ module DRI
 
           # Queue synchronization between parent and grandparent
           if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-            Sufia.queue.push(UpdateParentMetadataJob.new(parent.id))
+            DRI.queue.push(UpdateParentMetadataJob.new(parent.id))
           end
 
           return true

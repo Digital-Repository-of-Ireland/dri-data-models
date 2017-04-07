@@ -96,7 +96,7 @@ module DRI
     def self.retrieve_linked_data(obj)
       if AuthoritiesConfig
         begin
-          Sufia.queue.push(LinkedDataJob.new(obj.id)) unless obj.geographical_coverage.blank?
+          DRI.queue.push(LinkedDataJob.new(obj.id)) unless obj.geographical_coverage.blank?
         rescue Exception => e
           Rails.logger.error "Unable to submit linked data job: #{e.message}"
         end

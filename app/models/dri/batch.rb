@@ -7,9 +7,11 @@ module DRI
   # inherit from this class
   #
   class Batch < ActiveFedora::Base
-    include Sufia::ModelMethods
-    include Sufia::Noid
-    include Sufia::GenericFile::Export
+    include Hydra::WithDepositor
+
+    include DRI::Noid
+    include DRI::Export
+    
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::InterchangeableMetadata

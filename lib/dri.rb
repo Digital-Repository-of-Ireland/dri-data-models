@@ -8,4 +8,11 @@ module DRI
   autoload :Checksum, 'dri/checksum'
   autoload :Solr, 'solr/query'
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
+
+  attr_writer :queue
+
+  def self.queue
+    @queue ||= DRI::Resque::Queue.new('dri')
+  end
+
 end
