@@ -72,7 +72,7 @@ module DRI::Asset
         metadata = content.extract_metadata
         characterization.ng_xml = metadata if metadata.present?
         append_metadata
-        self.filename = [content.original_name]
+        self.filename = [self.label]
         save
       end
 
