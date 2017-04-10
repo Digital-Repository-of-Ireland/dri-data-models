@@ -47,6 +47,9 @@ module DRI
     property :depositor, predicate: ::RDF::URI.new("http://id.loc.gov/vocabulary/relators/dpt"), multiple: false do |index|
       index.as :symbol, :stored_searchable
     end
+    property :creator, predicate: ::RDF::Vocab::DC.creator do |index|
+      index.as :stored_searchable, :facetable
+    end
 
     # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
     # the DS is non-repeatable
