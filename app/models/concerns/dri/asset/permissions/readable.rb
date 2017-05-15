@@ -1,8 +1,6 @@
-# Sufia namespace
-module Sufia
+module DRI::Asset
   # Permissions namespace
   module Permissions
-    # Override from Sufia
     module Readable
       extend ActiveSupport::Concern
 

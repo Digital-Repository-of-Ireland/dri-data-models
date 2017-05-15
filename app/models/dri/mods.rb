@@ -385,7 +385,7 @@ module DRI
       return unless new_record? || query.count <= 1
 
       begin
-        Sufia.queue.push(CreateModsRecordsJob.new(id))
+        DRI.queue.push(CreateModsRecordsJob.new(id))
       rescue Exception => e
         Rails.logger.error(e.message)
       end

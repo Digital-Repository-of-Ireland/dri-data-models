@@ -5,23 +5,28 @@ module DRI
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
   class GenericFile < ActiveFedora::Base
-    include Sufia::ModelMethods
-    include Sufia::Noid
-    include Sufia::GenericFile::MimeTypes
-    include Sufia::GenericFile::Export
-    include Sufia::GenericFile::Characterization
-    include Sufia::GenericFile::Permissions
-    include Sufia::GenericFile::Derivatives
-    include Sufia::GenericFile::Featured
-    include Sufia::GenericFile::Metadata
-    include Sufia::GenericFile::Content
-    include Sufia::GenericFile::Versions
-    include Sufia::GenericFile::VirusCheck
-    include Sufia::GenericFile::FullTextIndexing
-    include Sufia::GenericFile::ProxyDeposit
+    include Hydra::AccessControls::Permissions
+    include Hydra::AccessControls::Visibility
+    include Hydra::WithDepositor
     include Hydra::Collections::Collectible
-    include Sufia::GenericFile::Batches
-    include Sufia::GenericFile::Indexing
+
+    include DRI::Noid
+    include DRI::Export
+    include DRI::Asset::MimeTypes
+    include DRI::Asset::Characterization
+    include DRI::Asset::Permissions::Readable
+    include DRI::Asset::Derivatives
+    include DRI::Asset::Versions
+
+    #include Sufia::GenericFile::Featured
+    #include Sufia::GenericFile::Metadata
+    #include Sufia::GenericFile::Content
+    #include Sufia::GenericFile::Versions
+    #include Sufia::GenericFile::VirusCheck
+    #include Sufia::GenericFile::FullTextIndexing
+    #include Sufia::GenericFile::ProxyDeposit
+    #include Sufia::GenericFile::Batches
+    #include Sufia::GenericFile::Indexing
 
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
@@ -32,6 +37,19 @@ module DRI
 
     # Declare a 'dri_properties' DS, of the following type
     contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
+    contains 'content', class_name: 'FileContentDatastream'
+    contains 'full_text'
+
+    property :title, predicate: ::RDF::Vocab::DC.title do |index|
+      index.as :stored_searchable, :facetable
+    end
+    property :label, predicate: ActiveFedora::RDF::Fcrepo::Model.downloadFilename, multiple: false
+    property :depositor, predicate: ::RDF::URI.new("http://id.loc.gov/vocabulary/relators/dpt"), multiple: false do |index|
+      index.as :symbol, :stored_searchable
+    end
+    property :creator, predicate: ::RDF::Vocab::DC.creator do |index|
+      index.as :stored_searchable, :facetable
+    end
 
     # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
     # the DS is non-repeatable
@@ -94,37 +112,49 @@ module DRI
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
+      solr_doc[ActiveFedora.index_field_mapper.solr_name('label')] = label
+      solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format')] = file_format
+      solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format', :facetable)] = file_format
+      solr_doc['all_text_timv'] = full_text.content
+      # Index the Fedora-generated SHA1 digest to create a linkage
+      # between files on disk (in fcrepo.binary-store-path) and objects
+      # in the repository.
+      solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
+      
       solr_doc
     end
 
-    # Extract the metadata from the content datastream and record it in the characterization datastream
-    # Issue #
-    # Override to fix issue with sample_rate or height or width md terms from FITS being generated as float
-    # as opposed to integer strings. this was causing Solr errors when indexing as the Solr fields are integers
-    def characterize
-      metadata = content.extract_metadata
-      characterization.ng_xml = round_float_values(metadata) if metadata.present?
-      append_metadata
-      self.filename = [content.original_name]
-      save
+    def related_files
+        return [] unless batch
+        batch.generic_files.reject { |sibling| sibling.id == id }
+      end
+
+    # Is this file in the middle of being processed by a batch?
+    def processing?
+      try(:batch).try(:status) == ['processing'.freeze]
     end
 
     private
 
-    def delete_files
-      local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
-                                        f: id, d: 'content').order('version DESC').to_a
-      local_file_info.each(&:destroy)
-      FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
-    end
-
-    def round_float_values(md_xml)
-      doc = Nokogiri::XML::Document.parse(md_xml)
-      doc.search('//fits:sampleRate | //fits:height | //fits:width', 'fits' => 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output').each do |node|
-        node.content = (node.text.to_f.round).to_s
+      def delete_files
+        local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
+                                          f: id, d: 'content').order('version DESC').to_a
+        local_file_info.each(&:destroy)
+        FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
       end
 
-      doc.to_xml
-    end
+      def digest_from_content
+        return unless content.has_content?
+        content.digest.first.to_s
+      end
+
+      def round_float_values(md_xml)
+        doc = Nokogiri::XML::Document.parse(md_xml)
+        doc.search('//fits:sampleRate | //fits:height | //fits:width', 'fits' => 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output').each do |node|
+          node.content = (node.text.to_f.round).to_s
+        end
+
+        doc.to_xml
+      end
   end
 end

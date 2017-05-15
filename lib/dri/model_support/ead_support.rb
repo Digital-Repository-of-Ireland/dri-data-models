@@ -213,7 +213,7 @@ module DRI
 
         if content_changed && generic_files.empty? &&
             !dao_href_proxy.empty? && !new_record?
-          Sufia.queue.push(IngestFilesFromMetadataJob.new(id))
+          DRI.queue.push(IngestFilesFromMetadataJob.new(id))
         end
       end # ingest_files_if_changed
     end # module

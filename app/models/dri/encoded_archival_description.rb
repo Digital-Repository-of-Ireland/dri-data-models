@@ -448,11 +448,11 @@ module DRI
 
       if trigger_ingest
         # This is an EAD ingest, not MD update
-        Sufia.queue.push(SynchronizeChildrenToMetadataJob.new(id))
+        DRI.queue.push(SynchronizeChildrenToMetadataJob.new(id))
       elsif trigger_update && descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
         # ONLY for EncodedArchivalDescriptionComponent
         # descMetadata update, trigger parent fullMetadata sync
-        Sufia.queue.push(UpdateParentMetadataJob.new(id))
+        DRI.queue.push(UpdateParentMetadataJob.new(id))
         self.trigger_update = false
       end
     end

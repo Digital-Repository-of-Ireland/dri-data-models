@@ -230,7 +230,7 @@ module DRI
       # @param [Hash] dates hash containing all the dates values from the metadata
       # @option dates [Array] :start the array of start dates from metadata
       # @option dates [Array] :end the array of end dates from metadata
-      # @return [String] the array of formatted dates strings for indexing (start_date end_date)
+      # @return [String] the array of formatted dates strings for indexing [start_date TO end_date]
       #
       def self.transform_date_ranges(dates = {})
         results = []
@@ -238,7 +238,7 @@ module DRI
           value.each do |date_string|
             range = date_range(date_string)
             if range.key?('start') && range.key?('end')
-              results << "[#{range['start']} TO #{range['end']}]"
+              results << "[#{range['start']} TO #{range['end']}]" if valid_range?(range)
             elsif range.key?('start')
               results << "#{range['start']}"
             end
@@ -360,6 +360,13 @@ module DRI
 
           false
         end
+      end
+
+      def self.valid_range?(range)
+        start_date = range['start']
+        end_date = range['end']
+
+        start_date.to_f < end_date.to_f
       end
 
       # Determines whether a date string is formatted according to DCMI Period
