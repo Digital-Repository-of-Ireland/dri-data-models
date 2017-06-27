@@ -94,15 +94,15 @@ module DRI
       solr_doc = super(solr_doc, opts)
 
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0]]) unless width.empty?
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer) => [height[0]]) unless height.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer) => [height[0].to_i]) unless height.empty?
       unless width.empty? || height.empty?
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i * height[0].to_i])
       end
 
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0]]) unless sample_rate.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0].to_i]) unless sample_rate.empty?
 
       file_type = []
       file_type.push('audio') if audio?
@@ -146,15 +146,6 @@ module DRI
       def digest_from_content
         return unless content.has_content?
         content.digest.first.to_s
-      end
-
-      def round_float_values(md_xml)
-        doc = Nokogiri::XML::Document.parse(md_xml)
-        doc.search('//fits:sampleRate | //fits:height | //fits:width', 'fits' => 'http://hul.harvard.edu/ois/xml/ns/fits/fits_output').each do |node|
-          node.content = (node.text.to_f.round).to_s
-        end
-
-        doc.to_xml
       end
   end
 end
