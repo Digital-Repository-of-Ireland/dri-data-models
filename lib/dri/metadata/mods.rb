@@ -1508,7 +1508,7 @@ module DRI
         errors[:creator] = "can\'t be blank" if creator_result == false
         errors[:description] = "can\'t be blank" if description_result == false
         errors[:rights] = "can\'t be blank" if rights_result == false
-        errors[:creation_date] = "can\'t be blank" if date_result == false
+        errors[:date] = "can\'t be blank" if date_result == false
 
         errors
       end # custom_validations

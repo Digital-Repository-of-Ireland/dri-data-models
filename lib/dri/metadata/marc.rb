@@ -33,12 +33,11 @@ module DRI
         t.description(path: 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.creator(path: 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.rights(path: 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.creation_date(path: 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"] | //record/controlfield[@tag="008"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+        t.date(path: 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"]')
         
         # common fields
         t.language(path: 'record/datafield[@tag="041"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.language_facetable])
         t.publisher(path: 'record/datafield[@tag="260"]/subfield[@code="b"] | //record/datafield[@tag="710"]/subfield[@code="x"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.published_date(path: 'record/datafield[@tag="260"]/subfield[@code="c"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, :sortable])
         t.author(path: 'record/datafield[@tag="100" or @tag="110" or @tag="111"]/subfield[@code="a"] | //record/datafield[@tag="740"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
         t.subject(path: 'record/datafield[@tag="600" or @tag="610" or @tag="611" or @tag="630" or @tag="650" or @tag="653"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
         t.contributor(path: 'record/datafield[@tag="700"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -83,7 +82,7 @@ module DRI
         t.nccb_subject_facet(path: 'record/datafield[@tag="600" or @tag="610" or @tag="611"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
         # Date Indices
-        t.creation_date_idx(path: '//record/controlfield[@tag="008"]')
+        t.date_idx(path: '//record/controlfield[@tag="008"]')
 
         # marc_id is used as a local, unique identifier for the record and is used for internal DRI relationships specified in the metadata
         # we map it to 024 - Other Standard Identifier (R)
@@ -182,18 +181,29 @@ module DRI
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
 
-        date_ranges = creation_date_for_index # ALL the date ranges
-
-        # Creation date dateRange index
-        cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
-        cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
-        if cdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
-          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+        # dates
+        dates = date_from_all_materials
+        
+        if dates.present?
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(dates))
         end
+       
+        p_date = published_date
+        if p_date
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
+        
+          pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => p_date })
+          if pdate_ranges.present?
+            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)
+            pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_ranges)
+            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
+            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
+            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+          end
+        end
+        
+        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => dates })
+        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
 
         solr_doc
       end
@@ -204,25 +214,111 @@ module DRI
       def person_array_for_index
         contributor | creator | publisher
       end
+        
+      def date_array_for_index
+        date | date_from_all_materials
+      end
 
-      # Returns all metadata related to creation date for Solr indexing
-      # @return [Hash] the hash with creation_date array
-      def creation_date_for_index
-        dates_hash = {}
+      # Transforms metadata date strings into DCMI Period encoded strings for displayable indices
+      # @param [String] date_field the date string
+      # @return [String] the DCMI Period encoded date string for display
+      def display_date_for_index(date_field)
+        date_field.collect do |value|
+          begin
+            next if value.nil? || value.empty?
+            
+            return value if DRI::Metadata::Transformations.dcmi_period?(value)
 
-        return dates_hash if creation_date_idx.empty?
-
-        dates_array = creation_date_idx.map do |value|
-          date_s = value.slice(7, 4)
-          date_e = value.slice(11, 4)
-          unless ['\\\\', '    ', '####'].include?(date_s)
-            ['\\\\', '    ', '####'].include?(date_e) ? date_s : "#{date_s}/#{date_e}"
+            # Date range in ISO8601 format?
+            formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
+            DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
+          rescue ISO8601::Errors::StandardError
+            # DCMI Period 'name' is the md value
+            DRI::Metadata::Transformations.create_dcmi_period(value)
           end
         end
+      end
+     
+      def date_from_all_materials
+        return [] if all_materials_dates.empty? || ['b','c','d','n'].include?(all_materials_dates[:type])
 
-        dates_hash['creation_date'] = dates_array unless dates_array.empty?
+        type_of_date = all_materials_dates[:type]
+        date1 = all_materials_dates[:date1]
+        date2 = all_materials_dates[:date2]
 
-        dates_hash
+        case type_of_date
+        when 's'
+          name = "s#{date1}"
+          start_date = date1
+          end_date = ''
+        when 'e'
+          year = date1
+          month = date2.slice(0, 2)
+          day = date2.slice(2, 2)
+          
+          name = "e#{year}#{month}#{day}"
+          start_date = "#{year}#{month}#{day}"
+          end_date = ''
+        when 'p'  
+          name = "p#{date1}#{date2}"
+          start_date = ''
+          end_date = ''
+        when 'm','i','k','q'
+          name = "#{date1} - #{date2}"
+          start_date = date1
+          end_date = date2
+        else
+          name = "#{type_of_date}#{date1}#{date2}"
+          start_date = ''
+          end_date = ''
+        end
+
+        [DRI::Metadata::Transformations.create_dcmi_period(name, start_date, end_date)]
+      end
+
+      def published_date
+        return nil if all_materials_dates.empty?
+
+        type_of_date = all_materials_dates[:type]
+        date1 = all_materials_dates[:date1]
+        date2 = all_materials_dates[:date2]
+
+        case type_of_date
+        when 'c'
+          name = "#{date1} - #{date2}"
+          start_date = "#{date1}"
+          end_date = ''
+        when 'd'
+          name = "#{date1} - #{date2}"
+          start_date = "#{date1}"
+          end_date = "#{date2}"
+        else
+          return nil
+        end
+
+        [DRI::Metadata::Transformations.create_dcmi_period(name, start_date, end_date)]
+      end
+
+      def all_materials_dates
+        @all_materials_dates || parse_all_materials
+      end
+
+      def parse_all_materials
+        tag_index = controlfield_tag.find_index('008')
+        return {} if tag_index.nil?
+
+        all_materials = controlfield[tag_index]
+        type_of_date = all_materials[6]
+        
+        date1 = all_materials.slice(7,4)
+        date2 = all_materials.slice(11,4)
+
+        all_materials = {}
+        all_materials[:type] = type_of_date
+        all_materials[:date1] = date1
+        all_materials[:date2] = date2
+
+        all_materials
       end
 
       # Implement additional DRI metadata validations as this class does not inherit
@@ -236,7 +332,7 @@ module DRI
         description_result = false
         creator_result = false
         rights_result = false
-        creation_date_result = false
+        date_result = false
 
         # Join all elements in array, get rid of carriage returns from the form (squish) and validate
         title_result = true unless title.join.squish.empty?
@@ -244,20 +340,21 @@ module DRI
         description_result = true unless description.join.squish.empty?
         creator_result = true unless creator.join.squish.empty?
         rights_result = true unless rights.join.squish.empty?
-        creation_date_result = true unless creation_date.join.squish.empty?
+        date_result = true unless date.join.squish.empty?
+        published_date.each { |curr_date| date_result = true unless curr_date.blank? } unless date_result
 
         title_result = true if title.any? { |v| !v.blank? }
         type_result = true if type.any? { |v| !v.blank? }
         description_result = true if description.any? { |v| !v.blank? }
         creator_result = true if creator.any? { |v| !v.blank? }
         rights_result = true if rights.any? { |v| !v.blank? }
-        creation_date_result = true if creation_date.any? { |v| !v.blank? }
+        date_result = true if date.any? { |v| !v.blank? }
 
         errors[:title] = "can\'t be blank" if title_result == false
         errors[:type] = "can\'t be blank" if type_result == false
         errors[:description] = "can\'t be blank" if description_result == false
         errors[:creator] = "can\'t be blank" if creator_result == false
-        errors[:creation_date] = "can\'t be blank" if creation_date_result == false
+        errors[:date] = "can\'t be blank" if date_result == false
         errors[:rights] = "can\'t be blank" if rights_result == false
 
         errors

@@ -60,6 +60,9 @@ module DRI
     property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
     property :format, delegate_to: 'descMetadata', multiple: true
 
+    property :published_date, delegate_to: 'descMetadata', multiple: true
+    property :creation_date, delegate_to: 'descMetadata', multiple: true
+
     around_save :synchronize_if_changed # trigger EAD children creation
 
     # Override constructor

@@ -54,6 +54,8 @@ module DRI
       index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
     end
 
+    property :date, delegate_to: 'descMetadata', multiple: true
+
     # Disabled below - metadata object update triggers
     # the creation of duplicated objects
     # around_save :create_multiple_records

@@ -61,6 +61,9 @@ module DRI
     property :subject_date_end, delegate_to: 'descMetadata', multiple: true
     property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
 
+    property :published_date, delegate_to: 'descMetadata', multiple: true
+    property :creation_date, delegate_to: 'descMetadata', multiple: true
+
     class_eval do
       # Roles
       DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }

@@ -34,10 +34,6 @@ module DRI
         property :contributor, delegate_to: 'descMetadata', multiple: true
         # Publisher (collection-level, DRI pre-populated)
         property :publisher, delegate_to: 'descMetadata', multiple: true
-        # Published Date (collection-level)
-        property :published_date, delegate_to: 'descMetadata', multiple: true
-        # Creation Date (collection-level, DRI pre-populated)
-        property :creation_date, delegate_to: 'descMetadata', multiple: true
         # Subject (collection-level)
         property :subject, delegate_to: 'descMetadata', multiple: true
         # Language (collection-level)
