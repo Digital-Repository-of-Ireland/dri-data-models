@@ -27,7 +27,7 @@ describe 'Marc' do
       @marc_item.description.should == ["\n    1 v. (unpaged) :\n    ill. (some col.) ;\n    26 cm.\n  ", "\n    One Mylar sheet included in pocket.\n  ", "\n    A poem about numbers and their characteristics. Features anamorphic, or distorted, drawings which can be restored to normal by viewing from a particular angle or by viewing the image's reflection in the provided Mylar cone.\n  "]
       @marc_item.creator.should == ["\n    Sandburg, Carl,\n    1878-1967.\n  ", "\n    Rand, Ted,\n    ill.\n  "]
       @marc_item.rights.first.squish.should == 'Copyright Digital Repository of Ireland, 2013. Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0).'
-      @marc_item.date.should == ['c1993.']
+      @marc_item.date.should == ['c1993.', 'name=s1993; start=1993;']
     end
 
     it 'should validate the presence of title attribute' do

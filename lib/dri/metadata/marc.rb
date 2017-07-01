@@ -33,7 +33,7 @@ module DRI
         t.description(path: 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.creator(path: 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         t.rights(path: 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.date(path: 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"]')
+        t.date_260c_264c(path: 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"]')
         
         # common fields
         t.language(path: 'record/datafield[@tag="041"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.language_facetable])
@@ -181,13 +181,8 @@ module DRI
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
 
-        # dates
-        dates = date_from_all_materials
-        
-        if dates.present?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(dates))
-        end
-       
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
+             
         p_date = published_date
         if p_date
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
@@ -202,7 +197,7 @@ module DRI
           end
         end
         
-        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => dates })
+        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
         solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
 
         solr_doc
@@ -227,11 +222,13 @@ module DRI
           begin
             next if value.nil? || value.empty?
             
-            return value if DRI::Metadata::Transformations.dcmi_period?(value)
-
-            # Date range in ISO8601 format?
-            formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
-            DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
+            if DRI::Metadata::Transformations.dcmi_period?(value)
+              value
+            else
+              # Date range in ISO8601 format?
+              formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
+              DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
+            end
           rescue ISO8601::Errors::StandardError
             # DCMI Period 'name' is the md value
             DRI::Metadata::Transformations.create_dcmi_period(value)
@@ -274,6 +271,10 @@ module DRI
         end
 
         [DRI::Metadata::Transformations.create_dcmi_period(name, start_date, end_date)]
+      end
+
+      def date
+        date_260c_264c | date_from_all_materials
       end
 
       def published_date
@@ -341,7 +342,7 @@ module DRI
         creator_result = true unless creator.join.squish.empty?
         rights_result = true unless rights.join.squish.empty?
         date_result = true unless date.join.squish.empty?
-        published_date.each { |curr_date| date_result = true unless curr_date.blank? } unless date_result
+        published_date.each { |curr_date| date_result = true unless curr_date.blank? } unless published_date.nil? || date_result
 
         title_result = true if title.any? { |v| !v.blank? }
         type_result = true if type.any? { |v| !v.blank? }
