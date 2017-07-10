@@ -26,6 +26,9 @@ module DRI
     property :geocode_box, delegate_to: 'descMetadata', multiple: true
     property :relation, delegate_to: 'descMetadata', multiple: true
 
+    property :published_date, delegate_to: 'descMetadata', multiple: true
+    property :creation_date, delegate_to: 'descMetadata', multiple: true
+
     #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|

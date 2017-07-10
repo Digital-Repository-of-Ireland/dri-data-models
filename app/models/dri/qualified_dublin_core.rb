@@ -56,6 +56,9 @@ module DRI
       index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
     end
 
+    property :published_date, delegate_to: 'descMetadata', multiple: true
+    property :creation_date, delegate_to: 'descMetadata', multiple: true
+
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
