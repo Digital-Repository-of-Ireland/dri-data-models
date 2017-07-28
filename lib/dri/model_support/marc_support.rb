@@ -24,7 +24,7 @@ module DRI
       # @param [String] xml the XML metadata for the digital object to be created
       #
       def create_object(xml)
-        new_object = DRI::Batch.with_standard(:marc)
+        new_object = DRI::Base.with_standard(:marc)
         if governing_collection.nil?
           new_object.governing_collection = self
         else

@@ -24,7 +24,7 @@ module DRI
         '%W' => 'Digital Repository of Ireland'
       }
       text = []
-      text << '%0 Batch'
+      text << '%0 Object'
       end_note_format.each do |endnote_key, mapping|
         if mapping.is_a? String
           values = [mapping]

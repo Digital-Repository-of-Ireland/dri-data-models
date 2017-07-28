@@ -3,7 +3,7 @@ module DRI
   # ModelSupport namespace
   module ModelSupport
     # Includes AF properties, methods common to all metadata digital object classes
-    module InterchangeableMetadata
+    module Base
       extend ActiveSupport::Concern
 
       included do

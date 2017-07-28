@@ -2,27 +2,27 @@
 # extending from active-fedora
 #
 module DRI
-  # DRI Batch, generic DRI digital object
+  # DRI Base, generic DRI digital object
   # Digital objects in DRI that handle the supported metadata standards
   # inherit from this class
   #
-  class Batch < ActiveFedora::Base
+  class Base < ActiveFedora::Base
     include Hydra::WithDepositor
 
     include DRI::Noid
     include DRI::Export
     
+    include DRI::ModelSupport::Base
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
-    include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
 
-    # one-to-many AF relationship to associate digital assets with their batch object
-    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :batch, dependent: :destroy
+    # one-to-many AF relationship to associate digital assets with their object
+    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :object, dependent: :destroy
     # one-to-many AF relationship to associate documentation objects
     has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
@@ -67,11 +67,11 @@ module DRI
     # a new object if object not found
     #
     # @param pid [String] the pid of the object to retrieve
-    # @return [DRI::Batch] the digital object.
+    # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::Batch.find(pid)
+      DRI::Base.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
-      DRI::Batch.create(id: pid)
+      DRI::Base.create(id: pid)
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -151,5 +151,5 @@ module DRI
       storage = StorageService.new
       storage.delete_bucket(id)
     end
-  end # Class Batch
+  end # Class Base
 end # Module DRI

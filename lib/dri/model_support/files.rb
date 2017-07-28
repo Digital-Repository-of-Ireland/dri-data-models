@@ -9,8 +9,8 @@ module DRI
       require 'uri'
       require 'tempfile'
 
-      # Gathers the file characteristics from the Batch's GenericFiles
-      # and adds them to the Batch's Solr document
+      # Gathers the file characteristics from the Object's GenericFiles
+      # and adds them to the Object's Solr document
       # @param solr_doc [Hash] the solr document hash for the object
       # @return [Hash] solr_doc hash for index
       def file_metadata_to_solr(solr_doc = {})

@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Batch
-  class QualifiedDublinCore < DRI::Batch
+  # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Base
+  class QualifiedDublinCore < DRI::Base
 
     contains 'descMetadata', class_name: 'DRI::Metadata::QualifiedDublinCore'
 
@@ -85,7 +85,7 @@ module DRI
     #
     # @return [String] the AF digital object model name
     def model_name
-      DRI::Batch.model_name
+      DRI::Base.model_name
     end
 
     # Roles attribute setter

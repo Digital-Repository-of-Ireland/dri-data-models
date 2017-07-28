@@ -36,8 +36,8 @@ describe 'EncodedArchivalDescription' do
       expect(@collection.new_record?).to eq true
     end
 
-    it 'should be a kind of Batch and EncodedArchivalDescription' do
-      @ead_header.should be_kind_of(DRI::Batch)
+    it 'should be a kind of Base and EncodedArchivalDescription' do
+      @ead_header.should be_kind_of(DRI::Base)
       @ead_header.should be_kind_of(DRI::EncodedArchivalDescription)
     end
 

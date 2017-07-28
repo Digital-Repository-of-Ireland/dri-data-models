@@ -12,8 +12,8 @@ describe 'Marc' do
 
     end
 
-    it 'should be a kind of Batch' do
-      @marc_item.should be_kind_of(DRI::Batch)
+    it 'should be a kind of Base' do
+      @marc_item.should be_kind_of(DRI::Base)
     end
 
     it 'should have a marc datastream' do

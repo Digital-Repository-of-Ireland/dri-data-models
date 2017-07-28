@@ -7,7 +7,7 @@ module DRI::Asset
       # Determine whether an object has public access status
       # @return [Boolean] true if public; false otherwise
       def public?
-        governing_object = self.batch
+        governing_object = self.base
 
         while governing_object.master_file_access.nil? || governing_object.master_file_access == "inherit" 
           governing_object = governing_object.governing_collection

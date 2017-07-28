@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI EAD digital objects extending from DRI::Batch
-  class EncodedArchivalDescription < DRI::Batch
+  # Implementation of DRI EAD digital objects extending from DRI::Base
+  class EncodedArchivalDescription < DRI::Base
     include DRI::ModelSupport::EadSupport
 
     # Specific EAD terms mapped
@@ -350,7 +350,7 @@ module DRI
     # If this is EAD, put the full XML in fullMetadata and
     # return XML with the component's children removed
     # @param [Nokogiri::XML] xml_text the XML metadata for the object
-    # @param [String] xml_type the type of object (DRI::Batch class)
+    # @param [String] xml_type the type of object (DRI::Base class)
     # @return [Nokogiri::XML] the modified XML document
     def split_ead_xml(xml_text, xml_type)
       if xml_text.is_a?(Nokogiri::XML::Document)

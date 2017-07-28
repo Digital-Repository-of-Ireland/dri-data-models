@@ -4,7 +4,7 @@ module DRI
   module Metadata
     # Implements DRI Base metadata class from which the different DRI supported standards
     # metadata classes inherit from
-    class Base < ActiveFedora::OmDatastream
+    class Base < ::DRI::OmDatastream
       # Boolean flag for metadata types like EAD where extracts of the metadata
       # may be stored in other Fedora objects. This allows us to add functions
       # to synchronize the XML between several objects

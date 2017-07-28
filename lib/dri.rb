@@ -8,6 +8,8 @@ module DRI
   autoload :Checksum, 'dri/checksum'
   autoload :Solr, 'solr/query'
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
+  autoload :Datastreams, 'dri/datastreams'
+  autoload :OmDatastream, 'dri/om_datastream'
 
   attr_writer :queue
 

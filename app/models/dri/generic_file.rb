@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
   # Implementation of DRI EAD generic files (digital assets) extending from AF Base
-  # and associated to Digital Objects extending from DRI::Batch:
+  # and associated to Digital Objects extending from DRI::Base
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
   class GenericFile < ActiveFedora::Base
@@ -17,23 +17,13 @@ module DRI
     include DRI::Asset::Permissions::Readable
     include DRI::Asset::Derivatives
     include DRI::Asset::Versions
-
-    #include Sufia::GenericFile::Featured
-    #include Sufia::GenericFile::Metadata
-    #include Sufia::GenericFile::Content
-    #include Sufia::GenericFile::Versions
-    #include Sufia::GenericFile::VirusCheck
-    #include Sufia::GenericFile::FullTextIndexing
-    #include Sufia::GenericFile::ProxyDeposit
-    #include Sufia::GenericFile::Batches
-    #include Sufia::GenericFile::Indexing
-
+    
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
-    # one-to-one AF association to associate DRI::Batch
-    belongs_to :batch,
+    # one-to-one AF association to associate DRI::Base
+    belongs_to :object,
                predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf,
-               class_name: 'DRI::Batch'
+               class_name: 'DRI::Base'
 
     # Declare a 'dri_properties' DS, of the following type
     contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
@@ -125,13 +115,13 @@ module DRI
     end
 
     def related_files
-        return [] unless batch
-        batch.generic_files.reject { |sibling| sibling.id == id }
+        return [] unless object
+        object.generic_files.reject { |sibling| sibling.id == id }
       end
 
-    # Is this file in the middle of being processed by a batch?
+    # Is this file in the middle of being processed by an object?
     def processing?
-      try(:batch).try(:status) == ['processing'.freeze]
+      try(:object).try(:status) == ['processing'.freeze]
     end
 
     private

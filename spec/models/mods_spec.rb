@@ -37,8 +37,8 @@ describe 'Mods' do
       @collection.delete
     end
 
-    it 'should be a kind of Batch and Mods' do
-      @mods_record.should be_kind_of(DRI::Batch)
+    it 'should be a kind of Base and Mods' do
+      @mods_record.should be_kind_of(DRI::Base)
       @mods_record.should be_kind_of(DRI::Mods)
     end
 

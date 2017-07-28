@@ -38,19 +38,13 @@ module DRI
       # @param [String] xml the XML metadata for the digital object to be created
       #
       def create_object(xml)
-        new_object = DRI::Batch.with_standard :mods
+        new_object = DRI::Base.with_standard :mods
         new_object.governing_collection = self
         new_object.depositor = depositor
         new_object.status = status
         new_object.update_metadata(xml)
         new_object.permissions = permissions.to_a
         DRI::Utils.checksum_metadata(new_object)
-
-        # Assign collection membership - only for collections
-        # (hasCollectionMember and isMemberOfCollection)
-        # if new_object.collection? && self.collection?
-        #   new_object.parent_collection = self
-        # end
 
         new_object.save if new_object.valid?
       end # create_object

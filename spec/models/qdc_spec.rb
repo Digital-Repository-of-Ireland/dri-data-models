@@ -45,12 +45,12 @@ describe 'QualifiedDublinCore' do
     end
 
     it 'should assert content model' do
-      expect_any_instance_of(DRI::Batch).to receive(:assert_content_model)
-      @dc = DRI::Batch.with_standard(:qdc)
+      expect_any_instance_of(DRI::Base).to receive(:assert_content_model)
+      @dc = DRI::Base.with_standard(:qdc)
     end
 
     it 'should have asserted the content model' do
-      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::Batch'])
+      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::Base'])
     end
 
     

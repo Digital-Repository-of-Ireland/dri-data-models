@@ -492,10 +492,10 @@ describe 'EncodedArchivalDescription descMetadata' do
         curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
         curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
         curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
-        curr_batch = DRI::EncodedArchivalDescription.new :component
-        curr_batch.update_metadata curr_file
-        curr_batch.identifier.should == ['KDW/RM/02']
-        curr_batch.ead_level.should == 'file'
+        curr_object = DRI::EncodedArchivalDescription.new :component
+        curr_object.update_metadata curr_file
+        curr_object.identifier.should == ['KDW/RM/02']
+        curr_object.ead_level.should == 'file'
       end
     end
   end # Context validation of DRI compulsory elements

@@ -175,7 +175,7 @@ module DRI
       end
 
       # Checks whether the passed object is a duplicate
-      # @param object [DRI::Batch] the object to check
+      # @param object [DRI::Base] the object to check
       # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
         result = false

@@ -70,7 +70,7 @@ module DRI
 
     # Generates metadata checksum for the object
     #
-    # @param object [DRI::Batch] the digital object
+    # @param object [DRI::Base] the digital object
     def self.checksum_metadata(object)
       if object.attached_files.key?(:descMetadata)
         xml = object.attached_files[:descMetadata].content
@@ -80,7 +80,7 @@ module DRI
 
     # Create default reader group permissions for the object and save
     #
-    # @param id [DRI::Batch] the PID of the collection object for which
+    # @param id [DRI::Base] the PID of the collection object for which
     # to add a default reader group
     def self.create_reader_group(id)
       grp = UserGroup::Group.new(name: id,
@@ -92,7 +92,7 @@ module DRI
     # Adds linked data records for logaimn links present
     # in the metadata (geographical_coverage)
     #
-    # @param obj [DRI::Batch] the object to check
+    # @param obj [DRI::Base] the object to check
     def self.retrieve_linked_data(obj)
       if AuthoritiesConfig
         begin

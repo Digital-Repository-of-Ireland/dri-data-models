@@ -26,12 +26,12 @@ describe 'Documentation' do
   end
 
   it 'should assert content model' do
-    expect_any_instance_of(DRI::Batch).to receive(:assert_content_model)
-    @doc_obj = DRI::Batch.with_standard(:documentation)
+    expect_any_instance_of(DRI::Base).to receive(:assert_content_model)
+    @doc_obj = DRI::Base.with_standard(:documentation)
   end
 
   it 'should have asserted the content model' do
-    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::Batch'])
+    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::Base'])
   end
 
   it 'should find an existing object from fedora' do

@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'sass-rails', '~> 4.0.3'
   s.add_dependency 'active-fedora', '9.11'
   s.add_dependency 'hydra-head', '~> 9.10'
-  s.add_dependency 'hydra-access-controls'
   s.add_dependency 'hydra-collections'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives', '~> 1.0'

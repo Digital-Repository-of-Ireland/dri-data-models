@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Mods digital objects extending from DRI::Batch
-  class Mods < DRI::Batch
+  # Implementation of DRI Mods digital objects extending from DRI::Base
+  class Mods < DRI::Base
     include DRI::ModelSupport::ModsSupport
 
     contains 'descMetadata', class_name: 'DRI::Metadata::Mods'

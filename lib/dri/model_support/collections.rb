@@ -13,11 +13,11 @@ module DRI
         # one-to-one AF association to associate the parent of the given object
         belongs_to :governing_collection,
                    predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                   class_name: 'DRI::Batch'
+                   class_name: 'DRI::Base'
         # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
                  predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                 class_name: 'DRI::Batch',
+                 class_name: 'DRI::Base',
                  as: :governing_collection,
                  dependent: :destroy
 
@@ -26,11 +26,11 @@ module DRI
         # one-to-one AF association to associate the preceding EAD child component for the given object
         belongs_to :previous_sibling,
                    predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                   class_name: 'DRI::Batch'
+                   class_name: 'DRI::Base'
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling,
                  predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                 class_name: 'DRI::Batch',
+                 class_name: 'DRI::Base',
                  as: :previous_sibling
 
         # Collection flag attribute setter

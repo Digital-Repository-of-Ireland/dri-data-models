@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects extending from DRI::Batch
-  class Marc < DRI::Batch
+  # Implementation of DRI Marc digital objects extending from DRI::Base
+  class Marc < DRI::Base
     include DRI::ModelSupport::MarcSupport
 
     contains 'descMetadata', class_name: 'DRI::Metadata::Marc'

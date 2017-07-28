@@ -1,15 +1,15 @@
 # DRI namespace
 module DRI
   # Implementation of DRI Documentation digital objects
-  # extending from DRI::Batch
-  class Documentation < DRI::Batch
-    # Override interchangeable_metadata definition of descMetadata
+  # extending from DRI::Base
+  class Documentation < DRI::Base
+    # Override DRI::ModelSupport::Base definition of descMetadata
     contains 'descMetadata', class_name: 'DRI::Metadata::Documentation'
 
-    # one-to-one AF association to DRI::Batch (documentation for)
+    # one-to-one AF association to DRI::Base (documentation for)
     belongs_to :documentation_for,
                predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf,
-               class_name: 'DRI::Batch'
+               class_name: 'DRI::Base'
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
@@ -129,18 +129,18 @@ module DRI
       DRI::Documentation.create(id: pid)
     end
 
-    # Override from DRI::Batch, default AF method
+    # Override from DRI::Base, default AF method
     def to_solr(solr_doc = {}, opts = {})
       super(solr_doc, opts)
     end
 
-    # Override from interchangeable_metadata:
+    # Override from DRI::ModelSupport::Base:
     # descMetadata doesn't inherit from base
     # and it loads the correct class
     def load_attributes
     end
 
-    # Override from interchangeable_metadata
+    # Override from DRI::ModelSupport::Base
     # Documentation does not inherit from DRI::Metadata::Base
     # Perform additional DRI validations before saving the object
     def custom_validations

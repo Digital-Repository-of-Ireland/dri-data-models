@@ -37,7 +37,7 @@ describe 'EncodedArchivalDescription' do
     end
   end
 
-  xit "should add new children if the batch is a EncodedArchivalDescriptionComponent" do
+  xit "should add new children if the object is a EncodedArchivalDescriptionComponent" do
     # @ead_collection.save
     @ead_collection.synchronize_children_to_metadata
     ead_series = DRI::EncodedArchivalDescription.find(@ead_collection.governed_items[0].id.to_s)
