@@ -11,27 +11,19 @@ module DRI
         attr_accessor :collection
 
         # one-to-one AF association to associate the parent of the given object
-        belongs_to :governing_collection,
-                   predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                   class_name: 'DRI::Base'
+        belongs_to :governing_collection, class_name: 'DRI::DigitalObject'
         # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
-                 predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                 class_name: 'DRI::Base',
+                 class_name: 'DRI::DigitalObject',
                  as: :governing_collection,
                  dependent: :destroy
 
         # Additional relationships to keep track of sibling order
         # used in EAD
         # one-to-one AF association to associate the preceding EAD child component for the given object
-        belongs_to :previous_sibling,
-                   predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                   class_name: 'DRI::Base'
+        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject'
         # one-to-many AF association to associate the succeeding EAD children component for the given object
-        has_many :next_sibling,
-                 predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                 class_name: 'DRI::Base',
-                 as: :previous_sibling
+        has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
 
         # Collection flag attribute setter
         #
@@ -57,7 +49,7 @@ module DRI
       def collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
-        (descMetadata.collection? || properties.collection?) && !generic_files.any?
+        (descMetadata.collection? || collection?) && !generic_files.any?
       end
 
       # Determine whether the digital object is a root, container collection
@@ -106,6 +98,26 @@ module DRI
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [ancestor_titles.last])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
+        end
+
+        unless governing_collection.nil?
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.id])
+        end
+
+        if governed_items.present?
+          ids = []
+          governed_items.each { |item| ids << item.id }
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => ids)
+        end
+
+        if previous_sibling
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.id])
+        end
+
+        if next_sibling.present?
+          ids = []
+          next_sibling.each { |item| ids << item.id }
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => ids)
         end
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :facetable) => collection?)

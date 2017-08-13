@@ -3,7 +3,9 @@ module DRI
   # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
-    class QualifiedDublinCore < DRI::Metadata::Base
+    class QualifiedDublinCore < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
+
       # Set OM (Opinionated Metadata) terminology
       def self.load_inherited_terminology
         set_terminology do |t|

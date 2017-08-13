@@ -1,84 +1,84 @@
 # DRI namespace
 module DRI
   # Implementation of DRI Mods digital objects extending from DRI::Base
-  class Mods < DRI::Base
+  class Mods < DRI::DigitalObject
     include DRI::ModelSupport::ModsSupport
 
-    contains 'descMetadata', class_name: 'DRI::Metadata::Mods'
+    has_one: :descMetadata, class_name: 'DRI::Metadata::Mods'
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    property :mods_id_local, delegate_to: 'descMetadata', multiple: false
+    delegate :mods_id_local, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
-    property :id_asset, delegate_to: 'descMetadata', multiple: false
+    delegate :id_asset, to: :descMetadata
     # MODS rest of identifiers are repeatable
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :identifier_doi, delegate_to: 'descMetadata', multiple: true
-    property :identifier_uri, delegate_to: 'descMetadata', multiple: true
+    delegate :identifier, to: :descMetadata
+    delegate :identifier_doi, to: :descMetadata
+    delegate :identifier_uri, to: :descMetadata
 
     # Collection attribute + genre type
-    property :mods_type_collection, delegate_to: 'descMetadata', multiple: false
-    property :mods_genre, delegate_to: 'descMetadata', multiple: true
+    delegate :mods_type_collection, to: :descMetadata
+    delegate :mods_genre, to: :descMetadata
 
     # subtitle
-    property :mods_subtitle, delegate_to: 'descMetadata', multiple: true
+    delegate :mods_subtitle, to: :descMetadata
 
     # Description
-    property :desc_abstract, delegate_to: 'descMetadata', multiple: true
-    property :desc_toc, delegate_to: 'descMetadata', multiple: true
-    property :desc_note, delegate_to: 'descMetadata', multiple: true
-    property :desc_physdesc_note, delegate_to: 'descMetadata', multiple: true
-    # property :abstract, delegate_to: 'descMetadata', multiple: true
-    # property :toc, delegate_to: 'descMetadata', multiple: true
-    # property :note_mods_type, delegate_to: 'descMetadata', multiple: true
-    # property :note_mods_no_type, delegate_to: 'descMetadata', multiple: true
+    delegate :desc_abstract, to: :descMetadata
+    delegate :desc_toc, to: :descMetadata
+    delegate :desc_note, to: :descMetadata
+    delegate :desc_physdesc_note, to: :descMetadata
+    # delegate :abstract, to: :descMetadata
+    # delegate :toc, to: :descMetadata
+    # delegate :note_mods_type, to: :descMetadata
+    # delegate :note_mods_no_type, to: :descMetadata
 
     # Rights copyrightMD
-    property :copyrightmd_rights, delegate_to: 'descMetadata', multiple: true
+    delegate :copyrightmd_rights, to: :descMetadata
 
     # Source
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :source_physical_location, delegate_to: 'descMetadata', multiple: true
-    property :source_location, delegate_to: 'descMetadata', multiple: true
+    delegate :source, to: :descMetadata
+    delegate :source_physical_location, to: :descMetadata
+    delegate :source_location, to: :descMetadata
 
     # Dates
-    property :date, delegate_to: 'descMetadata', multiple: true
-    property :date_other, delegate_to: 'descMetadata', multiple: true
-    property :date_other_start, delegate_to: 'descMetadata', multiple: true
-    property :date_other_end, delegate_to: 'descMetadata', multiple: true
-    property :captured_date, delegate_to: 'descMetadata', multiple: true
-    property :captured_date_start, delegate_to: 'descMetadata', multiple: true
-    property :captured_date_end, delegate_to: 'descMetadata', multiple: true
-    property :issued_date_start, delegate_to: 'descMetadata', multiple: true
-    property :issued_date_end, delegate_to: 'descMetadata', multiple: true
-    property :creation_date_start, delegate_to: 'descMetadata', multiple: true
-    property :creation_date_end, delegate_to: 'descMetadata', multiple: true
+    delegate :date, to: :descMetadata
+    delegate :date_other, to: :descMetadata
+    delegate :date_other_start, to: :descMetadata
+    delegate :date_other_end, to: :descMetadata
+    delegate :captured_date, to: :descMetadata
+    delegate :captured_date_start, to: :descMetadata
+    delegate :captured_date_end, to: :descMetadata
+    delegate :issued_date_start, to: :descMetadata
+    delegate :issued_date_end, to: :descMetadata
+    delegate :creation_date_start, to: :descMetadata
+    delegate :creation_date_end, to: :descMetadata
 
     # Geographical, temporal, name
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :subject_date_start, delegate_to: 'descMetadata', multiple: true
-    property :subject_date_end, delegate_to: 'descMetadata', multiple: true
-    property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
+    delegate :name_coverage, to: :descMetadata
+    delegate :geographical_coverage, to: :descMetadata
+    delegate :temporal_coverage, to: :descMetadata
+    delegate :subject_date_start, to: :descMetadata
+    delegate :subject_date_end, to: :descMetadata
+    delegate :geocode_logainm, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date, to: :descMetadata
+    delegate :creation_date, to: :descMetadata
 
     class_eval do
       # Roles
-      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym, to: :descMetadata }
       # Internal Relationships
-      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym, to: :descMetadata }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym, to: :descMetadata }
     end
 
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
-    property :mods_genre, delegate_to: 'descMetadata', multiple: true
+    delegate :resource_type, to: :descMetadata
+    delegate :mods_genre, to: :descMetadata
 
-    property :origin_metadata, delegate_to: 'descMetadata', multiple: true
+    delegate :origin_metadata, to: :descMetadata
 
-    property :subject_metadata, delegate_to: 'descMetadata', multiple: true
+    delegate :subject_metadata, to: :descMetadata
 
     # Disabled for now
     # around_save :create_multiple_records
@@ -87,6 +87,10 @@ module DRI
     def initialize(args = {})
       args[:desc_metadata_class] = 'DRI::Metadata::Mods'
       super(args)
+    end
+
+    def descMetadata
+      super || build_descMetadata
     end
 
     #

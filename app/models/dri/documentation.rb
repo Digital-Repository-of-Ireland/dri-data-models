@@ -2,39 +2,38 @@
 module DRI
   # Implementation of DRI Documentation digital objects
   # extending from DRI::Base
-  class Documentation < DRI::Base
+  class Documentation < DRI::DigitalObject
     # Override DRI::ModelSupport::Base definition of descMetadata
-    contains 'descMetadata', class_name: 'DRI::Metadata::Documentation'
+    has_one :descMetadata, class_name: 'DRI::Metadata::Documentation', as: :describable
 
     # one-to-one AF association to DRI::Base (documentation for)
-    belongs_to :documentation_for,
-               predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf,
-               class_name: 'DRI::Base'
+    belongs_to :documentation_for, class_name: 'DRI::DigitalObject'
+               #predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf,
+               
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
-    property :date, delegate_to: 'descMetadata', multiple: true
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage_period, delegate_to: 'descMetadata', multiple: true
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
-    property :format, delegate_to: 'descMetadata', multiple: true
-    property :coverage, delegate_to: 'descMetadata', multiple: true
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true
-    property :relation, delegate_to: 'descMetadata', multiple: true
+    delegate :date, to: :descMetadata
+    delegate :source, to: :descMetadata
+    delegate :geographical_coverage, to: :descMetadata
+    delegate :temporal_coverage, to: :descMetadata
+    delegate :temporal_coverage_period, to: :descMetadata
+    delegate :resource_type, to: :descMetadata
+    delegate :format, to: :descMetadata
+    delegate :coverage, to: :descMetadata
+    delegate :identifier, to: :descMetadata
+    delegate :geocode_point, to: :descMetadata
+    delegate :geocode_box, to: :descMetadata
+    delegate :relation, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date, to: :descMetadata
+    delegate :creation_date, to: :descMetadata
 
     #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
-        property s.prepend('role_').to_sym,
-                 delegate_to: 'descMetadata',
-                 multiple: true
+        delegate s.prepend('role_').to_sym,
+                 to: :descMetadata
       end
     end
 
@@ -43,6 +42,10 @@ module DRI
       args[:desc_metadata_class] = 'DRI::Metadata::Documentation'
 
       super(args)
+    end
+
+    def descMetadata
+      super || build_descMetadata
     end
 
     # Override - ingest from RDF-XML files not supported
@@ -125,7 +128,7 @@ module DRI
     # @return [DRI::Documentation] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::Documentation.find(pid)
-    rescue ActiveFedora::ObjectNotFoundError
+    rescue ActiveRecord::RecordNotFound
       DRI::Documentation.create(id: pid)
     end
 

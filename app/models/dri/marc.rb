@@ -1,61 +1,43 @@
 # DRI namespace
 module DRI
   # Implementation of DRI Marc digital objects extending from DRI::Base
-  class Marc < DRI::Base
+  class Marc < DRI::DigitalObject
     include DRI::ModelSupport::MarcSupport
 
-    contains 'descMetadata', class_name: 'DRI::Metadata::Marc'
+    has_one :descMetadata, class_name: 'DRI::Metadata::Marc'
 
-    property :leader, delegate_to: 'descMetadata', multiple: false
-    property :controlfield, delegate_to: 'descMetadata', multiple: true
-    property :controlfield_tag, delegate_to: 'descMetadata', multiple: true
-    property :datafield, delegate_to: 'descMetadata', multiple: true
-    property :datafield_tag, delegate_to: 'descMetadata', multiple: true
-    property :datafield_ind1, delegate_to: 'descMetadata', multiple: true
-    property :datafield_ind2, delegate_to: 'descMetadata', multiple: true
+    delegate :leader, to: :descMetadata, multiple: false
+    delegate :controlfield, to: :descMetadata
+    delegate :controlfield_tag, to: :descMetadata
+    delegate :datafield, to: :descMetadata
+    delegate :datafield_tag, to: :descMetadata
+    delegate :datafield_ind1, to: :descMetadata
+    delegate :datafield_ind2, to: :descMetadata
 
     # MARC record identifier used for internal rels target,
     # NOT multi-valued
-    property :marc_id, delegate_to: 'descMetadata', multiple: false do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :marc_id, to: :descMetadata
     # MARC record asset identifier used to sort pages/sequenced items
-    property :id_asset, delegate_to: 'descMetadata', multiple: false do |index|
-      index.as :stored_sortable
-    end
+    delegate :id_asset, to: :descMetadata
 
     # MARC Relationships, mapped from QDC predicate properties
     # Mapped attributes for getting relational information from metadata
     # Internal Relationships
     # 775: Other Edition Entry; Mapped to QDC: isVersionOf
-    property :relation_ids_isVersionOf, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :relation_ids_isVersionOf, to: :descMetadata
     # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
-    property :relation_ids_isFormatOf, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :relation_ids_isFormatOf, to: :descMetadata
     # 787: Other Relationship Entry; Mapped to DC: relation
-    property :relation_ids_relation, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :relation_ids_relation, to: :descMetadata
     # Tag 780 - Preceding Entry (R); Mapped to MODS: preceding
-    property :relation_ids_preceding, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :relation_ids_succeeding, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :relation_ids_preceding, to: :descMetadata
+    delegate :relation_ids_succeeding, to: :descMetadata
 
-    property :related_material, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :alternative_form, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :related_material, to: :descMetadata
+    delegate :alternative_form, to: :descMetadata 
 
-    delegate :date, to: 'descMetadata'
-    delegate :published_date, to: 'descMetadata'
+    delegate :date, to: :descMetadata
+    delegate :published_date, to: :descMetadata
 
     # Disabled below - metadata object update triggers
     # the creation of duplicated objects
@@ -65,6 +47,10 @@ module DRI
     def initialize(params = {})
       params[:desc_metadata_class] = 'DRI::Metadata::Marc'
       super(params)
+    end
+
+    def descMetadata
+      super || build_descMetadata
     end
 
     # type attribute getter

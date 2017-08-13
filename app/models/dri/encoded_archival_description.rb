@@ -1,67 +1,67 @@
 # DRI namespace
 module DRI
   # Implementation of DRI EAD digital objects extending from DRI::Base
-  class EncodedArchivalDescription < DRI::Base
+  class EncodedArchivalDescription < DRI::DigitalObject
     include DRI::ModelSupport::EadSupport
 
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :identifier_id, delegate_to: 'descMetadata', multiple: false
-    property :repository_code, delegate_to: 'descMetadata', multiple: false
-    property :country_code, delegate_to: 'descMetadata', multiple: false
+    delegate :identifier, to: :descMetadata
+    delegate :identifier_id, to: :descMetadata, multiple: false
+    delegate :repository_code, to: :descMetadata, multiple: false
+    delegate :country_code, to: :descMetadata, multiple: false
 
     # ISO Dates
-    property :creation_date_idx, delegate_to: 'descMetadata', multiple: true
-    property :published_date_idx, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage_idx, delegate_to: 'descMetadata', multiple: true
+    delegate :creation_date_idx, to: :descMetadata
+    delegate :published_date_idx, to: :descMetadata
+    delegate :temporal_coverage_idx, to: :descMetadata
 
     # Description properties
-    property :desc_abstract, delegate_to: 'descMetadata', multiple: false
-    property :desc_biog_hist, delegate_to: 'descMetadata', multiple: true
-    property :desc_scope_content, delegate_to: 'descMetadata', multiple: true
-    property :desc_dao_desc, delegate_to: 'descMetadata', multiple: true
+    delegate :desc_abstract, to: :descMetadata, multiple: false
+    delegate :desc_biog_hist, to: :descMetadata
+    delegate :desc_scope_content, to: :descMetadata
+    delegate :desc_dao_desc, to: :descMetadata
     
     # Subjects
-    property :name_subject, delegate_to: 'descMetadata', multiple: true
-    property :persname_subject, delegate_to: 'descMetadata', multiple: true
-    property :corpname_subject, delegate_to: 'descMetadata', multiple: true
-    property :famname_subject, delegate_to: 'descMetadata', multiple: true
-    property :geogname_subject, delegate_to: 'descMetadata', multiple: true
+    delegate :name_subject, to: :descMetadata
+    delegate :persname_subject, to: :descMetadata
+    delegate :corpname_subject, to: :descMetadata
+    delegate :famname_subject, to: :descMetadata
+    delegate :geogname_subject, to: :descMetadata
 
     # Types
-    property :ead_level, delegate_to: 'descMetadata', multiple: false
-    property :ead_level_other, delegate_to: 'descMetadata', multiple: false
+    delegate :ead_level, to: :descMetadata, multiple: false
+    delegate :ead_level_other, to: :descMetadata, multiple: false
 
     # Files, description
-    property :dao_proxy, delegate_to: 'descMetadata', multiple: true
-    property :dao_href_proxy, delegate_to: 'descMetadata', multiple: true
-    property :dao_desc_proxy, delegate_to: 'descMetadata', multiple: true
+    delegate :dao_proxy, to: :descMetadata
+    delegate :dao_href_proxy, to: :descMetadata
+    delegate :dao_desc_proxy, to: :descMetadata
 
     # Coverage: name, geographical, location, temporal
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geogname_coverage_access, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    delegate :name_coverage, to: :descMetadata
+    delegate :geographical_coverage, to: :descMetadata
+    delegate :geogname_coverage_access, to: :descMetadata
+    delegate :temporal_coverage, to: :descMetadata
 
     # Related Material
     # The <relatedmaterial> element is comparable to ISAD(G)
     # data element 3.5.3 and MARC field 544 with indicator 1
-    property :related_material, delegate_to: 'descMetadata', multiple: true
+    delegate :related_material, to: :descMetadata
 
     # Alternative Form Available
-    property :alternative_form, delegate_to: 'descMetadata', multiple: true
+    delegate :alternative_form, to: :descMetadata
 
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
+    delegate :resource_type, to: :descMetadata
 
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true
-    property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
-    property :format, delegate_to: 'descMetadata', multiple: true
+    delegate :geocode_point, to: :descMetadata
+    delegate :geocode_box, to: :descMetadata
+    delegate :geocode_logainm, to: :descMetadata
+    delegate :format, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date, to: :descMetadata
+    delegate :creation_date, to: :descMetadata
 
     around_save :synchronize_if_changed # trigger EAD children creation
 
@@ -85,7 +85,7 @@ module DRI
     # @return [DRI::EncodedArchivalDescription] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::EncodedArchivalDescription.find(pid)
-    rescue ActiveFedora::ObjectNotFoundError
+    rescue ActiveRecord::RecordNotFound
       DRI::EncodedArchivalDescription.create(id: pid)
     end
 

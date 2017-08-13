@@ -4,11 +4,9 @@ module DRI
   # and associated to Digital Objects extending from DRI::Base
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
-  class GenericFile < ActiveFedora::Base
-    include Hydra::AccessControls::Permissions
-    include Hydra::AccessControls::Visibility
-    include Hydra::WithDepositor
-    include Hydra::Collections::Collectible
+  class GenericFile < ActiveRecord::Base
+    include ActiveFedora::Indexing
+    include Hydra::Derivatives::ExtractMetadata
 
     include DRI::Noid
     include DRI::Export
@@ -18,59 +16,23 @@ module DRI
     include DRI::Asset::Derivatives
     include DRI::Asset::Versions
     
+    include DRI::ModelSupport::LocalFile
+
+    after_save { update_index }
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
     # one-to-one AF association to associate DRI::Base
-    belongs_to :object,
-               predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf,
-               class_name: 'DRI::Base'
+    belongs_to :digital_object, class_name: 'DRI::DigitalObject'
 
-    # Declare a 'dri_properties' DS, of the following type
-    contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
-    contains 'content', class_name: 'FileContentDatastream'
-    contains 'full_text'
+    serialize :title
+    serialize :creator
 
-    property :title, predicate: ::RDF::Vocab::DC.title do |index|
-      index.as :stored_searchable, :facetable
-    end
-    property :label, predicate: ActiveFedora::RDF::Fcrepo::Model.downloadFilename, multiple: false
-    property :depositor, predicate: ::RDF::URI.new("http://id.loc.gov/vocabulary/relators/dpt"), multiple: false do |index|
-      index.as :symbol, :stored_searchable
-    end
-    property :creator, predicate: ::RDF::Vocab::DC.creator do |index|
-      index.as :stored_searchable, :facetable
+    def declared_attached_files
+      { 'characterization' => characterization }
     end
 
-    # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
-    # the DS is non-repeatable
-    property :checksum_md5, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :checksum_sha256, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :preservation_only, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-
-    # DRI is not storing files in Fedora (which would be too slow to be of practical use),
-    # instead a datastream will link to a URL in the DRI storage system.
-    #
-    # @param dsid [String] the datastream's identifier
-    # @param opts [Hash] hash of additional options
-    # @return [Boolean] true if operation successful; false otherwise
-    def update_file_reference(dsid, opts)
-      options = {}
-
-      options[:mime_type] = opts[:mimeType] if opts.key?(:mimeType)
-
-      options[:path] = dsid
-      attach_file(opts[:url], dsid, options)
-
-      true
+    def add_depositor_metadata(current_user)
+      depositor = current_user.to_s
     end
 
     # Return number of milliseconds for the duration of this asset file
@@ -105,37 +67,32 @@ module DRI
       solr_doc[ActiveFedora.index_field_mapper.solr_name('label')] = label
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format')] = file_format
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format', :facetable)] = file_format
-      solr_doc['all_text_timv'] = full_text.content
+      #solr_doc['all_text_timv'] = full_text.content
       # Index the Fedora-generated SHA1 digest to create a linkage
       # between files on disk (in fcrepo.binary-store-path) and objects
       # in the repository.
-      solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
+      #solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
       
       solr_doc
     end
 
     def related_files
-        return [] unless object
-        object.generic_files.reject { |sibling| sibling.id == id }
+        return [] unless digital_object
+        digital_object.generic_files.reject { |sibling| sibling.id == id }
       end
 
     # Is this file in the middle of being processed by an object?
     def processing?
-      try(:object).try(:status) == ['processing'.freeze]
+      try(:digital_object).try(:status) == ['processing'.freeze]
     end
 
     private
 
       def delete_files
-        local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
-                                          f: id, d: 'content').order('version DESC').to_a
+        local_file_info = DRI::GenericFile.where('digital_object_id LIKE :f',
+                                          f: id).order('version DESC').to_a
         local_file_info.each(&:destroy)
         FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
-      end
-
-      def digest_from_content
-        return unless content.has_content?
-        content.digest.first.to_s
       end
   end
 end

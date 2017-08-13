@@ -6,15 +6,16 @@ module DRI
   # Digital objects in DRI that handle the supported metadata standards
   # inherit from this class
   #
-  class Base < ActiveFedora::Base
+  class DigitalObject < ActiveRecord::Base
+    include ActiveFedora::Indexing
     include Hydra::WithDepositor
 
     include DRI::Noid
     include DRI::Export
     
     include DRI::ModelSupport::Base
-    include DRI::ModelSupport::Properties
-    include DRI::ModelSupport::Permissions
+    #include DRI::ModelSupport::Properties
+    #include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
@@ -22,17 +23,32 @@ module DRI
     after_destroy :delete_bucket
 
     # one-to-many AF relationship to associate digital assets with their object
-    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :object, dependent: :destroy
+    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
     # one-to-many AF relationship to associate documentation objects
     has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
+    has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable
+
+    delegate :status, to: :properties
+    delegate :object_type, to: :properties
+    delegate :depositor, to: :properties
+    delegate :metadata_md5, to: :properties
+    delegate :model_version, to: :properties
+    delegate :verified, to: :properties
+    delegate :doi, to: :properties
+    delegate :cover_image, to: :properties
+    delegate :institute, to: :properties
+    delegate :depositing_institute, to: :properties
+    delegate :licence, to: :properties
+    delegate :object_version, to: :properties
+
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
-    contains 'extracted', class_name: 'DRI::Metadata::Extracted'
+    #has_many 'extracted', class_name: 'DRI::Metadata::Extracted'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
     # Unused for NOW
-    property :full_text, delegate_to: 'extracted', multiple: true
+    #delegate :full_text, to: 'extracted'
 
     # Creates a digital object depending on the metadata standard
     #
@@ -69,9 +85,9 @@ module DRI
     # @param pid [String] the pid of the object to retrieve
     # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::Base.find(pid)
-    rescue ActiveFedora::ObjectNotFoundError
-      DRI::Base.create(id: pid)
+      DRI::DigitalObject.find(pid)
+    rescue ActiveRecord::RecordNotFound
+      DRI::DigitalObject.create(id: pid)
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -88,8 +104,36 @@ module DRI
     end
 
     # Asserts the model class
-    def assert_content_model
-      self.has_model = [self.class.to_s, self.class.superclass.to_s]
+    def has_model
+      [self.class.to_s, self.class.superclass.to_s]
+    end
+
+    # Determine whether the metadata describes a collection
+    # @return [Boolean] true if metadata specified this is a collection; false otherwise
+    def collection?
+      object_type.include? 'Collection' if object_type.present?
+    end
+
+    def create_date
+      return nil unless created_at
+      DateTime.parse(created_at).utc
+    end
+
+    def modified_date
+      return nil unless updated_at
+      DateTime.parse(updated_at).utc
+    end
+
+    def attached_files
+      { descMetadata: descMetadata, properties: properties }
+    end
+
+    def properties
+      super || build_properties
+    end
+
+    def status
+      properties.status.first
     end
 
     # Return a Hash representation of this object where keys
@@ -100,16 +144,14 @@ module DRI
     # @return [Hash] the solr document to be indexed
     def to_solr(solr_doc = {}, _opts = {})
       solr_doc = super(solr_doc)
-
+      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr
 
-      metadata_streams.each do |m|
-        solr_doc.merge! m.to_solr
-      end
-
-      solr_doc.merge!('all_text_timv' => full_text)
+      #solr_doc.merge! descMetadata.to_solr unless descMetadata.nil?
+      
+      #solr_doc.merge!('all_text_timv' => full_text)
 
       solr_doc
     end

@@ -1,7 +1,7 @@
 # FITS Metadata datastream, defines the XML terminology
 # for this OM-based datastream
 #
-class FitsDatastream < ActiveFedora::OmDatastream
+class FitsDatastream < DRI::Datastreams::OmDatastream
   include OM::XML::Document
 
   set_terminology do |t|

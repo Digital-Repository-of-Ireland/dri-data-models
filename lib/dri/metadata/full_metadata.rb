@@ -8,7 +8,7 @@ module DRI
     #   MODS: <mods:modsCollection> wrapper
     #   EAD: <ead:dsc> wrapper
     #   MARC <marc:collection> wrapper
-    class FullMetadata < ActiveFedora::OmDatastream
+    class FullMetadata < DRI::Datastreams::OmDatastream
     end
   end
 end

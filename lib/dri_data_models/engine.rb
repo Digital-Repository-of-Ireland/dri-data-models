@@ -16,5 +16,12 @@ module DriDataModels
 
     ActiveFedora::Base.translate_uri_to_id = ActiveFedora::Noid.config.translate_uri_to_id
     ActiveFedora::Base.translate_id_to_uri = ActiveFedora::Noid.config.translate_id_to_uri
+
+    config.generators do |g|
+      g.test_framework :rspec, :fixture => true
+      g.fixture_replacement :factory_girl, :dir => 'spec/factories'
+      g.assets false
+      g.helper false
+    end
   end
 end

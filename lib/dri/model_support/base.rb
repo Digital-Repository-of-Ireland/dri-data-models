@@ -10,34 +10,34 @@ module DRI
         attr_accessor :desc_metadata_class
 
         # Descriptive metadata DS - F4 uses "File attachments" instead of DSs
-        contains 'descMetadata', class_name: 'DRI::Metadata::Base'
+        #has_one :descMetadata, class_name: 'DRI::Metadata::Base'
         # Complete metadata record datastream
-        contains 'fullMetadata', class_name: 'DRI::Metadata::FullMetadata'
+        has_one :fullMetadata, class_name: 'DRI::Metadata::FullMetadata'
 
         after_initialize :load_attributes
 
         # TODO: Check that these match the DRI Level 1 and 2 terms
         # DRI Mandatory (M)
         # Title (collection-level)
-        property :title, delegate_to: 'descMetadata', multiple: true
+        delegate :title,:title=, to: :descMetadata
         # Description (collection-level)
-        property :description, delegate_to: 'descMetadata', multiple: true
+        delegate :description, to: :descMetadata
         # ADDED TYPE, it is compulsory
-        # property :type, delegate_to: 'descMetadata', multiple: true
+        # delegate :type, to: 'descMetadata', multiple: true
         # Rights (collection-level)
-        property :rights, delegate_to: 'descMetadata', multiple: true
+        delegate :rights,:rights=, to: :descMetadata
         # Creator (collection-level)
-        property :creator, delegate_to: 'descMetadata', multiple: true
+        delegate :creator,:creator=, to: :descMetadata
 
         # DRI Recommended (R)
         # Contributor
-        property :contributor, delegate_to: 'descMetadata', multiple: true
+        delegate :contributor, to: :descMetadata
         # Publisher (collection-level, DRI pre-populated)
-        property :publisher, delegate_to: 'descMetadata', multiple: true
+        delegate :publisher, to: :descMetadata
         # Subject (collection-level)
-        property :subject, delegate_to: 'descMetadata', multiple: true
+        delegate :subject, to: :descMetadata
         # Language (collection-level)
-        property :language, delegate_to: 'descMetadata', multiple: true
+        delegate :language, to: :descMetadata
 
         validate :custom_validations
       end
@@ -50,7 +50,7 @@ module DRI
       private
 
       def custom_validations
-        return true unless descMetadata.class < DRI::Metadata::Base
+        return true unless descMetadata.class < DRI::Datastreams::OmDatastream
 
         results = descMetadata.custom_validations
         return true if results.empty?
@@ -137,8 +137,9 @@ module DRI
         ds = ds_class.constantize.from_xml(descMetadata.to_xml)
         ds.uri = old_digital_object
           
-        ds.instance_variable_set(:@dsid, 'descMetadata')
-        attached_files[:descMetadata] = ds
+        #ds.instance_variable_set(:@dsid, 'descMetadata')
+        #attached_files[:descMetadata] = ds
+        descMetadata = ds
       end
     end # module
   end # module

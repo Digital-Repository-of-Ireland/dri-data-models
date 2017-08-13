@@ -1,11 +1,19 @@
 require "om"
 
-module DRI
-  class OmDatastream < ActiveFedora::File
-    
+module DRI::Datastreams
+  class OmDatastream < ActiveRecord::Base
+    # before_save do
+    #   if content.blank?
+    #     ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+    #     false
+    #   end
+    # end
+
+    belongs_to :describable, polymorphic: true
+
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
-    include Datastreams::NokogiriDatastreams
+    include ::DRI::Datastreams::NokogiriDatastream
 
     alias om_term_values term_values unless method_defined?(:om_term_values)
     alias om_update_values update_values unless method_defined?(:om_update_values)
@@ -32,7 +40,7 @@ module DRI
     # @param [String] name Name of key to look for
     # @param [Solr::Document] solr_doc Solr doc to query
     def has_solr_name?(name, solr_doc = {})
-      !solr_doc[name].nil? || !solr_doc[name.to_s].nil?
+      solr_doc[name].present? || solr_doc[name.to_s].present?
     end
 
     # ** Experimental **

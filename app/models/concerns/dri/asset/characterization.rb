@@ -2,53 +2,51 @@ module DRI::Asset
   module Characterization
       extend ActiveSupport::Concern
       included do
-        contains "characterization", class_name: 'FitsDatastream'
-        property :mime_type,         delegate_to: 'characterization', multiple: false do |index|
-          index.as :stored_searchable
-        end
-        property :format_label,      delegate_to: 'characterization'
-        property :file_size,         delegate_to: 'characterization'
-        property :last_modified,     delegate_to: 'characterization'
-        property :filename,          delegate_to: 'characterization'
-        property :original_checksum, delegate_to: 'characterization'
-        property :rights_basis,      delegate_to: 'characterization'
-        property :copyright_basis,   delegate_to: 'characterization'
-        property :copyright_note,    delegate_to: 'characterization'
-        property :well_formed,       delegate_to: 'characterization'
-        property :valid,             delegate_to: 'characterization'
-        property :message,           delegate_to: 'characterization'
-        property :file_title,        delegate_to: 'characterization'
-        property :file_author,       delegate_to: 'characterization'
-        property :page_count,        delegate_to: 'characterization'
-        property :file_language,     delegate_to: 'characterization'
-        property :word_count,        delegate_to: 'characterization'
-        property :character_count,   delegate_to: 'characterization'
-        property :paragraph_count,   delegate_to: 'characterization'
-        property :line_count,        delegate_to: 'characterization'
-        property :table_count,       delegate_to: 'characterization'
-        property :graphics_count,    delegate_to: 'characterization'
-        property :byte_order,        delegate_to: 'characterization'
-        property :compression,       delegate_to: 'characterization'
-        property :color_space,       delegate_to: 'characterization'
-        property :profile_name,      delegate_to: 'characterization'
-        property :profile_version,   delegate_to: 'characterization'
-        property :orientation,       delegate_to: 'characterization'
-        property :color_map,         delegate_to: 'characterization'
-        property :image_producer,    delegate_to: 'characterization'
-        property :capture_device,    delegate_to: 'characterization'
-        property :scanning_software, delegate_to: 'characterization'
-        property :exif_version,      delegate_to: 'characterization'
-        property :gps_timestamp,     delegate_to: 'characterization'
-        property :latitude,          delegate_to: 'characterization'
-        property :longitude,         delegate_to: 'characterization'
-        property :character_set,     delegate_to: 'characterization'
-        property :markup_basis,      delegate_to: 'characterization'
-        property :markup_language,   delegate_to: 'characterization'
-        property :bit_depth,         delegate_to: 'characterization'
-        property :channels,          delegate_to: 'characterization'
-        property :data_format,       delegate_to: 'characterization'
-        property :offset,            delegate_to: 'characterization'
-        property :frame_rate,        delegate_to: 'characterization'
+        has_one :characterization, class_name: 'FitsDatastream'
+        delegate :mime_type,         to: :characterization
+        delegate :format_label,      to: :characterization
+        delegate :file_size,         to: :characterization
+        delegate :last_modified,     to: :characterization
+        delegate :filename,          to: :characterization
+        delegate :original_checksum, to: :characterization
+        delegate :rights_basis,      to: :characterization
+        delegate :copyright_basis,   to: :characterization
+        delegate :copyright_note,    to: :characterization
+        delegate :well_formed,       to: :characterization
+        delegate :valid,             to: :characterization
+        delegate :message,           to: :characterization
+        delegate :file_title,        to: :characterization
+        delegate :file_author,       to: :characterization
+        delegate :page_count,        to: :characterization
+        delegate :file_language,     to: :characterization
+        delegate :word_count,        to: :characterization
+        delegate :character_count,   to: :characterization
+        delegate :paragraph_count,   to: :characterization
+        delegate :line_count,        to: :characterization
+        delegate :table_count,       to: :characterization
+        delegate :graphics_count,    to: :characterization
+        delegate :byte_order,        to: :characterization
+        delegate :compression,       to: :characterization
+        delegate :color_space,       to: :characterization
+        delegate :profile_name,      to: :characterization
+        delegate :profile_version,   to: :characterization
+        delegate :orientation,       to: :characterization
+        delegate :color_map,         to: :characterization
+        delegate :image_producer,    to: :characterization
+        delegate :capture_device,    to: :characterization
+        delegate :scanning_software, to: :characterization
+        delegate :exif_version,      to: :characterization
+        delegate :gps_timestamp,     to: :characterization
+        delegate :latitude,          to: :characterization
+        delegate :longitude,         to: :characterization
+        delegate :character_set,     to: :characterization
+        delegate :markup_basis,      to: :characterization
+        delegate :markup_language,   to: :characterization
+        delegate :bit_depth,         to: :characterization
+        delegate :channels,          to: :characterization
+        delegate :data_format,       to: :characterization
+        delegate :offset,            to: :characterization
+        delegate :frame_rate,        to: :characterization
       end
 
       def width

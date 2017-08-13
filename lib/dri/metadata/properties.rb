@@ -4,7 +4,13 @@ module DRI
   module Metadata
     # Implements descMetadata DRI properties for DRI metadata digital objects
     # Common to all supported metadata standards (MODS, EAD, MARC and QDC)
-    class Properties < ActiveFedora::OmDatastream
+    class Properties < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
+
+      def prefix args
+       'properties__'
+      end
+
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|
         # Selects the root node of the XML document

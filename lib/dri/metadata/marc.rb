@@ -3,7 +3,9 @@ module DRI
   # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with MARC-XML Metadata.
-    class Marc < DRI::Metadata::Base
+    class Marc < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
+      
       # OM terminology mapping to a Marc Collection
       # df=datafield, sf=subfield
       set_terminology do |t|

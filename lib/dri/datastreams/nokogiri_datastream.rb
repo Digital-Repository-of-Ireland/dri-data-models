@@ -1,6 +1,6 @@
 module DRI
   module Datastreams
-    module NokogiriDatastreams
+    module NokogiriDatastream
       extend ActiveSupport::Concern
 
       module ClassMethods
@@ -44,33 +44,33 @@ module DRI
       end
 
       def refresh_attributes
-        changed_attributes.clear
+        @changed_attributes.clear
         @ng_xml = nil
       end
 
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_will_change!
-        changed_attributes['ng_xml'] = nil
+        @changed_attributes['ng_xml'] = nil
       end
 
       def ng_xml_doesnt_change!
-        changed_attributes.delete('ng_xml')
+        @changed_attributes.delete('ng_xml')
       end
 
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_changed?
-        changed_attributes.key? 'ng_xml'
+        @changed_attributes.key? 'ng_xml'
       end
 
       def remote_content
-        @ds_content ||= Nokogiri::XML(super).to_xml(&:no_declaration).strip
+        @ds_content ||= Nokogiri::XML(ds_content).to_xml(&:no_declaration).strip
       end
 
       def content=(new_content)
         if remote_content != new_content.to_s
           ng_xml_will_change!
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
-          super(@ng_xml.to_s.strip)
+          ds_content = @ng_xml.to_s.strip
         end
         self.class.decorate_ng_xml @ng_xml
       end
@@ -108,7 +108,7 @@ module DRI
       end
 
       def autocreate?
-        changed_attributes.key? :profile
+        @changed_attributes.key? :profile
       end
 
       def xml_loaded

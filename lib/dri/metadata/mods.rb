@@ -3,7 +3,9 @@ module DRI
   # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with MODS.
-    class Mods < DRI::Metadata::Base
+    class Mods < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
+      
       # MODS prefix for the MODS XSD namespace
       MODS_NS_PREFIX = 'mods'
       # The MODS XSD namespace URL

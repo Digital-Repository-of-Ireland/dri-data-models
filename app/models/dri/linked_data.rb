@@ -2,25 +2,23 @@
 module DRI
   # Implementation of DRI::LinkedData digital objects extending from AF Base
   # for Logainm places
-  class LinkedData < ActiveFedora::Base
-    include DRI::Noid
+  class LinkedData < DRI::DigitalObject
+    has_one :descMetadata, class_name: 'DRI::Metadata::LinkedData'
 
-    contains 'descMetadata', class_name: 'DRI::Metadata::LinkedData'
-
-    property :creator, delegate_to: 'descMetadata', multiple: true
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :contributor, delegate_to: 'descMetadata', multiple: true
-    property :title, delegate_to: 'descMetadata', multiple: true
-    property :tag, delegate_to: 'descMetadata', multiple: true
-    property :description, delegate_to: 'descMetadata', multiple: true
-    property :publisher, delegate_to: 'descMetadata', multiple: true
-    property :date_created, delegate_to: 'descMetadata', multiple: true
-    property :subject, delegate_to: 'descMetadata', multiple: true
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :language, delegate_to: 'descMetadata', multiple: true
-    property :spatial, delegate_to: 'descMetadata', multiple: true
+    delegate :creator, to: :descMetadata
+    delegate :identifier, to: :descMetadata
+    delegate :source, to: :descMetadata
+    delegate :contributor, to: :descMetadata
+    delegate :title, to: :descMetadata
+    delegate :tag, to: :descMetadata
+    delegate :description, to: :descMetadata
+    delegate :publisher, to: :descMetadata
+    delegate :date_created, to: :descMetadata
+    delegate :subject, to: :descMetadata
+    delegate :resource_type, to: :descMetadata
+    delegate :identifier, to: :descMetadata
+    delegate :language, to: :descMetadata
+    delegate :spatial, to: :descMetadata
 
     # AF Override
     # Set the object's attributes
@@ -36,8 +34,12 @@ module DRI
     # @return [DRI::LinkedData] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::LinkedData.find(pid)
-    rescue ActiveFedora::ObjectNotFoundError
+    rescue ActiveRecord::RecordNotFound
       DRI::LinkedData.create(id: pid)
+    end
+
+    def descMetadata
+      super || build_descMetadata
     end
 
     # Override from AF method
