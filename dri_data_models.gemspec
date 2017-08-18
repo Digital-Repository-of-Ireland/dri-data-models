@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib', 'app']
 
   s.add_dependency 'rails', '~> 4.2'
+  s.add_dependency 'globalize', '~> 5'
   s.add_dependency 'sass-rails', '~> 4.0.3'
   s.add_dependency 'active-fedora', '9.11'
   s.add_dependency 'hydra-head', '~> 9.10'
