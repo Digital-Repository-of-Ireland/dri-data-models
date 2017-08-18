@@ -104,6 +104,11 @@ module DRI::Datastreams
       result
     end
 
+    def update_attributes(attributes)
+      super
+      self.datastream_content = self.to_xml if self.datastream_content.nil?
+    end
+
     def get_values(field_key, _default = [])
       term_values(*field_key)
     end
@@ -124,5 +129,10 @@ module DRI::Datastreams
       result = om_update_values(params)
       result
     end
+
+    def retrieve_content
+      self.datastream_content
+    end
+
   end
 end

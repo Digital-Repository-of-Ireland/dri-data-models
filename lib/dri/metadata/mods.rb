@@ -17,6 +17,7 @@ module DRI
       # The copyrightMD XSD namespace URL
       CR_NS = 'http://www.cdlib.org/inside/diglib/copyrightMD'
 
+      def self.load_inherited_terminology
       # Set OM (Opinionated Metadata) terminology
       set_terminology do |t|
         t.root(path: 'mods', namespace_prefix: MODS_NS_PREFIX, "xmlns:#{CR_NS_PREFIX}" => CR_NS, schema: MODS_SCHEMA)
@@ -465,7 +466,7 @@ module DRI
         t.origin_metadata(proxy: [:mods, :origin_info])
         t.subject_metadata(proxy: [:mods, :main_subject])
       end # set_terminology
-
+      end
       # Determine whether the metadata describes a collection
       # Collection if typeOfResource[@collection="yes"]
       def collection?
@@ -1514,6 +1515,9 @@ module DRI
 
         errors
       end # custom_validations
+
+      # Load Dublin Core terminology
+      load_inherited_terminology
     end # class
   end # module
 end # module

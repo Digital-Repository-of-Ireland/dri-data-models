@@ -9,7 +9,8 @@ module DRI
     # Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    delegate :date, to: :descMetadata
+    delegate :creator,:creator=, to: :descMetadata
+    delegate :date,:date=, to: :descMetadata
     delegate :relation, to: :descMetadata
     delegate :external_relation, to: :descMetadata
     delegate :source, to: :descMetadata
@@ -32,16 +33,40 @@ module DRI
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
-      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym,
+      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
                                                        to: :descMetadata}
       # Internal Relationships (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('relation_ids_').to_sym,
+      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('relation_ids_').to_sym,s.concat('=').to_sym,
                                                                 to: :descMetadata}
       # External relationships (contain a URI to resources external to DRI)
       # (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,
+      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
                                                                 to: :descMetadata}
     end
+
+    #DELEGATES = %i(relation external_relation source 
+    #               geographical_coverage name_coverage resource_type
+    #               format coverage id_asset qdc_id geocode_point geocode_box
+    #              ).freeze
+
+    #def self.index_config
+    #  config = {}
+    #  DELEGATES.each do |delegate|
+    #    term = DRI::Metadata::QualifiedDublinCore.terminology.terms[delegate]
+    #    if term
+    #      index = ActiveFedora::Indexing::Map::IndexObject.new(term.name)
+    #      index.type(term.type)
+    #      index.behaviors = term.index_as
+    #      config[delegate] = index
+    #    end
+    #  end
+
+    #  config
+    #end
+
+    #def self.properties
+    #  {}
+    #end
 
     # Override constructor
     def initialize(args = {})
@@ -51,6 +76,10 @@ module DRI
 
     def descMetadata
       super || build_descMetadata
+    end
+
+    def fullMetadata
+      super || build_fullMetadata
     end
 
     #
@@ -91,7 +120,7 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      obj = DRI::QualifiedDublinCore.find(pid)
+      DRI::QualifiedDublinCore.find(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::QualifiedDublinCore.create(id: pid)
     end

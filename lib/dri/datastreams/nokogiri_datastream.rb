@@ -41,6 +41,7 @@ module DRI
         else
           raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{dsid} datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
         end
+        self.datastream_content = self.content
       end
 
       def refresh_attributes
@@ -63,14 +64,19 @@ module DRI
       end
 
       def remote_content
-        @ds_content ||= Nokogiri::XML(ds_content).to_xml(&:no_declaration).strip
+        @ds_content ||= Nokogiri::XML(load_remote_content).to_xml(&:no_declaration).strip
       end
 
+      def load_remote_content
+        return if new_record?
+        @ds_content ||= retrieve_content
+      end
+      
       def content=(new_content)
         if remote_content != new_content.to_s
           ng_xml_will_change!
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
-          ds_content = @ng_xml.to_s.strip
+          self.datastream_content = @ng_xml.to_s.strip
         end
         self.class.decorate_ng_xml @ng_xml
       end
@@ -104,7 +110,6 @@ module DRI
 
       def content
         @content = to_xml if ng_xml_changed? || autocreate?
-        super
       end
 
       def autocreate?

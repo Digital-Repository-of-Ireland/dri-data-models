@@ -44,18 +44,13 @@ describe 'QualifiedDublinCore' do
       expect(@audio.collection?).to eq true
     end
 
-    it 'should assert content model' do
-      expect_any_instance_of(DRI::Base).to receive(:assert_content_model)
-      @dc = DRI::Base.with_standard(:qdc)
-    end
-
     it 'should have asserted the content model' do
-      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::Base'])
+      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::DigitalObject'])
     end
 
     
     it 'should create a new object if there isnt an existing object for a given id' do
-      @audio.update_attributes(@attributes_hash)
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.save
       @audio2 = DRI::QualifiedDublinCore.find_or_create('fake-dc-id')
       expect(@audio2.new_record?).to eq true
@@ -72,8 +67,8 @@ describe 'QualifiedDublinCore' do
       audio2.creator.should == ['Gallagher, Damien']
     end
 
-    it 'should retrieve an existing object from fedora' do
-      @audio.update_attributes(@attributes_hash)
+    it 'should retrieve an existing object' do
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
       @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.id)
@@ -160,7 +155,7 @@ describe 'QualifiedDublinCore' do
           'type' => ['role_hst', 'role_pro', 'role_aut'],
           'name' => ['new host', 'new producer', 'new author']}
 
-      @audio.update_attributes(@attributes_hash)
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.role_pro.should == @attributes_hash['role_hst']
       @audio.role_hst.should == @attributes_hash['role_pro']
       @audio.role_aut.should == @attributes_hash['role_aut']
@@ -182,11 +177,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:title] = ['']
-      @audio.update_attributes(@attributes_hash)
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('title')
-      @audio.update_attributes(@attributes_hash)
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.should_not be_valid
 
       # From variable assignment
@@ -222,7 +217,7 @@ describe 'QualifiedDublinCore' do
       @attributes_hash[:role_pro] = ['']
       @attributes_hash[:role_aut] = ['']
       @audio.type = ['Sound']
-      @audio.update_attributes(@attributes_hash)
+      @audio.descMetadata.update_attributes(@attributes_hash)
       @audio.should_not be_valid
       expect(@audio.descMetadata.custom_validations).to include(:creator)
 
@@ -251,11 +246,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:description] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('description')
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -284,11 +279,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:rights] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('rights')
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -316,11 +311,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:type] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('type')
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -348,12 +343,12 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:type] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('creation_date')
       @attributes_hash.delete('published_date')
-      @audio.update_attributes( @attributes_hash )
+      @audio.descMetadata.update_attributes( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -376,7 +371,7 @@ describe 'QualifiedDublinCore' do
     before(:each) do
       @obj_xml = fixture('audios/dublin_core_audio_lang_sample.xml')
       @obj = DRI::QualifiedDublinCore.new
-      @obj.update_metadata DRI::Metadata::Marc.from_xml(@obj_xml).to_xml
+      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
     end
 
     after(:each) do
@@ -407,8 +402,8 @@ describe 'QualifiedDublinCore' do
       @obj_xml = fixture('relationships/qdc/qdc-rel-obj.xml')
       @col = DRI::QualifiedDublinCore.new
       @obj = DRI::QualifiedDublinCore.new
-      @col.update_metadata DRI::Metadata::Marc.from_xml(@col_xml).to_xml
-      @obj.update_metadata DRI::Metadata::Marc.from_xml(@obj_xml).to_xml
+      @col.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@col_xml).to_xml
+      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
 
       @col.save
       @obj.governing_collection = @col

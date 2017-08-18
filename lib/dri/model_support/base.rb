@@ -12,7 +12,7 @@ module DRI
         # Descriptive metadata DS - F4 uses "File attachments" instead of DSs
         #has_one :descMetadata, class_name: 'DRI::Metadata::Base'
         # Complete metadata record datastream
-        has_one :fullMetadata, class_name: 'DRI::Metadata::FullMetadata'
+        has_one :fullMetadata, class_name: 'DRI::Metadata::FullMetadata', as: :describable, autosave: true
 
         after_initialize :load_attributes
 
@@ -21,13 +21,13 @@ module DRI
         # Title (collection-level)
         delegate :title,:title=, to: :descMetadata
         # Description (collection-level)
-        delegate :description, to: :descMetadata
+        delegate :description,:description=, to: :descMetadata
         # ADDED TYPE, it is compulsory
         # delegate :type, to: 'descMetadata', multiple: true
         # Rights (collection-level)
         delegate :rights,:rights=, to: :descMetadata
         # Creator (collection-level)
-        delegate :creator,:creator=, to: :descMetadata
+        delegate :creator, to: :descMetadata
 
         # DRI Recommended (R)
         # Contributor

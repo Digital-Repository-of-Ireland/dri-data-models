@@ -27,20 +27,20 @@ module DRI
     # one-to-many AF relationship to associate documentation objects
     has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
 
-    has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable
+    has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true
 
-    delegate :status, to: :properties
-    delegate :object_type, to: :properties
-    delegate :depositor, to: :properties
-    delegate :metadata_md5, to: :properties
-    delegate :model_version, to: :properties
+    delegate :status,:status=, to: :properties
+    delegate :object_type,:object_type=, to: :properties
+    delegate :depositor,:depositor=, to: :properties
+    delegate :metadata_md5,:metadata_md5=, to: :properties
+    delegate :model_version,:model_version=, to: :properties
     delegate :verified, to: :properties
-    delegate :doi, to: :properties
-    delegate :cover_image, to: :properties
+    delegate :doi,:doi=, to: :properties
+    delegate :cover_image,:cover_image=, to: :properties
     delegate :institute, to: :properties
     delegate :depositing_institute, to: :properties
-    delegate :licence, to: :properties
-    delegate :object_version, to: :properties
+    delegate :licence,:licence=, to: :properties
+    delegate :object_version,:object_version=, to: :properties
 
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
@@ -111,21 +111,25 @@ module DRI
     # Determine whether the metadata describes a collection
     # @return [Boolean] true if metadata specified this is a collection; false otherwise
     def collection?
-      object_type.include? 'Collection' if object_type.present?
+      descMetadata.resource_type.include? 'Collection' if descMetadata.resource_type.present?
     end
 
     def create_date
       return nil unless created_at
-      DateTime.parse(created_at).utc
+      DateTime.parse(created_at.to_s).utc
     end
 
     def modified_date
       return nil unless updated_at
-      DateTime.parse(updated_at).utc
+      DateTime.parse(updated_at.to_s).utc
+    end
+
+    def declared_attached_files
+      { descMetadata: descMetadata, properties: properties, fullMetadata: fullMetadata }
     end
 
     def attached_files
-      { descMetadata: descMetadata, properties: properties }
+      declared_attached_files
     end
 
     def properties
@@ -136,6 +140,16 @@ module DRI
       properties.status.first
     end
 
+    def method_missing(method, *args)
+      if descMetadata.respond_to?(method)
+        descMetadata.send(method, *args)
+      elsif properties.respond_to?(method)
+        properties.send(method, *args)
+      else
+        super
+      end
+    end
+   
     # Return a Hash representation of this object where keys
     # in the hash are appropriate Solr field names.
     #

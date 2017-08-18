@@ -4,10 +4,10 @@ module DRI
   class Mods < DRI::DigitalObject
     include DRI::ModelSupport::ModsSupport
 
-    has_one: :descMetadata, class_name: 'DRI::Metadata::Mods'
+    has_one :descMetadata, class_name: 'DRI::Metadata::Mods', as: :describable, autosave: true
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    delegate :mods_id_local, to: :descMetadata
+    delegate :mods_id_local,:mods_id_local=, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
     delegate :id_asset, to: :descMetadata
     # MODS rest of identifiers are repeatable
@@ -16,17 +16,17 @@ module DRI
     delegate :identifier_uri, to: :descMetadata
 
     # Collection attribute + genre type
-    delegate :mods_type_collection, to: :descMetadata
+    delegate :mods_type_collection,:mods_type_collection=, to: :descMetadata
     delegate :mods_genre, to: :descMetadata
 
     # subtitle
     delegate :mods_subtitle, to: :descMetadata
 
     # Description
-    delegate :desc_abstract, to: :descMetadata
-    delegate :desc_toc, to: :descMetadata
-    delegate :desc_note, to: :descMetadata
-    delegate :desc_physdesc_note, to: :descMetadata
+    delegate :desc_abstract,:desc_abstract=, to: :descMetadata
+    delegate :desc_toc,:desc_toc=, to: :descMetadata
+    delegate :desc_note,:desc_note=, to: :descMetadata
+    delegate :desc_physdesc_note,:desc_physdesc_note=, to: :descMetadata
     # delegate :abstract, to: :descMetadata
     # delegate :toc, to: :descMetadata
     # delegate :note_mods_type, to: :descMetadata
@@ -50,8 +50,8 @@ module DRI
     delegate :captured_date_end, to: :descMetadata
     delegate :issued_date_start, to: :descMetadata
     delegate :issued_date_end, to: :descMetadata
-    delegate :creation_date_start, to: :descMetadata
-    delegate :creation_date_end, to: :descMetadata
+    delegate :creation_date_start,:creation_date_start=, to: :descMetadata
+    delegate :creation_date_end,:creation_date_end=, to: :descMetadata
 
     # Geographical, temporal, name
     delegate :name_coverage, to: :descMetadata
@@ -79,7 +79,7 @@ module DRI
     delegate :origin_metadata, to: :descMetadata
 
     delegate :subject_metadata, to: :descMetadata
-
+    
     # Disabled for now
     # around_save :create_multiple_records
 
@@ -91,6 +91,10 @@ module DRI
 
     def descMetadata
       super || build_descMetadata
+    end
+
+    def fullMetadata
+      super || build_fullMetadata
     end
 
     #
@@ -332,7 +336,7 @@ module DRI
     # @return [DRI::Mods] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
       DRI::Mods.find(pid)
-    rescue ActiveFedora::ObjectNotFoundError
+    rescue ActiveRecord::RecordNotFound
       DRI::Mods.create(id: pid)
     end
 
@@ -360,7 +364,7 @@ module DRI
     # i.e. mods_id_local_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)
+      ActiveFedora.index_field_mapper.solr_name('mods_id_local', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type
@@ -379,7 +383,7 @@ module DRI
         review: retrieve_relation_records(send(self.class.relationships[:review][:field]), self.class.solr_relationships_field)
       }
     end
-
+    
     private
 
     def create_multiple_records

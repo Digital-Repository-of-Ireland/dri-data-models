@@ -38,7 +38,7 @@ describe 'Mods' do
     end
 
     it 'should be a kind of Base and Mods' do
-      @mods_record.should be_kind_of(DRI::Base)
+      @mods_record.should be_kind_of(DRI::DigitalObject)
       @mods_record.should be_kind_of(DRI::Mods)
     end
 
@@ -180,8 +180,8 @@ describe 'Mods' do
     it 'should add relationship host and referenced_by' do
       md_relationships_hash = @mods_record.get_relationships_records
 
-      added_rels = [DRI::Mods.find(md_relationships_hash[:referenced_by].first).mods_id_local,
-                    DRI::Mods.find(md_relationships_hash[:host].first).mods_id_local]
+      added_rels = [DRI::Mods.find(md_relationships_hash[:referenced_by].first).mods_id_local.first,
+                    DRI::Mods.find(md_relationships_hash[:host].first).mods_id_local.first]
 
       expect(added_rels).to  match(%w(http://example.org/subcollection/1# MODS-ID-1234))
     end

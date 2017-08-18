@@ -9,15 +9,12 @@ module DRI
       # Creates a set of DRI::Mods digital objects from the MODS record metadata
       def create_mods_records
         return if self.new_record?
-
-        xml_no_blanks = Nokogiri::XML.parse(fullMetadata.ng_xml.to_xml, &:noblanks)
+        xml_no_blanks = Nokogiri::XML.parse(fullMetadata.to_xml, &:noblanks)
 
         return if xml_no_blanks.search('/mods:modsCollection').empty?
 
         collection = xml_no_blanks.search('/mods:modsCollection')
-
         records = collection.children
-
         records.each_with_index do |r, i|
           next if i == 0
 
@@ -38,15 +35,23 @@ module DRI
       # @param [String] xml the XML metadata for the digital object to be created
       #
       def create_object(xml)
-        new_object = DRI::Base.with_standard :mods
+        new_object = DRI::Mods.new
         new_object.governing_collection = self
         new_object.depositor = depositor
         new_object.status = status
         new_object.update_metadata(xml)
-        new_object.permissions = permissions.to_a
+        
+        new_object.read_users_string = read_users_string
+        new_object.read_groups_string = read_groups_string
+        new_object.edit_users_string = edit_users_string
+        new_object.edit_groups_string = edit_groups_string
+        new_object.manager_users_string = manager_users_string
+        new_object.manager_groups_string = manager_groups_string
+
         DRI::Utils.checksum_metadata(new_object)
 
         new_object.save if new_object.valid?
+        self.save
       end # create_object
     end # modsSupport
   end # modelSupport

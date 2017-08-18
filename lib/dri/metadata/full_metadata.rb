@@ -9,6 +9,7 @@ module DRI
     #   EAD: <ead:dsc> wrapper
     #   MARC <marc:collection> wrapper
     class FullMetadata < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
     end
   end
 end

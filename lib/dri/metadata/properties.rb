@@ -7,10 +7,6 @@ module DRI
     class Properties < DRI::Datastreams::OmDatastream
       include DRI::Metadata
 
-      def prefix args
-       'properties__'
-      end
-
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|
         # Selects the root node of the XML document

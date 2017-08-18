@@ -44,9 +44,10 @@ module DRI
         []
       end
 
-      def prefix args
-       'desc_metadata__'
+      def prefix(path)
+        ''#path ? "#{path.underscore}__" : ''
       end
+
 
       # Remove null values from a given field within
       # the solr document for this object
