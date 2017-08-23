@@ -31,13 +31,13 @@ module DRI
 
         # DRI Recommended (R)
         # Contributor
-        delegate :contributor, to: :descMetadata
+        delegate :contributor,:contributor=, to: :descMetadata
         # Publisher (collection-level, DRI pre-populated)
-        delegate :publisher, to: :descMetadata
+        delegate :publisher,:publisher=, to: :descMetadata
         # Subject (collection-level)
-        delegate :subject, to: :descMetadata
+        delegate :subject,:subject=, to: :descMetadata
         # Language (collection-level)
-        delegate :language, to: :descMetadata
+        delegate :language,:language=, to: :descMetadata
 
         validate :custom_validations
       end
@@ -116,31 +116,9 @@ module DRI
         end
 
         return if ds.nil?
-
-        ds.instance_variable_set(:@dsid, 'descMetadata')
-        attach_file(ds, 'descMetadata')
-      end # load_attributes
-
-      def load_attached_files
-        super
-
-        attach_desc_metadata
-      end
-
-      def attach_desc_metadata
-        ds_class = get_metadata_class_from_xml(descMetadata.to_xml)
-
-        return unless %w(DRI::Metadata::EncodedArchivalDescription
-                         DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
-
-        old_digital_object = descMetadata.uri
-        ds = ds_class.constantize.from_xml(descMetadata.to_xml)
-        ds.uri = old_digital_object
-          
         #ds.instance_variable_set(:@dsid, 'descMetadata')
-        #attached_files[:descMetadata] = ds
-        descMetadata = ds
-      end
+        #attach_file(ds, 'descMetadata')
+      end # load_attributes
     end # module
   end # module
 end # module

@@ -29,7 +29,6 @@ module DRI
         # before we set ng_xml, we load the datastream so we know if the new value differs.
         # TODO reinstate this
         # local_or_remote_content(true)
-
         case new_xml
         when Nokogiri::XML::Document
           self.content = new_xml.to_xml
@@ -39,50 +38,46 @@ module DRI
         when String
           self.content = new_xml
         else
-          raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{dsid} datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
+          raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
         end
-        self.datastream_content = self.content
       end
 
       def refresh_attributes
-        @changed_attributes.clear
+        clear_changes_information
         @ng_xml = nil
       end
 
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_will_change!
-        @changed_attributes['ng_xml'] = nil
+        attribute_will_change!('ng_xml')
       end
 
-      def ng_xml_doesnt_change!
-        @changed_attributes.delete('ng_xml')
-      end
+      #def ng_xml_doesnt_change!
+      #  changes.delete('ng_xml')
+      #end
 
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_changed?
-        @changed_attributes.key? 'ng_xml'
+        changed.include?('ng_xml')
       end
 
       def remote_content
-        @ds_content ||= Nokogiri::XML(load_remote_content).to_xml(&:no_declaration).strip
+        @ds_content ||= Nokogiri::XML(persisted_remote_content).to_xml(&:no_declaration).strip
       end
-
-      def load_remote_content
-        return if new_record?
-        @ds_content ||= retrieve_content
-      end
-      
+           
       def content=(new_content)
         if remote_content != new_content.to_s
-          ng_xml_will_change!
+          attribute_will_change!('ng_xml')
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
-          self.datastream_content = @ng_xml.to_s.strip
+          
+          attribute_will_change!('content') unless @content == new_content.to_s
+          @content = new_content.to_s
         end
         self.class.decorate_ng_xml @ng_xml
       end
 
       def content_changed?
-        return true if autocreate? && new_record?
+        return true if new_record?
         return false unless xml_loaded
         ng_xml_changed?
       end
@@ -109,13 +104,10 @@ module DRI
       end
 
       def content
-        @content = to_xml if ng_xml_changed? || autocreate?
+        @content = to_xml if ng_xml_changed?
+        persisted_content
       end
-
-      def autocreate?
-        @changed_attributes.key? :profile
-      end
-
+      
       def xml_loaded
         instance_variable_defined? :@ng_xml
       end

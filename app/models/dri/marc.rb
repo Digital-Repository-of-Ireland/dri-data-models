@@ -4,7 +4,7 @@ module DRI
   class Marc < DRI::DigitalObject
     include DRI::ModelSupport::MarcSupport
 
-    has_one :descMetadata, class_name: 'DRI::Metadata::Marc'
+    has_one :descMetadata, class_name: 'DRI::Metadata::Marc', as: :describable, autosave: true
 
     delegate :leader, to: :descMetadata, multiple: false
     delegate :controlfield, to: :descMetadata
@@ -51,6 +51,10 @@ module DRI
 
     def descMetadata
       super || build_descMetadata
+    end
+
+    def fullMetadata
+      super || build_fullMetadata
     end
 
     # type attribute getter

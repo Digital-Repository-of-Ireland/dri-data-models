@@ -12,8 +12,8 @@ describe 'Marc' do
 
     end
 
-    it 'should be a kind of Base' do
-      @marc_item.should be_kind_of(DRI::Base)
+    it 'should be a kind of DigitalObject' do
+      @marc_item.should be_kind_of(DRI::DigitalObject)
     end
 
     it 'should have a marc datastream' do
@@ -21,7 +21,7 @@ describe 'Marc' do
     end
 
     it "should expose the Marc components\' identifiers - mandatory fields" do
-      @marc_item.marc_id.should == '0123456789'
+      @marc_item.marc_id.should == ['0123456789']
       @marc_item.type.first.should == 'Language material'
       @marc_item.title.first.should == 'Arithmetic /'
       @marc_item.description.should == ["\n    1 v. (unpaged) :\n    ill. (some col.) ;\n    26 cm.\n  ", "\n    One Mylar sheet included in pocket.\n  ", "\n    A poem about numbers and their characteristics. Features anamorphic, or distorted, drawings which can be restored to normal by viewing from a particular angle or by viewing the image's reflection in the provided Mylar cone.\n  "]
@@ -86,9 +86,9 @@ describe 'Marc' do
     it 'should add relationship relation, is_version_of and is_format_of' do
       md_relationships_hash = @nccb1.get_relationships_records
 
-      added_rels = [DRI::Marc.find(md_relationships_hash[:related].first).marc_id,
-                    DRI::Marc.find(md_relationships_hash[:is_format].first).marc_id,
-                    DRI::Marc.find(md_relationships_hash[:is_version].first).marc_id]
+      added_rels = [DRI::Marc.find(md_relationships_hash[:related].first).marc_id.first,
+                    DRI::Marc.find(md_relationships_hash[:is_format].first).marc_id.first,
+                    DRI::Marc.find(md_relationships_hash[:is_version].first).marc_id.first]
 
       added_rels.should =~ ['nccb3', 'nccb2', 'nccb0']
     end

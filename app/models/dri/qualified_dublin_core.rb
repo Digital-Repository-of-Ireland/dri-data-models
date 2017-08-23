@@ -11,25 +11,25 @@ module DRI
     # All DC elements added to the DM - Simple DC Ingest form
     delegate :creator,:creator=, to: :descMetadata
     delegate :date,:date=, to: :descMetadata
-    delegate :relation, to: :descMetadata
-    delegate :external_relation, to: :descMetadata
-    delegate :source, to: :descMetadata
-    delegate :geographical_coverage, to: :descMetadata
-    delegate :temporal_coverage, to: :descMetadata
-    delegate :name_coverage, to: :descMetadata
+    delegate :relation,:relation=, to: :descMetadata
+    delegate :external_relation,:external_relation=, to: :descMetadata
+    delegate :source,:source=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :name_coverage,:name_coverage=, to: :descMetadata
     delegate :resource_type, to: :descMetadata
-    delegate :format, to: :descMetadata
-    delegate :coverage, to: :descMetadata
-    delegate :identifier, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
+    delegate :coverage,:coverage=, to: :descMetadata
+    delegate :identifier,:identifier=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
-    delegate :id_asset, to: :descMetadata
-    delegate :qdc_id, to: :descMetadata
-    delegate :geocode_point, to: :descMetadata
-    delegate :geocode_box, to: :descMetadata
+    delegate :id_asset,:id_asset=, to: :descMetadata
+    delegate :qdc_id,:qdc_id=, to: :descMetadata
+    delegate :geocode_point,:geocode_point=, to: :descMetadata
+    delegate :geocode_box,:geocode_box=, to: :descMetadata
 
-    delegate :published_date, to: :descMetadata
-    delegate :creation_date, to: :descMetadata
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
@@ -43,31 +43,7 @@ module DRI
       DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
                                                                 to: :descMetadata}
     end
-
-    #DELEGATES = %i(relation external_relation source 
-    #               geographical_coverage name_coverage resource_type
-    #               format coverage id_asset qdc_id geocode_point geocode_box
-    #              ).freeze
-
-    #def self.index_config
-    #  config = {}
-    #  DELEGATES.each do |delegate|
-    #    term = DRI::Metadata::QualifiedDublinCore.terminology.terms[delegate]
-    #    if term
-    #      index = ActiveFedora::Indexing::Map::IndexObject.new(term.name)
-    #      index.type(term.type)
-    #      index.behaviors = term.index_as
-    #      config[delegate] = index
-    #    end
-    #  end
-
-    #  config
-    #end
-
-    #def self.properties
-    #  {}
-    #end
-
+   
     # Override constructor
     def initialize(args = {})
       args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
@@ -111,7 +87,7 @@ module DRI
         break
       end
 
-      super(properties)
+      super(updated_props)
     end
 
     # Retrieve an existing Fedora DRI::QualifiedDublinCore object;

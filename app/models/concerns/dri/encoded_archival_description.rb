@@ -1,15 +1,17 @@
 # DRI namespace
 module DRI
   # Implementation of DRI EAD digital objects extending from DRI::Base
-  class EncodedArchivalDescription < DRI::DigitalObject
-    include DRI::ModelSupport::EadSupport
+  module EncodedArchivalDescription
+    extend ActiveSupport::Concern
 
+    include DRI::ModelSupport::EadSupport
+    
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
-    delegate :identifier, to: :descMetadata
-    delegate :identifier_id, to: :descMetadata, multiple: false
-    delegate :repository_code, to: :descMetadata, multiple: false
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :identifier_id,:identifier_id=, to: :descMetadata, multiple: false
+    delegate :repository_code,:repository_code=, to: :descMetadata, multiple: false
     delegate :country_code, to: :descMetadata, multiple: false
 
     # ISO Dates
@@ -24,15 +26,15 @@ module DRI
     delegate :desc_dao_desc, to: :descMetadata
     
     # Subjects
-    delegate :name_subject, to: :descMetadata
-    delegate :persname_subject, to: :descMetadata
-    delegate :corpname_subject, to: :descMetadata
-    delegate :famname_subject, to: :descMetadata
-    delegate :geogname_subject, to: :descMetadata
+    delegate :name_subject,:name_subject=, to: :descMetadata
+    delegate :persname_subject,:persname_subject=, to: :descMetadata
+    delegate :corpname_subject,:corpname_subject=, to: :descMetadata
+    delegate :famname_subject,:famname_subject=, to: :descMetadata
+    delegate :geogname_subject,:geogname_subject=, to: :descMetadata
 
     # Types
-    delegate :ead_level, to: :descMetadata, multiple: false
-    delegate :ead_level_other, to: :descMetadata, multiple: false
+    delegate :ead_level,:ead_level=, to: :descMetadata, multiple: false
+    delegate :ead_level_other,:ead_level_other=, to: :descMetadata, multiple: false
 
     # Files, description
     delegate :dao_proxy, to: :descMetadata
@@ -58,37 +60,11 @@ module DRI
     delegate :geocode_point, to: :descMetadata
     delegate :geocode_box, to: :descMetadata
     delegate :geocode_logainm, to: :descMetadata
-    delegate :format, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
 
     delegate :published_date, to: :descMetadata
     delegate :creation_date, to: :descMetadata
-
-    around_save :synchronize_if_changed # trigger EAD children creation
-
-    # Override constructor
-    def initialize(type, args = {})
-      case type
-      when :collection
-        metadata_class = 'DRI::Metadata::EncodedArchivalDescription'
-      else
-        metadata_class = 'DRI::Metadata::EncodedArchivalDescriptionComponent'
-      end
-      args[:desc_metadata_class] = metadata_class
-
-      super(args)
-    end
-
-    # Retrieve an existing Fedora DRI::EncodedArchivalDescription object;
-    # creates a new one if object not found for a given PID
-    #
-    # @param [String] pid the object's PID
-    # @return [DRI::EncodedArchivalDescription] the retrieved Fedora object; new object if not found
-    def self.find_or_create(pid)
-      DRI::EncodedArchivalDescription.find(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::EncodedArchivalDescription.create(id: pid)
-    end
-
+       
     #
     # @return [Array<Symbol>] EAD DRI terms symbols array
     def self.ead_dri_terms
@@ -110,20 +86,23 @@ module DRI
 
       # When updating from DRI form
       # replace type attribute key with resource_type
-      updated_props.keys.each do |k|
-        next if k.to_sym != :type
+      #updated_props.keys.each do |k|
+      #  next if k.to_sym != :type
 
-        updated_props[:resource_type] = updated_props[k]
-        updated_props.delete(k)
-        break
-      end
+      #  updated_props[:resource_type] = updated_props[k]
+      #  updated_props.delete(k)
+      #  break
+      #end
 
-      modified_attributes = updated_props.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
-      super(modified_attributes)
+      #puts updated_props
 
-      update_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
-      self.trigger_update = true unless update_attributes.empty?
-      update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
+      #modified_attributes = updated_props.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      #super(modified_attributes)
+      super(updated_props)
+
+      #update_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      #self.trigger_update = true unless update_attributes.empty?
+      #update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
 
     #
@@ -147,7 +126,7 @@ module DRI
     # Type attribute setter
     # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
-      self.resource_type = type
+      descMetadata.resource_type = type
     end
 
     # Returns a Hash with all the values for the DRI editable metadata fields
@@ -279,7 +258,7 @@ module DRI
       file_type.push('collection')
 
       if !root_collection? && !ead_level.blank?
-        file_type_display.push ead_level.strip.capitalize
+        file_type_display.push ead_level.first.strip.capitalize
       else
         file_type_display.push('Collection')
       end
@@ -291,20 +270,18 @@ module DRI
     def object_types_to_solr(solr_doc = {})
       # Add title metadata from parent collections
       object_types = []
-
       descMetadata.resource_type.each do |curr_category|
-        object_types.push(curr_category.split.map(&:capitalize) * ' ')
+        object_types.push(curr_category.split.map(&:capitalize) * ' ') unless curr_category.blank?
       end
 
       if object_types.empty?
         case descMetadata
         when DRI::Metadata::EncodedArchivalDescriptionComponent
           object_types.push('Collection') if descMetadata.collection?
-
           if ead_level.include? 'otherlevel'
-            object_types.push(ead_level_other.split.map(&:capitalize) * ' ')
+            object_types.push(ead_level_other.split.first.map(&:capitalize) * ' ')
           else
-            object_types.push(ead_level.split.map(&:capitalize) * ' ')
+            object_types.push(ead_level.split.first.map(&:capitalize) * ' ')
           end
         when DRI::Metadata::EncodedArchivalDescription
           object_types.push('Collection')
@@ -417,12 +394,12 @@ module DRI
             dsc = updated_desc_md.at('//dsc')
           end
 
-          if dsc.nil?
-            # directly nested under the parent's component
-            updated_desc_md.root.add_child(node)
-          else
+          if dsc
             # grouped under dsc, if present
             dsc.add_child(node)
+          else
+             # directly nested under the parent's component
+            updated_desc_md.root.add_child(node)
           end
         end
       end
@@ -457,6 +434,14 @@ module DRI
         # descMetadata update, trigger parent fullMetadata sync
         DRI.queue.push(UpdateParentMetadataJob.new(id))
         self.trigger_update = false
+      end
+    end
+
+    def method_missing(method, *args)
+      if self.class.terminology.has_term?(*OM.destringify(term_pointer))
+        descMetadata.send(method, *args)
+      else
+        super
       end
     end
   end # class

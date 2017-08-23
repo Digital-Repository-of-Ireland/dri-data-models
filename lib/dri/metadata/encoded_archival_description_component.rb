@@ -4,263 +4,267 @@ module DRI
   module Metadata
     # Implements the descMetadata datastream for DRI::EncodedArchivalDescription digital objects
     # extends from DRI::Metadata::Base
-    class EncodedArchivalDescriptionComponent < DRI::Metadata::Base
+    class EncodedArchivalDescriptionComponent < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
+
       # OM (Opinionated Metadata) terminology mapping to an EAD Components (Sub-collections or Objects)
-      set_terminology do |t|
-        t.root(path: '*', namespace_prefix: nil)
+      def self.load_inherited_terminology
+        set_terminology do |t|
+          t.root(path: '*', namespace_prefix: nil)
 
-        # Subject name, temporal and geographical terms
-        t.geog_name(path: 'geogname') {
-          t.role(path: { attribute: 'role' })
-        }
-        t.geog_name_cvg(ref: :geog_name, path: 'geogname[not(@role="subject")]')
+          # Subject name, temporal and geographical terms
+          t.geog_name(path: 'geogname') {
+            t.role(path: { attribute: 'role' })
+          }
+          t.geog_name_cvg(ref: :geog_name, path: 'geogname[not(@role="subject")]')
 
-        t.name {
-          t.role(path: { attribute: 'role' })
-        }
-        t.name_cvg(ref: :name, path: 'name[not(parent::origination) and not(@role="subject")]')
+          t.name {
+            t.role(path: { attribute: 'role' })
+          }
+          t.name_cvg(ref: :name, path: 'name[not(parent::origination) and not(@role="subject")]')
 
-        t.pers_name(path: 'persname') {
-          t.role(path: { attribute: 'role' })
-        }
-        t.pers_name_cvg(ref: :pers_name, path: 'persname[not(parent::origination) and not(@role="subject")]')
+          t.pers_name(path: 'persname') {
+            t.role(path: { attribute: 'role' })
+          }
+          t.pers_name_cvg(ref: :pers_name, path: 'persname[not(parent::origination) and not(@role="subject")]')
 
-        t.corp_name(path: 'corpname') {
-          t.role(path: { attribute: 'role' })
-        }
-        t.corp_name_cvg(ref: :corp_name, path: 'corpname[not(parent::origination) and not(@role="subject")]')
+          t.corp_name(path: 'corpname') {
+            t.role(path: { attribute: 'role' })
+          }
+          t.corp_name_cvg(ref: :corp_name, path: 'corpname[not(parent::origination) and not(@role="subject")]')
 
-        t.fam_name(path: 'famname') {
-          t.role(path: { attribute: 'role' })
-        }
-        t.fam_name_cvg(ref: :fam_name, path: 'famname[not(parent::origination) and not(@role="subject")]')
+          t.fam_name(path: 'famname') {
+            t.role(path: { attribute: 'role' })
+          }
+          t.fam_name_cvg(ref: :fam_name, path: 'famname[not(parent::origination) and not(@role="subject")]')
 
-        t.date {
-          t.normal_at(path: { attribute: 'normal' })
-          t.type_at(path: { attribute: 'type' })
-        }
-        t.date_text(ref: :date, attributes: { normal: :none })
+          t.date {
+            t.normal_at(path: { attribute: 'normal' })
+            t.type_at(path: { attribute: 'type' })
+          }
+          t.date_text(ref: :date, attributes: { normal: :none })
 
-        t.lang(path: 'language') {
-          t.langcode_at(path: { attribute: 'langcode' })
-        }
+          t.lang(path: 'language') {
+            t.langcode_at(path: { attribute: 'langcode' })
+          }
 
-        t.subject_anywhere(path: 'subject')
+          t.subject_anywhere(path: 'subject')
 
-        t.ext_ref(path: 'extref') {
-          t.href_at(path: { attribute: 'href' })
-        }
+          t.ext_ref(path: 'extref') {
+            t.href_at(path: { attribute: 'href' })
+          }
 
-        # EAD p
-        t.p(path: 'p')
+          # EAD p
+          t.p(path: 'p')
 
-        t.ext_ref_p(path: 'p') {
-          t.ext_ref(ref: [:ext_ref])
-        }
+          t.ext_ref_p(path: 'p') {
+            t.ext_ref(ref: [:ext_ref])
+          }
 
-        # c, c01..c12
-        t.scope_content(path: 'scopecontent') {
-          t.p(ref: [:p])
-        }
-        # Key subjects under controlaccess
-        t.control_access(path: 'controlaccess') {
-          # Preferred subject from the guidelines
-          t.subject(ref: [:subject_anywhere])
-          # Name, Personal name, Family name, Corporate Name, Geographical name
-          t.name(ref: [:name], attributes: { role: 'subject' })
-          t.pers_name(ref: [:pers_name], attributes: { role: 'subject' })
-          t.corp_name(ref: [:corp_name], attributes: { role: 'subject' })
-          t.fam_name(ref: [:fam_name], attributes: { role: 'subject' })
-          t.geog_name(ref: [:geog_name], attributes: { role: 'subject' })
-          t.name_cvg(ref: [:name_cvg])
-          t.pers_name_cvg(ref: [:pers_name_cvg])
-          t.corp_name_cvg(ref: [:corp_name_cvg])
-          t.fam_name_cvg(ref: [:fam_name_cvg])
-          t.geog_name_cvg(ref: [:geog_name_cvg])
-        }
+          # c, c01..c12
+          t.scope_content(path: 'scopecontent') {
+            t.p(ref: [:p])
+          }
+          # Key subjects under controlaccess
+          t.control_access(path: 'controlaccess') {
+            # Preferred subject from the guidelines
+            t.subject(ref: [:subject_anywhere])
+            # Name, Personal name, Family name, Corporate Name, Geographical name
+            t.name(ref: [:name], attributes: { role: 'subject' })
+            t.pers_name(ref: [:pers_name], attributes: { role: 'subject' })
+            t.corp_name(ref: [:corp_name], attributes: { role: 'subject' })
+            t.fam_name(ref: [:fam_name], attributes: { role: 'subject' })
+            t.geog_name(ref: [:geog_name], attributes: { role: 'subject' })
+            t.name_cvg(ref: [:name_cvg])
+            t.pers_name_cvg(ref: [:pers_name_cvg])
+            t.corp_name_cvg(ref: [:corp_name_cvg])
+            t.fam_name_cvg(ref: [:fam_name_cvg])
+            t.geog_name_cvg(ref: [:geog_name_cvg])
+          }
 
-        t.biog_hist(path: 'bioghist') {
-          t.p(ref: [:p])
-        }
+          t.biog_hist(path: 'bioghist') {
+            t.p(ref: [:p])
+          }
 
-        # did
-        t.lang_material(path: 'langmaterial') {
-          t.lang(ref: [:lang])
-        }
-        t.origination {
-          t.person_contributor(ref: [:pers_name], attributes: { role: 'contributor' })
-          t.person_creator(ref: [:pers_name], attributes: { role: 'creator' })
-          t.pers_name(ref: [:pers_name])
-          t.name(ref: [:name])
-          t.corp_name(ref: [:corp_name])
-          t.fam_name(ref: [:fam_name])
-        }
+          # did
+          t.lang_material(path: 'langmaterial') {
+            t.lang(ref: [:lang])
+          }
+          t.origination {
+            t.person_contributor(ref: [:pers_name], attributes: { role: 'contributor' })
+            t.person_creator(ref: [:pers_name], attributes: { role: 'creator' })
+            t.pers_name(ref: [:pers_name])
+            t.name(ref: [:name])
+            t.corp_name(ref: [:corp_name])
+            t.fam_name(ref: [:fam_name])
+          }
 
-        t.unit_date(path: 'unitdate') {
-          t.normal_at(path: { attribute: 'normal' })
-          t.datechar_at(path: { attribute: 'datechar' })
-        }
-        t.unit_date_display(ref: :unit_date, attributes: { normal: :none })
-        t.unit_date_other(ref: :unit_date, path: 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]')
+          t.unit_date(path: 'unitdate') {
+            t.normal_at(path: { attribute: 'normal' })
+            t.datechar_at(path: { attribute: 'datechar' })
+          }
+          t.unit_date_display(ref: :unit_date, attributes: { normal: :none })
+          t.unit_date_other(ref: :unit_date, path: 'unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]')
 
-        t.phys_desc(path: 'physdesc') {
-          t.genre_form(path: 'genreform')
-          t.extent(path: 'extent')
-        }
-        t.dao_desc {
-          t.p(ref: [:p])
-        }
-        t.dao {
-          t.href_at(path: { attribute: 'href' })
-          t.dao_desc(ref: [:dao_desc], path: 'daodesc')
-        }
+          t.phys_desc(path: 'physdesc') {
+            t.genre_form(path: 'genreform')
+            t.extent(path: 'extent')
+          }
+          t.dao_desc {
+            t.p(ref: [:p])
+          }
+          t.dao {
+            t.href_at(path: { attribute: 'href' })
+            t.dao_desc(ref: [:dao_desc], path: 'daodesc')
+          }
 
-        t.use_restrict(path: 'userestrict') {
-          t.p(ref: [:p])
-        }
+          t.use_restrict(path: 'userestrict') {
+            t.p(ref: [:p])
+          }
 
-        t.rel_mat(path: 'relatedmaterial') {
-          t.p(ref: [:p])
-          t.ext_ref(ref: [:ext_ref])
-        }
+          t.rel_mat(path: 'relatedmaterial') {
+            t.p(ref: [:p])
+            t.ext_ref(ref: [:ext_ref])
+          }
 
-        t.alt_form(path: 'altformavail') {
-          t.p(ref: [:p])
-          t.ext_ref_p(ref: [:ext_ref_p])
-        }
+          t.alt_form(path: 'altformavail') {
+            t.p(ref: [:p])
+            t.ext_ref_p(ref: [:ext_ref_p])
+          }
 
-        t.note {
-          t.p(ref: [:p])
-        }
+          t.note {
+            t.p(ref: [:p])
+          }
 
-        # We need to keep track of the unitid in order to sync this XML snippet to the correct
-        # component tag in the complete EAD XML datastream in the collection object!
-        t.unit_id(path: 'unitid') {
-          t.repository_code_at(path: { attribute: 'repositorycode' })
-          t.country_code_at(path: { attribute: 'countrycode' })
-          t.identifier_at(path: { attribute: 'identifier' })
-          t.url_at(path: { attribute: 'url' })
-          t.public_id_at(path: { attribute: 'publicid' })
-        }
+          # We need to keep track of the unitid in order to sync this XML snippet to the correct
+          # component tag in the complete EAD XML datastream in the collection object!
+          t.unit_id(path: 'unitid') {
+            t.repository_code_at(path: { attribute: 'repositorycode' })
+            t.country_code_at(path: { attribute: 'countrycode' })
+            t.identifier_at(path: { attribute: 'identifier' })
+            t.url_at(path: { attribute: 'url' })
+            t.public_id_at(path: { attribute: 'publicid' })
+          }
 
-        t.did {
-          t.unit_id(ref: [:unit_id])
-          t.unit_title(path: 'unittitle')
-          t.unit_date(ref: [:unit_date])
-          t.unitdate_creation(ref: [:unit_date], path: 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]')
-          t.unitdate_pub(ref: [:unit_date], attributes: { datechar: 'publication' })
-          t.unit_date_other(ref: [:unit_date_other])
-          t.origination(ref: [:origination])
-          t.abstract
-          t.lang_material(ref: [:lang_material])
-          t.dao(ref: [:dao])
-          t.phys_desc(ref: [:phys_desc])
-          t.note(ref: [:note])
-          t.repository
-        }
+          t.did {
+            t.unit_id(ref: [:unit_id])
+            t.unit_title(path: 'unittitle')
+            t.unit_date(ref: [:unit_date])
+            t.unitdate_creation(ref: [:unit_date], path: 'unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]')
+            t.unitdate_pub(ref: [:unit_date], attributes: { datechar: 'publication' })
+            t.unit_date_other(ref: [:unit_date_other])
+            t.origination(ref: [:origination])
+            t.abstract
+            t.lang_material(ref: [:lang_material])
+            t.dao(ref: [:dao])
+            t.phys_desc(ref: [:phys_desc])
+            t.note(ref: [:note])
+            t.repository
+          }
 
-        t.c(path: '*', namespace_prefix: nil) {
-          # level attributes
-          t.ead_level_at(path: { attribute: 'level' })
-          t.other_level_at(path: { attribute: 'otherlevel' })
+          t.c(path: '*', namespace_prefix: nil) {
+            # level attributes
+            t.ead_level_at(path: { attribute: 'level' })
+            t.other_level_at(path: { attribute: 'otherlevel' })
 
-          t.did(ref: [:did])
-          t.control_access(ref: [:control_access])
-          t.biog_hist(ref: [:biog_hist])
-          t.scope_content(ref: [:scope_content])
-          t.use_restrict(ref: [:use_restrict])
-          t.rel_mat(ref: [:rel_mat])
-          t.alt_form(ref: [:alt_form])
-          t.dao(ref: [:dao])
-          t.dsc
-        }
+            t.did(ref: [:did])
+            t.control_access(ref: [:control_access])
+            t.biog_hist(ref: [:biog_hist])
+            t.scope_content(ref: [:scope_content])
+            t.use_restrict(ref: [:use_restrict])
+            t.rel_mat(ref: [:rel_mat])
+            t.alt_form(ref: [:alt_form])
+            t.dao(ref: [:dao])
+            t.dsc
+          }
 
-        # DRI mandatory fields 1-to-1 mappings
-        t.title(proxy: [:c, :did, :unit_title], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.language(proxy: [:c, :did, :lang_material, :lang], index_as: [Descriptors.cleaned_searchable, Descriptors.language_facetable])
-        t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
-        t.publisher(proxy: [:c, :did, :repository], index_as: [Descriptors.cleaned_searchable])
-        t.rights(proxy: [:c, :use_restrict, :p], index_as: [Descriptors.cleaned_displayable, :stored_searchable])
-        t.resource_type(proxy: [:c, :did, :phys_desc, :genre_form], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # DRI mandatory fields 1-to-1 mappings
+          t.title(proxy: [:c, :did, :unit_title], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.language(proxy: [:c, :did, :lang_material, :lang], index_as: [Descriptors.cleaned_searchable, Descriptors.language_facetable])
+          t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
+          t.publisher(proxy: [:c, :did, :repository], index_as: [Descriptors.cleaned_searchable])
+          t.rights(proxy: [:c, :use_restrict, :p], index_as: [Descriptors.cleaned_displayable, :stored_searchable])
+          t.resource_type(proxy: [:c, :did, :phys_desc, :genre_form], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        t.creation_date(proxy: [:c, :did, :unitdate_creation])
-        t.published_date(proxy: [:c, :did, :unitdate_pub])
-        t.subject(proxy: [:c, :control_access, :subject], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          t.creation_date(proxy: [:c, :did, :unitdate_creation])
+          t.published_date(proxy: [:c, :did, :unitdate_pub])
+          t.subject(proxy: [:c, :control_access, :subject], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
-        t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        t.desc_abstract(proxy: [:c, :did, :abstract])
-        t.desc_biog_hist(proxy: [:c, :biog_hist, :p])
-        t.desc_dao_desc(proxy: [:c, :did, :dao, :dao_desc, :p])
-        t.desc_scope_content(proxy: [:c, :scope_content, :p])
-        t.desc_note(proxy: [:c, :did, :note])
+          t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.desc_abstract(proxy: [:c, :did, :abstract])
+          t.desc_biog_hist(proxy: [:c, :biog_hist, :p])
+          t.desc_dao_desc(proxy: [:c, :did, :dao, :dao_desc, :p])
+          t.desc_scope_content(proxy: [:c, :scope_content, :p])
+          t.desc_note(proxy: [:c, :did, :note])
 
-        t.creator(path: '/*/did/origination/text()[normalize-space()]  | /*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
-        t.creator_role(proxy: [:c, :did, :origination, :person_creator])
-        t.creator_name(proxy: [:c, :did, :origination, :name])
-        t.creator_persname(proxy: [:c, :did, :origination, :pers_name])
-        t.creator_corpname(proxy: [:c, :did, :origination, :corp_name])
-        t.creator_famname(proxy: [:c, :did, :origination, :fam_name])
+          t.creator(path: '/*/did/origination/text()[normalize-space()]  | /*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]')
+          t.creator_role(proxy: [:c, :did, :origination, :person_creator])
+          t.creator_name(proxy: [:c, :did, :origination, :name])
+          t.creator_persname(proxy: [:c, :did, :origination, :pers_name])
+          t.creator_corpname(proxy: [:c, :did, :origination, :corp_name])
+          t.creator_famname(proxy: [:c, :did, :origination, :fam_name])
 
-        # Subjects (including names, persnames, corpnames and famnames with @role='subject', nested within <controlaccess>)
-        t.name_subject(proxy: [:c, :control_access, :name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.persname_subject(proxy: [:c, :control_access, :pers_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.corpname_subject(proxy: [:c, :control_access, :corp_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.famname_subject(proxy: [:c, :control_access, :fam_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
-        t.geogname_subject(proxy: [:c, :control_access, :geog_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          # Subjects (including names, persnames, corpnames and famnames with @role='subject', nested within <controlaccess>)
+          t.name_subject(proxy: [:c, :control_access, :name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          t.persname_subject(proxy: [:c, :control_access, :pers_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          t.corpname_subject(proxy: [:c, :control_access, :corp_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          t.famname_subject(proxy: [:c, :control_access, :fam_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
+          t.geogname_subject(proxy: [:c, :control_access, :geog_name], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable])
 
-        # EAD level
-        t.ead_level(proxy: [:c, :ead_level_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Eadlevel - otherlevel
-        t.ead_level_other(proxy: [:c, :other_level_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # EAD level
+          t.ead_level(proxy: [:c, :ead_level_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # Eadlevel - otherlevel
+          t.ead_level_other(proxy: [:c, :other_level_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        t.format(proxy: [:c, :did, :phys_desc, :extent], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          t.format(proxy: [:c, :did, :phys_desc, :extent], index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        t.dao_did(proxy: [:c, :did, :dao])
-        t.dao_other(proxy: [:c, :dao])
-        # Dao
-        t.dao_proxy(proxy: [:dao])
-        # Dao_href
-        t.dao_href_proxy(proxy: [:dao, :href_at])
-        # Daodesc
-        t.dao_desc_proxy(proxy: [:dao, :dao_desc, :p])
+          t.dao_did(proxy: [:c, :did, :dao])
+          t.dao_other(proxy: [:c, :dao])
+          # Dao
+          t.dao_proxy(proxy: [:dao])
+          # Dao_href
+          t.dao_href_proxy(proxy: [:dao, :href_at])
+          # Daodesc
+          t.dao_desc_proxy(proxy: [:dao, :dao_desc, :p])
 
-        # Identifier
-        t.identifier(proxy: [:c, :did, :unit_id])
-        # Compulsory attributes at finding aid level: identifier, repositorycode and countrycode, in <eadid>
-        t.identifier_id(proxy: [:c, :did, :unit_id, :identifier_at])
-        # Repositorycode
-        t.repository_code(proxy: [:c, :did, :unit_id, :repository_code_at])
-        # Countrycode
-        t.country_code(proxy: [:c, :did, :unit_id, :country_code_at])
-        t.identifier_url(proxy: [:c, :did, :unit_id, :url_at])
-        t.identifier_public_id(proxy: [:c, :did, :unit_id, :public_id_at])
+          # Identifier
+          t.identifier(proxy: [:c, :did, :unit_id])
+          # Compulsory attributes at finding aid level: identifier, repositorycode and countrycode, in <eadid>
+          t.identifier_id(proxy: [:c, :did, :unit_id, :identifier_at])
+          # Repositorycode
+          t.repository_code(proxy: [:c, :did, :unit_id, :repository_code_at])
+          # Countrycode
+          t.country_code(proxy: [:c, :did, :unit_id, :country_code_at])
+          t.identifier_url(proxy: [:c, :did, :unit_id, :url_at])
+          t.identifier_public_id(proxy: [:c, :did, :unit_id, :public_id_at])
 
-        # Related Material
-        t.related_material(proxy: [:c, :rel_mat, :ext_ref, :href_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-        # Alternative Form Available
-        t.alternative_form(proxy: [:c, :alt_form, :ext_ref_p, :ext_ref, :href_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # Related Material
+          t.related_material(proxy: [:c, :rel_mat, :ext_ref, :href_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
+          # Alternative Form Available
+          t.alternative_form(proxy: [:c, :alt_form, :ext_ref_p, :ext_ref, :href_at], index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
-        # Mapping to geogname supporting DCMI Point and Box
-        t.geocode_point(ref: :geog_name_cvg, attributes: { rules: 'dcterms:Point' })
-        t.geocode_box(ref: :geog_name_cvg, attributes: { rules: 'dcterms:Box' })
-        # Mapping to geogname supporting Logaimn URIs
-        t.geocode_logainm(ref: :geog_name_cvg, attributes: { source: 'logainm' })
+          # Mapping to geogname supporting DCMI Point and Box
+          t.geocode_point(ref: :geog_name_cvg, attributes: { rules: 'dcterms:Point' })
+          t.geocode_box(ref: :geog_name_cvg, attributes: { rules: 'dcterms:Box' })
+          # Mapping to geogname supporting Logaimn URIs
+          t.geocode_logainm(ref: :geog_name_cvg, attributes: { source: 'logainm' })
 
-        # PROXIES FOR INDEXING
-        # EAD coverage elements within control access headings, authority-controlled search across finding aids
-        t.name_coverage(path: '/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]')
-        t.persname_coverage(proxy: [:c, :control_access, :pers_name_cvg])
-        t.corpname_coverage(proxy: [:c, :control_access, :corp_name_cvg])
-        t.famname_coverage(proxy: [:c, :control_access, :fam_name_cvg])
-        t.geographical_coverage(proxy: [:geog_name_cvg])
-        t.geogname_coverage_access(proxy: [:c, :control_access, :geog_name_cvg])
-        t.temporal_coverage(proxy: [:did, :unit_date_other])
+          # PROXIES FOR INDEXING
+          # EAD coverage elements within control access headings, authority-controlled search across finding aids
+          t.name_coverage(path: '/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]')
+          t.persname_coverage(proxy: [:c, :control_access, :pers_name_cvg])
+          t.corpname_coverage(proxy: [:c, :control_access, :corp_name_cvg])
+          t.famname_coverage(proxy: [:c, :control_access, :fam_name_cvg])
+          t.geographical_coverage(proxy: [:geog_name_cvg])
+          t.geogname_coverage_access(proxy: [:c, :control_access, :geog_name_cvg])
+          t.temporal_coverage(proxy: [:did, :unit_date_other])
 
-        t.creation_date_idx(path: '/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
-        t.published_date_idx(path: '/*/did/unitdate[@datechar="publication"]/@normal')
-        t.temporal_coverage_idx(path: 'did/unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
-        t.date_idx(proxy: [:date, :normal_at])
-      end # set_terminology
+          t.creation_date_idx(path: '/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]/@normal')
+          t.published_date_idx(path: '/*/did/unitdate[@datechar="publication"]/@normal')
+          t.temporal_coverage_idx(path: 'did/unitdate[@datechar[not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")) and not(contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "publication"))]]/@normal')
+          t.date_idx(proxy: [:date, :normal_at])
+        end # set_terminology
+      end
 
       # synchronize_metadata_on_save attribute getter
       # Flag used to indicate whether EAD component children creation should be triggered
@@ -524,20 +528,14 @@ module DRI
       # @param [String] field_name the metadata field name
       # @return [Array<String>] the array of metadata field values from the parent
       def get_field_from_parent(field_name)
-        parent_field = nil
-        fedora_object = nil
-
-        obj_id = uri.to_str.split('/')[-2] # get the object's id
-        fedora_object = DRI::EncodedArchivalDescription.find(obj_id) unless obj_id.nil?
-
-        unless fedora_object.nil? || fedora_object.governing_collection.nil?
-          solr_query = "id:\"#{fedora_object.governing_collection_id}\""
+        if describable && describable.governing_collection
+          solr_query = "id:\"#{describable.governing_collection.id}\""
           docs = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
 
           parent_field = docs.first[ActiveFedora.index_field_mapper.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
         end
 
-        parent_field.nil? ? [] : parent_field
+        parent_field || []
       end
 
       # Returns all metadata related to subjects for Solr indexing
@@ -1130,7 +1128,6 @@ module DRI
         return if parent.nil? # Return if we have no parent to sync with
 
         parent_md_xml = parent.fullMetadata.ng_xml.clone
-
         if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
           # if original XML file uses EAD XSD and includes namespace prefixes, use them in the query
           query = "//*[ead:did/ead:unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
@@ -1165,19 +1162,23 @@ module DRI
         else
           same_metadata = child_xml.root.serialize(save_with:0).gsub("\n", '') == parent_xml.root.serialize(save_with:0).gsub("\n", '')
         end
+        
         # Check if the component node in parent XML is different
         unless component_node.nil? || same_metadata
           component_node.children.remove
-          full_metadata.ng_xml.search('/*/*').each { |node| component_node.add_child(node) }
+          full_metadata.ng_xml.search('/*/*').each { |node| component_node.add_child(node.clone) }
           parent.fullMetadata.ng_xml = parent_md_xml
           # Prevent parent from automatically syncing
-          parent.trigger_update = false
-          parent.trigger_ingest = false
-          parent.save if parent.fullMetadata.changed?
+          if parent.fullMetadata.changed?
+            parent.fullMetadata.ng_xml = parent_md_xml
+            parent.trigger_update = false
+            parent.trigger_ingest = false
+            parent.save
 
-          # Queue synchronization between parent and grandparent
-          if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-            DRI.queue.push(UpdateParentMetadataJob.new(parent.id))
+            # Queue synchronization between parent and grandparent
+            if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+              DRI.queue.push(UpdateParentMetadataJob.new(parent.id))
+            end
           end
 
           return true
@@ -1250,6 +1251,8 @@ module DRI
 
         errors
       end # custom_validations
+
+      load_inherited_terminology
     end # class
   end # module
 end # module

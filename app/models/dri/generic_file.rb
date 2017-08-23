@@ -18,11 +18,10 @@ module DRI
     
     include DRI::ModelSupport::LocalFile
 
-    after_save { update_index }
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
     # one-to-one AF association to associate DRI::Base
-    belongs_to :digital_object, class_name: 'DRI::DigitalObject'
+    belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
 
     serialize :title
     serialize :creator
@@ -44,6 +43,10 @@ module DRI
     # Override from AF method
     def to_solr(solr_doc = {}, opts = {})
       solr_doc = super(solr_doc, opts)
+
+      if digital_object
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :symbol) => [digital_object.id])
+      end
 
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?

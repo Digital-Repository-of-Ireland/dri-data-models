@@ -48,7 +48,7 @@ module DRI
 
         while metadata_child_index < metadata_children.length
           # Create a new child
-          new_child = DRI::EncodedArchivalDescription.new(:component)
+          new_child = DRI::EadComponent.new
           new_child.update_metadata metadata_children[metadata_child_index].to_xml
           new_child.previous_sibling = prev_obj unless prev_obj.nil?
           new_child.governing_collection = self
@@ -183,8 +183,8 @@ module DRI
         return result unless object.governing_collection.present?
 
         parent_id = object.governing_collection_id
-        md_hash_key = ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)
-        governed_key = ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
+        md_hash_key = ActiveFedora.index_mapper.solr_name('metadata_md5', :stored_searchable, type: :string)
+        governed_key = ActiveFedora.index_mapper.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
 
         solr_query = "#{md_hash_key}:\"#{object.metadata_md5}\" AND #{governed_key}:\"#{parent_id}\""
         documents = ActiveFedora::SolrService.query(solr_query,

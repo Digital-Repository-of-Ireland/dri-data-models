@@ -13,7 +13,8 @@ module DRI::Datastreams
 
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
-    include ::DRI::Datastreams::NokogiriDatastream
+    include DRI::Datastreams::Persistence
+    include DRI::Datastreams::NokogiriDatastream
 
     alias om_term_values term_values unless method_defined?(:om_term_values)
     alias om_update_values update_values unless method_defined?(:om_update_values)
@@ -103,10 +104,10 @@ module DRI::Datastreams
 
       result
     end
-
-    def update_attributes(attributes)
+    
+    def update_attributes(params)
+      update_indexed_attributes(params)
       super
-      self.datastream_content = self.to_xml if self.datastream_content.nil?
     end
 
     def get_values(field_key, _default = [])
@@ -125,14 +126,10 @@ module DRI::Datastreams
     #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}}
     def update_values(params = {})
       raise "can't modify frozen #{self.class}" if frozen?
-      ng_xml_will_change!
+      attribute_will_change!('ng_xml')
       result = om_update_values(params)
       result
     end
-
-    def retrieve_content
-      self.datastream_content
-    end
-
+  
   end
 end
