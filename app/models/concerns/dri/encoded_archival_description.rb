@@ -12,7 +12,7 @@ module DRI
     delegate :identifier,:identifier=, to: :descMetadata
     delegate :identifier_id,:identifier_id=, to: :descMetadata, multiple: false
     delegate :repository_code,:repository_code=, to: :descMetadata, multiple: false
-    delegate :country_code, to: :descMetadata, multiple: false
+    delegate :country_code,:country_code=, to: :descMetadata, multiple: false
 
     # ISO Dates
     delegate :creation_date_idx, to: :descMetadata
@@ -100,8 +100,8 @@ module DRI
       #super(modified_attributes)
       super(updated_props)
 
-      #update_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
-      #self.trigger_update = true unless update_attributes.empty?
+      term_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      self.trigger_update = true unless term_attributes.empty?
       #update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
 

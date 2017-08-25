@@ -239,16 +239,16 @@ describe 'EncodedArchivalDescription descMetadata' do
       @file_xml = fixture('ead/components/component_file.xml')
       @item_xml = fixture('ead/components/component_item.xml')
 
-      @ead_collection = DRI::EncodedArchivalDescription.new :collection
+      @ead_collection = DRI::EadCollection.new
       @ead_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml, false)
 
-      @ead_series = DRI::EncodedArchivalDescription.new :component
+      @ead_series = DRI::EadComponent.new
       @ead_series.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@series_xml).to_xml, false)
 
-      @ead_file = DRI::EncodedArchivalDescription.new :component
+      @ead_file = DRI::EadComponent.new
       @ead_file.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@file_xml).to_xml, false)
 
-      @ead_item = DRI::EncodedArchivalDescription.new :component
+      @ead_item = DRI::EadComponent.new
       @ead_item.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@item_xml).to_xml, false)
     end
 
@@ -269,35 +269,35 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     it "should expose the EAD components\' identifiers" do
       expect(@ead_collection.identifier).to match_array(['IE/NIVAL KDW'])
-      @ead_collection.country_code.should == 'IE'
-      @ead_collection.repository_code.should == 'IE-DuNIV'
-      @ead_collection.identifier_id.should == 'KDW'
+      @ead_collection.country_code.first.should == 'IE'
+      @ead_collection.repository_code.first.should == 'IE-DuNIV'
+      @ead_collection.identifier_id.first.should == 'KDW'
 
       expect(@ead_series.identifier).to match_array(['KDW/RM'])
-      @ead_series.country_code.should == 'IE'
-      @ead_series.repository_code.should == 'IE-DuNIV'
-      @ead_series.identifier_id.should == 'RM'
+      @ead_series.country_code.first.should == 'IE'
+      @ead_series.repository_code.first.should == 'IE-DuNIV'
+      @ead_series.identifier_id.first.should == 'RM'
 
       expect(@ead_file.identifier).to match_array(['KDW/RM/02'])
-      @ead_file.country_code.should == 'IE'
-      @ead_file.repository_code.should == 'IE-DuNIV'
-      @ead_file.identifier_id.should == '02'
+      @ead_file.country_code.first.should == 'IE'
+      @ead_file.repository_code.first.should == 'IE-DuNIV'
+      @ead_file.identifier_id.first.should == '02'
 
       expect(@ead_item.identifier).to match_array(['KDW/RM/02/04'])
-      @ead_item.country_code.should == 'IE'
-      @ead_item.repository_code.should == 'IE-DuNIV'
-      @ead_item.identifier_id.should == '04'
+      @ead_item.country_code.first.should == 'IE'
+      @ead_item.repository_code.first.should == 'IE-DuNIV'
+      @ead_item.identifier_id.first.should == '04'
     end
 
     it 'should expose the level of the EAD component' do
-      @ead_collection.ead_level.should == 'fonds'
-      @ead_series.ead_level.should == 'series'
-      @ead_file.ead_level.should == 'file'
-      @ead_item.ead_level.should == 'item'
+      @ead_collection.ead_level.first.should == 'fonds'
+      @ead_series.ead_level.first.should == 'series'
+      @ead_file.ead_level.first.should == 'file'
+      @ead_item.ead_level.first.should == 'item'
       @ead_series.ead_level = 'otherlevel'
       @ead_series.ead_level_other = 'subcollection'
-      @ead_series.ead_level.should == 'otherlevel'
-      @ead_series.ead_level_other.should == 'subcollection'
+      @ead_series.ead_level.first.should == 'otherlevel'
+      @ead_series.ead_level_other.first.should == 'subcollection'
     end
 
     it 'should use the EAD component level to determine whether the component is a collection or not' do
@@ -492,30 +492,30 @@ describe 'EncodedArchivalDescription descMetadata' do
         curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
         curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
         curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
-        curr_object = DRI::EncodedArchivalDescription.new :component
+        curr_object = DRI::EadComponent.new
         curr_object.update_metadata curr_file
         curr_object.identifier.should == ['KDW/RM/02']
-        curr_object.ead_level.should == 'file'
+        curr_object.ead_level.first.should == 'file'
       end
     end
   end # Context validation of DRI compulsory elements
 
   context 'terminology mappings' do
     before(:each) do
-      @collection = DRI::EncodedArchivalDescription.new(:collection)
+      @collection = DRI::EadCollection.new
       @collection.identifier = ['IE/NIVAL KDW']
       @collection.identifier_id = 'KDW'
       @collection.country_code = 'IE'
       @collection.repository_code = 'IE-DuNIV'
 
-      @component = DRI::EncodedArchivalDescription.new(:component)
+      @component = DRI::EadComponent.new
       @component.identifier = ['IE/NIVAL KDW']
       @component.identifier_id = 'KDW'
       @component.country_code = 'IE'
       @component.repository_code = 'IE-DuNIV'
       @component.ead_level = 'file'
 
-      @component_item = DRI::EncodedArchivalDescription.new(:component)
+      @component_item = DRI::EadComponent.new
       @component_item.identifier = ['IE/NIVAL KDW']
       @component_item.identifier_id = 'KDW'
       @component_item.country_code = 'IE'

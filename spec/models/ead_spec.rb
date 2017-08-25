@@ -243,7 +243,7 @@ describe 'EncodedArchivalDescription' do
       result = @ead_series.descMetadata.update_parent_metadata(@ead_root, @ead_series.fullMetadata)
       expect(result).to eq(true)
       
-      query = "//*[did/unitid[@repositorycode='#{@ead_item.repository_code}' and @countrycode='#{@ead_item.country_code}' and text()='#{@ead_item.identifier.first}']]"
+      query = "//*[did/unitid[@repositorycode='#{@ead_item.repository_code.first}' and @countrycode='#{@ead_item.country_code.first}' and text()='#{@ead_item.identifier.first}']]"
       node = @ead_root.fullMetadata.ng_xml.at(query)
 
       expect(node.at('did/unittitle').content).to eq(@ead_item.title.first)
