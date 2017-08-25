@@ -4,7 +4,8 @@ module DRI
   module Metadata
     # Implements the descMetadata datastream for DRI::Documentation digital objects as an AF
     # RDFXMLDatastream
-    class Documentation < ActiveFedora::RDFXMLDatastream
+    class Documentation < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
       # It supports all the DRI Compulsory elements
       property :title, predicate: RDF::Vocab::DC.title do |index|
         index.as DRI::Metadata::Descriptors.cleaned_searchable,

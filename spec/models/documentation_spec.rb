@@ -25,13 +25,8 @@ describe 'Documentation' do
     @dc_obj.delete unless @dc_obj.new_record?
   end
 
-  it 'should assert content model' do
-    expect_any_instance_of(DRI::Base).to receive(:assert_content_model)
-    @doc_obj = DRI::Base.with_standard(:documentation)
-  end
-
   it 'should have asserted the content model' do
-    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::Base'])
+    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::DigitalObject'])
   end
 
   it 'should find an existing object from fedora' do
@@ -52,6 +47,8 @@ describe 'Documentation' do
   it 'should retrieve an existing object from fedora' do
     @doc.update_attributes(@attributes_hash)
     @doc.save
+    coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
+
     @doc.new_record?.should == false
     @doc = DRI::Documentation.find_or_create(@doc.id)
     @doc.title.should == @attributes_hash[:title]
@@ -63,7 +60,7 @@ describe 'Documentation' do
     @doc.role_aut.should == @attributes_hash[:role_aut]
     @doc.subject.should == @attributes_hash[:subject]
     @doc.source.should == @attributes_hash[:source]
-    @doc.geographical_coverage.should == @attributes_hash[:geographical_coverage]
+    @doc.geographical_coverage.should == coverage.flatten
     @doc.temporal_coverage.should == @attributes_hash[:temporal_coverage]
     @doc.type.should == @attributes_hash[:type]
 
@@ -88,7 +85,7 @@ describe 'Documentation' do
   it 'should have the specified datastreams' do
     # Check for descMetadata datastream with MODS in it
     @doc.attached_files.keys.should include(:descMetadata)
-    @doc.descMetadata.should be_kind_of DRI::Metadata::Documentation
+    @doc.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
     # Check for properties datastream
     @doc.attached_files.keys.should include(:properties)
     @doc.properties.should be_kind_of DRI::Metadata::Properties

@@ -150,7 +150,7 @@ module DRI
                 results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
               end
             elsif geo_string =~ /\A#{URI.regexp(['http', 'https'])}\z/
-              ld = DRI::LinkedData.where(source: geo_string)
+              ld = find_linked_data(geo_string)
               unless ld.empty?
                 geojson = ld.first.spatial
                 geojson.each do |geo|
@@ -297,6 +297,17 @@ module DRI
         end
 
         years
+      end
+
+      def self.find_linked_data(geostring)
+        results = ActiveFedora::SolrService.query("source_sim:\"#{geostring}\"")
+        return [] if results.blank?
+        begin
+          [DRI::LinkedData.find(results.first[:id])]
+        rescue ActiveRecord::RecordNotFound => e
+          []  
+        end
+        
       end
 
       # Transforms a date range string in ISO8601 (e.g. YYYYmmdd/YYYYmmdd) into a format

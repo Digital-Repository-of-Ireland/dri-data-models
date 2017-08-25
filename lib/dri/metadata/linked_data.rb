@@ -1,7 +1,6 @@
 # DRI::Metadata namespace
 module DRI::Metadata
-  # Implements the descMetadata datastream for DRI::LinkedData digital objects as an AF
-  # NtriplesRDFDatastream
+  # Implements the descMetadata datastream for DRI::LinkedData digital objects
   class LinkedData < ActiveFedora::NtriplesRDFDatastream
     property :part_of, predicate: RDF::Vocab::DC.isPartOf
 

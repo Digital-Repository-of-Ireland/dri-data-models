@@ -89,6 +89,12 @@ module DRI
       super(args)
     end
 
+    # Determine whether the metadata describes a collection
+    # @return [Boolean] true if metadata specified this is a collection; false otherwise
+    def collection?
+      descMetadata.collection?
+    end
+
     def descMetadata
       super || build_descMetadata
     end

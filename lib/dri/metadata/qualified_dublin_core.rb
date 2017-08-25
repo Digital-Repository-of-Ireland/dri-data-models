@@ -28,7 +28,7 @@ module DRI
           t.subject_lang(proxy: [:subject, :subject_lang])
           t.date(namespace_prefix: 'dc')
           t.contributor(path: 'contributor', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(path: 'source', namespace_prefix: 'dc') {
+          t.source(path: 'source', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable]) {
             t.source_lang(path: { attribute: 'xml:lang' })
           }
           t.publisher(path: 'publisher', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
@@ -59,6 +59,8 @@ module DRI
           t.temporal_coverage(path: 'temporal', namespace_prefix: 'dcterms') {
             t.temporal_coverage_lang(path: { attribute: 'xml:lang' })
           }
+          t.temporal_coverage_period(ref: :temporal_coverage, attributes: { 'xsi:type' => 'dcterms:Period' },
+            index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' },
             index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
           t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' }, 

@@ -4,44 +4,46 @@ module DRI
   # extending from DRI::Base
   class Documentation < DRI::DigitalObject
     # Override DRI::ModelSupport::Base definition of descMetadata
-    has_one :descMetadata, class_name: 'DRI::Metadata::Documentation', as: :describable
+    has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
     # one-to-one AF association to DRI::Base (documentation for)
-    belongs_to :documentation_for, class_name: 'DRI::DigitalObject'
-               #predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf,
-               
+    belongs_to :documentation_for, class_name: 'DRI::DigitalObject', polymorphic: true
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
-    delegate :date, to: :descMetadata
-    delegate :source, to: :descMetadata
-    delegate :geographical_coverage, to: :descMetadata
-    delegate :temporal_coverage, to: :descMetadata
-    delegate :temporal_coverage_period, to: :descMetadata
-    delegate :resource_type, to: :descMetadata
-    delegate :format, to: :descMetadata
-    delegate :coverage, to: :descMetadata
-    delegate :identifier, to: :descMetadata
-    delegate :geocode_point, to: :descMetadata
-    delegate :geocode_box, to: :descMetadata
-    delegate :relation, to: :descMetadata
+    delegate :date,:date=, to: :descMetadata
+    delegate :source,:source=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :temporal_coverage_period,:temporal_coverage_period=, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
+    delegate :coverage,:coverage=, to: :descMetadata
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :geocode_point,:geocode_point=, to: :descMetadata
+    delegate :geocode_box,:geocode_box=, to: :descMetadata
+    delegate :relation,:relation=, to: :descMetadata
 
-    delegate :published_date, to: :descMetadata
-    delegate :creation_date, to: :descMetadata
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
     #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
-        delegate s.prepend('role_').to_sym,
+        delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
                  to: :descMetadata
       end
     end
 
     # Override constructor
     def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::Documentation'
+      args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
 
       super(args)
+    end
+
+    def declared_attached_files
+      { descMetadata: descMetadata, properties: properties }
     end
 
     def descMetadata
@@ -63,13 +65,7 @@ module DRI
 
       # When updating from DRI form
       # replace type attribute key with resource_type
-      updated_props.keys.each do |k|
-        next if k.to_sym != :type
-
-        updated_props[:resource_type] = updated_props[k]
-        updated_props.delete(k)
-        break
-      end
+      updated_props[:resource_type] = updated_props.delete :type
 
       # Adding :geocode_point and :geocode_box to properties
       # if :geographical_coverage present
@@ -105,7 +101,7 @@ module DRI
     # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
     # @option roles [Array<String>] :type the marcrelator codes
     def roles=(roles)
-      descMetadata.roles = roles if descMetadata.is_a? DRI::Metadata::Documentation
+      descMetadata.roles = roles if descMetadata.is_a? DRI::Metadata::QualifiedDublinCore
     end
 
     # Type attribute getter
@@ -118,7 +114,7 @@ module DRI
     # Type attribute setter
     # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
-      self.resource_type = type
+      descMetadata.resource_type = type
     end
 
     # Retrieve an existing Fedora DRI::Documentation object;
@@ -134,7 +130,15 @@ module DRI
 
     # Override from DRI::Base, default AF method
     def to_solr(solr_doc = {}, opts = {})
-      super(solr_doc, opts)
+      solr_doc = super(solr_doc, opts)
+
+      if documentation_for
+        solr_doc.merge!(
+          ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, :symbol) => [documentation_for.id]
+        )
+      end
+
+      solr_doc
     end
 
     # Override from DRI::ModelSupport::Base:

@@ -12,7 +12,7 @@ class CreateGenericFiles < ActiveRecord::Migration
       t.string :checksum_sha256
       t.string :checksum_rmd160
       t.timestamps
-      t.references :bases, index: true, foreign_key: true
+      t.references :digital_objects, index: true, foreign_key: true
     end
   end
 end

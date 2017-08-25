@@ -3,14 +3,14 @@ module DRI
   # Implementation of DRI::LinkedData digital objects extending from AF Base
   # for Logainm places
   class LinkedData < DRI::DigitalObject
-    has_one :descMetadata, class_name: 'DRI::Metadata::LinkedData'
+    has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
     delegate :creator, to: :descMetadata
     delegate :identifier, to: :descMetadata
     delegate :source, to: :descMetadata
     delegate :contributor, to: :descMetadata
     delegate :title, to: :descMetadata
-    delegate :tag, to: :descMetadata
+    #delegate :tag, to: :descMetadata
     delegate :description, to: :descMetadata
     delegate :publisher, to: :descMetadata
     delegate :date_created, to: :descMetadata
@@ -24,7 +24,30 @@ module DRI
     # Set the object's attributes
     # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
-      super(properties)
+      updated_props = properties.clone
+      
+      # When updating from DRI form
+      # replace type attribute key with resource_type
+      updated_props[:resource_type] = updated_props.delete :type
+   
+      super(updated_props)
+    end
+
+    def declared_attached_files
+      { descMetadata: descMetadata, properties: properties }
+    end
+
+    # Type attribute getter
+    #
+    # @return [Array<String>] the array of metadata type values
+    def type
+      descMetadata.resource_type
+    end
+
+    # Type attribute setter
+    # @param [Array<String>] type the array of metadata type values to set
+    def type=(type)
+      descMetadata.resource_type = type
     end
 
     # Retrieve an existing Fedora DRI::LinkedData object;
@@ -41,10 +64,6 @@ module DRI
     def descMetadata
       super || build_descMetadata
     end
-
-    # Override from AF method
-    def to_solr(solr_doc = {}, opts = {})
-      super(solr_doc, opts)
-    end
+   
   end 
 end # Module DRI

@@ -25,8 +25,8 @@ module DRI
     # one-to-many AF relationship to associate digital assets with their object
     has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
     # one-to-many AF relationship to associate documentation objects
-    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
-
+    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for, dependent: :destroy
+    
     has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true
 
     delegate :status,:status=, to: :properties
@@ -34,11 +34,11 @@ module DRI
     delegate :depositor,:depositor=, to: :properties
     delegate :metadata_md5,:metadata_md5=, to: :properties
     delegate :model_version,:model_version=, to: :properties
-    delegate :verified, to: :properties
+    delegate :verified,:verified=, to: :properties
     delegate :doi,:doi=, to: :properties
     delegate :cover_image,:cover_image=, to: :properties
-    delegate :institute, to: :properties
-    delegate :depositing_institute, to: :properties
+    delegate :institute,:institute=, to: :properties
+    delegate :depositing_institute,:depositing_institute=, to: :properties
     delegate :licence,:licence=, to: :properties
     delegate :object_version,:object_version=, to: :properties
 
@@ -157,7 +157,8 @@ module DRI
     # @param _opts [Hash] options hash
     # @return [Hash] the solr document to be indexed
     def to_solr(solr_doc = {}, _opts = {})
-      solr_doc = super(solr_doc)
+      solr_doc = indexing_service.generate_solr_document
+
       Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr

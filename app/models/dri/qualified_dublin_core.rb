@@ -16,8 +16,9 @@ module DRI
     delegate :source,:source=, to: :descMetadata
     delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
     delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :temporal_coverage_period,:temporal_coverage_period=, to: :descMetadata
     delegate :name_coverage,:name_coverage=, to: :descMetadata
-    delegate :resource_type, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
     delegate :format,:format=, to: :descMetadata
     delegate :coverage,:coverage=, to: :descMetadata
     delegate :identifier,:identifier=, to: :descMetadata
@@ -79,13 +80,7 @@ module DRI
 
       # When updating from DRI form
       # replace type attribute key with resource_type
-      updated_props.keys.each do |k|
-        next if k.to_sym != :type
-
-        updated_props[:resource_type] = updated_props[k]
-        updated_props.delete(k)
-        break
-      end
+      updated_props[:resource_type] = updated_props.delete :type
 
       super(updated_props)
     end
