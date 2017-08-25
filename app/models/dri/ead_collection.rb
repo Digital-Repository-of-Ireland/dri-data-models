@@ -8,12 +8,6 @@ module DRI
 
     has_one :descMetadata, class_name: 'DRI::Metadata::EncodedArchivalDescription', as: :describable, autosave: true
 
-    # Override constructor
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::EncodedArchivalDescription'
-      super(args)
-    end
-
     def descMetadata
       super || build_descMetadata
     end

@@ -35,13 +35,6 @@ module DRI
       end
     end
 
-    # Override constructor
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
-
-      super(args)
-    end
-
     def declared_attached_files
       { descMetadata: descMetadata, properties: properties }
     end

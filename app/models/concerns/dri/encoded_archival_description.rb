@@ -308,7 +308,7 @@ module DRI
 
       if ingest
         fullMetadata.ng_xml = xml_text
-        xml_text = split_ead_xml(xml_text, desc_metadata_class)
+        xml_text = split_ead_xml(xml_text, descMetadata.class.to_s)
 
         descMetadata.ng_xml = xml_text
       else
@@ -317,7 +317,7 @@ module DRI
         end
         # For EAD XML updates discard any children components in the XML
         # as NO hierarchy updates are supported, only MD
-        xml_text = split_ead_xml(xml_text, desc_metadata_class)
+        xml_text = split_ead_xml(xml_text, descMetadata.class.to_s)
         descMetadata.ng_xml = xml_text
       end
 

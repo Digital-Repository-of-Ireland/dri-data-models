@@ -3,7 +3,6 @@ module DRI
     autoload :Descriptors, 'dri/metadata/descriptors'
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
-    autoload :FileProperties, 'dri/metadata/file_properties'
     autoload :FullMetadata, 'dri/metadata/full_metadata'
     autoload :Mods, 'dri/metadata/mods'
     autoload :Properties, 'dri/metadata/properties'
@@ -11,8 +10,6 @@ module DRI
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
     autoload :Marc, 'dri/metadata/marc'
-    autoload :LinkedData, 'dri/metadata/linked_data'
-    autoload :Documentation, 'dri/metadata/documentation'
   
   # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other Fedora objects. This allows us to add functions
@@ -45,7 +42,7 @@ module DRI
       end
 
       def prefix(path)
-        ''#path ? "#{path.underscore}__" : ''
+        ''
       end
 
 

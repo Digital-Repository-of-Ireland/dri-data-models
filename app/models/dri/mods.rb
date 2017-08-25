@@ -83,12 +83,6 @@ module DRI
     # Disabled for now
     # around_save :create_multiple_records
 
-    # Initialize - mods record
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
-      super(args)
-    end
-
     # Determine whether the metadata describes a collection
     # @return [Boolean] true if metadata specified this is a collection; false otherwise
     def collection?

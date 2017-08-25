@@ -45,12 +45,6 @@ module DRI
                                                                 to: :descMetadata}
     end
    
-    # Override constructor
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
-      super(args)
-    end
-
     def descMetadata
       super || build_descMetadata
     end

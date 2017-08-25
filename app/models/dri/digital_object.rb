@@ -13,34 +13,12 @@ module DRI
     include DRI::Noid
     include DRI::Export
     
-    include DRI::ModelSupport::Base
-    #include DRI::ModelSupport::Properties
-    #include DRI::ModelSupport::Permissions
+    include DRI::ModelSupport::Common
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
-
-    # one-to-many AF relationship to associate digital assets with their object
-    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
-    # one-to-many AF relationship to associate documentation objects
-    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for, dependent: :destroy
-    
-    has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true
-
-    delegate :status,:status=, to: :properties
-    delegate :object_type,:object_type=, to: :properties
-    delegate :depositor,:depositor=, to: :properties
-    delegate :metadata_md5,:metadata_md5=, to: :properties
-    delegate :model_version,:model_version=, to: :properties
-    delegate :verified,:verified=, to: :properties
-    delegate :doi,:doi=, to: :properties
-    delegate :cover_image,:cover_image=, to: :properties
-    delegate :institute,:institute=, to: :properties
-    delegate :depositing_institute,:depositing_institute=, to: :properties
-    delegate :licence,:licence=, to: :properties
-    delegate :object_version,:object_version=, to: :properties
 
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
@@ -67,9 +45,9 @@ module DRI
       when :qdc
         QualifiedDublinCore.new(args)
       when :ead_collection
-       EncodedArchivalDescription.new(:collection, args)
+       EadCollection.new(args)
       when :ead_component
-        EncodedArchivalDescription.new(:component, args)
+        EadComponent.new(args)
       when :mods
         Mods.new(args)
       when :documentation

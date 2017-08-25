@@ -43,12 +43,6 @@ module DRI
     # the creation of duplicated objects
     # around_save :create_multiple_records
 
-    # Override constructor
-    def initialize(params = {})
-      params[:desc_metadata_class] = 'DRI::Metadata::Marc'
-      super(params)
-    end
-
     def descMetadata
       super || build_descMetadata
     end
