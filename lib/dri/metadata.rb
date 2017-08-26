@@ -10,6 +10,7 @@ module DRI
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
     autoload :Marc, 'dri/metadata/marc'
+    autoload :Terminologies, 'dri/metadata/terminologies'
   
   # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other Fedora objects. This allows us to add functions
