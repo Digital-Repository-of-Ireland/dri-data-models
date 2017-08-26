@@ -26,7 +26,7 @@ module DRI
             solr_results = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
 
             if solr_results.empty?
-              Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{id}")
+              Rails.logger.error("Relationship target object #{item_id} not found in Solr for object #{noid}")
             else
               solr_results.each { |item| records << item['id'] }
             end
@@ -41,7 +41,7 @@ module DRI
       def root_collection
         root = nil
 
-        solr_query = "id:\"#{id}\""
+        solr_query = "id:\"#{noid}\""
         solr_docs = ActiveFedora::SolrService.query(solr_query, rows: 1, defType: 'edismax')
 
         if solr_docs.nil? || solr_docs.empty?

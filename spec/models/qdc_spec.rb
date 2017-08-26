@@ -71,7 +71,7 @@ describe 'QualifiedDublinCore' do
       @audio.update_attributes(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
-      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.id)
+      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.noid)
       @audio3.title.should == @attributes_hash['title']
       @audio3.rights.should == @attributes_hash['rights']
       @audio3.description.should == @attributes_hash['description']
@@ -420,14 +420,14 @@ describe 'QualifiedDublinCore' do
     it 'should add relationship has_part and source' do
       md_relationships_hash = @col.get_relationships_records
 
-      added_rels = DRI::QualifiedDublinCore.find(md_relationships_hash[:parts].first).qdc_id
+      added_rels = DRI::QualifiedDublinCore.find_by(noid: md_relationships_hash[:parts].first).qdc_id
       added_rels.should =~ ['MAGOH01']
     end
 
     it 'should add relationship is_part_of' do
       md_relationships_hash = @obj.get_relationships_records
 
-      added_rels = DRI::QualifiedDublinCore.find(md_relationships_hash[:container].first).qdc_id
+      added_rels = DRI::QualifiedDublinCore.find_by(noid: md_relationships_hash[:container].first).qdc_id
       added_rels.should =~ ['MAGOH']
     end
   end

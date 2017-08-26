@@ -30,8 +30,27 @@ module DRI
       { 'characterization' => characterization }
     end
 
+    def attached_files
+      declared_attached_files
+    end
+
     def add_depositor_metadata(current_user)
       depositor = current_user.to_s
+    end
+
+    def create_date
+      return nil unless created_at
+      DateTime.parse(created_at.to_s).utc
+    end
+
+    def modified_date
+      return nil unless updated_at
+      DateTime.parse(updated_at.to_s).utc
+    end
+
+    # Asserts the model class
+    def has_model
+      [self.class.to_s]
     end
 
     # Return number of milliseconds for the duration of this asset file
@@ -42,7 +61,9 @@ module DRI
 
     # Override from AF method
     def to_solr(solr_doc = {}, opts = {})
-      solr_doc = super(solr_doc, opts)
+      solr_doc = indexing_service.generate_solr_document
+      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
+      solr_doc[:id] = noid
 
       if digital_object
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :symbol) => [digital_object.id])

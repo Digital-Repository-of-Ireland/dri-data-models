@@ -11,7 +11,7 @@ module DRI
     end
 
     def to_param
-      id
+      noid
     end
 
     private

@@ -86,9 +86,9 @@ describe 'Marc' do
     it 'should add relationship relation, is_version_of and is_format_of' do
       md_relationships_hash = @nccb1.get_relationships_records
 
-      added_rels = [DRI::Marc.find(md_relationships_hash[:related].first).marc_id.first,
-                    DRI::Marc.find(md_relationships_hash[:is_format].first).marc_id.first,
-                    DRI::Marc.find(md_relationships_hash[:is_version].first).marc_id.first]
+      added_rels = [DRI::Marc.find_by(noid: md_relationships_hash[:related].first).marc_id.first,
+                    DRI::Marc.find_by(noid: md_relationships_hash[:is_format].first).marc_id.first,
+                    DRI::Marc.find_by(noid: md_relationships_hash[:is_version].first).marc_id.first]
 
       added_rels.should =~ ['nccb3', 'nccb2', 'nccb0']
     end

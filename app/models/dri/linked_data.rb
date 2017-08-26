@@ -56,9 +56,9 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::LinkedData] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::LinkedData.find(pid)
+      DRI::LinkedData.find_by!(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::LinkedData.create(id: pid)
+      DRI::LinkedData.create(noid: pid)
     end
 
     def descMetadata

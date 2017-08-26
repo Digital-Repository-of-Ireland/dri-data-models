@@ -63,9 +63,9 @@ module DRI
     # @param pid [String] the pid of the object to retrieve
     # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::DigitalObject.find(pid)
+      DRI::DigitalObject.find_by(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::DigitalObject.create(id: pid)
+      DRI::DigitalObject.create(noid: pid)
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -118,15 +118,16 @@ module DRI
       properties.status.first
     end
 
-    def method_missing(method, *args)
-      if descMetadata.respond_to?(method)
-        descMetadata.send(method, *args)
-      elsif properties.respond_to?(method)
-        properties.send(method, *args)
-      else
-        super
-      end
-    end
+    #def method_missing(method, *args)
+    #  puts "#{method}"
+     # if descMetadata.respond_to?(method)
+     #   descMetadata.send(method, *args)
+     # elsif properties.respond_to?(method)
+     #   properties.send(method, *args)
+     # else
+     #   super
+     # end
+    #end
    
     # Return a Hash representation of this object where keys
     # in the hash are appropriate Solr field names.
@@ -138,6 +139,7 @@ module DRI
       solr_doc = indexing_service.generate_solr_document
 
       Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
+      solr_doc[:id] = noid
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr

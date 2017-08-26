@@ -85,9 +85,9 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::QualifiedDublinCore.find(pid)
+      DRI::QualifiedDublinCore.find_by!(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::QualifiedDublinCore.create(id: pid)
+      DRI::QualifiedDublinCore.create(noid: pid)
     end
 
     # Type attribute getter

@@ -26,7 +26,7 @@ module DRI
         # Rights (collection-level)
         delegate :rights,:rights=, to: :descMetadata
         # Creator (collection-level)
-        delegate :creator, to: :descMetadata
+        delegate :creator,:creator=, to: :descMetadata
 
         # DRI Recommended (R)
         # Contributor

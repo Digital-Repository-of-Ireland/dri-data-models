@@ -32,7 +32,7 @@ describe 'Documentation' do
   it 'should find an existing object from fedora' do
     @doc.update_attributes(@attributes_hash)
     @doc.save
-    @doc2 = DRI::Documentation.find_or_create(@doc.id)
+    @doc2 = DRI::Documentation.find_or_create(@doc.noid)
     expect(@doc2.new_record?).to eq false
   end
 
@@ -50,7 +50,7 @@ describe 'Documentation' do
     coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
 
     @doc.new_record?.should == false
-    @doc = DRI::Documentation.find_or_create(@doc.id)
+    @doc = DRI::Documentation.find_or_create(@doc.noid)
     @doc.title.should == @attributes_hash[:title]
     @doc.rights.should == @attributes_hash[:rights]
     @doc.description.should == @attributes_hash[:description]

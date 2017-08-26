@@ -116,9 +116,9 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::Documentation] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::Documentation.find(pid)
+      DRI::Documentation.find_by!(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::Documentation.create(id: pid)
+      DRI::Documentation.create(noid: pid)
     end
 
     # Override from DRI::Base, default AF method

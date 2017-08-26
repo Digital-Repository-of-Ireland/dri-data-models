@@ -26,9 +26,9 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::EncodedArchivalDescription] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::EadCollection.find(pid)
+      DRI::EadCollection.find_by!(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::EadCollection.create(id: pid)
+      DRI::EadCollection.create(noid: pid)
     end
 
     def method_missing(method, *args)

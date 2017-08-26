@@ -335,9 +335,9 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::Mods] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::Mods.find(pid)
+      DRI::Mods.find_by!(noid: pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::Mods.create(id: pid)
+      DRI::Mods.create(noid: pid)
     end
 
     # For relationships display in the UI, creates Hash where the keys are

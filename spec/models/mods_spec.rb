@@ -26,7 +26,7 @@ describe 'Mods' do
 
     it 'should find an existing object from fedora' do
       @mods_record.save
-      @collection = DRI::Mods.find_or_create(@mods_record.id)
+      @collection = DRI::Mods.find_or_create(@mods_record.noid)
       expect(@collection.new_record?).to eq false
     end
 
@@ -180,8 +180,8 @@ describe 'Mods' do
     it 'should add relationship host and referenced_by' do
       md_relationships_hash = @mods_record.get_relationships_records
 
-      added_rels = [DRI::Mods.find(md_relationships_hash[:referenced_by].first).mods_id_local.first,
-                    DRI::Mods.find(md_relationships_hash[:host].first).mods_id_local.first]
+      added_rels = [DRI::Mods.find_by(noid: md_relationships_hash[:referenced_by].first).mods_id_local.first,
+                    DRI::Mods.find_by(noid: md_relationships_hash[:host].first).mods_id_local.first]
 
       expect(added_rels).to  match(%w(http://example.org/subcollection/1# MODS-ID-1234))
     end

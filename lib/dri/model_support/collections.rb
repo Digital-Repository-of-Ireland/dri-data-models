@@ -73,7 +73,7 @@ module DRI
 
         until curr_gov_collection.nil?
           ancestor_titles << curr_gov_collection.title[0]
-          ancestor_ids << curr_gov_collection.id
+          ancestor_ids << curr_gov_collection.noid
           curr_gov_collection = curr_gov_collection.governing_collection
         end
 
@@ -81,8 +81,8 @@ module DRI
           # This must be a root collection
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [title.first])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [title.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [id])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [id])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [noid])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [noid])
         else
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :facetable) => ancestor_titles)
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
@@ -101,19 +101,15 @@ module DRI
         end
 
         unless governing_collection.nil?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.id])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.noid])
         end
 
-        #if governed_items.present?
-        #  solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.ids)
-        #end
-
         if previous_sibling
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.id])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
         end
 
         if next_sibling.present?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => next_sibling.ids)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => next_sibling.noids)
         end
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :facetable) => collection?)
