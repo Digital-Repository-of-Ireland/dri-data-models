@@ -31,7 +31,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'active_fedora-noid', '~> 1.0'
   s.add_dependency 'resque', '~> 1.23'
   s.add_dependency 'resque-pool', '~> 0.3'
-  s.add_dependency 'google-api-client', '0.8.6'
   s.add_dependency 'iso8601'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'simplecov'
