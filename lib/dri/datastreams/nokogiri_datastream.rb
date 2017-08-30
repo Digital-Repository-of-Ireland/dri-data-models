@@ -104,7 +104,7 @@ module DRI
       end
 
       def content
-        @content = to_xml if ng_xml_changed?
+        @content = to_xml if ng_xml_changed? || (new_record? && @content.nil?)
         persisted_content
       end
       

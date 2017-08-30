@@ -58,12 +58,12 @@ module DRI
 
       def custom_validations
         return true unless descMetadata.class < DRI::Datastreams::OmDatastream
-
+        
         results = descMetadata.custom_validations
         return true if results.empty?
-
+        
         results.each { |key, value| errors.add(key, value) }
-
+        
         false
       end # custom_validations    
     end # module

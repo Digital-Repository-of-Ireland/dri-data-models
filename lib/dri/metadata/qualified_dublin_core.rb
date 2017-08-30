@@ -48,7 +48,7 @@ module DRI
 
         super(new_params, opts)
       end
-
+      
       # Roles attribute setter
       # @example Sample Hash:
       #   { 'name' => ['Test host', 'new producer'],

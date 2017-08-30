@@ -8,7 +8,6 @@ module DRI::Datastreams
     #     false
     #   end
     # end
-
     belongs_to :describable, polymorphic: true
 
     include OM::XML::Document
@@ -127,9 +126,7 @@ module DRI::Datastreams
     def update_values(params = {})
       raise "can't modify frozen #{self.class}" if frozen?
       attribute_will_change!('ng_xml')
-      result = om_update_values(params)
-      result
+      om_update_values(params)
     end
-  
   end
 end

@@ -364,6 +364,14 @@ describe 'QualifiedDublinCore' do
       @audio.date = ['']
       @audio.should_not be_valid
     end
+
+    it 'should persist changes' do
+      @audio.update_attributes(@attributes_hash)
+      @audio.title = ['A Test Title']
+      @audio.save
+      expect(@audio.title.first).to eq('A Test Title')
+    end
+
   end
 
   context 'indexing' do

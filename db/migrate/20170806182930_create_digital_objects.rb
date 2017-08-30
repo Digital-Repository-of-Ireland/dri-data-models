@@ -4,7 +4,7 @@ class CreateDigitalObjects < ActiveRecord::Migration
       t.string :ingest_files_from_metadata
       t.string :master_file_access
       t.string :published_at
-      t.string :type
+      t.string :digital_object_type
       t.string :read_users_string
       t.string :read_groups_string
       t.string :edit_users_string

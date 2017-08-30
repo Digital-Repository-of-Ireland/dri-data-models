@@ -18,8 +18,10 @@ module DRI
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
-    after_destroy :delete_bucket
+    self.inheritance_column = 'digital_object_type'
 
+    after_destroy :delete_bucket
+    
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
     #has_many 'extracted', class_name: 'DRI::Metadata::Extracted'
@@ -80,7 +82,7 @@ module DRI
 
       true
     end
-
+    
     # Asserts the model class
     def has_model
       [self.class.to_s, self.class.superclass.to_s]
@@ -118,6 +120,10 @@ module DRI
       properties.status.first
     end
 
+    def status=(status)
+      properties.status = status
+    end
+    
     #def method_missing(method, *args)
     #  puts "#{method}"
      # if descMetadata.respond_to?(method)

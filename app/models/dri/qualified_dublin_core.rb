@@ -2,7 +2,6 @@
 module DRI
   # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Base
   class QualifiedDublinCore < DRI::DigitalObject
-
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
     
     # Full Simple DC Title, Creator, Subject, Description, Publisher,
