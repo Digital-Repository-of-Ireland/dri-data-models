@@ -109,6 +109,10 @@ module DRI::Datastreams
       super
     end
 
+    def []=(name, value)
+      self.send("#{name}=", value)
+    end
+
     def get_values(field_key, _default = [])
       term_values(*field_key)
     end
