@@ -49,7 +49,7 @@ module DRI
         delegate :institute,:institute=, to: :properties
         delegate :depositing_institute,:depositing_institute=, to: :properties
         delegate :licence,:licence=, to: :properties
-        delegate :object_version,:object_version=, to: :properties
+        delegate :object_version=, to: :properties
         
         validate :custom_validations
       end
