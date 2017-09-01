@@ -12,6 +12,7 @@ module DRI
 
     include DRI::Noid
     include DRI::Export
+    include DRI::Permissions
     
     include DRI::ModelSupport::Common
     include DRI::ModelSupport::Files
@@ -70,6 +71,16 @@ module DRI
       DRI::DigitalObject.create(noid: pid)
     end
 
+    def []=(name, value)
+      if descMetadata.class.terminology.has_term?(name)
+        descMetadata[name.to_sym] = value
+      elsif properties.class.terminology.has_term?(name)
+        properties[name.to_sym] = value
+      else
+        super
+      end
+    end
+
     # @note Use this in preference over setting xml directly in the OmDatastreams
     # Updates the xml metadata of this object
     #
@@ -102,6 +113,10 @@ module DRI
     def modified_date
       return nil unless updated_at
       DateTime.parse(updated_at.to_s).utc
+    end
+
+    def object_version
+      properties.object_version.first
     end
 
     def declared_attached_files
@@ -149,8 +164,7 @@ module DRI
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr
-
-      #solr_doc.merge! descMetadata.to_solr unless descMetadata.nil?
+      solr_doc.merge! solrize_permissions
       
       #solr_doc.merge!('all_text_timv' => full_text)
 
