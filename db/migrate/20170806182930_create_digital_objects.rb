@@ -5,12 +5,14 @@ class CreateDigitalObjects < ActiveRecord::Migration
       t.string :master_file_access
       t.string :published_at
       t.string :digital_object_type
-      t.string :read_users_string
-      t.string :read_groups_string
-      t.string :edit_users_string
-      t.string :edit_groups_string
-      t.string :manager_users_string
-      t.string :manager_groups_string
+      t.string :discover_users
+      t.string :discover_groups
+      t.string :read_users
+      t.string :read_groups
+      t.string :edit_users
+      t.string :edit_groups
+      t.string :manager_users
+      t.string :manager_groups
       t.references :governing_collection, polymorphic: true
       t.references :previous_sibling, polymorphic: true
       t.references :documentation_for, polymorphic: true

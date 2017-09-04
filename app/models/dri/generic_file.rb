@@ -8,6 +8,10 @@ module DRI
     include ActiveFedora::Indexing
     include Hydra::Derivatives::ExtractMetadata
 
+    include DRI::Permissions
+    include DRI::ModelSupport::Permissions
+    include Hydra::WithDepositor
+    
     include DRI::Noid
     include DRI::Export
     include DRI::Asset::MimeTypes
@@ -66,7 +70,7 @@ module DRI
       solr_doc[:id] = noid
 
       if digital_object
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :symbol) => [digital_object.id])
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf.fragment, :symbol) => [digital_object.noid])
       end
 
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
@@ -96,7 +100,6 @@ module DRI
       # between files on disk (in fcrepo.binary-store-path) and objects
       # in the repository.
       #solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
-      
       solr_doc
     end
 

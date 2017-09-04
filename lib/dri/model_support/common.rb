@@ -47,7 +47,7 @@ module DRI
         delegate :doi,:doi=, to: :properties
         delegate :cover_image,:cover_image=, to: :properties
         delegate :institute,:institute=, to: :properties
-        delegate :depositing_institute,:depositing_institute=, to: :properties
+        delegate :depositing_institute=, to: :properties
         delegate :licence,:licence=, to: :properties
         delegate :object_version=, to: :properties
         

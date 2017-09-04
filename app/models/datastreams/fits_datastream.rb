@@ -138,6 +138,10 @@ class FitsDatastream < DRI::Datastreams::OmDatastream
     t.frame_rate(proxy: [:metadata, :video, :frame_rate])
   end
 
+  def prefix(path)
+    ''
+  end
+
   # Returns an empty, default FITS XML document
   #
   # @return [Nokogiri::Document] the FITS XML document

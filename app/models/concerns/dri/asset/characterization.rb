@@ -2,8 +2,7 @@ module DRI::Asset
   module Characterization
       extend ActiveSupport::Concern
       included do
-        has_one :characterization, class_name: 'FitsDatastream'
-        delegate :mime_type,         to: :characterization
+        has_one :characterization, class_name: 'FitsDatastream', as: :describable, autosave: true
         delegate :format_label,      to: :characterization
         delegate :file_size,         to: :characterization
         delegate :last_modified,     to: :characterization
@@ -47,6 +46,18 @@ module DRI::Asset
         delegate :data_format,       to: :characterization
         delegate :offset,            to: :characterization
         delegate :frame_rate,        to: :characterization
+      end
+
+      def characterization
+        super || build_characterization
+      end
+
+      def mime_type
+        characterization.mime_type.first
+      end
+
+      def format_label
+        characterization.format_label.first
       end
 
       def width

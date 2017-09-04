@@ -104,9 +104,9 @@ module DRI
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.noid])
         end
 
-        unless governed_items.empty?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.map(&:noid))
-        end
+        #unless governed_items.empty?
+        #  solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.map(&:noid))
+        #end
 
         if previous_sibling
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
