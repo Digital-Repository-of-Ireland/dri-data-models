@@ -11,7 +11,7 @@ module DRI::ModelSupport
     #
     def add_file(upload, opts = {})
       # Batch ID will be used in the MOAB directory name
-      batch_id = digital_object.id
+      batch_id = digital_object.noid
      
       self.version = opts[:object_version] || 1
       self.mime_type = opts[:mime_type]

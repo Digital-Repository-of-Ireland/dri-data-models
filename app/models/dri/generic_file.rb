@@ -22,7 +22,7 @@ module DRI
     
     include DRI::ModelSupport::LocalFile
 
-    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
+    #before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
     # one-to-one AF association to associate DRI::Base
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
@@ -30,16 +30,18 @@ module DRI
     serialize :title
     serialize :creator
 
+    def self.find_or_create(pid)
+      DRI::GenericFile.find_by(noid: pid)
+    rescue ActiveRecord::RecordNotFound
+      DRI::GenericFile.create(noid: pid)
+    end
+
     def declared_attached_files
       { 'characterization' => characterization }
     end
 
     def attached_files
       declared_attached_files
-    end
-
-    def add_depositor_metadata(current_user)
-      depositor = current_user.to_s
     end
 
     def create_date
@@ -117,9 +119,9 @@ module DRI
 
       def delete_files
         local_file_info = DRI::GenericFile.where('digital_object_id LIKE :f',
-                                          f: id).order('version DESC').to_a
+                                          f: noid).order('version DESC').to_a
         local_file_info.each(&:destroy)
-        FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
+        FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(noid), force: true)
       end
   end
 end
