@@ -8,7 +8,7 @@ class CreateModsRecordsJob < ActiveFedoraIdBasedJob
   # Run CreateModsRecordsJob job
   def run
     sleep 3
-    mods_object = DRI::Mods.find(self.pid)
+    mods_object = DRI::Identifier.retrieve_object(self.pid)
     mods_object.create_mods_records
   end
 end

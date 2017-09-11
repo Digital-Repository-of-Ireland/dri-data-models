@@ -42,11 +42,11 @@ describe 'EncodedArchivalDescription' do
     end
 
     it 'should have the specified datastreams' do
-      @ead_header.attached_files.keys.should include(:descMetadata)
+      @ead_header.attached_files.keys.should include('descMetadata')
       @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
-      @ead_header.attached_files.keys.should include(:fullMetadata)
+      @ead_header.attached_files.keys.should include('fullMetadata')
       @ead_header.fullMetadata.should be_kind_of(DRI::Metadata::FullMetadata)
-      @ead_header.attached_files.keys.should include(:properties)
+      @ead_header.attached_files.keys.should include('properties')
       @ead_header.properties.should be_kind_of(DRI::Metadata::Properties)
     end
 

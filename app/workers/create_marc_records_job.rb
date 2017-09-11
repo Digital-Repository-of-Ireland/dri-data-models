@@ -8,7 +8,7 @@ class CreateMarcRecordsJob < ActiveFedoraIdBasedJob
   # Run CreateMarcRecordsJob job
   def run
     sleep 3
-    marc_object = DRI::Marc.find(self.pid)
+    marc_object = DRI::Identifier.retrieve_object(self.pid)
     marc_object.create_marc_records
   end
 end

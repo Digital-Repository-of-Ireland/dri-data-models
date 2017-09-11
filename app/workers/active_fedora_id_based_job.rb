@@ -10,7 +10,7 @@ class ActiveFedoraIdBasedJob
   end
 
   def object
-    @object ||= ActiveFedora::Base.find(id)
+    @object ||= DRI::Identifier::retrieve_object(id)
   end
 
   alias_method :generic_file, :object

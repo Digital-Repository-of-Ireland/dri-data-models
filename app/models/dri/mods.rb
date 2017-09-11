@@ -19,6 +19,8 @@ module DRI
     delegate :mods_type_collection,:mods_type_collection=, to: :descMetadata
     delegate :mods_genre, to: :descMetadata
 
+    delegate :resource_type,:resource_type=, to: :descMetadata
+
     # subtitle
     delegate :mods_subtitle, to: :descMetadata
 
@@ -61,8 +63,8 @@ module DRI
     delegate :subject_date_end, to: :descMetadata
     delegate :geocode_logainm, to: :descMetadata
 
-    delegate :published_date, to: :descMetadata
-    delegate :creation_date, to: :descMetadata
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
     class_eval do
       # Roles
@@ -191,14 +193,14 @@ module DRI
     # @param [Array<String>] creators the array of creator metadata values to set
     def creator=(creators)
       # default marcrel code for creator cre
-      self.role_cre = creators if creators.is_a?(Array)
+      descMetadata.role_cre = creators if creators.is_a?(Array)
     end
 
     # contributor attribute setter (to create the associated metadata elements in the DS XML)
     # @param [Array<String>] contributors the array of contributor metadata values to set
     def contributor=(contributors)
       # default marcrel code for creator ctb
-      self.role_ctb = contributors if contributors.is_a?(Array)
+      descMetadata.role_ctb = contributors if contributors.is_a?(Array)
     end
 
     # origin_metadata attribute setter (to create the associated metadata elements in the DS XML)
@@ -335,7 +337,7 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::Mods] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      DRI::Mods.find_by!(noid: pid)
+      DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::Mods.create(noid: pid)
     end

@@ -22,7 +22,8 @@ module DRI
     
     include DRI::ModelSupport::LocalFile
 
-    #before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
+    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
+    has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
 
     # one-to-one AF association to associate DRI::Base
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
@@ -31,7 +32,7 @@ module DRI
     serialize :creator
 
     def self.find_or_create(pid)
-      DRI::GenericFile.find_by(noid: pid)
+      DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::GenericFile.create(noid: pid)
     end
@@ -52,6 +53,18 @@ module DRI
     def modified_date
       return nil unless updated_at
       DateTime.parse(updated_at.to_s).utc
+    end
+
+    def noid
+      alternate_identifier.alternate_id
+    end
+
+    def noid=(identifier)
+      alternate_identifier.alternate_id=identifier
+    end
+
+    def alternate_identifier
+      super || build_alternate_identifier
     end
 
     # Asserts the model class

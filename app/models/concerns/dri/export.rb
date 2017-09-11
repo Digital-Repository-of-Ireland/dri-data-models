@@ -119,14 +119,14 @@ module DRI
       text << setup_database_name 
 
       # Set depositing institute
-      depositing_institute = self.depositing_institute.first
+      depositing_institute = self.depositing_institute
 
       if depositing_institute.blank?
         gov = self
         while depositing_institute.blank?
           gov = gov.governing_collection
           break if gov.nil?
-          depositing_institute = gov.depositing_institute.first
+          depositing_institute = gov.depositing_institute
         end
       end
       text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.blank?

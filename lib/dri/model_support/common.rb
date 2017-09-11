@@ -7,6 +7,7 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
+        has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
         # one-to-many AF relationship to associate digital assets with their object
         has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
         # one-to-many AF relationship to associate documentation objects
@@ -43,6 +44,7 @@ module DRI
         delegate :depositor,:depositor=, to: :properties
         delegate :metadata_md5,:metadata_md5=, to: :properties
         delegate :model_version,:model_version=, to: :properties
+        delegate :master_file_access,:master_file_access=, to: :properties
         delegate :verified,:verified=, to: :properties
         delegate :doi,:doi=, to: :properties
         delegate :cover_image,:cover_image=, to: :properties

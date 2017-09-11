@@ -84,10 +84,10 @@ describe 'Documentation' do
 
   it 'should have the specified datastreams' do
     # Check for descMetadata datastream with MODS in it
-    @doc.attached_files.keys.should include(:descMetadata)
+    @doc.attached_files.keys.should include('descMetadata')
     @doc.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
     # Check for properties datastream
-    @doc.attached_files.keys.should include(:properties)
+    @doc.attached_files.keys.should include('properties')
     @doc.properties.should be_kind_of DRI::Metadata::Properties
   end
 

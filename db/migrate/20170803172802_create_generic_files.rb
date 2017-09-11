@@ -3,6 +3,7 @@ class CreateGenericFiles < ActiveRecord::Migration
     create_table :generic_files do |t|
       t.text :title
       t.text :creator
+      t.string :filename
       t.string :label
       t.string :depositor
       t.string :mime_type

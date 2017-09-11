@@ -8,14 +8,12 @@ module DRI::Asset
       # @return [Boolean] true if public; false otherwise
       def public?
         governing_object = self.digital_object
-
-        while governing_object.master_file_access.nil? || governing_object.master_file_access == "inherit" 
+        while governing_object.master_file_access.blank? || governing_object.master_file_access.first == "inherit" 
           governing_object = governing_object.governing_collection
-
           return false if governing_object.nil?
         end        
 
-        governing_object.master_file_access == 'public'
+        governing_object.master_file_access.first == 'public'
       end
 
       # Determine whether the object has a preservation only access status

@@ -90,10 +90,10 @@ describe 'QualifiedDublinCore' do
 
     it 'should have the specified datastreams' do
       # Check for descMetadata datastream with MODS in it
-      @audio.attached_files.keys.should include(:descMetadata)
+      @audio.attached_files.keys.should include('descMetadata')
       @audio.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
       # Check for properties datastream
-      @audio.attached_files.keys.should include(:properties)
+      @audio.attached_files.keys.should include('properties')
       @audio.properties.should be_kind_of DRI::Metadata::Properties
     end
 
@@ -428,14 +428,14 @@ describe 'QualifiedDublinCore' do
     it 'should add relationship has_part and source' do
       md_relationships_hash = @col.get_relationships_records
 
-      added_rels = DRI::QualifiedDublinCore.find_by(noid: md_relationships_hash[:parts].first).qdc_id
+      added_rels = DRI::Identifier.retrieve_object!(md_relationships_hash[:parts].first).qdc_id
       added_rels.should =~ ['MAGOH01']
     end
 
     it 'should add relationship is_part_of' do
       md_relationships_hash = @obj.get_relationships_records
 
-      added_rels = DRI::QualifiedDublinCore.find_by(noid: md_relationships_hash[:container].first).qdc_id
+      added_rels = DRI::Identifier.retrieve_object!(md_relationships_hash[:container].first).qdc_id
       added_rels.should =~ ['MAGOH']
     end
   end

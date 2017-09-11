@@ -68,7 +68,7 @@ module DRI
     # @param pid [String] the pid of the object to retrieve
     # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::DigitalObject.find_by(noid: pid)
+      DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::DigitalObject.create(noid: pid)
     end
@@ -121,6 +121,18 @@ module DRI
       DateTime.parse(updated_at.to_s).utc
     end
 
+    def noid
+      alternate_identifier.alternate_id
+    end
+
+    def noid=(identifier)
+      alternate_identifier.alternate_id=identifier
+    end
+
+    def alternate_identifier
+      super || build_alternate_identifier
+    end
+
     def object_version
       properties.object_version.first
     end
@@ -144,18 +156,7 @@ module DRI
     def status=(status)
       properties.status = status
     end
-    
-    #def method_missing(method, *args)
-    #  puts "#{method}"
-     # if descMetadata.respond_to?(method)
-     #   descMetadata.send(method, *args)
-     # elsif properties.respond_to?(method)
-     #   properties.send(method, *args)
-     # else
-     #   super
-     # end
-    #end
-   
+      
     # Return a Hash representation of this object where keys
     # in the hash are appropriate Solr field names.
     #
@@ -212,7 +213,7 @@ module DRI
 
     def delete_bucket
       storage = StorageService.new
-      storage.delete_bucket(id)
+      storage.delete_bucket(noid)
     end
   end # Class Base
 end # Module DRI
