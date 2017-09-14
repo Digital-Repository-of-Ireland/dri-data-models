@@ -52,10 +52,6 @@ module DRI::Asset
         super || build_characterization
       end
 
-      def mime_type
-        characterization.mime_type.first
-      end
-
       def format_label
         characterization.format_label.first
       end

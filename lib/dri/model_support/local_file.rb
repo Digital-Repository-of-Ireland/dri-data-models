@@ -4,20 +4,18 @@ require 'pathname'
 
 module DRI::ModelSupport
   module LocalFile
-    # TODO: reenable this as an admin function
-    #before_destroy :delete_file
-
     # Write the file to the filesystem
     #
     def add_file(upload, opts = {})
       # Batch ID will be used in the MOAB directory name
       batch_id = digital_object.noid
      
-      self.version = opts[:object_version] || 1
+      self.version = digital_object.object_version.to_i || 1
       self.mime_type = opts[:mime_type]
 
       base_dir = opts[:directory].presence || File.join(content_path(batch_id, version))
       FileUtils.mkdir_p(base_dir)
+
       self.path = File.join(base_dir, opts[:file_name])
 
       upload_to_file(upload)
