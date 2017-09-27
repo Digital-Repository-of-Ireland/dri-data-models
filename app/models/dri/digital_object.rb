@@ -62,13 +62,24 @@ module DRI
       end
     end
 
+    def self.find_by_noid(pid)
+      joins(:alternate_identifier).where(identifiers: { alternate_id: pid }).take
+    end
+
+    def self.find_by_noid!(pid)
+      object = find_by_noid(pid)
+      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::DigitalObject with 'noid'=#{pid}") unless object
+
+      object
+    end
+
     # Retrieves a digital object from fedora given its pid; creates
     # a new object if object not found
     #
     # @param pid [String] the pid of the object to retrieve
     # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
+      DRI::DigitalObject.find_by_noid!(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::DigitalObject.create(noid: pid)
     end

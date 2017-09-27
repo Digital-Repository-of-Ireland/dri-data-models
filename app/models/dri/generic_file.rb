@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI EAD generic files (digital assets) extending from AF Base
-  # and associated to Digital Objects extending from DRI::Base
+  # Implementation of DRI generic files (digital assets) extending from AR Base
+  # and associated to Digital Objects extending from DRI::DigitalObject
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
   class GenericFile < ActiveRecord::Base
@@ -22,17 +22,27 @@ module DRI
     
     include DRI::ModelSupport::LocalFile
 
-    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
     has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
 
-    # one-to-one AF association to associate DRI::Base
+    # one-to-one AF association to associate DRI::DigitalObject
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
 
     serialize :title
     serialize :creator
 
+    def self.find_by_noid(pid)
+      joins(:alternate_identifier).where(identifiers: { alternate_id: pid }).take
+    end
+
+    def self.find_by_noid!(pid)
+      object = find_by_noid(pid)
+      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::GenericFile with 'noid'=#{pid}") unless object
+
+      object
+    end
+
     def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
+      DRI::GenericFile.find_by_noid!(pid)
     rescue ActiveRecord::RecordNotFound
       DRI::GenericFile.create(noid: pid)
     end
@@ -111,30 +121,19 @@ module DRI
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format')] = file_format
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format', :facetable)] = file_format
       #solr_doc['all_text_timv'] = full_text.content
-      # Index the Fedora-generated SHA1 digest to create a linkage
-      # between files on disk (in fcrepo.binary-store-path) and objects
-      # in the repository.
-      #solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
+     
       solr_doc
     end
 
     def related_files
-        return [] unless digital_object
-        digital_object.generic_files.reject { |sibling| sibling.id == id }
-      end
+      return [] unless digital_object
+      digital_object.generic_files.reject { |sibling| sibling.id == id }
+    end
 
     # Is this file in the middle of being processed by an object?
     def processing?
       try(:digital_object).try(:status) == ['processing'.freeze]
     end
 
-    private
-
-      def delete_files
-        local_file_info = DRI::GenericFile.where('digital_object_id LIKE :f',
-                                          f: noid).order('version DESC').to_a
-        local_file_info.each(&:destroy)
-        FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(noid), force: true)
-      end
   end
 end
