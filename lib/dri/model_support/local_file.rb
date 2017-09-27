@@ -7,17 +7,16 @@ module DRI::ModelSupport
     # Write the file to the filesystem
     #
     def add_file(upload, opts = {})
-      # Batch ID will be used in the MOAB directory name
-      batch_id = digital_object.noid
+      # object ID will be used in the MOAB directory name
+      object_id = digital_object.noid
      
       self.version = digital_object.object_version.to_i || 1
       self.mime_type = opts[:mime_type]
 
-      base_dir = opts[:directory].presence || File.join(content_path(batch_id, version))
+      base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
       FileUtils.mkdir_p(base_dir)
 
       self.path = File.join(base_dir, opts[:file_name])
-
       upload_to_file(upload)
     end
 
@@ -43,18 +42,18 @@ module DRI::ModelSupport
         Rails.root.join(Settings.dri.files)
       end
 
-      def version_path(batch, version)
-        File.join(local_storage_dir, build_hash_dir(batch), version_string(version))
+      def version_path(object_id, version)
+        File.join(local_storage_dir, build_hash_dir(object_id), version_string(version))
       end
 
       # data path
-      def data_path(batch, version)
-        File.join(version_path(batch,version), "data")
+      def data_path(object_id, version)
+        File.join(version_path(object_id, version), "data")
       end
 
       # output: partial path string e.g. "1c/18/df/87/1c18df87m/v0001"
-      def content_path(batch, version)
-        File.join(data_path(batch, version), "content")
+      def content_path(object_id, version)
+        File.join(data_path(object_id, version), "content")
       end
 
       # Return formatted version number for the file path
