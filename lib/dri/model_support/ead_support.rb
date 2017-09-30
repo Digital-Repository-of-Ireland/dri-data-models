@@ -119,7 +119,7 @@ module DRI
           open(file_url) { |data| temp_file.write data.read }
           temp_file.close
 
-          add_file(temp_file, 'content', file_name)
+          add_file(temp_file, file_name)
 
           true
         rescue Exception => e
