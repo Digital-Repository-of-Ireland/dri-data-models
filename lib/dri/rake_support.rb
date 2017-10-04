@@ -1,18 +1,16 @@
-# Starts a fedora server and a solr server on a random port and then
+# Starts a solr server on a random port and then
 # yields the passed block
-def with_test_server(&block)
-  with_server('test', &block)
+def with_solr_test_server(&block)
+  with_solr_server('test', &block)
 end
 
-def with_server(environment)
+def with_solr_server(environment)
   return yield if ENV["#{environment}_SERVER_STARTED"]
 
   ENV["#{environment}_SERVER_STARTED"] = 'true'
 
   # setting port: nil assigns a random port.
   solr_defaults = { port: nil, verbose: true, managed: true }
-  fcrepo_defaults = { port: nil, verbose: true, managed: true,
-                      enable_jms: false, fcrepo_home_dir: "fcrepo4-#{environment}-data" }
 
   SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
     ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
@@ -24,10 +22,7 @@ def with_server(environment)
       solr_config_path = File.join(File.expand_path("../..", File.dirname(__FILE__)), 'lib', 'generators', 'active_fedora', 'config', 'solr', 'templates', 'solr', 'config')
     end
     solr.with_collection(name: "#{environment}", dir: solr_config_path) do
-      FcrepoWrapper.wrap(load_config(:fcrepo, environment, fcrepo_defaults)) do |fcrepo|
-        ENV["FCREPO_#{environment.upcase}_PORT"] = fcrepo.port.to_s
         yield
-      end
     end
   end
   ENV["#{environment}_SERVER_STARTED"] = 'false'

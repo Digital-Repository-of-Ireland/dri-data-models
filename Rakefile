@@ -51,7 +51,7 @@ end
 desc 'Run Continuous Integration'
 task :ci do
   ENV['environment'] = 'test'
-  with_test_server do
+  with_solr_test_server do
     Rake::Task['rspec'].invoke
   end
 
