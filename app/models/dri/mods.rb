@@ -200,7 +200,7 @@ module DRI
     # @param [Array<String>] contributors the array of contributor metadata values to set
     def contributor=(contributors)
       # default marcrel code for creator ctb
-      descMetadata.role_ctb = contributors if contributors.is_a?(Array)
+      descMetadata.add_role('ctb', contributors) if contributors.is_a?(Array)
     end
 
     # origin_metadata attribute setter (to create the associated metadata elements in the DS XML)
