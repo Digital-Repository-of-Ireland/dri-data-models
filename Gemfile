@@ -50,5 +50,6 @@ end
 
 group :test do
   # dri-user-group gem added for the rspec tests
+  gem 'simplecov', require: false
   gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'develop'
 end
