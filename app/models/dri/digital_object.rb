@@ -127,6 +127,10 @@ module DRI
       properties.depositing_institute.first if properties.depositing_institute.present?
     end
 
+    def increment_version
+      properties.object_version = [properties.object_version.first.next]
+    end
+
     def modified_date
       return nil unless updated_at
       DateTime.parse(updated_at.to_s).utc
