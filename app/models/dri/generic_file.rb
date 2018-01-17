@@ -18,16 +18,6 @@ module DRI
     include DRI::Asset::Derivatives
     include DRI::Asset::Versions
 
-    #include Sufia::GenericFile::Featured
-    #include Sufia::GenericFile::Metadata
-    #include Sufia::GenericFile::Content
-    #include Sufia::GenericFile::Versions
-    #include Sufia::GenericFile::VirusCheck
-    #include Sufia::GenericFile::FullTextIndexing
-    #include Sufia::GenericFile::ProxyDeposit
-    #include Sufia::GenericFile::Batches
-    #include Sufia::GenericFile::Indexing
-
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
     # one-to-one AF association to associate DRI::Batch
