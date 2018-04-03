@@ -11,6 +11,7 @@ module DRI
     autoload :Extracted, 'dri/metadata/extracted'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
+    autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :LinkedData, 'dri/metadata/linked_data'
     autoload :Documentation, 'dri/metadata/documentation'

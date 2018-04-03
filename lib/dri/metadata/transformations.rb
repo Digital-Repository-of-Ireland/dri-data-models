@@ -1,3 +1,5 @@
+require 'dri/metadata/transformations/spatial_transformations'
+
 # DRI namespace
 module DRI
   # Metadata namespace
@@ -109,116 +111,33 @@ module DRI
       # Parse geospatial data sourced from the metadata into Point or BBox for indexing into Solr
       #
       # @param [Hash] geodata the hash containing all the geo values from the metadata
-      # @return [Array<String>] the array of formatted coordinates or bbox for indexing
+      # @return [Hash] parsed geospatial strings for indexing
       #
       def self.transform_geospatial(geodata = {})
-        results = {}
-        results[:coords] = []
-        results[:name] = []
-        results[:json] = []
-
-        box_keys = %w(name eastlimit northlimit westlimit southlimit)
-        point_keys = %w(name east north)
+        results = { coords: [], name: [], json: [] }
 
         geodata.each do |_key, value|
           value.each do |geo_string|
-            if dcmi_point?(geo_string)
-              begin
-                point = get_geo_point(geo_string)
-              rescue Exception => e
-                Rails.logger.error("Exception in transform_geospatial: #{geo_string} => #{e}")
-                break
-              end
-              # [east_long north_lat]
-              if self.all_keys?(point_keys, point)
-                results[:coords] << "#{point['east']} #{point['north']}"
-                results[:name] << point['name']
-                results[:json] << geojson_string_from_coords(point['name'], "#{point['east']} #{point['north']}")
-              end
-            elsif dcmi_box?(geo_string)
-              begin
-                box = get_geo_box(geo_string)
-              rescue Exception => e
-                Rails.logger.error("Exception in transform_geospatial: #{geo_string} => #{e}")
-                break
-              end
-              # [west_long south_lat east_long north_lat]
-              if self.all_keys?(box_keys, box)
-                # Solr 5 changed format to ENVELOPE(minX, maxX, maxY, minY)
-                results[:coords] << "ENVELOPE(#{box['westlimit']}, #{box['eastlimit']}, #{box['northlimit']}, #{box['southlimit']})"
-                results[:name] << box['name']
-                results[:json] << geojson_string_from_coords(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
-              end
-            elsif geo_string =~ /\A#{URI.regexp(['http', 'https'])}\z/
-              ld = DRI::LinkedData.where(source: geo_string)
-              unless ld.empty?
-                geojson = ld.first.spatial
-                geojson.each do |geo|
-                  geojson_hash = JSON.parse(geo, symbolize_names: true)
-                  results[:json] << geo
-                  results[:name] << geojson_hash[:properties][:placename]
-                  results[:coords] << "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
-                end
-              end
+            
+            result = if dcmi_point?(geo_string)
+                       DRI::Metadata::Transformations::SpatialTransformations.parse_dcmi_point(geo_string)
+                     elsif dcmi_box?(geo_string)
+                       DRI::Metadata::Transformations::SpatialTransformations.parse_dcmi_box(geo_string)
+                     elsif geo_string =~ /\A#{URI.regexp(['http', 'https'])}\z/
+                       DRI::Metadata::Transformations::SpatialTransformations.from_url(geo_string)
+                     else
+                      {}
+                     end
+
+            unless result.empty?
+              results[:coords].push(*result[:coords])
+              results[:name].push(*result[:name])
+              results[:json].push(*result[:json])
             end
           end
         end
 
         results
-      end
-
-      # Parse geospatial data sourced from the metadata and transform into DCMI Point encoding
-      #
-      # @param [String] value the metadata coordinates string
-      # @return [Array<String>] the transformed metadata coordinates formatter as DCMI Point into a Hash
-      #
-      def self.get_geo_point(value = nil)
-        return {} if value.nil?
-
-        point = {}
-
-        value.split(/\s*;\s*/).each do |component|
-          (k, v) = component.split(/\s*=\s*/)
-          case k
-          when 'east'
-            point['east'] = v.strip
-          when 'north'
-            point['north'] = v.strip
-          when 'name'
-            point['name'] = v.strip
-          end
-        end
-
-        point
-      end
-
-      # Parse geospatial data sourced from the metadata and transform into DCMI Box encoding
-      #
-      # @param [String] value the metadata coordinates string
-      # @return [Hash] the transformed metadata coordinates formatter as DCMI Box into a Hash
-      #
-      def self.get_geo_box(value = nil)
-        return {} if value.nil?
-
-        box = {}
-
-        value.split(/\s*;\s*/).each do |component|
-          (k, v) = component.split(/\s*=\s*/)
-          case k
-          when 'northlimit'
-            box['northlimit'] = v.strip
-          when 'eastlimit'
-            box['eastlimit'] = v.strip
-          when 'southlimit'
-            box['southlimit'] = v.strip
-          when 'westlimit'
-            box['westlimit'] = v.strip
-          when 'name'
-            box['name'] = v.strip
-          end
-        end
-
-        box
       end
 
       #---------------------------------------------------------------------------------------------------------------
@@ -441,45 +360,7 @@ module DRI
 
         "#{name_comp} #{sdate_comp} #{edate_comp} #{scheme_comp}".rstrip
       end
-
-      # Transforms a geocode into a Geo Json Hash
-      # @param [String] name the displayable place name for a geocode value
-      # @param [String] coords the string including the coordinates for a geocode value
-      # @return [Hash] the hash including the geocode value formatted in GEO Json
-      def self.geojson_string_from_coords(name, coords)
-        geojson_hash = { type: 'Feature', geometry: {}, properties: {} }
-
-        if coords.scan(/[\s]/).length == 3
-          # bbox
-          coords_array = coords.split(' ').map(&:to_f)
-          geojson_hash[:bbox] = coords_array
-          geojson_hash[:geometry][:type] = 'Polygon'
-          geojson_hash[:geometry][:coordinates] = [[[coords_array[0], coords_array[1]],
-                                                    [coords_array[2], coords_array[1]],
-                                                    [coords_array[2], coords_array[3]],
-                                                    [coords_array[0], coords_array[3]],
-                                                    [coords_array[0], coords_array[1]]]]
-        elsif coords.match(/^[-]?[\d]*[\.]?[\d]*[ ,][-]?[\d]*[\.]?[\d]*$/)
-          # point
-          geojson_hash[:geometry][:type] = 'Point'
-
-          if coords.match(/,/)
-            coords_array = coords.split(',').reverse
-          else
-            coords_array = coords.split(' ')
-          end
-
-          geojson_hash[:geometry][:coordinates] = coords_array.map(&:to_f)
-        else
-          Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
-        end
-        geojson_hash[:properties] = {}
-        geojson_hash[:properties][:placename] = name
-
-        # Return as a JSON String for blacklight-maps
-        geojson_hash.to_json.to_s
-      end
-
+      
       # Transforms a geocode string encoded using DCMI Point or Box into a suitable formatted string of
       # coordinates for their indexing in the geographical indices.
       # E.g. Box: 'eastlimit, northlimit, westlimit, southlimit'
@@ -489,21 +370,21 @@ module DRI
       def self.get_spatial_coordinates(geo_string)
         coordinates = ''
 
-        if DRI::Metadata::Transformations.dcmi_point?(geo_string)
+        if dcmi_point?(geo_string)
           lat = ''
           long = ''
 
           geo_string.split(/\s*;\s*/).each do |component|
             (k, v) = component.split(/\s*=\s*/)
-            if k.eql?('east')
+            if k == 'east'
               lat = v.strip unless v.nil? || v.empty?
-            elsif k.eql?('north')
+            elsif k == 'north'
               long = v.strip unless v.nil? || v.empty?
             end
           end
 
           coordinates = "#{lat} #{long}" unless lat.empty? || long.empty?
-        elsif DRI::Metadata::Transformations.dcmi_box?(geo_string)
+        elsif dcmi_box?(geo_string)
           eastlimit = ''
           northlimit = ''
           westlimit = ''
@@ -511,13 +392,13 @@ module DRI
 
           geo_string.split(/\s*;\s*/).each do |component|
             (k, v) = component.split(/\s*=\s*/)
-            if k.eql?('eastlimit')
+            if k == 'eastlimit'
               eastlimit = v.strip unless v.nil? || v.empty?
-            elsif k.eql?('northlimit')
+            elsif k == 'northlimit'
               northlimit = v.strip unless v.nil? || v.empty?
-            elsif k.eql?('westlimit')
+            elsif k == 'westlimit'
               westlimit = v.strip unless v.nil? || v.empty?
-            elsif k.eql?('southlimit')
+            elsif k == 'southlimit'
               southlimit = v.strip unless v.nil? || v.empty?
             end
           end
@@ -526,12 +407,6 @@ module DRI
         end
 
         coordinates
-      end
-
-      private
-
-      def self.all_keys?(key_array = [], hash = {})
-        key_array.all? { |s| hash.key? s }
       end
     end
   end
