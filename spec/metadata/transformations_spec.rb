@@ -33,6 +33,22 @@ describe DRI::Metadata::Transformations do
       results = described_class.transform_geospatial({ geographic_coverage: [point]})
       expect(results[:coords]).to eq(["-7.2860995621042877 52.61546963259449"])
     end
+
+    it 'should filter by ITM > ING > WGS84' do
+      points = [ "name=Raheenapisha; east=-7.2859979; north=52.615355;", "east=248405; north=151775; projection=ING", "east=648345; north=651820; projection=ITM"]
+      allow(DRI::Metadata::Transformations::SpatialTransformations).to receive(:giqtrans).and_return("-7.2860995621042877 52.61546963259449")
+      results = described_class.transform_geospatial({ geographic_coverage: points})
+      expect(results[:json].count).to eq 1
+      geojson = JSON.parse(results[:json][0])
+      expect(geojson['properties']['geometryCRS']['crs']).to eq 'http://www.opengis.net/def/crs/EPSG/0/2157'
+
+      points = [ "name=Raheenapisha; east=-7.2859979; north=52.615355;", "east=248405; north=151775; projection=ING"]
+      allow(DRI::Metadata::Transformations::SpatialTransformations).to receive(:giqtrans).and_return("-7.2860995621042877 52.61546963259449")
+      results = described_class.transform_geospatial({ geographic_coverage: points})
+      expect(results[:json].count).to eq 1
+      geojson = JSON.parse(results[:json][0])
+      expect(geojson['properties']['geometryCRS']['crs']).to eq 'http://www.opengis.net/def/crs/EPSG/0/29903'
+    end
   end
 
   context 'name transformations' do

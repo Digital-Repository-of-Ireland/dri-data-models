@@ -6,6 +6,8 @@ module DRI::Metadata::Transformations
     POINT_KEYS = %w(east north)
     BOX_KEYS = %w(eastlimit northlimit westlimit southlimit)
 
+    PROJECTIONS = { 'itm' => '2157', 'ing' => '29903' }
+
     def self.from_url(url)
       result = {}
 
@@ -32,12 +34,18 @@ module DRI::Metadata::Transformations
         Rails.logger.error("Exception in transform_geospatial: #{geospatial_string} => #{e}")
         return result
       end
-      
+
       # [east_long north_lat]
       if supported_dcmi?(POINT_KEYS, point)
-        coords = if ['ING','ITM'].include?(point['projection'].presence)
-                   transform_projection(point)
+        coords = if point['projection'].present? && PROJECTIONS.keys.include?(point['projection'].downcase)
+                   projection = PROJECTIONS[point['projection'].downcase]
+      
+                   geometryCrs = { crs: "http://www.opengis.net/def/crs/EPSG/0/#{projection}" }
+                   geometryCrs[:coordinates] = [ point['east'].to_f, point['north'].to_f ]
+
+                   giqtrans(projection, point)
                  else
+                  projection = 'ESPG:4326'
                    "#{point['east']} #{point['north']}"
                  end
 
@@ -45,7 +53,7 @@ module DRI::Metadata::Transformations
 
         result[:coords] = coords
         result[:name] = point['name']
-        result[:json] = coords_to_geojson_string(point['name'], coords)
+        result[:json] = coords_to_geojson_string(point['name'], coords, geometryCrs)
       end
       
       result
@@ -85,23 +93,12 @@ module DRI::Metadata::Transformations
 
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
-          dcmi_components[k] = v.strip
+          dcmi_components[k.downcase] = v.strip
         end
         
         dcmi_components
       end
-   
-      def self.transform_projection(point)
-        case point['projection']
-        when 'ING'
-          giqtrans('29903', point)                
-        when 'ITM'
-          giqtrans('2157', point)
-        else
-          ''
-        end     
-      end
-
+       
       def self.supported_dcmi?(key_array = [], hash = {})
         key_array.all? { |s| hash.key? s }
       end
@@ -110,7 +107,7 @@ module DRI::Metadata::Transformations
       # @param [String] name the displayable place name for a geocode value
       # @param [String] coords the string including the coordinates for a geocode value
       # @return [Hash] the hash including the geocode value formatted in GEO Json
-      def self.coords_to_geojson_string(name, coords)
+      def self.coords_to_geojson_string(name, coords, geometryCRS = nil)
         geojson_hash = { type: 'Feature', geometry: {}, properties: {} }
 
         if coords.scan(/[\s]/).length == 3
@@ -139,6 +136,7 @@ module DRI::Metadata::Transformations
         end
         geojson_hash[:properties] = {}
         geojson_hash[:properties][:placename] = name unless name.blank?
+        geojson_hash[:properties][:geometryCRS] = geometryCRS unless geometryCRS.nil?
 
         # Return as a JSON String for blacklight-maps
         geojson_hash.to_json.to_s
@@ -153,7 +151,7 @@ module DRI::Metadata::Transformations
           
         json['coordinates'].join(' ')
       rescue StandardError => e
-        return ''
+        {}
       end
         
   end
