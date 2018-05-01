@@ -130,15 +130,28 @@ module DRI
                      end
 
             unless result.empty?
-              results[:coords].push(*result[:coords])
-              results[:name].push(*result[:name])
-              results[:json].push(*result[:json])
+              results[:coords].push(result[:coords])
+              results[:name].push(result[:name]) unless result[:name].nil?
+              results[:json].push(result[:json])
             end
           end
         end
-
+        
+        results[:json] = filter_projections(results[:json])
         results
       end
+     
+      def self.filter_projections(geojson_strings)
+        features = geojson_strings.map { |geojson_string| JSON.parse(geojson_string) }
+        
+        [ 'http://www.opengis.net/def/crs/EPSG/0/2157', 'http://www.opengis.net/def/crs/EPSG/0/29903' ].each do |projection|
+          filtered = features.select { |feature| feature['properties'].dig('geometryCRS', 'crs') == projection }
+          return filtered.map { |feature| feature.to_json.to_s } unless filtered.empty?
+        end
+
+        features.map { |feature| feature.to_json.to_s }
+      end
+
 
       #---------------------------------------------------------------------------------------------------------------
       # Date, Time transformations for indexing
