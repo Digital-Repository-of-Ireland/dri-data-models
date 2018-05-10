@@ -49,6 +49,13 @@ describe DRI::Metadata::Transformations do
       geojson = JSON.parse(results[:json][0])
       expect(geojson['properties']['geometryCRS']['crs']).to eq 'http://www.opengis.net/def/crs/EPSG/0/29903'
     end
+
+    it 'should add non-dcmi to placenames' do
+      point = 'Raheenapisha'
+      results = described_class.transform_geospatial({ geographic_coverage: [point]})
+
+      expect(results[:name]).to include('Raheenapisha')
+    end
   end
 
   context 'name transformations' do

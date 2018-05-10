@@ -126,13 +126,13 @@ module DRI
                      elsif geo_string =~ /\A#{URI.regexp(['http', 'https'])}\z/
                        DRI::Metadata::Transformations::SpatialTransformations.from_url(geo_string)
                      else
-                      {}
+                       { name: geo_string } #not a point or box so index string into placename solr field
                      end
 
             unless result.empty?
-              results[:coords].push(result[:coords])
+              results[:coords].push(result[:coords]) if result[:coords].present?
               results[:name].push(result[:name]) unless result[:name].nil?
-              results[:json].push(result[:json])
+              results[:json].push(result[:json]) if result[:json].present?
             end
           end
         end
@@ -327,7 +327,7 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k, _v) = component.split(/\s*=\s*/)
 
-          result = true if %w(east north elevation).include? k
+          result = true if %w(east north elevation projection).include? k
         end
 
         result
