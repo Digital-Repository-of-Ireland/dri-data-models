@@ -236,10 +236,14 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
         end
 
-        # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
-        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => geocode_point | geocode_box })
+        # Index dcterms Point and Box data into geospatial Solr field
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
+          { 
+            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          }
+        )
 
-        uris = geographical_coverage.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
@@ -247,11 +251,16 @@ module DRI
           geospatial_hash[:name].concat(linked_data[:name])
           geospatial_hash[:json].concat(linked_data[:json])
         end
+        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
+        
+        unless geospatial_hash[:name].empty?
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
+        end
 
-        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) if geospatial_hash[:coords].present?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) if geospatial_hash[:name].present?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) if geospatial_hash[:name].present?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) if geospatial_hash[:json].present?
+        unless geospatial_hash[:json].empty?
+          solr_doc.merge!(DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD => geospatial_hash[:json])
+        end
 
         solr_doc
       end
