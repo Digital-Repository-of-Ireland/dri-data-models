@@ -11,7 +11,7 @@ module DRI::Metadata::Transformations
     def self.from_url(url)
       result = {}
 
-      ld = DRI::LinkedData.where(source: url)
+      ld = find_linked_data(url)
       unless ld.empty?
         geojson = ld.first.spatial
         geojson.each do |geo|
@@ -23,6 +23,16 @@ module DRI::Metadata::Transformations
       end
 
       result
+    end
+
+    def self.find_linked_data(geostring)
+      results = ActiveFedora::SolrService.query("source_sim:\"#{geostring}\"")
+      return [] if results.blank?
+      begin
+        [DRI::LinkedData.find(results.first[:id])]
+     rescue ActiveRecord::RecordNotFound => e
+          []
+      end
     end
 
     def self.parse_dcmi_point(geospatial_string)
@@ -39,7 +49,7 @@ module DRI::Metadata::Transformations
       if supported_dcmi?(POINT_KEYS, point)
         coords = if point['projection'].present? && PROJECTIONS.keys.include?(point['projection'].downcase)
                    projection = PROJECTIONS[point['projection'].downcase]
-      
+
                    geometryCrs = { crs: "http://www.opengis.net/def/crs/EPSG/0/#{projection}" }
                    geometryCrs[:coordinates] = [ point['east'].to_f, point['north'].to_f ]
 
@@ -55,13 +65,13 @@ module DRI::Metadata::Transformations
         result[:name] = point['name']
         result[:json] = coords_to_geojson_string(point['name'], coords, geometryCrs)
       end
-      
+
       result
     end
 
     def self.parse_dcmi_box(geospatial_string)
       result = {}
-      
+
       begin
         box = dcmi_components(geospatial_string)
       rescue Exception => e
@@ -95,10 +105,10 @@ module DRI::Metadata::Transformations
           (k, v) = component.split(/\s*=\s*/)
           dcmi_components[k.downcase] = v.strip
         end
-        
+
         dcmi_components
       end
-       
+
       def self.supported_dcmi?(key_array = [], hash = {})
         key_array.all? { |s| hash.key? s }
       end
@@ -145,15 +155,15 @@ module DRI::Metadata::Transformations
       def self.giqtrans(source_srid, point)
         command = "SourceSRID=#{source_srid}&TargetSRID=4937&PreferredDatum=13&Geometry={\"type\":\"Point\",\"coordinates\":[#{point['east']},#{point['north']}]}"
         giqtrans_output = Open3.capture3("#{Settings.plugins.giqtrans_path}/giqtrans --CGI='#{command}'")
-          
+
         transform = giqtrans_output[0]
         json = JSON.parse(transform.lines.last)
-          
+
         json['coordinates'].join(' ')
       rescue StandardError => e
         {}
       end
-        
+
   end
 end
 

@@ -77,10 +77,10 @@ module DRI
     # @return [String] the citation as html-safe text
     def export_as_dri_citation
       text = ''
-     
+
       authors_list = []
       authors_list_final = []
-       
+
       authors = author_list
       authors.each do |author|
         next if author.blank?
@@ -103,8 +103,8 @@ module DRI
         else
           text << ' '
         end
-      end 
-      
+      end
+
       # Get Pub Date
       text << '(' + setup_pub_date('dri') + ') ' unless setup_pub_date('dri').nil?
 
@@ -116,7 +116,7 @@ module DRI
       text << title_info unless title_info.blank?
 
       # Set database name
-      text << setup_database_name 
+      text << setup_database_name
 
       # Set depositing institute
       depositing_institute = self.depositing_institute
@@ -131,7 +131,7 @@ module DRI
       end
       text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.blank?
 
-      text << ", https://doi.org/#{doi}" unless doi.nil?
+      text << ", https://doi.org/#{doi.first}" unless doi.blank?
 
       text.html_safe
     end
