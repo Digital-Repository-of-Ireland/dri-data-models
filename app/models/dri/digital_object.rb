@@ -94,6 +94,12 @@ module DRI
       end
     end
 
+    def increment_version
+      return '1' if object_version.nil?
+      
+      self.object_version = self.object_version.next
+    end
+
     # @note Use this in preference over setting xml directly in the OmDatastreams
     # Updates the xml metadata of this object
     #

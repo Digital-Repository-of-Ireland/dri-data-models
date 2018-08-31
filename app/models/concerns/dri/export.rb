@@ -131,7 +131,7 @@ module DRI
       end
       text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.blank?
 
-      text << ", DOI: #{doi.first}" unless doi.blank?
+      text << ", https://doi.org/#{doi}" unless doi.nil?
 
       text.html_safe
     end
@@ -181,7 +181,7 @@ module DRI
 
       text << " Retrieved #{access_date_chicago}."
 
-      text << " doi: #{doi}" unless doi.nil?
+      text << " https://doi.org/#{doi}" unless doi.nil?
 
       text.html_safe
     end
