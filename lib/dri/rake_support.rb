@@ -17,9 +17,8 @@ def with_solr_server(environment)
     solr_config_path = File.join('solr', 'config')
     # Check to see if configs exist in a path relative to the working directory
     unless Dir.exist?(solr_config_path)
-      $stderr.puts "Solr configuration not found at #{solr_config_path}. Using ActiveFedora defaults"
-      # Otherwise use the configs delivered with ActiveFedora.
-      solr_config_path = File.join(File.expand_path("../..", File.dirname(__FILE__)), 'lib', 'generators', 'active_fedora', 'config', 'solr', 'templates', 'solr', 'config')
+      $stderr.puts "Solr configuration not found at #{solr_config_path}."
+      return
     end
     solr.with_collection(name: "#{environment}", dir: solr_config_path) do
         yield

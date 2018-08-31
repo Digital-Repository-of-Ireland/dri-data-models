@@ -1,4 +1,4 @@
-class ActiveFedoraIdBasedJob
+class IdBasedJob
   def queue_name
     :id_based
   end

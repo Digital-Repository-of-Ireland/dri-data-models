@@ -8,7 +8,7 @@ module DRI
   #
   class DigitalObject < ActiveRecord::Base
     include ActiveFedora::Indexing
-    
+
     include DRI::Noid
     include DRI::Export
     include DRI::Permissions
@@ -24,7 +24,7 @@ module DRI
     self.inheritance_column = 'digital_object_type'
 
     after_destroy :delete_bucket
-    
+
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
     #has_many 'extracted', class_name: 'DRI::Metadata::Extracted'
@@ -96,7 +96,7 @@ module DRI
 
     def increment_version
       return '1' if object_version.nil?
-      
+
       self.object_version = self.object_version.next
     end
 
@@ -112,7 +112,7 @@ module DRI
 
       true
     end
-    
+
     # Asserts the model class
     def has_model
       [self.class.to_s, self.class.superclass.to_s]
@@ -177,7 +177,7 @@ module DRI
     def status=(status)
       properties.status = status
     end
-      
+
     # Return a Hash representation of this object where keys
     # in the hash are appropriate Solr field names.
     #
@@ -193,7 +193,7 @@ module DRI
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr
       solr_doc.merge! solrize_permissions
-      
+
       #solr_doc.merge!('all_text_timv' => full_text)
 
       solr_doc
@@ -209,15 +209,15 @@ module DRI
       type.each { |cat| object_types.push cat.split.map(&:capitalize)*' ' }
       object_types.push('Unknown') if object_types.count < 1
 
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(Solrizer.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(Solrizer.solr_name('object_type', :displayable) => object_types)
 
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => type)
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => type)
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => type)
 
       if rights.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('rights', :stored_searchable) => ['No rights statement'])
+        solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable) => ['No rights statement'])
       end
 
       solr_doc

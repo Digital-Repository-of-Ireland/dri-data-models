@@ -1,6 +1,6 @@
 # Implements a resque job to handle the update/re-index of solr fields for a given
 # digital object
-class UpdateIndexJob < ActiveFedoraIdBasedJob
+class UpdateIndexJob < IdBasedJob
   # Assign the resque queue name for this job
   def queue_name
     :update_index

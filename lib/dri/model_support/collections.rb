@@ -79,45 +79,45 @@ module DRI
 
         if ancestor_ids.empty?
           # This must be a root collection
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [title.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [title.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [noid])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [noid])
+          solr_doc.merge!(Solrizer.solr_name('root_collection', :facetable) => [title.first])
+          solr_doc.merge!(Solrizer.solr_name('root_collection', :stored_searchable) => [title.first])
+          solr_doc.merge!(Solrizer.solr_name('root_collection_id', :facetable) => [noid])
+          solr_doc.merge!(Solrizer.solr_name('root_collection_id', :stored_searchable) => [noid])
         else
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :facetable) => ancestor_titles)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_id', :facetable) => ancestor_ids)
+          solr_doc.merge!(Solrizer.solr_name('ancestor_title', :facetable) => ancestor_titles)
+          solr_doc.merge!(Solrizer.solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
+          solr_doc.merge!(Solrizer.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
+          solr_doc.merge!(Solrizer.solr_name('ancestor_id', :facetable) => ancestor_ids)
           # governing_id needed for user_group gem!!!
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('governing_id', :facetable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection_id', :facetable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection', :facetable) => [ancestor_titles.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection', :stored_searchable) => [ancestor_titles.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [ancestor_ids.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [ancestor_titles.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
+          solr_doc.merge!(Solrizer.solr_name('governing_id', :facetable) => [ancestor_ids.first])
+          solr_doc.merge!(Solrizer.solr_name('collection_id', :facetable) => [ancestor_ids.first])
+          solr_doc.merge!(Solrizer.solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
+          solr_doc.merge!(Solrizer.solr_name('collection', :facetable) => [ancestor_titles.first])
+          solr_doc.merge!(Solrizer.solr_name('collection', :stored_searchable) => [ancestor_titles.first])
+          solr_doc.merge!(Solrizer.solr_name('root_collection_id', :facetable) => [ancestor_ids.last])
+          solr_doc.merge!(Solrizer.solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
+          solr_doc.merge!(Solrizer.solr_name('root_collection', :facetable) => [ancestor_titles.last])
+          solr_doc.merge!(Solrizer.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
         end
 
         unless governing_collection.nil?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.noid])
+          solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.noid])
         end
 
         #unless governed_items.empty?
-        #  solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.map(&:noid))
+        #  solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.map(&:noid))
         #end
 
         if previous_sibling
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
+          solr_doc.merge!(Solrizer.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
         end
 
         if next_sibling.present?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => next_sibling.map(&:noid))
+          solr_doc.merge!(Solrizer.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => next_sibling.map(&:noid))
         end
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :facetable) => collection?)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :stored_searchable) => collection?)
+        solr_doc.merge!(Solrizer.solr_name('is_collection', :facetable) => collection?)
+        solr_doc.merge!(Solrizer.solr_name('is_collection', :stored_searchable) => collection?)
 
         solr_doc
       end # collections_to_solr

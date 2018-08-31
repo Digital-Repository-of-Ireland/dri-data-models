@@ -2,7 +2,7 @@
 module DRI
   # Metadata namespace
   module Metadata
-    # An ActiveFedora datastream that interacts with MODS.
+    # A datastream that interacts with MODS.
     class Mods < DRI::Datastreams::OmDatastream
       include DRI::Metadata
       include DRI::Metadata::Terminologies::Mods
@@ -119,22 +119,22 @@ module DRI
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
           unless sorted_title.empty?
-            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
         # Type
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => type_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => type_for_index)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type_for_index)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type_for_index)
         if collection?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable, type: :string) => 'Collection')
+          solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :string) => 'Collection')
         end
 
         # MODS has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ''
@@ -142,40 +142,40 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # Subject
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :stored_searchable) => subject) unless subject == []
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :facetable) => subject) unless subject == []
+        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject) unless subject == []
+        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject) unless subject == []
 
         subject_place_array = subject_place_for_index
         subject_temporal_array = subject_temporal_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :stored_searchable) => subject_name_for_index) unless name_coverage.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_for_index) unless name_coverage.empty?
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_for_index) unless name_coverage.empty?
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_for_index) unless name_coverage.empty?
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array.empty?
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array.empty?
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
 
         external_rels.each do |elem|
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
+          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
         end
 
         # Index creation_date
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => creation_date_for_index)
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_for_index)
 
         # Index creation_date
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => date_for_index)
+        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => date_for_index)
 
         # Index Published Date
         unless published_date.empty? && issued_date_start.empty?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
+          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_single_date_for_index(published_date) |
                               display_date_range_for_index(issued_date_start, issued_date_end))
         end
 
@@ -221,8 +221,8 @@ module DRI
 
         # Geospatial indexing
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          { 
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          {
+            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
           }
         )
 
@@ -237,13 +237,13 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        
+
         unless geospatial_hash[:name].empty?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
+          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
+          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
         end
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc.merge!(Solrizer.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
 
         solr_doc
       end

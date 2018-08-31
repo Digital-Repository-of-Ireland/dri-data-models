@@ -3,7 +3,7 @@ module DRI
   # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Base
   class QualifiedDublinCore < DRI::DigitalObject
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
-    
+
     # Full Simple DC Title, Creator, Subject, Description, Publisher,
     # Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
@@ -43,7 +43,7 @@ module DRI
       DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
                                                                 to: :descMetadata}
     end
-   
+
     def descMetadata
       super || build_descMetadata
     end
@@ -125,7 +125,7 @@ module DRI
     # i.e. qdc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora.index_field_mapper.solr_name('qdc_id', :stored_searchable, type: :string)
+      Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type

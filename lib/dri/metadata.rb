@@ -12,7 +12,7 @@ module DRI
     autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :Terminologies, 'dri/metadata/terminologies'
-  
+
     # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other Fedora objects. This allows us to add functions
     # to synchronize the XML between several objects
@@ -55,8 +55,8 @@ module DRI
     # @return [hash] the solr document hash
     def remove_null_values(solr_doc, field)
       [:stored_searchable, :facetable].each do |index_type|
-        if solr_doc[ActiveFedora.index_field_mapper.solr_name(field, index_type)].present?
-          solr_doc[ActiveFedora.index_field_mapper.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
+        if solr_doc[Solrizer.solr_name(field, index_type)].present?
+          solr_doc[Solrizer.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
         end
       end
 

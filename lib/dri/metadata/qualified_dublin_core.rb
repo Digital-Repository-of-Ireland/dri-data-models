@@ -2,7 +2,7 @@
 module DRI
   # Metadata namespace
   module Metadata
-    # An ActiveFedora datastream that interacts with Qualified DC Metadata.
+    # A datastream that interacts with Qualified DC Metadata.
     class QualifiedDublinCore < DRI::Datastreams::OmDatastream
       include DRI::Metadata
       extend DRI::Metadata::Terminologies::Qdc
@@ -48,7 +48,7 @@ module DRI
 
         super(new_params, opts)
       end
-      
+
       # Roles attribute setter
       # @example Sample Hash:
       #   { 'name' => ['Test host', 'new producer'],
@@ -102,32 +102,32 @@ module DRI
         solr_doc = super(solr_doc, opts)
 
         # Index dates here, for display
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
+        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+
         temporal_coverage_dates = display_date_for_index(temporal_coverage)
         if temporal_coverage_dates.present?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+          solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
+          solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
         end
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[Solrizer.solr_name('date', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # title_sorted - A SOLR index for sorting titles
         if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           unless sorted_title.empty?
-            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
@@ -137,7 +137,7 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
         # Split facets into different languages based on xml:lang
         faceted_language_indexes = {}
@@ -152,15 +152,15 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages('name_coverage')
 
         faceted_language_indexes.each do |key, value|
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => value)
+          solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
+          solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => value)
         end
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.qdc_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
 
         external_rels.each do |elem|
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
+          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
         end
 
 
@@ -185,7 +185,7 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
         end
-        
+
         if sdate_ranges.present?
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges)
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_ranges).minmax
@@ -194,12 +194,12 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
-        
+
 
         # Index dcterms Point and Box data into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          { 
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          {
+            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
           }
         )
 
@@ -212,10 +212,10 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        
+
         unless geospatial_hash[:name].empty?
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
+          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
+          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
         end
 
         unless geospatial_hash[:json].empty?
@@ -253,7 +253,7 @@ module DRI
       # @return [Hash] the hash with indices split by language
       def split_array_into_languages(index_name = '')
         results = {}
-        
+
         return results if index_name.empty?
 
         array_values = send(index_name)
@@ -268,12 +268,12 @@ module DRI
           elsif index_name == 'geographical_coverage' && DRI::Metadata::Transformations.dcmi_encoded?(value)
             next
           end
-          
+
           value_lang = send(index_name, i).send("#{index_name}_lang")
 
           lang_code = value_lang.length > 0 ? value_lang[0].strip : 'eng'
           lang_code = DRI::Metadata::Descriptors.standardise_language_code(lang_code) || 'eng'
-          
+
           if results.key?("#{index_name}_#{lang_code}")
             results["#{index_name}_#{lang_code}"] |= [value]
           else
@@ -320,7 +320,7 @@ module DRI
         unless creator_result == true
           marc_rels = *(DRI::Vocabulary.marc_relators.map { |s| s.prepend('role_').to_sym })
           marc_rels.each do |role|
-            send(role).each do |v| 
+            send(role).each do |v|
               creator_result = true unless v.blank?
               break if creator_result == true
             end

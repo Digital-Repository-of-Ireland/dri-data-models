@@ -79,18 +79,18 @@ module DRI
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
           unless sorted_title.blank?
-            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
           end
         end
 
         # Type
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => resource_type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => resource_type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable, type: :string) => 'Collection')
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => resource_type)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => resource_type)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable, type: :string) => 'Collection')
 
         # EAD has several "name" tags, so we merge them together into the SOLR document
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array_for_index | DRI::Metadata::Transformations.transform_name(person_array_for_index))
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array_for_index)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array_for_index | DRI::Metadata::Transformations.transform_name(person_array_for_index))
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ''
@@ -98,23 +98,23 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creator', :facetable) => creator_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable, type: :text) => creator_for_index)
+        solr_doc.merge!(Solrizer.solr_name('creator', :facetable) => creator_for_index)
+        solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator_for_index)
 
         # Subject: generic, name and place
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :stored_searchable) => subject_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :facetable) => subject_for_index)
+        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject_for_index)
+        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_for_index)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :stored_searchable) => subject_name_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_for_index)
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_for_index)
+        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_for_index)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => subject_place_for_index)
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_for_index)
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_for_index)
 
         # Publisher
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
+        solr_doc.merge!(Solrizer.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
 
         # Indexing dates for display
         # Creation Date
@@ -134,15 +134,15 @@ module DRI
            iso_to_dcmi_period(value, iso_date)
          end
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => cdate_array) unless creation_date.empty?
+        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => cdate_array) unless creation_date.empty?
         # Published Date
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => pdate_array) unless published_date.empty?
+        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => pdate_array) unless published_date.empty?
         # Subject(Temporal)
         subject_temporal_array = subject_temporal_for_index
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
 
-        #solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx) unless creation_date_idx == []
+        #solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx) unless creation_date_idx == []
 
         # Index date ranges, and iso dates into the appropriate solr fields
         date_ranges = date_ranges_for_index # ALL the date ranges
@@ -159,7 +159,7 @@ module DRI
         end
 
         # Indexing creation_date_idx is necessary for children, in case they inherit from the root collection
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
+        solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
@@ -196,9 +196,9 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
+        solr_doc.merge!(Solrizer.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
 
         solr_doc
       end # solr_doc

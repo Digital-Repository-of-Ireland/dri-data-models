@@ -2,7 +2,7 @@
 module DRI
   # Metadata namespace
   module Metadata
-    # An ActiveFedora datastream that interacts with MARC-XML Metadata.
+    # A datastream that interacts with MARC-XML Metadata.
     class Marc < DRI::Datastreams::OmDatastream
       include DRI::Metadata
       extend DRI::Metadata::Terminologies::Marc
@@ -51,18 +51,18 @@ module DRI
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type)
+        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type)
 
         # Retrieve list of all people and add to
         # facet and search indexes in solr document
         person_array = person_array_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
+        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # Index Creator with null fields removed
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
 
         # all_metadata - A SOLR index of all the text
         # contained in the XML document
@@ -71,18 +71,18 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
+        solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
+        solr_doc.merge!(Solrizer.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
+        solr_doc.merge!(Solrizer.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
-             
+        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
+
         p_date = published_date
         if p_date
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
-        
+          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
+
           pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => p_date })
           if pdate_ranges.present?
             solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)
@@ -92,7 +92,7 @@ module DRI
             solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
           end
         end
-        
+
         ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
         solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
 
@@ -105,7 +105,7 @@ module DRI
       def person_array_for_index
         contributor | creator | publisher
       end
-        
+
       def date_array_for_index
         date | date_from_all_materials
       end
@@ -117,7 +117,7 @@ module DRI
         date_field.collect do |value|
           begin
             next if value.nil? || value.empty?
-            
+
             if DRI::Metadata::Transformations.dcmi_period?(value)
               value
             else
@@ -131,7 +131,7 @@ module DRI
           end
         end
       end
-     
+
       def date_from_all_materials
         return [] if all_materials_dates.empty? || ['b','c','d','n'].include?(all_materials_dates[:type])
 
@@ -148,11 +148,11 @@ module DRI
           year = date1
           month = date2.slice(0, 2)
           day = date2.slice(2, 2)
-          
+
           name = "e#{year}#{month}#{day}"
           start_date = "#{year}#{month}#{day}"
           end_date = ''
-        when 'p'  
+        when 'p'
           name = "p#{date1}#{date2}"
           start_date = ''
           end_date = ''
@@ -206,7 +206,7 @@ module DRI
 
         all_materials = controlfield[tag_index]
         type_of_date = all_materials[6]
-        
+
         date1 = all_materials.slice(7,4)
         date2 = all_materials.slice(11,4)
 

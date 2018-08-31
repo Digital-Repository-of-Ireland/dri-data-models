@@ -81,7 +81,7 @@ module DRI
     delegate :origin_metadata, to: :descMetadata
 
     delegate :subject_metadata, to: :descMetadata
-    
+
     # Disabled for now
     # around_save :create_multiple_records
 
@@ -366,7 +366,7 @@ module DRI
     # i.e. mods_id_local_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora.index_field_mapper.solr_name('mods_id_local', :stored_searchable, type: :string)
+      Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type
@@ -385,7 +385,7 @@ module DRI
         review: retrieve_relation_records(send(self.class.relationships[:review][:field]), self.class.solr_relationships_field)
       }
     end
-    
+
     private
 
     def create_multiple_records

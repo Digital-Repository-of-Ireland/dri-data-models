@@ -2,12 +2,7 @@ require "om"
 
 module DRI::Datastreams
   class OmDatastream < ActiveRecord::Base
-    # before_save do
-    #   if content.blank?
-    #     ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
-    #     false
-    #   end
-    # end
+
     belongs_to :describable, polymorphic: true
 
     include OM::XML::Document
@@ -91,7 +86,7 @@ module DRI::Datastreams
       current_params = params.clone
       current_params.delete_if do |term_pointer, new_values|
         if term_pointer.is_a?(String)
-          ActiveFedora::Base.logger.warn "WARNING: #{self.class.name} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it." if ActiveFedora::Base.logger
+          Rails.logger.warn "WARNING: #{self.class.name} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
           true
         else
           !self.class.terminology.has_term?(*OM.destringify(term_pointer))
@@ -103,7 +98,7 @@ module DRI::Datastreams
 
       result
     end
-    
+
     def update_attributes(params)
       update_indexed_attributes(params)
       super

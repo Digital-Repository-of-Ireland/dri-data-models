@@ -5,7 +5,7 @@ module DRI
     extend ActiveSupport::Concern
 
     include DRI::ModelSupport::EadSupport
-    
+
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
@@ -24,7 +24,7 @@ module DRI
     delegate :desc_biog_hist, to: :descMetadata
     delegate :desc_scope_content, to: :descMetadata
     delegate :desc_dao_desc, to: :descMetadata
-    
+
     # Subjects
     delegate :name_subject,:name_subject=, to: :descMetadata
     delegate :persname_subject,:persname_subject=, to: :descMetadata
@@ -64,7 +64,7 @@ module DRI
 
     delegate :published_date, to: :descMetadata
     delegate :creation_date, to: :descMetadata
-       
+
     #
     # @return [Array<Symbol>] EAD DRI terms symbols array
     def self.ead_dri_terms
@@ -240,7 +240,7 @@ module DRI
       solr_doc = super(solr_doc)
 
       if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent) && previous_sibling.nil?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
+        solr_doc.merge!(Solrizer.solr_name('is_first_sibling', :stored_searchable) => '1')
       end
 
       solr_doc
@@ -290,8 +290,8 @@ module DRI
 
       object_types.push('Unknown') if object_types.count < 1
 
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('object_type', :displayable) => object_types)
+      solr_doc.merge!(Solrizer.solr_name('object_type', :facetable) => object_types)
+      solr_doc.merge!(Solrizer.solr_name('object_type', :displayable) => object_types)
 
       solr_doc
     end

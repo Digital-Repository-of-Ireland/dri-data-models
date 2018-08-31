@@ -17,9 +17,9 @@ module DRI
         begin
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
         rescue Redis::CannotConnectError
-          ActiveFedora::Base.logger.error "Redis is down!"
+          Rails.logger.error "Redis is down!"
         rescue Redis::TimeoutError => error
-          ActiveFedora::Base.logger.warn "Redis Timed out.  Trying again! #{job.inspect}"
+          Rails.logger.warn "Redis Timed out.  Trying again! #{job.inspect}"
           push_tries += 1
           # fail for good if the tries is greater than 3
           raise error if push_tries >= 3

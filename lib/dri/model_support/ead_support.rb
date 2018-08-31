@@ -183,8 +183,8 @@ module DRI
         return result unless object.governing_collection.present?
 
         parent_id = object.governing_collection_id
-        md_hash_key = ActiveFedora.index_mapper.solr_name('metadata_md5', :stored_searchable, type: :string)
-        governed_key = ActiveFedora.index_mapper.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
+        md_hash_key = Solrizer.solr_name('metadata_md5', :stored_searchable, type: :string)
+        governed_key = Solrizer.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
 
         solr_query = "#{md_hash_key}:\"#{object.metadata_md5}\" AND #{governed_key}:\"#{parent_id}\""
         documents = ActiveFedora::SolrService.query(solr_query,

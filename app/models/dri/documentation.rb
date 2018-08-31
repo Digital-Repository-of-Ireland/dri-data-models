@@ -127,7 +127,7 @@ module DRI
 
       if documentation_for
         solr_doc.merge!(
-          ActiveFedora.index_field_mapper.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, :symbol) => [documentation_for.id]
+          Solrizer.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, :symbol) => [documentation_for.id]
         )
       end
 

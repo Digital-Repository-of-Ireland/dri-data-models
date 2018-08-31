@@ -1,5 +1,5 @@
 # Implements a resque job to handle the creation of MARC records
-class CreateMarcRecordsJob < ActiveFedoraIdBasedJob
+class CreateMarcRecordsJob < IdBasedJob
   # Assign the resque queue name for this job
   def queue_name
     :marc

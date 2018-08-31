@@ -34,7 +34,7 @@ module DRI
     delegate :relation_ids_succeeding, to: :descMetadata
 
     delegate :related_material, to: :descMetadata
-    delegate :alternative_form, to: :descMetadata 
+    delegate :alternative_form, to: :descMetadata
 
     delegate :date, to: :descMetadata
     delegate :published_date, to: :descMetadata
@@ -126,7 +126,7 @@ module DRI
     # i.e. marc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora.index_field_mapper.solr_name('marc_id', :stored_searchable, type: :string)
+      Solrizer.solr_name('marc_id', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type
