@@ -7,11 +7,11 @@ require 'dri_data_models/version'
 Gem::Specification.new do |s|
   s.name        = 'dri_data_models'
   s.version     = DriDataModels::VERSION
-  s.authors     = 'Damien Gallagher'
-  s.email       = 'damien.gallagher@nuim.ie'
+  s.authors     = ["Damien Gallagher, Stuart Kenny, Kathryn Cassidy, Augustina Martinez"]
+  s.email       = 'dri@ria.ie'
   s.homepage    = 'http://www.dri.ie'
-  s.summary     = 'DRI metadata and data models needed for a DRI Hydra-Head.'
-  s.description = 'DRI metadata and data models needed for a DRI Hydra-Head.'
+  s.summary     = 'DRI metadata and data models needed for the DRI application.'
+  s.description = 'DRI metadata and data models needed for the DRI application.'
 
   s.required_ruby_version = '>= 1.9.3'
 
@@ -23,15 +23,12 @@ Gem::Specification.new do |s|
   s.add_dependency 'rails', '~> 4.2'
   s.add_dependency 'globalize', '~> 5'
   s.add_dependency 'sass-rails', '~> 4.0.3'
-  s.add_dependency 'active-fedora', '9.11'
-  s.add_dependency 'hydra-head', '~> 9.10'
-  s.add_dependency 'hydra-collections'
+  s.add_dependency 'active-fedora'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives', '~> 1.0'
-  s.add_dependency 'active_fedora-noid', '~> 1.0'
-  s.add_dependency 'resque', '~> 1.23'
-  s.add_dependency 'resque-pool', '~> 0.3'
-  #s.add_dependency 'google-api-client', '~> 0.9'
+  s.add_dependency 'active_fedora-noid'
+  s.add_dependency 'resque' #, '~> 1.23'
+  s.add_dependency 'resque-pool' #, '~> 0.3'
   s.add_dependency 'iso8601'
   s.add_development_dependency 'rspec'
 end

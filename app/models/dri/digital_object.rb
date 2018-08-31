@@ -12,14 +12,13 @@ module DRI
     include DRI::Noid
     include DRI::Export
     include DRI::Permissions
+    include DRI::WithDepositor
 
     include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::Common
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
-
-    include Hydra::WithDepositor
 
     self.inheritance_column = 'digital_object_type'
 

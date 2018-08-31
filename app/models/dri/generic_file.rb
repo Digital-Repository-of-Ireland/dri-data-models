@@ -10,7 +10,7 @@ module DRI
 
     include DRI::Permissions
     include DRI::ModelSupport::Permissions
-    include Hydra::WithDepositor
+    include DRI::WithDepositor
 
     include DRI::Noid
     include DRI::Export
