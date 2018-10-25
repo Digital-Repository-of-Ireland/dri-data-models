@@ -234,6 +234,8 @@ describe 'EncodedArchivalDescription descMetadata' do
 
   context 'validation of DRI compulsory elements' do
     before(:each) do
+      allow(Resque).to receive(:enqueue_to)
+
       @collection_xml = fixture('ead/collections/ead_collection_dtd.xml')
       @series_xml = fixture('ead/components/component_series.xml')
       @file_xml = fixture('ead/components/component_file.xml')
