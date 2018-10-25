@@ -16,8 +16,9 @@ module DRI
         queue = job.respond_to?(:queue_name) ? job.queue_name : default_queue_name
         begin
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
-        rescue Redis::CannotConnectError
+        rescue Redis::CannotConnectError => error
           ActiveFedora::Base.logger.error "Redis is down!"
+	  raise error
         rescue Redis::TimeoutError => error
           ActiveFedora::Base.logger.warn "Redis Timed out.  Trying again! #{job.inspect}"
           push_tries += 1
