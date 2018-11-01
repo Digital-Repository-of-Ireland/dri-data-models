@@ -1,6 +1,8 @@
 describe 'EncodedArchivalDescription' do
   context 'object methods' do
+
     before(:each) do
+      allow(Resque).to receive(:enqueue)
       @header_xml = fixture('ead/collections/ead_header_dtd.xml')
       @ead_header = DRI::EadCollection.new
       @ead_header.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml, false)
@@ -166,6 +168,8 @@ describe 'EncodedArchivalDescription' do
 
   context 'synchronize parent metadata' do
     before(:each) do
+      allow(Resque).to receive(:enqueue_to)
+
       @ead_xml = fixture('ead/updates/ead.xml')
       @ead_root = DRI::EadCollection.new
       @ead_root.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@ead_xml).to_xml, false)
@@ -337,6 +341,8 @@ describe 'EncodedArchivalDescription' do
   context 'update attributes methods' do
     # Before each test create test objects
     before(:each) do
+      allow(Resque).to receive(:enqueue)
+
       @header_xml = fixture('ead/collections/ead_header_dtd.xml')
       @ead_header = DRI::EadCollection.new
       @ead_header.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@header_xml).to_xml, false)

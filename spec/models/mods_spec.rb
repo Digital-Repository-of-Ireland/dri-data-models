@@ -57,6 +57,8 @@ describe 'Mods' do
     end
 
     it 'should add create mods records if modsCollection is used in metadata' do
+      allow(Resque).to receive(:enqueue_to)
+
       @mods_wrapper.save
       @mods_wrapper.create_mods_records
 

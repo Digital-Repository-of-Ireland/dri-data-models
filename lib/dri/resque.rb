@@ -18,6 +18,7 @@ module DRI
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
         rescue Redis::CannotConnectError
           Rails.logger.error "Redis is down!"
+	  raise error
         rescue Redis::TimeoutError => error
           Rails.logger.warn "Redis Timed out.  Trying again! #{job.inspect}"
           push_tries += 1
