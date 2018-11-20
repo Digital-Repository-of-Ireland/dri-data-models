@@ -59,9 +59,23 @@ describe DRI::Metadata::Transformations do
   end
 
   context 'name transformations' do
-  
+
     it 'should transform names to human readable' do
       expect(described_class.transform_name(['Lewis, Daniel, Day-', 'Valera, Eamon, de'])).to eq (['Daniel Day-Lewis','Eamon de Valera'])
+    end
+  end
+
+  context 'date transformations' do
+    it 'should convert dcmi point to solr range' do
+      dcmi_point = ["name=1988; start=1988-01-01; end=1988-12-31; scheme=W3C-DTF;"]
+      results = described_class.transform_date_ranges({ 'creation_date' => dcmi_point })
+      expect(results).to eq(["[1988-01-01 TO 1988-12-31]"])
+    end
+
+     it 'should not convert invalid range' do
+      dcmi_point = ["name=1988; start=1988-12-31; end=1988-01-01; scheme=W3C-DTF;"]
+      results = described_class.transform_date_ranges({ 'creation_date' => dcmi_point })
+      expect(results).to eq([])
     end
   end
 end
