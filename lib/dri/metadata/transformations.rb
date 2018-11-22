@@ -21,6 +21,8 @@ module DRI
       PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (date)
       DATE_RANGE_SOLR_FIELD = 'ddateRange'
+      DATE_RANGE_START_SOLR_FIELD = 'date_range_start_isi'
+      DATE_RANGE_END_SOLR_FIELD = 'date_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
       SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'

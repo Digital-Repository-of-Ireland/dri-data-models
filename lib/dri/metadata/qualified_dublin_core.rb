@@ -183,7 +183,7 @@ module DRI
         # Index dates here, for display
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        
+
         temporal_coverage_dates = display_date_for_index(temporal_coverage)
         if temporal_coverage_dates.present?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
@@ -264,7 +264,7 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
         end
-        
+
         if sdate_ranges.present?
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges)
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_ranges).minmax
@@ -272,13 +272,17 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
         end
 
-        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
-        
+        if ddate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges)
+          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_ranges).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+        end
 
         # Index dcterms Point and Box data into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          { 
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          {
+            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
           }
         )
 
@@ -291,7 +295,7 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        
+
         unless geospatial_hash[:name].empty?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
@@ -332,7 +336,7 @@ module DRI
       # @return [Hash] the hash with indices split by language
       def split_array_into_languages(index_name = '')
         results = {}
-        
+
         return results if index_name.empty?
 
         array_values = send(index_name)
@@ -347,12 +351,12 @@ module DRI
           elsif index_name == 'geographical_coverage' && DRI::Metadata::Transformations.dcmi_encoded?(value)
             next
           end
-          
+
           value_lang = send(index_name, i).send("#{index_name}_lang")
 
           lang_code = value_lang.length > 0 ? value_lang[0].strip : 'eng'
           lang_code = DRI::Metadata::Descriptors.standardise_language_code(lang_code) || 'eng'
-          
+
           if results.key?("#{index_name}_#{lang_code}")
             results["#{index_name}_#{lang_code}"] |= [value]
           else
@@ -399,7 +403,7 @@ module DRI
         unless creator_result == true
           marc_rels = *(DRI::Vocabulary.marc_relators.map { |s| s.prepend('role_').to_sym })
           marc_rels.each do |role|
-            send(role).each do |v| 
+            send(role).each do |v|
               creator_result = true unless v.blank?
               break if creator_result == true
             end
