@@ -663,8 +663,12 @@ module DRI
         # date dateRange index
         ddate_ranges = date_ranges.select { |key, _value| ['date_other', 'part_date'].include?(key) }
         ddate_index = DRI::Metadata::Transformations.transform_date_ranges(ddate_ranges)
-        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => ddate_index) unless ddate_index.empty?
-
+        if ddate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_index)
+          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_index).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+        end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
@@ -678,8 +682,8 @@ module DRI
 
         # Geospatial indexing
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          { 
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          {
+            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
           }
         )
 
@@ -694,7 +698,7 @@ module DRI
         end
 
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        
+
         unless geospatial_hash[:name].empty?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])

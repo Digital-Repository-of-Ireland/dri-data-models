@@ -21,6 +21,8 @@ module DRI
       PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (date)
       DATE_RANGE_SOLR_FIELD = 'ddateRange'
+      DATE_RANGE_START_SOLR_FIELD = 'date_range_start_isi'
+      DATE_RANGE_END_SOLR_FIELD = 'date_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
       SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'
@@ -118,7 +120,7 @@ module DRI
 
         geodata.each do |_key, value|
           value.each do |geo_string|
-            
+
             result = if dcmi_point?(geo_string)
                        DRI::Metadata::Transformations::SpatialTransformations.parse_dcmi_point(geo_string)
                      elsif dcmi_box?(geo_string)
@@ -136,14 +138,14 @@ module DRI
             end
           end
         end
-        
+
         results[:json] = filter_projections(results[:json])
         results
       end
-     
+
       def self.filter_projections(geojson_strings)
         features = geojson_strings.map { |geojson_string| JSON.parse(geojson_string) }
-        
+
         [ 'http://www.opengis.net/def/crs/EPSG/0/2157', 'http://www.opengis.net/def/crs/EPSG/0/29903' ].each do |projection|
           filtered = features.select { |feature| feature['properties'].dig('geometryCRS', 'crs') == projection }
           return filtered.map { |feature| feature.to_json.to_s } unless filtered.empty?
@@ -169,6 +171,7 @@ module DRI
         dates.each do |_key, value|
           value.each do |date_string|
             range = date_range(date_string)
+
             if range.key?('start') && range.key?('end')
               results << "[#{range['start']} TO #{range['end']}]" if valid_range?(range)
             elsif range.key?('start')
@@ -223,9 +226,7 @@ module DRI
         years = []
         ranges.each do |range|
           endpoints = range.gsub(/\[(.*)\]/, '\1').split(/\sTO\s/)
-          endpoints.each do |point|
-            years << ISO8601::DateTime.new(point).year
-          end
+          endpoints.each { |point| years << ISO8601::DateTime.new(point).year }
         end
 
         years
@@ -264,7 +265,7 @@ module DRI
 
       def self.transform_period(value)
         return {} if value.nil?
-        
+
         results = {}
         value.split(/\s*;\s*/).each do |component|
          (k,v) = component.split(/\s*=\s*/)
@@ -298,7 +299,7 @@ module DRI
         start_date = range['start']
         end_date = range['end']
 
-        start_date.to_f < end_date.to_f
+        ISO8601::DateTime.new(start_date).to_f < ISO8601::DateTime.new(end_date).to_f
       end
 
       # Determines whether a date string is formatted according to DCMI Period
@@ -373,7 +374,7 @@ module DRI
 
         "#{name_comp} #{sdate_comp} #{edate_comp} #{scheme_comp}".rstrip
       end
-      
+
       # Transforms a geocode string encoded using DCMI Point or Box into a suitable formatted string of
       # coordinates for their indexing in the geographical indices.
       # E.g. Box: 'eastlimit, northlimit, westlimit, southlimit'

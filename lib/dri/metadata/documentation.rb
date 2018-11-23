@@ -168,7 +168,7 @@ module DRI
         # Index dates here, for display
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
-        
+
         temporal_coverage_dates = display_date_for_index(temporal_coverage_period)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
@@ -211,8 +211,13 @@ module DRI
         ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
         sdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'temporal_coverage' => temporal_coverage | temporal_coverage_period })
 
-        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges.empty?
-        
+        if ddate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges)
+          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_ranges).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+        end
+
         if cdate_ranges.present?
           solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_ranges)
           cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_ranges)
@@ -228,7 +233,7 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
           solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
         end
-        
+
         if sdate_ranges.present?
           solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_ranges)
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_ranges).minmax
@@ -238,8 +243,8 @@ module DRI
 
         # Index dcterms Point and Box data into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          { 
-            'geographical_coverage' => geocode_point | geocode_box | geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } 
+          {
+            'geographical_coverage' => geocode_point | geocode_box | geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
           }
         )
 
@@ -252,7 +257,7 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        
+
         unless geospatial_hash[:name].empty?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
