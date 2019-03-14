@@ -3,77 +3,49 @@ module DRI
   # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Batch
   class QualifiedDublinCore < DRI::Batch
 
-    contains 'descMetadata', class_name: 'DRI::Metadata::QualifiedDublinCore'
+    has_subresource :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore'
 
     # Full Simple DC Title, Creator, Subject, Description, Publisher,
     # Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    property :date, delegate_to: 'descMetadata', multiple: true
-    property :relation, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable
-    end
-    property :external_relation, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable
-    end
-    property :source, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable
-    end
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, 
-               DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
-               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :resource_type, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
-               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :format, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_facetable, 
-               DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :coverage, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-
+    delegate :date,:date=, to: :descMetadata
+    delegate :relation,:relation=, to: :descMetadata
+    delegate :external_relation,:external_relation=, to: :descMetadata
+    delegate :source,:source=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :name_coverage,:name_coverage=, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
+    delegate :coverage,:coverage=, to: :descMetadata
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
-    property :id_asset, delegate_to: 'descMetadata', multiple: false do |index|
-      index.as :stored_sortable
-    end
-    property :qdc_id, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true do |index|
-      index.as DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable
-    end
+    delegate :id_asset,:id_asset=, to: :descMetadata
+    delegate :qdc_id,:qdc_id=, to: :descMetadata
+    delegate :geocode_point,:geocode_point=, to: :descMetadata
+    delegate :geocode_box,:geocode_box=, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
-      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym,
-                                                       delegate_to: 'descMetadata',
-                                                       multiple: true }
+      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
+                                                       to: :descMetadata
+                                                     }
       # Internal Relationships (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('relation_ids_').to_sym,
-                                                                delegate_to: 'descMetadata',
-                                                                multiple: true }
+      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('relation_ids_').to_sym,s.concat('=').to_sym,
+                                                                to: :descMetadata
+                                                  }
       # External relationships (contain a URI to resources external to DRI)
       # (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym,
-                                                                delegate_to: 'descMetadata',
-                                                                multiple: true }
+      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
+                                                                to: :descMetadata
+                                                  }
     end
 
     # Override constructor

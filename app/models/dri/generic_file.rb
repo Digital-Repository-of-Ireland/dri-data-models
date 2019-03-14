@@ -8,7 +8,7 @@ module DRI
     include Hydra::AccessControls::Permissions
     include Hydra::AccessControls::Visibility
     include Hydra::WithDepositor
-    include Hydra::Collections::Collectible
+    #include Hydra::Collections::Collectible
 
     include DRI::Noid
     include DRI::Export
@@ -26,9 +26,9 @@ module DRI
                class_name: 'DRI::Batch'
 
     # Declare a 'dri_properties' DS, of the following type
-    contains 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
-    contains 'content', class_name: 'FileContentDatastream'
-    contains 'full_text'
+    has_subresource 'dri_properties', class_name: 'DRI::Metadata::FileProperties'
+    has_subresource 'content', class_name: 'FileContentDatastream'
+    has_subresource 'full_text'
 
     property :title, predicate: ::RDF::Vocab::DC.title do |index|
       index.as :stored_searchable, :facetable
@@ -110,7 +110,7 @@ module DRI
       # between files on disk (in fcrepo.binary-store-path) and objects
       # in the repository.
       solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
-      
+
       solr_doc
     end
 

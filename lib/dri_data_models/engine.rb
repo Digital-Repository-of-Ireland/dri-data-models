@@ -1,7 +1,7 @@
 module DriDataModels
   require 'rails'
   require 'hydra/head'
-  require 'hydra-collections'
+  #require 'hydra-collections'
   require 'hydra/derivatives'
   require 'active_fedora/noid'
   require 'resque/server'

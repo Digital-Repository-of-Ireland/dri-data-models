@@ -26,24 +26,26 @@ module DRI
           t.subject_lang(proxy: [:subject, :subject_lang])
           t.date(namespace_prefix: 'dc')
           t.contributor(path: 'contributor', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(path: 'source', namespace_prefix: 'dc') {
+          t.source(path: 'source', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable]) {
             t.source_lang(path: { attribute: 'xml:lang' })
           }
           t.publisher(path: 'publisher', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.coverage(namespace_prefix: 'dc') {
+          t.coverage(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.coverage_lang(path: { attribute: 'xml:lang' })
           }
-          t.relation(namespace_prefix: 'dc')
-          t.external_relation(path: 'relation', namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' })
+          t.relation(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_displayable, Descriptors.cleaned_facetable])
+          t.external_relation(path: 'relation', index_as: [Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable], namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' })
           t.creator(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
-          t.format(namespace_prefix: 'dc')
-          t.resource_type(path: 'type', namespace_prefix: 'dc')
+          t.format(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable,
+               Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+          t.resource_type(path: 'type', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable,
+               Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           t.identifier(namespace_prefix: 'dc')
           # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
-          t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc')
+          t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [:stored_sortable])
           # Used for QDC metadata relationships, as the local, unique record ID
-          t.qdc_id(ref: :identifier)
+          t.qdc_id(ref: :identifier, index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
 
           # Qualified Dublin Core fields
           t.published_date(path: 'issued', namespace_prefix: 'dcterms')
@@ -54,9 +56,10 @@ module DRI
           t.temporal_coverage(path: 'temporal', namespace_prefix: 'dcterms') {
             t.temporal_coverage_lang(path: { attribute: 'xml:lang' })
           }
-          t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' })
-          t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' })
-          t.name_coverage(path: 'dpc', namespace_prefix: 'marcrel') {
+          t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' }, index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+          t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' }, index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+          t.name_coverage(path: 'dpc', namespace_prefix: 'marcrel', index_as: [Descriptors.cleaned_facetable,
+               Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
             t.name_coverage_lang(path: { attribute: 'xml:lang' })
           }
 
@@ -105,9 +108,11 @@ module DRI
                                  :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
         if recognised_attributes.include? field
           [field]
-        else
+        elsif
           m = /^role_(.*)/.match(field.to_s)
           DRI::Vocabulary.marc_relators.include?(m[1]) ? [field] : []
+        else
+          []
         end
       end
 

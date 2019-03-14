@@ -91,28 +91,28 @@ module DRI
         # Full map: tag 024; first indicator 7 (Source specified in subfield $2), subfield $2 contains a value of 'local' (from http://www.loc.gov/standards/sourcelist/standard-identifier.html)
         # value of the identifier comes then from subfield $a
         # Example: 024 	7#$a0A3200912B4A1057$2local http://www.loc.gov/marc/marc2dc.html#unqualifiedlist
-        t.marc_id(path: 'record/datafield[@tag="024" and @ind1="7" and subfield[@code="2"]="local"]/subfield[@code="a"]')
+        t.marc_id(path: 'record/datafield[@tag="024" and @ind1="7" and subfield[@code="2"]="local"]/subfield[@code="a"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # marc_asset - Used for sorting sequenced items
         # we map it to 024 - Other Standard Identifier (R); indicator1 = 8 (Unspecified type of standard number or code)
-        t.id_asset(path: 'record/datafield[@tag="024" and @ind1="8"]/subfield[@code="a"]')
+        t.id_asset(path: 'record/datafield[@tag="024" and @ind1="8"]/subfield[@code="a"]', index_as:[:stored_sortable])
 
         # Relationships terms (Crosswalk MARC to QDC: http://www.loc.gov/marc/marc2dc.html#qualifiedlist)
         # Tag 775 - Other Edition Entry (R); Subfield $o - Other item identifier (R)
-        t.relation_ids_isVersionOf(path: 'record/datafield[@tag="775"]/subfield[@code="o"]')
+        t.relation_ids_isVersionOf(path: 'record/datafield[@tag="775"]/subfield[@code="o"]', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
         # Tag 776 - Additional Physical Form Entry (R); Subfield $o - Other item identifier (R)
-        t.relation_ids_isFormatOf(path: 'record/datafield[@tag="776"]/subfield[@code="o"]')
+        t.relation_ids_isFormatOf(path: 'record/datafield[@tag="776"]/subfield[@code="o"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         # Tag 787 - Other Relationship Entry (R); Subfield $o - Other item identifier (R)
-        t.relation_ids_relation(path: 'record/datafield[@tag="787"]/subfield[@code="o"]')
+        t.relation_ids_relation(path: 'record/datafield[@tag="787"]/subfield[@code="o"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 
         # Tag 780 - Preceding Entry (R); Subfield $o - Preceding item identifier (R)
-        t.relation_ids_preceding(path: 'record/datafield[@tag="780"]/subfield[@code="o"]')
+        t.relation_ids_preceding(path: 'record/datafield[@tag="780"]/subfield[@code="o"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         # Tag 785 - Succeeding Entry (R); Subfield $o - Succeeding item identifier (R)
-        t.relation_ids_succeeding(path: 'record/datafield[@tag="785"]/subfield[@code="o"]')
+        t.relation_ids_succeeding(path: 'record/datafield[@tag="785"]/subfield[@code="o"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 
         # FIXME: Related Material is also mapped to alternative_form
-        t.related_material(path: 'record/datafield[@tag="530"]/subfield[@code="u"]')
+        t.related_material(path: 'record/datafield[@tag="530"]/subfield[@code="u"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         # MARC field 530, subfield $u for a URL to an alternative form available of this resource
-        t.alternative_form(path: "record/datafield[@tag='530']/subfield[@code='u']")
+        t.alternative_form(path: "record/datafield[@tag='530']/subfield[@code='u']", index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
       end # set_terminology
 
       # Determine whether the metadata describes a collection

@@ -6,7 +6,7 @@ module DRI
       included do
         include Hydra::Derivatives
 
-        makes_derivatives do |obj|
+        create_derivatives do |obj|
           case obj.mime_type
           when *pdf_mime_types
             obj.transform_file :content, thumbnail: { format: 'jpg', size: '338x493', datastream: 'thumbnail' }

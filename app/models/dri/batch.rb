@@ -11,8 +11,8 @@ module DRI
 
     include DRI::Noid
     include DRI::Export
-    
-    include DRI::ModelSupport::Properties
+
+    #include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
@@ -22,17 +22,57 @@ module DRI
     after_destroy :delete_bucket
 
     # one-to-many AF relationship to associate digital assets with their batch object
-    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :batch, dependent: :destroy
+    has_many :generic_files, class_name: 'DRI::GenericFile', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, dependent: :destroy
     # one-to-many AF relationship to associate documentation objects
-    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
+    has_many :documentation_objects, class_name: 'DRI::Documentation', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, as: :documentation_for
 
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
-    contains 'extracted', class_name: 'DRI::Metadata::Extracted'
+    has_subresource :extracted, class_name: 'DRI::Metadata::Extracted'
+    has_subresource :properties, class_name: 'DRI::Metadata::Properties'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
     # Unused for NOW
-    property :full_text, delegate_to: 'extracted', multiple: true
+    delegate :full_text, to: :extracted
+
+    # DRI Mandatory (M)
+    # Title (collection-level)
+    delegate :title,:title=, to: :descMetadata
+    # Description (collection-level)
+    delegate :description,:description=, to: :descMetadata
+    # ADDED TYPE, it is compulsory
+    # delegate :type, to: 'descMetadata', multiple: true
+    # Rights (collection-level)
+    delegate :rights,:rights=, to: :descMetadata
+    # Creator (collection-level)
+    delegate :creator,:creator=, to: :descMetadata
+
+    # DRI Recommended (R)
+    # Contributor
+    delegate :contributor,:contributor=, to: :descMetadata
+    # Publisher (collection-level, DRI pre-populated)
+    delegate :publisher,:publisher=, to: :descMetadata
+    # Subject (collection-level)
+    delegate :subject,:subject=, to: :descMetadata
+    # Language (collection-level)
+    delegate :language,:language=, to: :descMetadata
+
+    delegate :object_type,:object_type=, to: :properties
+    delegate :depositor,:depositor=, to: :properties
+    delegate :metadata_md5,:metadata_md5=, to: :properties
+    delegate :model_version,:model_version=, to: :properties
+    delegate :master_file_access,:master_file_access=, to: :properties
+    delegate :verified,:verified=, to: :properties
+    delegate :doi=, to: :properties
+    delegate :cover_image,:cover_image=, to: :properties
+    delegate :institute,:institute=, to: :properties
+    delegate :depositing_institute=, to: :properties
+    delegate :licence,:licence=, to: :properties
+    delegate :status=, to: :properties
+    delegate :published_at=, to: :properties
+    delegate :object_version=, to: :properties
+    delegate :ingest_files_from_metadata=, to: :properties
+
 
     # Creates a digital object depending on the metadata standard
     #
@@ -76,8 +116,28 @@ module DRI
 
     def increment_version
       return '1' if object_version.nil?
-      
+
       self.object_version = self.object_version.next
+    end
+
+    def depositing_institute
+      properties.depositing_institute.first if properties.depositing_institute.present?
+    end
+
+    def doi
+      properties.doi.first
+    end
+
+    def ingest_files_from_metadata
+      properties.ingest_files_from_metadata.first
+    end
+
+    def published_at
+      properties.published_at.first if properties.published_at.present?
+    end
+
+    def status
+      properties.status.first
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams

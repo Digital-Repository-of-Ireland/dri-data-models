@@ -7,23 +7,39 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        contains 'properties', class_name: 'DRI::Metadata::Properties'
+        has_subresource 'properties', class_name: 'DRI::Metadata::Properties'
 
-        property :status, delegate_to: 'properties', multiple: false
-        property :object_type, delegate_to: 'properties', multiple: true
-        property :depositor, delegate_to: 'properties', multiple: false
-        property :metadata_md5, delegate_to: 'properties', multiple: false
-        property :model_version, delegate_to: 'properties', multiple: false
-        property :verified, delegate_to: 'properties', multiple: false
-        property :doi, delegate_to: 'properties', multiple: false
-        property :cover_image, delegate_to: 'properties', multiple: false
-        property :institute, delegate_to: 'properties', multiple: true
-        property :depositing_institute, delegate_to: 'properties', multiple: false
-        property :licence, delegate_to: 'properties', multiple: false
-        property :ingest_files_from_metadata, delegate_to: 'properties', multiple: false
-        property :master_file_access, delegate_to: 'properties', multiple: false
-        property :published_at, delegate_to: 'properties', multiple: false
-        property :object_version, delegate_to: 'properties', multiple: false
+        delegate :status, to: 'properties'#, multiple: false
+        delegate :object_type, to: 'properties'#, multiple: true
+        delegate :depositor, to: 'properties'#, multiple: false
+        delegate :metadata_md5, to: 'properties'#, multiple: false
+        delegate :model_version, to: 'properties'#, multiple: false
+        delegate :verified, to: 'properties'#, multiple: false
+        delegate :doi, to: 'properties'#, multiple: false
+        delegate :cover_image, to: 'properties'#, multiple: false
+        delegate :institute, to: 'properties'#, multiple: true
+        delegate :depositing_institute=, to: 'properties'#, multiple: false
+        delegate :licence, to: 'properties'#, multiple: false
+        delegate :ingest_files_from_metadata,:ingest_files_from_metadata=, to: 'properties'#, multiple: false
+        delegate :master_file_access, to: 'properties'#, multiple: false
+        delegate :published_at=, to: 'properties'#, multiple: false
+        delegate :object_version, to: 'properties'#, multiple: false
+      end
+
+      def depositing_institute
+        depositing_institute.first if depositing_institute.present?
+      end
+
+      def published_at
+        published_at.first if published_at.present?
+      end
+
+      def status
+        status.first
+      end
+
+      def status=(status)
+        self.status = status
       end
     end
   end
