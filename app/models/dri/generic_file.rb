@@ -43,18 +43,10 @@ module DRI
 
     # Declare the attributes of 'dri_properties' DS - 'checksum_md5...'
     # the DS is non-repeatable
-    property :checksum_md5, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :checksum_sha256, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :checksum_rmd160, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
-    property :preservation_only, delegate_to: 'dri_properties', multiple: false do |index|
-      index.as :stored_searchable
-    end
+    delegate :checksum_md5,:checksum_md5=, to: 'dri_properties'
+    delegate :checksum_sha256,:checksum_sha256=, to: 'dri_properties'
+    delegate :checksum_rmd160,:checksum_rmd160=, to: 'dri_properties'
+    delegate :preservation_only,:preservation_only=, to: 'dri_properties'
 
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
