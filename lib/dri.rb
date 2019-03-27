@@ -8,7 +8,8 @@ module DRI
   autoload :Checksum, 'dri/checksum'
   autoload :Solr, 'solr/query'
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
-
+  autoload :Derivatives, 'dri/derivatives'
+ 
   attr_writer :queue
 
   def self.queue

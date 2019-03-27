@@ -63,7 +63,7 @@ module DRI
     delegate :model_version,:model_version=, to: :properties
     delegate :master_file_access,:master_file_access=, to: :properties
     delegate :verified,:verified=, to: :properties
-    delegate :doi=, to: :properties
+    delegate :doi,:doi=, to: :properties
     delegate :cover_image,:cover_image=, to: :properties
     delegate :institute,:institute=, to: :properties
     delegate :depositing_institute=, to: :properties
@@ -132,6 +132,10 @@ module DRI
       properties.ingest_files_from_metadata.first
     end
 
+    def object_version
+      properties.object_version.first
+    end
+
     def published_at
       properties.published_at.first if properties.published_at.present?
     end
@@ -167,6 +171,7 @@ module DRI
     def to_solr(solr_doc = {}, _opts = {})
       solr_doc = super(solr_doc)
 
+      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr

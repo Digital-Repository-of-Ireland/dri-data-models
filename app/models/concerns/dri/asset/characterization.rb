@@ -3,52 +3,54 @@ module DRI::Asset
       extend ActiveSupport::Concern
       included do
         has_subresource :characterization, class_name: 'FitsDatastream'
-        delegate :mime_type,         to: 'characterization', multiple: false do |index|
-          index.as :stored_searchable
-        end
-        delegate :format_label,      to: 'characterization'
-        delegate :file_size,         to: 'characterization'
-        delegate :last_modified,     to: 'characterization'
-        delegate :filename,          to: 'characterization'
-        delegate :original_checksum, to: 'characterization'
-        delegate :rights_basis,      to: 'characterization'
-        delegate :copyright_basis,   to: 'characterization'
-        delegate :copyright_note,    to: 'characterization'
-        delegate :well_formed,       to: 'characterization'
-        delegate :valid,             to: 'characterization'
-        delegate :message,           to: 'characterization'
-        delegate :file_title,        to: 'characterization'
-        delegate :file_author,       to: 'characterization'
-        delegate :page_count,        to: 'characterization'
-        delegate :file_language,     to: 'characterization'
-        delegate :word_count,        to: 'characterization'
-        delegate :character_count,   to: 'characterization'
-        delegate :paragraph_count,   to: 'characterization'
-        delegate :line_count,        to: 'characterization'
-        delegate :table_count,       to: 'characterization'
-        delegate :graphics_count,    to: 'characterization'
-        delegate :byte_order,        to: 'characterization'
-        delegate :compression,       to: 'characterization'
-        delegate :color_space,       to: 'characterization'
-        delegate :profile_name,      to: 'characterization'
-        delegate :profile_version,   to: 'characterization'
-        delegate :orientation,       to: 'characterization'
-        delegate :color_map,         to: 'characterization'
-        delegate :image_producer,    to: 'characterization'
-        delegate :capture_device,    to: 'characterization'
-        delegate :scanning_software, to: 'characterization'
-        delegate :exif_version,      to: 'characterization'
-        delegate :gps_timestamp,     to: 'characterization'
-        delegate :latitude,          to: 'characterization'
-        delegate :longitude,         to: 'characterization'
-        delegate :character_set,     to: 'characterization'
-        delegate :markup_basis,      to: 'characterization'
-        delegate :markup_language,   to: 'characterization'
-        delegate :bit_depth,         to: 'characterization'
-        delegate :channels,          to: 'characterization'
-        delegate :data_format,       to: 'characterization'
-        delegate :offset,            to: 'characterization'
-        delegate :frame_rate,        to: 'characterization'
+
+        delegate :format_label,          to: :characterization
+        delegate :file_size,             to: :characterization
+        delegate :last_modified,         to: :characterization
+        delegate :filename,:filename=,   to: :characterization
+        delegate :original_checksum, to: :characterization
+        delegate :rights_basis,      to: :characterization
+        delegate :copyright_basis,   to: :characterization
+        delegate :copyright_note,    to: :characterization
+        delegate :well_formed,       to: :characterization
+        delegate :valid,             to: :characterization
+        delegate :message,           to: :characterization
+        delegate :file_title,        to: :characterization
+        delegate :file_author,       to: :characterization
+        delegate :page_count,        to: :characterization
+        delegate :file_language,     to: :characterization
+        delegate :word_count,        to: :characterization
+        delegate :character_count,   to: :characterization
+        delegate :paragraph_count,   to: :characterization
+        delegate :line_count,        to: :characterization
+        delegate :table_count,       to: :characterization
+        delegate :graphics_count,    to: :characterization
+        delegate :byte_order,        to: :characterization
+        delegate :compression,       to: :characterization
+        delegate :color_space,       to: :characterization
+        delegate :profile_name,      to: :characterization
+        delegate :profile_version,   to: :characterization
+        delegate :orientation,       to: :characterization
+        delegate :color_map,         to: :characterization
+        delegate :image_producer,    to: :characterization
+        delegate :capture_device,    to: :characterization
+        delegate :scanning_software, to: :characterization
+        delegate :exif_version,      to: :characterization
+        delegate :gps_timestamp,     to: :characterization
+        delegate :latitude,          to: :characterization
+        delegate :longitude,         to: :characterization
+        delegate :character_set,     to: :characterization
+        delegate :markup_basis,      to: :characterization
+        delegate :markup_language,   to: :characterization
+        delegate :bit_depth,         to: :characterization
+        delegate :channels,          to: :characterization
+        delegate :data_format,       to: :characterization
+        delegate :offset,            to: :characterization
+        delegate :frame_rate,        to: :characterization
+      end
+
+      def mime_type
+       characterization.identification.identity.mime_type.first
       end
 
       def width

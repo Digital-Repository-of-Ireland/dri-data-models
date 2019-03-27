@@ -5,22 +5,37 @@ module DRI
 
       included do
         include Hydra::Derivatives
+      end
 
-        create_derivatives do |obj|
-          case obj.mime_type
-          when *pdf_mime_types
-            obj.transform_file :content, thumbnail: { format: 'jpg', size: '338x493', datastream: 'thumbnail' }
-          when *office_document_mime_types
-            obj.transform_file :content, { thumbnail: { format: 'jpg', size: '200x150>', datastream: 'thumbnail' } }, processor: :document
-          when *audio_mime_types
-            obj.transform_file :content, { mp3: { format: 'mp3', datastream: 'mp3' }, ogg: { format: 'ogg', datastream: 'ogg' } }, processor: :audio
-          when *video_mime_types
-            obj.transform_file :content, { webm: { format: 'webm', datastream: 'webm' }, mp4: { format: 'mp4', datastream: 'mp4' }, thumbnail: { format: 'jpg', datastream: 'thumbnail' } }, processor: :video
-          when *image_mime_types
-            obj.transform_file :content, thumbnail: { format: 'jpg', size: '200x150>', datastream: 'thumbnail' }
-          end
+      def create_derivatives(filename)
+        case mime_type
+        when *self.class.pdf_mime_types
+          Hydra::Derivatives::PdfDerivatives.create(self, source: :content,
+            outputs: [{ label: :thumbnail, format: 'jpg', size: '338x493' }]
+          )
+        when *self.class.text_mime_types
+          Hydra::Derivatives::DocumentDerivatives.create(self, source: :content,
+            outputs: [{ format: 'jpg', size: '200x150>', label: :thumbnail }]
+          )
+        when *self.class.audio_mime_types
+          Hydra::Derivatives::AudioDerivatives.create(self, source: :content,
+            outputs: [{ format: 'mp3', label: :mp3 }, { format: 'ogg', label: :ogg }]
+          )
+        when *self.class.video_mime_types
+          Hydra::Derivatives::VideoDerivatives.create(self, source: :content,
+            outputs: [
+              { format: 'webm', label: :webm },
+              { format: 'mp4', label: :mp4 },
+              { format: 'jpg', label: 'thumbnail' }
+            ]
+          )
+        when *self.class.image_mime_types
+          Hydra::Derivatives::ImageDerivatives.create(self, source: :content,
+            outputs: [{ format: 'jpg', size: '200x150>', label: :thumbnail }]
+          )
         end
       end
+
     end
   end
 end

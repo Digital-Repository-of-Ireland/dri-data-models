@@ -8,7 +8,6 @@ module DRI
     include Hydra::AccessControls::Permissions
     include Hydra::AccessControls::Visibility
     include Hydra::WithDepositor
-    #include Hydra::Collections::Collectible
 
     include DRI::Noid
     include DRI::Export
@@ -17,6 +16,8 @@ module DRI
     include DRI::Asset::Permissions::Readable
     include DRI::Asset::Derivatives
     include DRI::Asset::Versions
+
+    include DRI::Derivatives::ExtractMetadata
 
     before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
@@ -75,6 +76,8 @@ module DRI
     def to_solr(solr_doc = {}, opts = {})
       solr_doc = super(solr_doc, opts)
 
+      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
+
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer) => [height[0].to_i]) unless height.empty?
@@ -85,6 +88,8 @@ module DRI
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('duration', :stored_sortable, type: :integer) => [milliseconds[0]]) unless milliseconds.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0].to_i]) unless sample_rate.empty?
+
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('mime_type', :stored_searchable) => mime_type) unless mime_type.empty?
 
       file_type = []
       file_type.push('audio') if audio?
@@ -98,10 +103,6 @@ module DRI
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format')] = file_format
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format', :facetable)] = file_format
       solr_doc['all_text_timv'] = full_text.content
-      # Index the Fedora-generated SHA1 digest to create a linkage
-      # between files on disk (in fcrepo.binary-store-path) and objects
-      # in the repository.
-      solr_doc[ActiveFedora.index_field_mapper.solr_name('digest', :symbol)] = digest_from_content
 
       solr_doc
     end
@@ -118,16 +119,11 @@ module DRI
 
     private
 
-      def delete_files
-        local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
-                                          f: id, d: 'content').order('version DESC').to_a
-        local_file_info.each(&:destroy)
-        FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
-      end
-
-      def digest_from_content
-        return unless content.has_content?
-        content.digest.first.to_s
-      end
+    def delete_files
+      local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
+                                        f: id, d: 'content').order('version DESC').to_a
+      local_file_info.each(&:destroy)
+      FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
+    end
   end
 end

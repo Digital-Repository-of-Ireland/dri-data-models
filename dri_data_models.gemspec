@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'hydra-access-controls'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
+  s.add_dependency 'hydra-file_characterization'
   s.add_dependency 'active_fedora-noid'
   s.add_dependency 'resque'
   s.add_dependency 'resque-pool'
