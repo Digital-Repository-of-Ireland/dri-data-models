@@ -12,7 +12,7 @@ module DRI
     include DRI::Noid
     include DRI::Export
 
-    #include DRI::ModelSupport::Properties
+    include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
@@ -29,7 +29,6 @@ module DRI
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
     has_subresource :extracted, class_name: 'DRI::Metadata::Extracted'
-    has_subresource :properties, class_name: 'DRI::Metadata::Properties'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
     # Unused for NOW
@@ -56,23 +55,6 @@ module DRI
     delegate :subject,:subject=, to: :descMetadata
     # Language (collection-level)
     delegate :language,:language=, to: :descMetadata
-
-    delegate :object_type,:object_type=, to: :properties
-    delegate :depositor,:depositor=, to: :properties
-    delegate :metadata_md5,:metadata_md5=, to: :properties
-    delegate :model_version,:model_version=, to: :properties
-    delegate :master_file_access,:master_file_access=, to: :properties
-    delegate :verified,:verified=, to: :properties
-    delegate :doi,:doi=, to: :properties
-    delegate :cover_image,:cover_image=, to: :properties
-    delegate :institute,:institute=, to: :properties
-    delegate :depositing_institute=, to: :properties
-    delegate :licence,:licence=, to: :properties
-    delegate :status=, to: :properties
-    delegate :published_at=, to: :properties
-    delegate :object_version=, to: :properties
-    delegate :ingest_files_from_metadata=, to: :properties
-
 
     # Creates a digital object depending on the metadata standard
     #
@@ -114,34 +96,35 @@ module DRI
       DRI::Batch.create(id: pid)
     end
 
+    def [](key)
+        super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          return file.send(key.to_s)
+        end
+      end
+
+      raise ArgumentError, "Unknown attribute #{key}"
+    end
+
+    def []=(key, value)
+      super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          file.send(key.to_s + "=", value)
+          return
+        end
+      end
+
+      raise ArgumentError, "Unknown attribute #{key}"
+    end
+
     def increment_version
       return '1' if object_version.nil?
 
       self.object_version = self.object_version.next
-    end
-
-    def depositing_institute
-      properties.depositing_institute.first if properties.depositing_institute.present?
-    end
-
-    def doi
-      properties.doi.first
-    end
-
-    def ingest_files_from_metadata
-      properties.ingest_files_from_metadata.first
-    end
-
-    def object_version
-      properties.object_version.first
-    end
-
-    def published_at
-      properties.published_at.first if properties.published_at.present?
-    end
-
-    def status
-      properties.status.first
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -207,13 +190,6 @@ module DRI
       end
 
       solr_doc
-    end
-
-    # Returns whether the object has a status of 'published'
-    #
-    # @return [Boolean] true if status is published
-    def published?
-      status == 'published'
     end
 
     private

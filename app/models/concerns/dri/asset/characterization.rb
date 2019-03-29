@@ -49,8 +49,28 @@ module DRI::Asset
         delegate :frame_rate,        to: :characterization
       end
 
+      def file_size
+       characterization.file_size
+      end
+
+      def file_size=(file_size)
+       characterization.file_size = file_size
+      end
+
+      def file_title
+       characterization.file_title
+      end
+
+      def file_title=(file_title)
+       characterization.file_title = file_title
+      end
+
       def mime_type
        characterization.identification.identity.mime_type.first
+      end
+
+      def mime_type=(mime_type)
+       characterization.identification.identity.mime_type = mime_type
       end
 
       def width

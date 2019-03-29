@@ -5,7 +5,8 @@ module DRI
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
   class GenericFile < ActiveFedora::Base
-    include Hydra::AccessControls::Permissions
+    #include Hydra::AccessControls::Permissions
+    include DRI::ModelSupport::Permissions
     include Hydra::AccessControls::Visibility
     include Hydra::WithDepositor
 
@@ -108,9 +109,9 @@ module DRI
     end
 
     def related_files
-        return [] unless batch
-        batch.generic_files.reject { |sibling| sibling.id == id }
-      end
+      return [] unless batch
+      batch.generic_files.reject { |sibling| sibling.id == id }
+    end
 
     # Is this file in the middle of being processed by a batch?
     def processing?

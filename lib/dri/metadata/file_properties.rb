@@ -22,6 +22,10 @@ module DRI
           end
           return builder.doc
       end
+
+      def prefix(path)
+        return ''
+      end
     end
   end
 end
