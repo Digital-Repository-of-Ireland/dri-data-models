@@ -20,7 +20,7 @@ module DRI
         delegate :depositing_institute=, to: 'properties'#, multiple: false
         delegate :licence,:licence=, to: 'properties'#, multiple: false
         delegate :ingest_files_from_metadata=, to: 'properties'#, multiple: false
-        delegate :master_file_access,:master_file_access=, to: 'properties'#, multiple: false
+        delegate :master_file_access=, to: 'properties'#, multiple: false
         delegate :published_at=, to: 'properties'#, multiple: false
         delegate :object_version=, to: 'properties'#, multiple: false
       end
@@ -54,6 +54,10 @@ module DRI
 
       def institute
         properties.institute.first
+      end
+
+      def master_file_access
+        properties.master_file_access.first
       end
 
       def status
