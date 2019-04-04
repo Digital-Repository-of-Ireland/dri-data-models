@@ -6,111 +6,28 @@ module DRI
     # RDFXMLDatastream
     class Documentation < ActiveFedora::RDFXMLDatastream
       # It supports all the DRI Compulsory elements
-      property :title, predicate: RDF::Vocab::DC.title do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :identifier, predicate: RDF::Vocab::DC.identifier do |index|
-        index.as :stored_searchable
-      end
-
-      property :creator, predicate: RDF::Vocab::DC.creator do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable,
-                 :sortable
-      end
-
-      property :contributor, predicate: RDF::Vocab::DC.contributor do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_facetable
-      end
-
-      property :publisher, predicate: RDF::Vocab::DC.publisher do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :description, predicate: RDF::Vocab::DC.description do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :rights, predicate: RDF::Vocab::DC.rights do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :language, predicate: RDF::Vocab::DC.language do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata:: Descriptors.language_facetable
-      end
-
-      property :date, predicate: RDF::Vocab::DC.date do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :creation_date, predicate: RDF::Vocab::DC.created do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :published_date, predicate: RDF::Vocab::DC.issued do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :subject, predicate: RDF::Vocab::DC.subject do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :resource_type, predicate: RDF::Vocab::DC.type do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :format, predicate: RDF::Vocab::DC.format do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :source, predicate: RDF::Vocab::DC.source do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_displayable,
-                 DRI::Metadata::Descriptors.cleaned_facetable
-      end
-
-      property :coverage, predicate: RDF::Vocab::DC.coverage do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_displayable,
-                 DRI::Metadata::Descriptors.cleaned_searchable
-      end
-
-      property :geographical_coverage, predicate: RDF::Vocab::DC.spatial do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :temporal_coverage, predicate: RDF::Vocab::DC.temporal do |index|
-        index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                 DRI::Metadata::Descriptors.cleaned_facetable,
-                 DRI::Metadata::Descriptors.cleaned_displayable
-      end
-
-      property :geocode_point, predicate: RDF::Vocab::DC.Point
-
-      property :geocode_box, predicate: RDF::Vocab::DC.Box
-
-      property :temporal_coverage_period, predicate: RDF::Vocab::DC.Period
-
-      property :relation, predicate: RDF::Vocab::DC.relation do |index|
-        index.as :stored_searchable, :facetable
-      end
+      property :title, predicate: ::RDF::Vocab::DC.title
+      property :identifier, predicate: ::RDF::Vocab::DC.identifier
+      property :creator, predicate: ::RDF::Vocab::DC.creator
+      property :contributor, predicate: ::RDF::Vocab::DC.contributor
+      property :publisher, predicate: ::RDF::Vocab::DC.publisher
+      property :description, predicate: ::RDF::Vocab::DC.description
+      property :rights, predicate: ::RDF::Vocab::DC.rights
+      property :language, predicate: ::RDF::Vocab::DC.language
+      property :date, predicate: ::RDF::Vocab::DC.date
+      property :creation_date, predicate: ::RDF::Vocab::DC.created
+      property :published_date, predicate: ::RDF::Vocab::DC.issued
+      property :subject, predicate: ::RDF::Vocab::DC.subject
+      property :resource_type, predicate: ::RDF::Vocab::DC.type
+      property :format, predicate: ::RDF::Vocab::DC.format
+      property :source, predicate: ::RDF::Vocab::DC.source
+      property :coverage, predicate: ::RDF::Vocab::DC.coverage
+      property :geographical_coverage, predicate: ::RDF::Vocab::DC.spatial
+      property :temporal_coverage, predicate: ::RDF::Vocab::DC.temporal
+      property :geocode_point, predicate: ::RDF::Vocab::DC.Point
+      property :geocode_box, predicate: ::RDF::Vocab::DC.Box
+      property :temporal_coverage_period, predicate: ::RDF::Vocab::DC.Period
+      property :relation, predicate: ::RDF::Vocab::DC.relation
 
       # Generate MARC Relators fields from the MARC Relators vocabulary
       DRI::Vocabulary.marc_relators.each do |role|
@@ -118,6 +35,99 @@ module DRI
           index.as Descriptors.cleaned_facetable,
                    Descriptors.cleaned_searchable,
                    Descriptors.cleaned_displayable
+        end
+      end
+
+      def self.index_config
+        {}.tap do |index_config|
+          index_config[:title] = ActiveFedora::Indexing::Map::IndexObject.new(:title) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:identifier] = ActiveFedora::Indexing::Map::IndexObject.new(:identifier) do |index|
+            index.as :stored_searchable
+          end
+          index_config[:creator] = ActiveFedora::Indexing::Map::IndexObject.new(:creator) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                    DRI::Metadata::Descriptors.cleaned_displayable,
+                   :sortable
+          end
+          index_config[:contributor] = ActiveFedora::Indexing::Map::IndexObject.new(:contributor) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                    DRI::Metadata::Descriptors.cleaned_facetable
+          end
+          index_config[:publisher] = ActiveFedora::Indexing::Map::IndexObject.new(:publisher) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:description] = ActiveFedora::Indexing::Map::IndexObject.new(:description) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:rights] = ActiveFedora::Indexing::Map::IndexObject.new(:rights) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:language] = ActiveFedora::Indexing::Map::IndexObject.new(:language) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.language_facetable
+          end
+          index_config[:date] = ActiveFedora::Indexing::Map::IndexObject.new(:date) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:creation_date] = ActiveFedora::Indexing::Map::IndexObject.new(:creation_date) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:published_date] = ActiveFedora::Indexing::Map::IndexObject.new(:published_date) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:subject] = ActiveFedora::Indexing::Map::IndexObject.new(:subject) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:resource_type] = ActiveFedora::Indexing::Map::IndexObject.new(:resource_type) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:format] = ActiveFedora::Indexing::Map::IndexObject.new(:format) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:source] = ActiveFedora::Indexing::Map::IndexObject.new(:source) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_displayable,
+                     DRI::Metadata::Descriptors.cleaned_facetable
+          end
+          index_config[:coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:coverage) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_displayable,
+                     DRI::Metadata::Descriptors.cleaned_searchable
+          end
+          index_config[:geographical_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:geographical_coverage) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:temporal_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:temporal_coverage) do |index|
+            index.as DRI::Metadata::Descriptors.cleaned_searchable,
+                     DRI::Metadata::Descriptors.cleaned_facetable,
+                     DRI::Metadata::Descriptors.cleaned_displayable
+          end
+          index_config[:relation] = ActiveFedora::Indexing::Map::IndexObject.new(:relation) do |index|
+            index.as :stored_searchable, :facetable
+          end
+          DRI::Vocabulary.marc_relators.each do |role|
+            index_config[role.prepend('role_').to_sym] = ActiveFedora::Indexing::Map::IndexObject.new(role.prepend('role_').to_sym) do |index|
+              index.as Descriptors.cleaned_facetable,
+                       Descriptors.cleaned_searchable,
+                       Descriptors.cleaned_displayable
+            end
+          end
         end
       end
 

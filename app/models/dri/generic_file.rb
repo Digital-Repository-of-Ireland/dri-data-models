@@ -32,9 +32,7 @@ module DRI
     has_subresource 'content', class_name: 'FileContentDatastream'
     has_subresource 'full_text'
 
-    property :title, predicate: ::RDF::Vocab::DC.title do |index|
-      index.as :stored_searchable, :facetable
-    end
+    property :title, predicate: ::RDF::Vocab::DC.title
     property :label, predicate: ActiveFedora::RDF::Fcrepo::Model.downloadFilename, multiple: false
     property :depositor, predicate: ::RDF::URI.new("http://id.loc.gov/vocabulary/relators/dpt"), multiple: false do |index|
       index.as :symbol, :stored_searchable
@@ -49,6 +47,23 @@ module DRI
     delegate :checksum_sha256,:checksum_sha256=, to: 'dri_properties'
     delegate :checksum_rmd160,:checksum_rmd160=, to: 'dri_properties'
     delegate :preservation_only,:preservation_only=, to: 'dri_properties'
+
+    def self.index_config
+      {}.tap do |index_config|
+        index_config[:title] = ActiveFedora::Indexing::Map::IndexObject.new(:title) do |index|
+          index.as :stored_searchable, :facetable
+        end
+        index_config[:label] = ActiveFedora::Indexing::Map::IndexObject.new(:label) do |index|
+          index.as :stored_searchable
+        end
+        index_config[:depositor] = ActiveFedora::Indexing::Map::IndexObject.new(:depositor) do |index|
+          index.as :symbol, :stored_searchable
+        end
+        index_config[:creator] = ActiveFedora::Indexing::Map::IndexObject.new(:creator) do |index|
+          index.as :stored_searchable, :facetable
+        end
+      end
+    end
 
     # DRI is not storing files in Fedora (which would be too slow to be of practical use),
     # instead a datastream will link to a URL in the DRI storage system.
@@ -100,7 +115,7 @@ module DRI
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
-      solr_doc[ActiveFedora.index_field_mapper.solr_name('label')] = label
+      #solr_doc[ActiveFedora.index_field_mapper.solr_name('label')] = label
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format')] = file_format
       solr_doc[ActiveFedora.index_field_mapper.solr_name('file_format', :facetable)] = file_format
       solr_doc['all_text_timv'] = full_text.content

@@ -35,6 +35,10 @@ module DRI
         []
       end
 
+      def prefix(path)
+        return ''
+      end
+
       # Remove null values from a given field within
       # the solr document for this object
       #
