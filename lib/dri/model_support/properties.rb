@@ -9,20 +9,20 @@ module DRI
       included do
         has_subresource :properties, class_name: 'DRI::Metadata::Properties'
 
-        delegate :object_type,:object_type=, to: :properties#, multiple: true
-        delegate :depositor=, to: :properties#, multiple: false
-        delegate :metadata_md5=, to: :properties#, multiple: false
-        delegate :model_version=, to: :properties#, multiple: false
-        delegate :verified=, to: :properties#, multiple: false
-        delegate :doi=, to: :properties#, multiple: false
-        delegate :cover_image=, to: :properties#, multiple: false
-        delegate :institute,:institute=, to: :properties#, multiple: true
-        delegate :depositing_institute=, to: :properties#, multiple: false
-        delegate :licence=, to: :properties#, multiple: false
-        delegate :ingest_files_from_metadata=, to: :properties#, multiple: false
-        delegate :master_file_access=, to: :properties#, multiple: false
-        delegate :published_at=, to: :properties#, multiple: false
-        delegate :object_version=, to: :properties#, multiple: false
+        delegate :object_type,:object_type=, to: :properties
+        delegate :depositor=, to: :properties
+        delegate :metadata_md5=, to: :properties
+        delegate :model_version=, to: :properties
+        delegate :verified=, to: :properties
+        delegate :doi=, to: :properties
+        delegate :cover_image=, to: :properties
+        delegate :institute,:institute=, to: :properties
+        delegate :depositing_institute=, to: :properties
+        delegate :licence=, to: :properties
+        delegate :ingest_files_from_metadata=, to: :properties
+        delegate :master_file_access=, to: :properties
+        delegate :published_at=, to: :properties
+        delegate :object_version=, to: :properties
         delegate :status=, to: :properties
       end
 
@@ -31,7 +31,7 @@ module DRI
       end
 
       def depositor
-        properties.depositer.first
+        properties.depositor.first
       end
 
       def depositing_institute

@@ -417,7 +417,8 @@ module DRI
         DRI::Vocabulary.mods_relationship_types.each do |rel|
           t.send "related_items_ids_#{rel}",
                  path: "relatedItem[@type='#{rel}']/mods:identifier[@type='local']",
-                 namespace_prefix: MODS_NS_PREFIX
+                 namespace_prefix: MODS_NS_PREFIX,
+                 index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
         end
 
         # External Relationships
@@ -544,7 +545,11 @@ module DRI
               xml.namePart
               xml.role {
                 xml.roleTerm('cre', type: 'code', authority: 'marcrelator')
-                xml.roleTerm(DRI::Vocabulary.marc_relators_creator['cre'], type: 'text', authority: 'marcrelator')
+                xml.roleTerm(
+                  DRI::Vocabulary.marc_relators_creator['cre'],
+                  type: 'text',
+                  authority: 'marcrelator'
+                )
               }
             }
             # Creation date

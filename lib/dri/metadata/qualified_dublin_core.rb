@@ -74,8 +74,9 @@ module DRI
           # Relationships for QDC
           DRI::Vocabulary.qdc_relationship_types.each do |rel|
             t.send "relation_ids_#{rel}",
-                   path: "#{rel}[not(@xsi:type='dcterms:URI')]",
-                   namespace_prefix: 'dcterms'
+                   path: rel,
+                   namespace_prefix: 'dcterms',
+                   index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
           end
 
           # External relationships (contain uri to a resource external to DRI)

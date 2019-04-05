@@ -6,6 +6,7 @@ module DRI
 
     has_subresource :descMetadata, class_name: 'DRI::Metadata::Marc'
 
+    delegate :leader=, to: :descMetadata
     delegate :controlfield, to: :descMetadata
     delegate :controlfield_tag, to: :descMetadata
     delegate :datafield, to: :descMetadata
@@ -13,8 +14,12 @@ module DRI
     delegate :datafield_ind1, to: :descMetadata
     delegate :datafield_ind2, to: :descMetadata
 
+    # MARC record identifier used for internal rels target,
+    # NOT multi-valued
+    delegate :marc_id=, to: :descMetadata
+
     # MARC record asset identifier used to sort pages/sequenced items
-    delegate :id_asset, to: :descMetadata #multiple: false do |index|
+    delegate :id_asset=, to: :descMetadata #multiple: false do |index|
 
     # MARC Relationships, mapped from QDC predicate properties
     # Mapped attributes for getting relational information from metadata
@@ -46,12 +51,16 @@ module DRI
       super(params)
     end
 
+    def id_asset
+      descMetadata.id_asset.first
+    end
+
     def leader
-      return descMetadata.leader.first
+      descMetadata.leader.first
     end
 
     def marc_id
-      return descMetadata.marc_id.first
+      descMetadata.marc_id.first
     end
 
     # type attribute getter

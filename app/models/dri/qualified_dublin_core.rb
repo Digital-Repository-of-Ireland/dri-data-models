@@ -23,7 +23,7 @@ module DRI
     delegate :resource_type,:resource_type=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
-    delegate :id_asset,:id_asset=, to: :descMetadata
+    delegate :id_asset=, to: :descMetadata
     delegate :qdc_id,:qdc_id=, to: :descMetadata
     delegate :geocode_point,:geocode_point=, to: :descMetadata
     delegate :geocode_box,:geocode_box=, to: :descMetadata
@@ -34,18 +34,18 @@ module DRI
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
-      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
-                                                       to: :descMetadata
-                                                     }
+      DRI::Vocabulary.marc_relators.map do |s|
+        delegate s.prepend('role_').to_sym,s.concat('=').to_sym, to: :descMetadata
+      end
       # Internal Relationships (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('relation_ids_').to_sym,s.concat('=').to_sym,
-                                                                to: :descMetadata
-                                                  }
+      DRI::Vocabulary.qdc_relationship_types.map do |s|
+        delegate s.prepend('relation_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata
+      end
       # External relationships (contain a URI to resources external to DRI)
       # (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
-                                                                to: :descMetadata
-                                                  }
+      DRI::Vocabulary.qdc_relationship_types.map do |s|
+        delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata
+      end
     end
 
     # Override constructor
@@ -58,6 +58,10 @@ module DRI
     # @return [String] the AF digital object model name
     def model_name
       DRI::Batch.model_name
+    end
+
+    def id_asset
+      descMetadata.id_asset.first
     end
 
     # Roles attribute setter

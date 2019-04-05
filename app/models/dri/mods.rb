@@ -7,16 +7,16 @@ module DRI
     has_subresource :descMetadata, class_name: 'DRI::Metadata::Mods'
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    #elegate :mods_id_local, to: :descMetadata, multiple: false
+    delegate :mods_id_local=, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
-    #delegate :id_asset, to: :descMetadata, multiple: false
+    delegate :id_asset=, to: :descMetadata
     # MODS rest of identifiers are repeatable
     delegate :identifier,:identifier=, to: :descMetadata
     delegate :identifier_doi,:identifier_doi=, to: :descMetadata
     delegate :identifier_uri,:identifier_uri=, to: :descMetadata
 
     # Collection attribute + genre type
-    delegate :mods_type_collection,:mods_type_collection=, to: :descMetadata, multiple: false
+    delegate :mods_type_collection=, to: :descMetadata
     delegate :mods_genre,:mods_genre=, to: :descMetadata
 
     # subtitle
@@ -103,8 +103,8 @@ module DRI
       descMetadata.mods_id_local.first
     end
 
-    def mods_id_local=(id)
-      descMetadata.mods_id_local = id
+    def mods_type_collection
+      descMetadata.mods_type_collection.first
     end
 
     def id_asset

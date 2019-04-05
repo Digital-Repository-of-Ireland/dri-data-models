@@ -31,11 +31,7 @@ module DRI
 
       # Generate MARC Relators fields from the MARC Relators vocabulary
       DRI::Vocabulary.marc_relators.each do |role|
-        property role.prepend('role_').to_sym, predicate: DRI::RDFVocabularies::MarcRelatorsVocabulary.send("#{role}") do |index|
-          index.as Descriptors.cleaned_facetable,
-                   Descriptors.cleaned_searchable,
-                   Descriptors.cleaned_displayable
-        end
+        property role.prepend('role_').to_sym, predicate: DRI::RDFVocabularies::MarcRelatorsVocabulary.send("#{role}")
       end
 
       def self.index_config
