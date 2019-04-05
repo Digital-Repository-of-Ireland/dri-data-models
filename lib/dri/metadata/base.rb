@@ -1,6 +1,4 @@
-# DRI namespace
 module DRI
-  # Metadata namespace
   module Metadata
     # Implements DRI Base metadata class from which the different DRI supported standards
     # metadata classes inherit from
