@@ -80,15 +80,6 @@ module DRI
 
     delegate :subject_metadata,:subject_metadata=, to: :descMetadata
 
-    # Disabled for now
-    # around_save :create_multiple_records
-
-    # Initialize - mods record
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
-      super(args)
-    end
-
     #
     # @return [Array<Symbol>] MODS DRI terms symbols array
     def self.mods_dri_terms

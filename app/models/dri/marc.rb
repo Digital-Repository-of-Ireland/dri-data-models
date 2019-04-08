@@ -41,16 +41,6 @@ module DRI
     delegate :date, to: :descMetadata
     delegate :published_date, to: :descMetadata
 
-    # Disabled below - metadata object update triggers
-    # the creation of duplicated objects
-    # around_save :create_multiple_records
-
-    # Override constructor
-    def initialize(params = {})
-      params[:desc_metadata_class] = 'DRI::Metadata::Marc'
-      super(params)
-    end
-
     def id_asset
       descMetadata.id_asset.first
     end

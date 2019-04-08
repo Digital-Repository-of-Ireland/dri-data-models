@@ -48,12 +48,6 @@ module DRI
       end
     end
 
-    # Override constructor
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::QualifiedDublinCore'
-      super(args)
-    end
-
     #
     # @return [String] the AF digital object model name
     def model_name
@@ -96,7 +90,7 @@ module DRI
     # @param [String] pid the object's PID
     # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
     def self.find_or_create(pid)
-      obj = DRI::QualifiedDublinCore.find(pid)
+      DRI::QualifiedDublinCore.find(pid)
     rescue ActiveFedora::ObjectNotFoundError
       DRI::QualifiedDublinCore.create(id: pid)
     end
@@ -111,7 +105,7 @@ module DRI
     # Type attribute setter
     # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
-      self.resource_type = type
+      descMetadata.resource_type = type
     end
 
     # For relationships display in the UI, creates Hash where the keys are

@@ -4,6 +4,8 @@ module DRI
   class EncodedArchivalDescription < DRI::Batch
     include DRI::ModelSupport::EadSupport
 
+    has_subresource :descMetadata, class_name: 'DRI::Metadata::Base'
+
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
@@ -168,7 +170,7 @@ module DRI
     # Type attribute setter
     # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
-      self.resource_type = type
+      descMetadata.resource_type = type
     end
 
     # Returns a Hash with all the values for the DRI editable metadata fields
@@ -425,7 +427,7 @@ module DRI
         updated_desc_md = descMetadata.ng_xml.clone
       end
 
-      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(fullMetadata.ng_xml)
+      children_components = DRI::ModelSupport::EadSupport.ead_metadata_components(fullMetadata.ng_xml)
 
       # copy children components from un-synced fullMetadata
       # as descMetadata does not include them

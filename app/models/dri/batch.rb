@@ -12,49 +12,14 @@ module DRI
     include DRI::Noid
     include DRI::Export
 
+    include DRI::ModelSupport::Common
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
-    include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
-
-    # one-to-many AF relationship to associate digital assets with their batch object
-    has_many :generic_files, class_name: 'DRI::GenericFile', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, dependent: :destroy
-    # one-to-many AF relationship to associate documentation objects
-    has_many :documentation_objects, class_name: 'DRI::Documentation', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, as: :documentation_for
-
-    # Declare a 'extracted' DS, of the following type
-    # Unused for NOW
-    has_subresource :extracted, class_name: 'DRI::Metadata::Extracted'
-
-    # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
-    # Unused for NOW
-    delegate :full_text, to: :extracted
-
-    # DRI Mandatory (M)
-    # Title (collection-level)
-    delegate :title,:title=, to: :descMetadata
-    # Description (collection-level)
-    delegate :description,:description=, to: :descMetadata
-    # ADDED TYPE, it is compulsory
-    # delegate :type, to: 'descMetadata', multiple: true
-    # Rights (collection-level)
-    delegate :rights,:rights=, to: :descMetadata
-    # Creator (collection-level)
-    delegate :creator,:creator=, to: :descMetadata
-
-    # DRI Recommended (R)
-    # Contributor
-    delegate :contributor,:contributor=, to: :descMetadata
-    # Publisher (collection-level, DRI pre-populated)
-    delegate :publisher,:publisher=, to: :descMetadata
-    # Subject (collection-level)
-    delegate :subject,:subject=, to: :descMetadata
-    # Language (collection-level)
-    delegate :language,:language=, to: :descMetadata
 
     # Creates a digital object depending on the metadata standard
     #
