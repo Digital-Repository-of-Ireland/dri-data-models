@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib', 'app']
 
   s.add_dependency 'active-fedora', '>= 10','< 11'
+  s.add_dependency 'rails', '~> 4.2'
   s.add_dependency 'hydra-head'
   s.add_dependency 'hydra-access-controls'
   s.add_dependency 'iso-639'
