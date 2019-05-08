@@ -4,64 +4,63 @@ module DRI
   class EncodedArchivalDescription < DRI::Batch
     include DRI::ModelSupport::EadSupport
 
+    has_subresource :descMetadata, class_name: 'DRI::Metadata::Base'
+
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :identifier_id, delegate_to: 'descMetadata', multiple: false
-    property :repository_code, delegate_to: 'descMetadata', multiple: false
-    property :country_code, delegate_to: 'descMetadata', multiple: false
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :identifier_id=, to: :descMetadata
+    delegate :country_code=, to: :descMetadata
+    delegate :repository_code=, to: :descMetadata
+    delegate :ead_level=, to: :descMetadata
+    delegate :ead_level_other=, to: :descMetadata
 
     # ISO Dates
-    property :creation_date_idx, delegate_to: 'descMetadata', multiple: true
-    property :published_date_idx, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage_idx, delegate_to: 'descMetadata', multiple: true
+    delegate :creation_date_idx,:creation_date_idx=, to: :descMetadata
+    delegate :published_date_idx,:published_date_idx=, to: :descMetadata
+    delegate :temporal_coverage_idx,:temporal_coverage_idx=, to: :descMetadata
 
     # Description properties
-    property :desc_abstract, delegate_to: 'descMetadata', multiple: false
-    property :desc_biog_hist, delegate_to: 'descMetadata', multiple: true
-    property :desc_scope_content, delegate_to: 'descMetadata', multiple: true
-    property :desc_dao_desc, delegate_to: 'descMetadata', multiple: true
-    
-    # Subjects
-    property :name_subject, delegate_to: 'descMetadata', multiple: true
-    property :persname_subject, delegate_to: 'descMetadata', multiple: true
-    property :corpname_subject, delegate_to: 'descMetadata', multiple: true
-    property :famname_subject, delegate_to: 'descMetadata', multiple: true
-    property :geogname_subject, delegate_to: 'descMetadata', multiple: true
+    delegate :desc_biog_hist, to: :descMetadata
+    delegate :desc_scope_content, to: :descMetadata
+    delegate :desc_dao_desc, to: :descMetadata
 
-    # Types
-    property :ead_level, delegate_to: 'descMetadata', multiple: false
-    property :ead_level_other, delegate_to: 'descMetadata', multiple: false
+    # Subjects
+    delegate :name_subject,:name_subject=, to: :descMetadata
+    delegate :persname_subject,:persname_subject=, to: :descMetadata
+    delegate :corpname_subject,:corpname_subject=, to: :descMetadata
+    delegate :famname_subject,:famname_subject=, to: :descMetadata
+    delegate :geogname_subject,:geogname_subject=, to: :descMetadata
 
     # Files, description
-    property :dao_proxy, delegate_to: 'descMetadata', multiple: true
-    property :dao_href_proxy, delegate_to: 'descMetadata', multiple: true
-    property :dao_desc_proxy, delegate_to: 'descMetadata', multiple: true
+    delegate :dao_proxy,:dao_proxy=, to: :descMetadata
+    delegate :dao_href_proxy,:dao_href_proxy=, to: :descMetadata
+    delegate :dao_desc_proxy,:dao_desc_proxy=, to: :descMetadata
 
     # Coverage: name, geographical, location, temporal
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geogname_coverage_access, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
+    delegate :name_coverage, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :geogname_coverage_access, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
 
     # Related Material
     # The <relatedmaterial> element is comparable to ISAD(G)
     # data element 3.5.3 and MARC field 544 with indicator 1
-    property :related_material, delegate_to: 'descMetadata', multiple: true
+    delegate :related_material, to: :descMetadata
 
     # Alternative Form Available
-    property :alternative_form, delegate_to: 'descMetadata', multiple: true
+    delegate :alternative_form, to: :descMetadata
 
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
+    delegate :resource_type,:resource_type=, to: :descMetadata
 
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true
-    property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
-    property :format, delegate_to: 'descMetadata', multiple: true
+    delegate :geocode_point,:geocode_point=, to: :descMetadata
+    delegate :geocode_box,:geocode_box=, to: :descMetadata
+    delegate :geocode_logainm,:geocode_logainm=, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date, to: :descMetadata
+    delegate :creation_date, to: :descMetadata
 
     around_save :synchronize_if_changed # trigger EAD children creation
 
@@ -137,6 +136,30 @@ module DRI
       editable_attrs
     end
 
+    def identifier_id
+      descMetadata.identifier_id.first
+    end
+
+    def repository_code
+      descMetadata.repository_code.first
+    end
+
+    def country_code
+      descMetadata.country_code.first
+    end
+
+    def desc_abstract
+      descMetadata.desc_abstract.first
+    end
+
+    def ead_level
+      descMetadata.ead_level.first
+    end
+
+    def ead_level_other
+      descMetadata.ead_level_other.first
+    end
+
     # Type attribute getter
     #
     # @return [Array<String>] the array of metadata type values
@@ -147,7 +170,7 @@ module DRI
     # Type attribute setter
     # @param [Array<String>] type the array of metadata type values to set
     def type=(type)
-      self.resource_type = type
+      descMetadata.resource_type = type
     end
 
     # Returns a Hash with all the values for the DRI editable metadata fields
@@ -404,7 +427,7 @@ module DRI
         updated_desc_md = descMetadata.ng_xml.clone
       end
 
-      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(fullMetadata.ng_xml)
+      children_components = DRI::ModelSupport::EadSupport.ead_metadata_components(fullMetadata.ng_xml)
 
       # copy children components from un-synced fullMetadata
       # as descMetadata does not include them

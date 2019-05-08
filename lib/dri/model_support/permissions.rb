@@ -9,14 +9,6 @@ module DRI
       included do
         include Hydra::AccessControls::Permissions
       end
-
-      #def apply_default_permissions
-      #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"registered"=>"read"} )
-      #  self.datastreams["rightsMetadata"].update_permissions( "group"=>{"public"=>"discover"} )
-      #  self.datastreams["rightsMetadata"].private_metadata="0"
-      #  self.datastreams["rightsMetadata"].master_file="1"
-      #  self.save
-      #end
     end
   end
 end

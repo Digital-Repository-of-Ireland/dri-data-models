@@ -4,7 +4,7 @@ module DRI
   # extending from DRI::Batch
   class Documentation < DRI::Batch
     # Override interchangeable_metadata definition of descMetadata
-    contains 'descMetadata', class_name: 'DRI::Metadata::Documentation'
+    has_subresource :descMetadata, class_name: 'DRI::Metadata::Documentation'
 
     # one-to-one AF association to DRI::Batch (documentation for)
     belongs_to :documentation_for,
@@ -13,36 +13,27 @@ module DRI
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
-    property :date, delegate_to: 'descMetadata', multiple: true
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage_period, delegate_to: 'descMetadata', multiple: true
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
-    property :format, delegate_to: 'descMetadata', multiple: true
-    property :coverage, delegate_to: 'descMetadata', multiple: true
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :geocode_point, delegate_to: 'descMetadata', multiple: true
-    property :geocode_box, delegate_to: 'descMetadata', multiple: true
-    property :relation, delegate_to: 'descMetadata', multiple: true
+    delegate :date,:date=, to: :descMetadata
+    delegate :source,:source=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :temporal_coverage_period,:temporal_coverage_period=, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :format,:format=, to: :descMetadata
+    delegate :coverage,:coverage=, to: :descMetadata
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :geocode_point,:geocode_point=, to: :descMetadata
+    delegate :geocode_box,:geocode_box=, to: :descMetadata
+    delegate :relation,:relation=, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
-    #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
-        property s.prepend('role_').to_sym,
-                 delegate_to: 'descMetadata',
-                 multiple: true
+        delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
+                 to: :descMetadata
       end
-    end
-
-    # Override constructor
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::Documentation'
-
-      super(args)
     end
 
     # Override - ingest from RDF-XML files not supported

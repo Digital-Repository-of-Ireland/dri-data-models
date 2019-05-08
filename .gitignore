@@ -12,6 +12,7 @@ tmp/
 .idea/
 spec/reports/*
 spec/test_app/config/predicate_mappings.yml
+spec/test_app/db/schema.rb
 .ruby-version
 .byebug_history
 fcrepo4-test-data/

@@ -1,6 +1,4 @@
-# DRI namespace
 module DRI
-  # Metadata namespace
   module Metadata
     # Implements DRI Base metadata class from which the different DRI supported standards
     # metadata classes inherit from
@@ -33,6 +31,10 @@ module DRI
         return [field] if respond_to? field
 
         []
+      end
+
+      def prefix(path)
+        return ''
       end
 
       # Remove null values from a given field within

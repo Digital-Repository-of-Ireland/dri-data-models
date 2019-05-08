@@ -9,8 +9,11 @@ module DRI
       included do
         around_save :ingest_files_if_changed # callback for generating EAD Generic Files from ead:dao links
 
+        attr_accessor :desc_metadata_class
         attr_accessor :trigger_ingest
         attr_accessor :trigger_update
+
+        after_initialize :load_attributes
 
         # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading fedora objects
         # load_attributes changes the descMetadata datastream to load the right metadata class
@@ -41,7 +44,7 @@ module DRI
         when 'DRI::Metadata::EncodedArchivalDescription'
           metadata_children = full_metadata_nons.xpath('/ead/archdesc/dsc/*')
         when 'DRI::Metadata::EncodedArchivalDescriptionComponent'
-          metadata_children = get_ead_children_components(full_metadata_nons)
+          metadata_children = ead_children_components(full_metadata_nons)
         else
           metadata_children = []
         end
@@ -137,7 +140,7 @@ module DRI
       # Searchs for the node's children ead:components (c | c01..12 XML nodes)
       # @param [Nokogiri::XML::Document] node the document to search
       # @return [Nokogiri::XML::NodeSet] the children ead:components for the given node
-      def self.get_ead_metadata_components(node)
+      def self.ead_metadata_components(node)
         if node.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
           ns_dcl = { 'xmlns:ead' => 'urn:isbn:1-931666-22-9' }
           # Nodes for EAD root collection (as path differs)
@@ -158,12 +161,87 @@ module DRI
         end
       end
 
+      # Should only be set in a new class
+      def desc_metadata_class=(desc_metadata_class)
+        @desc_metadata_class = desc_metadata_class if self.new?
+      end
+
       private
+
+      def metadata_class_from_xml(xml_text)
+        result = nil
+        ead_components = %w(c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12)
+
+        xml = if xml_text.is_a? Nokogiri::XML::Document
+                xml_text
+              else
+                Nokogiri::XML xml_text
+              end
+
+        namespace = xml.namespaces
+        root_name = xml.root.name
+
+        result = if (xml.internal_subset.present? && xml.internal_subset.name == 'ead') || root_name == 'ead'
+                   'DRI::Metadata::EncodedArchivalDescription'
+                 elsif ead_components.include? root_name
+                   'DRI::Metadata::EncodedArchivalDescriptionComponent'
+                 end
+
+        result
+      end # metadata_class_from_xml
+
+      def load_attributes
+        ead_classes = %w(DRI::Metadata::EncodedArchivalDescription
+                         DRI::Metadata::EncodedArchivalDescriptionComponent)
+        ds = nil
+
+        if new_record? && !desc_metadata_class.nil?
+          # For new objects, check what metadata class was asked for during initialization
+          ds_class = @desc_metadata_class.to_s
+
+          if ead_classes.include? ds_class
+            ds = ds_class.constantize.new
+          else
+            # Load class from :desc_metadata_class which is set ingest_controller
+            if ead_classes.include? desc_metadata_class
+              ds = desc_metadata_class.constantize.new
+            else
+              # if NOT EAD or EADComponent, do not create DS
+              return
+            end
+          end
+        end
+
+        return if ds.nil?
+
+        ds.instance_variable_set(:@dsid, :descMetadata)
+        attach_file(ds, 'descMetadata')
+      end # load_attributes
+
+      def load_attached_files
+        super
+
+        attach_desc_metadata
+      end
+
+      def attach_desc_metadata
+        ds_class = metadata_class_from_xml(descMetadata.to_xml)
+
+        return unless %w(DRI::Metadata::EncodedArchivalDescription
+                         DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
+
+        old_digital_object = descMetadata.uri
+        ds = ds_class.constantize.from_xml(descMetadata.to_xml)
+        ds.uri = old_digital_object
+
+        ds.instance_variable_set(:@dsid, :descMetadata)
+        attached_files[:descMetadata] = ds
+      end
 
       # Returns an array of children EAD components
       # @param metadata [Nokogiri::XML] EAD component XML metadata
       # @return [Array<Nokogiri::XML::NodeSet>] Array of children EAD components
-      def get_ead_children_components(metadata)
+      def ead_children_components(metadata)
         # Components in EAD can either be children of dsc; or children of c
         # 1. dsc/c
         return metadata.xpath('/*/dsc/*') unless metadata.xpath('/*/dsc/*').empty?

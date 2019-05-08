@@ -7,23 +7,86 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        contains 'properties', class_name: 'DRI::Metadata::Properties'
+        has_subresource :properties, class_name: 'DRI::Metadata::Properties'
 
-        property :status, delegate_to: 'properties', multiple: false
-        property :object_type, delegate_to: 'properties', multiple: true
-        property :depositor, delegate_to: 'properties', multiple: false
-        property :metadata_md5, delegate_to: 'properties', multiple: false
-        property :model_version, delegate_to: 'properties', multiple: false
-        property :verified, delegate_to: 'properties', multiple: false
-        property :doi, delegate_to: 'properties', multiple: false
-        property :cover_image, delegate_to: 'properties', multiple: false
-        property :institute, delegate_to: 'properties', multiple: true
-        property :depositing_institute, delegate_to: 'properties', multiple: false
-        property :licence, delegate_to: 'properties', multiple: false
-        property :ingest_files_from_metadata, delegate_to: 'properties', multiple: false
-        property :master_file_access, delegate_to: 'properties', multiple: false
-        property :published_at, delegate_to: 'properties', multiple: false
-        property :object_version, delegate_to: 'properties', multiple: false
+        delegate :object_type,:object_type=, to: :properties
+        delegate :depositor=, to: :properties
+        delegate :metadata_md5=, to: :properties
+        delegate :model_version=, to: :properties
+        delegate :verified=, to: :properties
+        delegate :doi=, to: :properties
+        delegate :cover_image=, to: :properties
+        delegate :institute,:institute=, to: :properties
+        delegate :depositing_institute=, to: :properties
+        delegate :licence=, to: :properties
+        delegate :ingest_files_from_metadata=, to: :properties
+        delegate :master_file_access=, to: :properties
+        delegate :published_at=, to: :properties
+        delegate :object_version=, to: :properties
+        delegate :status=, to: :properties
+      end
+
+      def cover_image
+        properties.cover_image.first
+      end
+
+      def depositor
+        properties.depositor.first
+      end
+
+      def depositing_institute
+        properties.depositing_institute.first
+      end
+
+      def doi
+        properties.doi.first
+      end
+
+      def object_version
+        properties.object_version.first
+      end
+
+      def licence
+        properties.licence.first
+      end
+
+      def metadata_md5
+        properties.metadata_md5.first
+      end
+
+      def model_version
+        properties.model_version.first
+      end
+
+      # Returns whether the object has a status of 'published'
+      #
+      # @return [Boolean] true if status is published
+      def published?
+        status == 'published'
+      end
+
+      def published_at
+        properties.published_at.first if properties.published_at.present?
+      end
+
+      def ingest_files_from_metadata
+        properties.ingest_files_from_metadata.first
+      end
+
+      def institute
+        properties.institute.first
+      end
+
+      def master_file_access
+        properties.master_file_access.first
+      end
+
+      def status
+        properties.status.first
+      end
+
+      def verified
+        properties.verified.first
       end
     end
   end

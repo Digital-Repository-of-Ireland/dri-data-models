@@ -1,90 +1,8 @@
-# DRI namespace
 module DRI
-  # Metadata namespace
   module Metadata
     # An ActiveFedora datastream that interacts with Qualified DC Metadata.
     class QualifiedDublinCore < DRI::Metadata::Base
-      # Set OM (Opinionated Metadata) terminology
-      def self.load_inherited_terminology
-        set_terminology do |t|
-          t.root(path: '*') # Selects the root node of the XML document
-
-          # Simple Dublin Core Fields
-          t.title(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
-            t.title_lang(path: { attribute: 'xml:lang' })
-          }
-          t.rights(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
-            t.rights_lang(path: { attribute: 'xml:lang' })
-          }
-          t.description(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]) {
-            t.description_lang(path: { attribute: 'xml:lang' })
-          }
-          t.language(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.language_facetable])
-          t.subject(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable, Descriptors.cleaned_displayable]) {
-            t.subject_lang(path: { attribute: 'xml:lang' })
-          }
-          t.subject_lang(proxy: [:subject, :subject_lang])
-          t.date(namespace_prefix: 'dc')
-          t.contributor(path: 'contributor', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable])
-          t.source(path: 'source', namespace_prefix: 'dc') {
-            t.source_lang(path: { attribute: 'xml:lang' })
-          }
-          t.publisher(path: 'publisher', namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable])
-          t.coverage(namespace_prefix: 'dc') {
-            t.coverage_lang(path: { attribute: 'xml:lang' })
-          }
-          t.relation(namespace_prefix: 'dc')
-          t.external_relation(path: 'relation', namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' })
-          t.creator(namespace_prefix: 'dc', index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable, :sortable])
-          t.format(namespace_prefix: 'dc')
-          t.resource_type(path: 'type', namespace_prefix: 'dc')
-
-          t.identifier(namespace_prefix: 'dc')
-          # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
-          t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc')
-          # Used for QDC metadata relationships, as the local, unique record ID
-          t.qdc_id(ref: :identifier)
-
-          # Qualified Dublin Core fields
-          t.published_date(path: 'issued', namespace_prefix: 'dcterms')
-          t.creation_date(path: 'created', namespace_prefix: 'dcterms')
-          t.geographical_coverage(path: 'spatial', namespace_prefix: 'dcterms', index_as: [Descriptors.cleaned_searchable, Descriptors.cleaned_facetable,  Descriptors.cleaned_displayable]) {
-            t.geographical_coverage_lang(path: { attribute: 'xml:lang' })
-          }
-          t.temporal_coverage(path: 'temporal', namespace_prefix: 'dcterms') {
-            t.temporal_coverage_lang(path: { attribute: 'xml:lang' })
-          }
-          t.geocode_point(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Point' })
-          t.geocode_box(ref: :geographical_coverage, attributes: { 'xsi:type' => 'dcterms:Box' })
-          t.name_coverage(path: 'dpc', namespace_prefix: 'marcrel') {
-            t.name_coverage_lang(path: { attribute: 'xml:lang' })
-          }
-
-          # Generate MARC Relators fields from the MARC Relators vocabulary
-          DRI::Vocabulary.marc_relators.each do |role|
-            t.send "role_#{role}",
-                   path: role,
-                   namespace_prefix: 'marcrel',
-                   index_as: [Descriptors.cleaned_facetable, Descriptors.cleaned_searchable, Descriptors.cleaned_displayable]
-          end
-
-          # Relationships for QDC
-          DRI::Vocabulary.qdc_relationship_types.each do |rel|
-            t.send "relation_ids_#{rel}",
-                   path: "#{rel}[not(@xsi:type='dcterms:URI')]",
-                   namespace_prefix: 'dcterms'
-          end
-
-          # External relationships (contain uri to a resource external to DRI)
-          DRI::Vocabulary.qdc_relationship_types.each do |rel|
-            t.send "ext_related_items_ids_#{rel}",
-                   path: rel,
-                   attributes: { 'xsi:type' => 'dcterms:URI' },
-                   namespace_prefix: 'dcterms'
-          end
-        end
-
-      end
+      extend DRI::Metadata::Terminologies::Qdc
 
       # synchronize_metadata_on_save attribute getter
       # For non-EAD digital objects this is always false (disable)
@@ -105,9 +23,11 @@ module DRI
                                  :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
         if recognised_attributes.include? field
           [field]
-        else
+        elsif
           m = /^role_(.*)/.match(field.to_s)
           DRI::Vocabulary.marc_relators.include?(m[1]) ? [field] : []
+        else
+          []
         end
       end
 
@@ -435,6 +355,6 @@ module DRI
 
       # Load Dublin Core terminology
       load_inherited_terminology
-    end # class
-  end # module
-end # module
+    end
+  end
+end

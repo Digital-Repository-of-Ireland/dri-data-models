@@ -1,4 +1,4 @@
 module DriDataModels
   # DRI Data Models version number
-  VERSION = '2.6.6'
+  VERSION = '3.0.0'
 end

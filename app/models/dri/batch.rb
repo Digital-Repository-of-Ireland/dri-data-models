@@ -11,28 +11,15 @@ module DRI
 
     include DRI::Noid
     include DRI::Export
-    
+
+    include DRI::ModelSupport::Common
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Permissions
-    include DRI::ModelSupport::InterchangeableMetadata
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
     after_destroy :delete_bucket
-
-    # one-to-many AF relationship to associate digital assets with their batch object
-    has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :batch, dependent: :destroy
-    # one-to-many AF relationship to associate documentation objects
-    has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for
-
-    # Declare a 'extracted' DS, of the following type
-    # Unused for NOW
-    contains 'extracted', class_name: 'DRI::Metadata::Extracted'
-
-    # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
-    # Unused for NOW
-    property :full_text, delegate_to: 'extracted', multiple: true
 
     # Creates a digital object depending on the metadata standard
     #
@@ -74,9 +61,34 @@ module DRI
       DRI::Batch.create(id: pid)
     end
 
+    def [](key)
+        super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          return file.send(key.to_s)
+        end
+      end
+
+      raise ArgumentError, "Unknown attribute #{key}"
+    end
+
+    def []=(key, value)
+      super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          file.send(key.to_s + "=", value)
+          return
+        end
+      end
+
+      raise ArgumentError, "Unknown attribute #{key}"
+    end
+
     def increment_version
       return '1' if object_version.nil?
-      
+
       self.object_version = self.object_version.next
     end
 
@@ -107,6 +119,7 @@ module DRI
     def to_solr(solr_doc = {}, _opts = {})
       solr_doc = super(solr_doc)
 
+      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr
@@ -142,13 +155,6 @@ module DRI
       end
 
       solr_doc
-    end
-
-    # Returns whether the object has a status of 'published'
-    #
-    # @return [Boolean] true if status is published
-    def published?
-      status == 'published'
     end
 
     private

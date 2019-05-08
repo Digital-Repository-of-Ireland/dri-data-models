@@ -9,11 +9,11 @@ module DRI::Asset
       def public?
         governing_object = self.batch
 
-        while governing_object.master_file_access.nil? || governing_object.master_file_access == "inherit" 
+        while governing_object.master_file_access.blank? || governing_object.master_file_access == "inherit"
           governing_object = governing_object.governing_collection
 
           return false if governing_object.nil?
-        end        
+        end
 
         governing_object.master_file_access == 'public'
       end
@@ -21,7 +21,7 @@ module DRI::Asset
       # Determine whether the object has a preservation only access status
       # @return [Boolean] true if preservation; false otherwise
       def preservation?
-        self.preservation_only == 'true'
+        self.preservation_only == ['true']
       end
 
       # Determine whether the object has a registered access status

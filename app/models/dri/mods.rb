@@ -4,90 +4,81 @@ module DRI
   class Mods < DRI::Batch
     include DRI::ModelSupport::ModsSupport
 
-    contains 'descMetadata', class_name: 'DRI::Metadata::Mods'
+    has_subresource :descMetadata, class_name: 'DRI::Metadata::Mods'
 
     # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    property :mods_id_local, delegate_to: 'descMetadata', multiple: false
+    delegate :mods_id_local=, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
-    property :id_asset, delegate_to: 'descMetadata', multiple: false
+    delegate :id_asset=, to: :descMetadata
     # MODS rest of identifiers are repeatable
-    property :identifier, delegate_to: 'descMetadata', multiple: true
-    property :identifier_doi, delegate_to: 'descMetadata', multiple: true
-    property :identifier_uri, delegate_to: 'descMetadata', multiple: true
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :identifier_doi,:identifier_doi=, to: :descMetadata
+    delegate :identifier_uri,:identifier_uri=, to: :descMetadata
 
     # Collection attribute + genre type
-    property :mods_type_collection, delegate_to: 'descMetadata', multiple: false
-    property :mods_genre, delegate_to: 'descMetadata', multiple: true
+    delegate :mods_type_collection=, to: :descMetadata
+    delegate :mods_genre,:mods_genre=, to: :descMetadata
 
     # subtitle
-    property :mods_subtitle, delegate_to: 'descMetadata', multiple: true
+    delegate :mods_subtitle,:mods_subtitle=, to: :descMetadata
 
     # Description
-    property :desc_abstract, delegate_to: 'descMetadata', multiple: true
-    property :desc_toc, delegate_to: 'descMetadata', multiple: true
-    property :desc_note, delegate_to: 'descMetadata', multiple: true
-    property :desc_physdesc_note, delegate_to: 'descMetadata', multiple: true
-    # property :abstract, delegate_to: 'descMetadata', multiple: true
-    # property :toc, delegate_to: 'descMetadata', multiple: true
-    # property :note_mods_type, delegate_to: 'descMetadata', multiple: true
-    # property :note_mods_no_type, delegate_to: 'descMetadata', multiple: true
+    delegate :desc_abstract,:desc_abstract=, to: :descMetadata
+    delegate :desc_toc,:desc_toc=, to: :descMetadata
+    delegate :desc_note,:desc_note=, to: :descMetadata
+    delegate :desc_physdesc_note,:desc_physdesc_note=, to: :descMetadata
+    # delegate :abstract, to: :descMetadata
+    # delegate :toc, to: :descMetadata
+    # delegate :note_mods_type, to: :descMetadata
+    # delegate :note_mods_no_type, to: :descMetadata
 
     # Rights copyrightMD
-    property :copyrightmd_rights, delegate_to: 'descMetadata', multiple: true
+    delegate :copyrightmd_rights,:copyrightmd_rights=, to: :descMetadata
 
     # Source
-    property :source, delegate_to: 'descMetadata', multiple: true
-    property :source_physical_location, delegate_to: 'descMetadata', multiple: true
-    property :source_location, delegate_to: 'descMetadata', multiple: true
+    delegate :source,:source=, to: :descMetadata
+    delegate :source_physical_location,:source_physical_location=, to: :descMetadata
+    delegate :source_location,:source_location=, to: :descMetadata
 
     # Dates
-    property :date, delegate_to: 'descMetadata', multiple: true
-    property :date_other, delegate_to: 'descMetadata', multiple: true
-    property :date_other_start, delegate_to: 'descMetadata', multiple: true
-    property :date_other_end, delegate_to: 'descMetadata', multiple: true
-    property :captured_date, delegate_to: 'descMetadata', multiple: true
-    property :captured_date_start, delegate_to: 'descMetadata', multiple: true
-    property :captured_date_end, delegate_to: 'descMetadata', multiple: true
-    property :issued_date_start, delegate_to: 'descMetadata', multiple: true
-    property :issued_date_end, delegate_to: 'descMetadata', multiple: true
-    property :creation_date_start, delegate_to: 'descMetadata', multiple: true
-    property :creation_date_end, delegate_to: 'descMetadata', multiple: true
+    delegate :date,:date=, to: :descMetadata
+    delegate :date_other,:date_other=, to: :descMetadata
+    delegate :date_other_start,:date_other_start=, to: :descMetadata
+    delegate :date_other_end,:date_other_end=, to: :descMetadata
+    delegate :captured_date,:captured_date=, to: :descMetadata
+    delegate :captured_date_start,:captured_date_start=, to: :descMetadata
+    delegate :captured_date_end,:captured_date_end=, to: :descMetadata
+    delegate :issued_date_start,:issued_date_start=, to: :descMetadata
+    delegate :issued_date_end,:issued_date_end=, to: :descMetadata
+    delegate :creation_date_start,:creation_date_start=, to: :descMetadata
+    delegate :creation_date_end,:creation_date_end=, to: :descMetadata
 
     # Geographical, temporal, name
-    property :name_coverage, delegate_to: 'descMetadata', multiple: true
-    property :geographical_coverage, delegate_to: 'descMetadata', multiple: true
-    property :temporal_coverage, delegate_to: 'descMetadata', multiple: true
-    property :subject_date_start, delegate_to: 'descMetadata', multiple: true
-    property :subject_date_end, delegate_to: 'descMetadata', multiple: true
-    property :geocode_logainm, delegate_to: 'descMetadata', multiple: true
+    delegate :name_coverage,:name_coverage=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :subject_date_start,:subject_date_start=, to: :descMetadata
+    delegate :subject_date_end,:subject_date_end=, to: :descMetadata
+    delegate :geocode_logainm,:geocode_logainm=, to: :descMetadata
 
-    property :published_date, delegate_to: 'descMetadata', multiple: true
-    property :creation_date, delegate_to: 'descMetadata', multiple: true
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
     class_eval do
       # Roles
-      DRI::Vocabulary.marc_relators.map { |s| property s.prepend('role_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym, to: :descMetadata }
       # Internal Relationships
-      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary.mods_relationship_types.map { |s| property s.prepend('ext_related_items_ids_').to_sym, delegate_to: 'descMetadata', multiple: true }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
     end
 
-    property :resource_type, delegate_to: 'descMetadata', multiple: true
-    property :mods_genre, delegate_to: 'descMetadata', multiple: true
+    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :mods_genre,:mods_genre=, to: :descMetadata
 
-    property :origin_metadata, delegate_to: 'descMetadata', multiple: true
+    delegate :origin_metadata,:origin_metadata=, to: :descMetadata
 
-    property :subject_metadata, delegate_to: 'descMetadata', multiple: true
-
-    # Disabled for now
-    # around_save :create_multiple_records
-
-    # Initialize - mods record
-    def initialize(args = {})
-      args[:desc_metadata_class] = 'DRI::Metadata::Mods'
-      super(args)
-    end
+    delegate :subject_metadata,:subject_metadata=, to: :descMetadata
 
     #
     # @return [Array<Symbol>] MODS DRI terms symbols array
@@ -97,6 +88,18 @@ module DRI
        :subject_metadata, :source_location, :source_physical_location,
        :publisher, :type, :mods_genre, :language, :roles
       ]
+    end
+
+    def mods_id_local
+      descMetadata.mods_id_local.first
+    end
+
+    def mods_type_collection
+      descMetadata.mods_type_collection.first
+    end
+
+    def id_asset
+      descMetadata.id_asset.first
     end
 
     # AF Override
@@ -356,7 +359,7 @@ module DRI
     # i.e. mods_id_local_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora::SolrQueryBuilder.solr_name('mods_id_local', :stored_searchable, type: :string)
+      ActiveFedora.index_field_mapper.solr_name('mods_id_local', :stored_searchable, type: :string)
     end
 
     # Return a Hash including all the PIDs of fedora objects by relationship type
