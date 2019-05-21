@@ -47,50 +47,42 @@ module DRI
         results = []
 
         names.each do |archived_name|
-          name_parts = archived_name.split(',')
+          archived_name = extract_name(archived_name)
+          next if !person_name?(archived_name)
 
-          firstname = ''
-          surname = ''
-          prefix = ''
-          misc = ''
+          escaped_name = CGI.unescapeHTML(archived_name)
+          name_parts = escaped_name.strip.split(',')
+          sorted_name = name_parts[0].strip + ", " + name_parts[1..-1].join(" ").strip
+          parsed_name = Namae.parse(sorted_name)
 
-          if name_parts.length > 0
-            surname_parts = name_parts[0].split('(')
-            surname = surname_parts[0].strip
-            misc += surname_parts[1..-1].join('(')
-          end
-
-          if name_parts.length > 1
-            firstname_parts = name_parts[1].split('(')
-            firstname = firstname_parts[0].strip
-            misc += firstname_parts[1..-1].join('(')
-          end
-
-          if name_parts.length > 2
-            prefix_parts = name_parts[2].split('(')
-            prefix = prefix_parts[0].strip
-            misc += prefix_parts[1..-1].join('(')
-          end
-
-          result = ''
-          result += "#{firstname} " unless firstname.empty?
-
-          unless prefix.empty?
-            result += prefix
-            result += ' ' unless prefix[-1, 1] == '-'
-          end
-
-          result += "#{surname} " unless surname.empty?
-
-          result += misc unless misc.empty?
-
-          result = result.strip
-
-          results |= [result] unless result.empty?
+          result = parsed_name[0].display_order unless parsed_name.empty?
+          results |= [result] if result
         end
 
         results
       end
+
+      def self.extract_name(name)
+        name = name_from_orcid(name)
+        name_remove_dates(name)
+      end
+
+      def self.name_from_orcid(name)
+        return name unless name.start_with?('name=')
+        name['name='.length..name.index(';')-1]
+      end
+
+      def self.name_remove_dates(name)
+        name.gsub(/\(?\s*\d+\s*-\s*\d+\s*\)?/,'')
+      end
+
+      def self.person_name?(name)
+        return false if name.include?("--") # lcsh style
+
+        name = name.downcase
+        !(%w(ltd ltd. limited archive museum archives library firm nui gallery services consultancy associates university).any? { |word| name.include?(word) })
+      end
+
 
       # A function to convert a title string removing definite articles, unneccessary spaces, etc.
       #

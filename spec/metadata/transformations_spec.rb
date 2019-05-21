@@ -61,7 +61,21 @@ describe DRI::Metadata::Transformations do
   context 'name transformations' do
 
     it 'should transform names to human readable' do
-      expect(described_class.transform_name(['Lewis, Daniel, Day-', 'Valera, Eamon, de'])).to eq (['Daniel Day-Lewis','Eamon de Valera'])
+      expect(described_class.transform_name(['Day-Lewis, Daniel', 'Valera, Eamon de'])).to eq (['Daniel Day-Lewis','Eamon de Valera'])
+    end
+
+    it 'should transform names with ORCID to human readable' do
+      expect(described_class.transform_name(['name=Day-Lewis, Daniel;authority=ORCID;identifier=https://orcid.org/1111-2222-3333-4444', 'Valera, Eamon de'])).to eq (['Daniel Day-Lewis','Eamon de Valera'])
+    end
+
+    it 'should skip non personal names' do
+      expect(described_class.person_name?('j. clarke & sons (irish church decoration firm, 1886-1930)')).to be false
+      expect(described_class.person_name?('dublin city library and archives')).to be false
+      expect(described_class.person_name?('jesus christ--resurrection')).to be false
+    end
+
+    it 'should attempt to handle dates' do
+      expect(described_class.transform_name(['deevy, teresa, 1894 - 1963'])).to eq (['teresa deevy'])
     end
   end
 
