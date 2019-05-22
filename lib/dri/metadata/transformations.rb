@@ -47,11 +47,12 @@ module DRI
         results = []
 
         names.each do |archived_name|
-          archived_name = extract_name(archived_name)
+          archived_name = extract_name(CGI.unescapeHTML(archived_name))
           next if !person_name?(archived_name)
 
-          escaped_name = CGI.unescapeHTML(archived_name)
-          name_parts = escaped_name.strip.split(',')
+          name_parts = archived_name.strip.split(',')
+          next if name_parts.empty?
+
           sorted_name = name_parts[0].strip + ", " + name_parts[1..-1].join(" ").strip
           parsed_name = Namae.parse(sorted_name)
 
