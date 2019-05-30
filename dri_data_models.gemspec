@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'resque-pool'
   s.add_dependency 'google-api-client'
   s.add_dependency 'iso8601'
-  #s.add_dependency 'paper_trail'
+  s.add_dependency 'namae'
   s.add_development_dependency 'sqlite3', '~> 1.3', '< 1.4'
   s.add_development_dependency 'bundler', '< 2.0'
   s.add_development_dependency 'rspec'
