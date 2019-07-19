@@ -24,6 +24,9 @@ Dir.glob(File.expand_path('../tasks/*.rake', __FILE__)).each do |f|
   load(f)
 end
 
+APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
+load 'rails/tasks/engine.rake'
+
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'DriDataModels'
@@ -48,7 +51,9 @@ end
 desc 'Run Continuous Integration'
 task :ci do
   ENV['environment'] = 'test'
+
   with_test_server do
+    Rake::Task['db:migrate'].invoke
     Rake::Task['rspec'].invoke
   end
 

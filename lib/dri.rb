@@ -16,4 +16,8 @@ module DRI
     @queue ||= DRI::Resque::Queue.new('dri')
   end
 
+  def self.table_name_prefix
+    'dri_'
+  end
 end
+

@@ -232,7 +232,7 @@ module DRI
         )
 
         # Index logainm URIs in the appropriate geographic indices
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 

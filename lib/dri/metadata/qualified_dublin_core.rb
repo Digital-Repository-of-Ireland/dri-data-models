@@ -199,21 +199,12 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
         end
 
-        # Index dcterms Point and Box data into geospatial Solr field
+        # Index dcterms Point and Box data, and linked data uris into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
           {
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+            'geographical_coverage' => geographical_coverage | reconciliation_uris
           }
         )
-
-        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
-        if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
-
-          geospatial_hash[:coords].concat(linked_data[:coords])
-          geospatial_hash[:name].concat(linked_data[:name])
-          geospatial_hash[:json].concat(linked_data[:json])
-        end
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
 
         unless geospatial_hash[:name].empty?

@@ -37,6 +37,11 @@ module DRI
         return ''
       end
 
+      def reconciliation_uris
+        return [] if id.nil?
+        DRI::ReconciliationResult.where(object_id: id.split('/')[0]).pluck(:uri)
+      end
+
       # Remove null values from a given field within
       # the solr document for this object
       #

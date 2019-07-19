@@ -254,7 +254,7 @@ module DRI
           }
         )
 
-        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
@@ -372,6 +372,11 @@ module DRI
 
         errors
       end # custom_validations
+
+      def reconciliation_uris
+        return [] if id.nil?
+        DRI::ReconciliationResult.where(object_id: id.split('/')[0]).pluck(:uri)
+      end
 
       # Override from ActiveFedora::RDFXMLDatastream
       def apply_prefix(name, _file_path)
