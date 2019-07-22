@@ -51,9 +51,10 @@ end
 desc 'Run Continuous Integration'
 task :ci do
   ENV['environment'] = 'test'
+  Rake::Task['app:db:migrate'].invoke
+  Rake::Task['app:db:test:prepare'].invoke
 
   with_test_server do
-    Rake::Task['db:migrate'].invoke
     Rake::Task['rspec'].invoke
   end
 
