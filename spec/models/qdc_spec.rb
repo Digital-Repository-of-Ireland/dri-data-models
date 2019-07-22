@@ -1,7 +1,7 @@
 describe 'QualifiedDublinCore' do
   context 'object methods' do
     before(:each) do
-      # This gives you a test article object that can be used in any of the tests
+      # This gives you a test object that can be used in any of the tests
       @audio = DRI::QualifiedDublinCore.new
       @audio.type = ['Sound']
 
@@ -114,41 +114,6 @@ describe 'QualifiedDublinCore' do
       @audio = DRI::QualifiedDublinCore.new
       @audio.status.should == 'draft'
     end
-
-    #it 'should have the attributes of a audio and support update_attributes' do
-    #  @audio.update_attributes( @attributes_hash )
-    #
-    #  # These attributes have not been marked 'unique' in the call to the delegate, which causes the results to be arrays
-    #  @audio.title.class.to_s.should == 'Array'
-    #  @audio.rights.class.to_s.should == 'Array'
-    #  @audio.description.class.to_s.should == 'Array'
-    #  @audio.language.class.to_s.should == 'Array'
-    #  @audio.creation_date.class.to_s.should == 'Array'
-    #  @audio.role_hst.class.to_s.should == 'Array'
-    #  @audio.role_pro.class.to_s.should == 'Array'
-    #  @audio.role_aut.class.to_s.should == 'Array'
-    #  @audio.subject.class.to_s.should == 'Array'
-    #  @audio.source.class.to_s.should == 'Array'
-    #  @audio.geographical_coverage.class.to_s.should == 'Array'
-    #  @audio.temporal_coverage.class.to_s.should == 'Array'
-    #  @audio.published_date.class.to_s.should == 'Array'
-
-      # The value should match what was set in the attributes_hash above
-    #  @audio.title.should == @attributes_hash['title']
-    #  @audio.rights.should == @attributes_hash['rights']
-    #  @audio.description.should == @attributes_hash['description']
-    #  @audio.published_date.should == @attributes_hash['published_date']
-    #  @audio.creation_date.should == @attributes_hash['creation_date']
-    #  @audio.language.should == @attributes_hash['language']
-    #  @audio.role_pro.should == @attributes_hash['role_hst']
-    #  @audio.role_hst.should == @attributes_hash['role_pro']
-    #  @audio.role_aut.should == @attributes_hash['role_aut']
-    #  @audio.subject.should == @attributes_hash['subject']
-    #  @audio.source.should == @attributes_hash['source']
-    #  @audio.geographical_coverage.should == @attributes_hash['geographical_coverage']
-    #  @audio.temporal_coverage.should == @attributes_hash['temporal_coverage']
-    #
-    #end
 
     it 'should update the role attributes' do
       new_roles = {
@@ -392,6 +357,24 @@ describe 'QualifiedDublinCore' do
       expect(solr_doc['geographical_coverage_gle_tesim']).to match(['Co. na Gaillimhe'])
       expect(solr_doc['geographical_coverage_tesim']).to match(['Co. na Gaillimhe',
                                                                 'name=Kilkenny; east=-7.2561; north=52.6477;'])
+    end
+
+    it 'includes reconciliation results in geographical_coverage' do
+      @obj.geographical_coverage = []
+      @obj.save
+
+      ld = DRI::LinkedData.new
+      ld.resource_type = ["Dataset"]
+      ld.source = ["http://data.logainm.ie/place/1399926"]
+      ld.spatial = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-7.25218,52.6556]},\"properties\":{\"placename\":\"Cill Chainnigh/Kilkenny\"}}"]
+      ld.save
+
+      rr = DRI::ReconciliationResult.new
+      rr.object_id = @obj.id
+      rr.uri = "http://data.logainm.ie/place/1399926"
+      rr.save
+
+      expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial[0])
     end
   end
 
