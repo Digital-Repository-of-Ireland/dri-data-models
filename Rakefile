@@ -1,7 +1,6 @@
 #!/usr/bin/env rake
 require 'rspec/core/rake_task'
 require 'yard'
-require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
