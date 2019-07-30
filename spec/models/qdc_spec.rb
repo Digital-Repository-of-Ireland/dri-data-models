@@ -375,6 +375,30 @@ describe 'QualifiedDublinCore' do
       rr.save
 
       expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial[0])
+
+      ld.delete
+      rr.delete
+    end
+
+    it 'ignores reconciliation results without spatial in geographical_coverage' do
+      @obj.geographical_coverage = []
+      @obj.save
+      @obj.reload
+
+      ld = DRI::LinkedData.new
+      ld.resource_type = ["Dataset"]
+      ld.source = ["http://data.logainm.ie/place/test"]
+      ld.spatial = []
+      ld.save
+
+      rr = DRI::ReconciliationResult.new
+      rr.object_id = @obj.id
+      rr.uri = "http://data.logainm.ie/place/test"
+      rr.save
+
+      expect(@obj.to_solr['geojson_ssim']).to be_blank
+      ld.delete
+      rr.delete
     end
   end
 
