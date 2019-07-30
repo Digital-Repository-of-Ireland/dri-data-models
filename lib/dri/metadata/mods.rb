@@ -320,12 +320,16 @@ module DRI
       # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_single_date_for_index(date_field = [])
         date_field.collect do |value|
-          begin
-            display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
-            DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
-          rescue ISO8601::Errors::StandardError
-            # DCMI Period 'name' is the md value
-            DRI::Metadata::Transformations.create_dcmi_period(value)
+          if Utils.valid_uri?(value)
+            value
+          else
+            begin
+              display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
+              DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
+            rescue ISO8601::Errors::StandardError
+              # DCMI Period 'name' is the md value
+              DRI::Metadata::Transformations.create_dcmi_period(value)
+            end
           end
         end
       end

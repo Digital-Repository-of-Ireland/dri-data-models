@@ -226,7 +226,7 @@ module DRI
         date_field = date_field.delete_if { |v| /^null$/i.match(v) }
         date_field.collect do |value|
           begin
-            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value)
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               # return value for display as it is
               # If value.empty? is cleaned afterwards
               value

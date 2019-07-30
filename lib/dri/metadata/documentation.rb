@@ -285,7 +285,7 @@ module DRI
         date_field.collect! do |value|
           begin
             # return value for display as it is
-            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value)
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               # If value.empty? is cleaned afterwards
               value
             else
