@@ -400,6 +400,14 @@ describe 'QualifiedDublinCore' do
       ld.delete
       rr.delete
     end
+
+    it 'does not index uris to facets' do
+      @obj.geographical_coverage = @obj.geographical_coverage + ["http://data.logainm.ie/place/test"]
+      solr_doc = @obj.descMetadata.to_solr
+
+      expect(solr_doc['geographical_coverage_sim']).to match(['Co. na Gaillimhe',
+                                                                'name=Kilkenny; east=-7.2561; north=52.6477;'])
+    end
   end
 
   context 'relationships' do

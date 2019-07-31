@@ -106,12 +106,10 @@ module DRI
           end
           index_config[:geographical_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:geographical_coverage) do |index|
             index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                     DRI::Metadata::Descriptors.cleaned_facetable,
                      DRI::Metadata::Descriptors.cleaned_displayable
           end
           index_config[:temporal_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:temporal_coverage) do |index|
             index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                     DRI::Metadata::Descriptors.cleaned_facetable,
                      DRI::Metadata::Descriptors.cleaned_displayable
           end
           index_config[:relation] = ActiveFedora::Indexing::Map::IndexObject.new(:relation) do |index|
@@ -177,7 +175,9 @@ module DRI
 
         temporal_coverage_dates = display_date_for_index(temporal_coverage_period)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(temporal_coverage_dates))
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(geographical_coverage))
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
@@ -274,6 +274,10 @@ module DRI
         end
 
         solr_doc
+      end
+
+      def filter_uris(array)
+        array.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
       end
 
       # Transforms metadata date strings into DCMI Period encoded strings for displayable indices

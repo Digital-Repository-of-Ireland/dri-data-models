@@ -108,7 +108,7 @@ module DRI
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_for_index)
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => subject_place_for_index)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_for_index))
 
         # Publisher
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
@@ -137,9 +137,7 @@ module DRI
         # Subject(Temporal)
         subject_temporal_array = subject_temporal_for_index
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
-
-        #solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx) unless creation_date_idx == []
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array))
 
         # Index date ranges, and iso dates into the appropriate solr fields
         date_ranges = date_ranges_for_index # ALL the date ranges

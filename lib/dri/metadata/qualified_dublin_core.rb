@@ -107,8 +107,10 @@ module DRI
         temporal_coverage_dates = display_date_for_index(temporal_coverage)
         if temporal_coverage_dates.present?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(temporal_coverage_dates))
         end
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(geographical_coverage))
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
@@ -152,7 +154,7 @@ module DRI
 
         faceted_language_indexes.each do |key, value|
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => value)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => filter_uris(value))
         end
 
         # Indices for external relationships (to be displayed as URL)
@@ -161,7 +163,6 @@ module DRI
         external_rels.each do |elem|
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
         end
-
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
         cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'creation_date' => creation_date })
