@@ -46,7 +46,7 @@ module DRI::Metadata::Terminologies
         # Qualified Dublin Core fields
         t.published_date(path: 'issued', namespace_prefix: 'dcterms')
         t.creation_date(path: 'created', namespace_prefix: 'dcterms')
-        t.geographical_coverage(path: 'spatial', namespace_prefix: 'dcterms', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable,  DRI::Metadata::Descriptors.cleaned_displayable]) {
+        t.geographical_coverage(path: 'spatial', namespace_prefix: 'dcterms', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]) {
           t.geographical_coverage_lang(path: { attribute: 'xml:lang' })
         }
         t.temporal_coverage(path: 'temporal', namespace_prefix: 'dcterms') {

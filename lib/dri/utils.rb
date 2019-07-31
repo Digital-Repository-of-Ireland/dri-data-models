@@ -4,19 +4,18 @@ require 'uri'
 module DRI
   # Module Utils - general utilities methods
   module Utils
-   
+
     # Validates a String URI
     # @param string_uri [String] the string URI
     # return true if valid URI; false otherwise
     #
     def self.valid_uri?(string_uri)
-      URI(string_uri)
-
-      true
-    rescue URI::InvalidURIError
+      uri = URI.parse(string_uri)
+      %w(http https).include?(uri.scheme)
+    rescue URI::BadURIError, URI::InvalidURIError
       false
     end
-    
+
     # Apply XSLT transformation to input XML. To transform existing
     # descriptive metadata (DC, MODS, EAD) into oai_dc metadata
     #

@@ -108,7 +108,7 @@ module DRI
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_array)
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => subject_place_array)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array))
 
         # Display of Creation Date
         creation_date_array = creation_date_for_index
@@ -122,7 +122,7 @@ module DRI
         # Display of Subject(Temporal)
         subject_temporal_array = subject_temporal_for_index
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => subject_temporal_array)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array))
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
         if creation_date_idx.empty?
@@ -187,7 +187,7 @@ module DRI
         # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => geocode_point | geocode_box })
 
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 

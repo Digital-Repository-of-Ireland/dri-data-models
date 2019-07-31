@@ -107,8 +107,10 @@ module DRI
         temporal_coverage_dates = display_date_for_index(temporal_coverage)
         if temporal_coverage_dates.present?
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(temporal_coverage_dates))
         end
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(geographical_coverage))
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
@@ -152,7 +154,7 @@ module DRI
 
         faceted_language_indexes.each do |key, value|
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => value)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(key, :facetable, type: :text) => filter_uris(value))
         end
 
         # Indices for external relationships (to be displayed as URL)
@@ -161,7 +163,6 @@ module DRI
         external_rels.each do |elem|
           solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
         end
-
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
         cdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'creation_date' => creation_date })
@@ -199,21 +200,12 @@ module DRI
           solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
         end
 
-        # Index dcterms Point and Box data into geospatial Solr field
+        # Index dcterms Point and Box data, and linked data uris into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
           {
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+            'geographical_coverage' => geographical_coverage | reconciliation_uris
           }
         )
-
-        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
-        if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
-
-          geospatial_hash[:coords].concat(linked_data[:coords])
-          geospatial_hash[:name].concat(linked_data[:name])
-          geospatial_hash[:json].concat(linked_data[:json])
-        end
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
 
         unless geospatial_hash[:name].empty?
@@ -235,7 +227,7 @@ module DRI
         date_field = date_field.delete_if { |v| /^null$/i.match(v) }
         date_field.collect do |value|
           begin
-            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value)
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               # return value for display as it is
               # If value.empty? is cleaned afterwards
               value

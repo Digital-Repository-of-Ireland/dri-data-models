@@ -67,6 +67,13 @@ describe 'Mods' do
       expect(@mods_wrapper.governed_items.any?).to eq true
       expect(@mods_wrapper.governed_items.count).to eq 2
     end
+
+     it 'does not index uris to facets' do
+      @mods_record.geographical_coverage = @mods_record.geographical_coverage + ['Co. na Gaillimhe', "http://data.logainm.ie/place/test"]
+      solr_doc = @mods_record.descMetadata.to_solr
+
+      expect(solr_doc['geographical_coverage_sim']).to match(['Co. na Gaillimhe'])
+    end
   end
 
   context 'update attributes methods' do

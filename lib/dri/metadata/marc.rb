@@ -117,7 +117,7 @@ module DRI
           begin
             next if value.nil? || value.empty?
 
-            if DRI::Metadata::Transformations.dcmi_period?(value)
+            if DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               value
             else
               # Date range in ISO8601 format?

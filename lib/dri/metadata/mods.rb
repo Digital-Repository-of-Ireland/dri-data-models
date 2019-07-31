@@ -156,10 +156,10 @@ module DRI
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_for_index) unless name_coverage.empty?
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array)) unless subject_place_array.empty?
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array)) unless subject_temporal_array.empty?
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
@@ -232,7 +232,7 @@ module DRI
         )
 
         # Index logainm URIs in the appropriate geographic indices
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
@@ -320,12 +320,16 @@ module DRI
       # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_single_date_for_index(date_field = [])
         date_field.collect do |value|
-          begin
-            display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
-            DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
-          rescue ISO8601::Errors::StandardError
-            # DCMI Period 'name' is the md value
-            DRI::Metadata::Transformations.create_dcmi_period(value)
+          if Utils.valid_uri?(value)
+            value
+          else
+            begin
+              display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
+              DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
+            rescue ISO8601::Errors::StandardError
+              # DCMI Period 'name' is the md value
+              DRI::Metadata::Transformations.create_dcmi_period(value)
+            end
           end
         end
       end

@@ -106,12 +106,10 @@ module DRI
           end
           index_config[:geographical_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:geographical_coverage) do |index|
             index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                     DRI::Metadata::Descriptors.cleaned_facetable,
                      DRI::Metadata::Descriptors.cleaned_displayable
           end
           index_config[:temporal_coverage] = ActiveFedora::Indexing::Map::IndexObject.new(:temporal_coverage) do |index|
             index.as DRI::Metadata::Descriptors.cleaned_searchable,
-                     DRI::Metadata::Descriptors.cleaned_facetable,
                      DRI::Metadata::Descriptors.cleaned_displayable
           end
           index_config[:relation] = ActiveFedora::Indexing::Map::IndexObject.new(:relation) do |index|
@@ -177,7 +175,9 @@ module DRI
 
         temporal_coverage_dates = display_date_for_index(temporal_coverage_period)
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => temporal_coverage_dates)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(temporal_coverage_dates))
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(geographical_coverage))
 
         solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
@@ -254,7 +254,7 @@ module DRI
           }
         )
 
-        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geographical_coverage.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
@@ -276,6 +276,10 @@ module DRI
         solr_doc
       end
 
+      def filter_uris(array)
+        array.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+      end
+
       # Transforms metadata date strings into DCMI Period encoded strings for displayable indices
       # @param [String] date_field the date string
       # @return [String] the DCMI Period encoded date string for display
@@ -285,7 +289,7 @@ module DRI
         date_field.collect! do |value|
           begin
             # return value for display as it is
-            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value)
+            if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               # If value.empty? is cleaned afterwards
               value
             else
@@ -372,6 +376,11 @@ module DRI
 
         errors
       end # custom_validations
+
+      def reconciliation_uris
+        return [] if id.nil?
+        DRI::ReconciliationResult.where(object_id: id.split('/')[0]).pluck(:uri)
+      end
 
       # Override from ActiveFedora::RDFXMLDatastream
       def apply_prefix(name, _file_path)

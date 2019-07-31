@@ -368,7 +368,7 @@ module DRI::Metadata::Terminologies
 
           # geographical_coverage
           t.geographical_coverage(proxy: [:mods, :main_subject, :subject_geographic],
-                                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable],
+                                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
                                   namespace_prefix: MODS_NS_PREFIX)
 
           t.mods_geographic_code(proxy: [:mods, :main_subject, :subject_geographic_code], namespace_prefix: MODS_NS_PREFIX)
