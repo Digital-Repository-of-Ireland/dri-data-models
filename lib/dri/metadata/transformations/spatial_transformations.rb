@@ -107,7 +107,7 @@ module DRI::Metadata::Transformations
       # @param [String] name the displayable place name for a geocode value
       # @param [String] coords the string including the coordinates for a geocode value
       # @return [Hash] the hash including the geocode value formatted in GEO Json
-      def self.coords_to_geojson_string(name, coords, geometryCRS = nil)
+      def self.coords_to_geojson_string(name, coords, geometryCRS = nil, uri = nil)
         geojson_hash = { type: 'Feature', geometry: {}, properties: {} }
 
         if coords.scan(/[\s]/).length == 3
@@ -134,9 +134,16 @@ module DRI::Metadata::Transformations
         else
           Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
         end
+
+        name_array = name.split('/')
+        
         geojson_hash[:properties] = {}
         geojson_hash[:properties][:placename] = name unless name.blank?
         geojson_hash[:properties][:geometryCRS] = geometryCRS unless geometryCRS.nil?
+        geojson_hash[:properties][:uri] = uri unless uri.blank?
+        geojson_hash[:properties][:nameGA] = name_array[0] unless name_array[0].blank?
+        geojson_hash[:properties][:nameEN] = name_array[1] unless name_array[1].blank?
+        
 
         # Return as a JSON String for blacklight-maps
         geojson_hash.to_json.to_s
