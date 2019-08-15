@@ -53,7 +53,7 @@ module DRI::Metadata::Transformations
 
         result[:coords] = coords
         result[:name] = point['name']
-        result[:json] = coords_to_geojson_string(point['name'], coords, geometryCrs)
+        result[:json] = coords_to_geojson_string([point['name']], coords, geometryCrs)
       end
 
       result
@@ -73,7 +73,7 @@ module DRI::Metadata::Transformations
         # Solr 5 changed format to ENVELOPE(minX, maxX, maxY, minY)
         result[:coords] = "ENVELOPE(#{box['westlimit']}, #{box['eastlimit']}, #{box['northlimit']}, #{box['southlimit']})"
         result[:name] = box['name']
-        result[:json] = coords_to_geojson_string(box['name'], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
+        result[:json] = coords_to_geojson_string([box['name']], "#{box['westlimit']} #{box['southlimit']} #{box['eastlimit']} #{box['northlimit']}")
       end
 
       result
@@ -135,14 +135,15 @@ module DRI::Metadata::Transformations
           Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
         end
 
-        name_array = name.split('/')
+        nameEN, nameGA = name;
+        name = nameGA ? "#{nameGA}/#{nameEN}" : nameEN
         
         geojson_hash[:properties] = {}
         geojson_hash[:properties][:placename] = name unless name.blank?
         geojson_hash[:properties][:geometryCRS] = geometryCRS unless geometryCRS.nil?
         geojson_hash[:properties][:uri] = uri unless uri.blank?
-        geojson_hash[:properties][:nameGA] = name_array[0] unless name_array[0].blank?
-        geojson_hash[:properties][:nameEN] = name_array[1] unless name_array[1].blank?
+        geojson_hash[:properties][:nameGA] = nameGA unless nameGA.blank?
+        geojson_hash[:properties][:nameEN] = nameEN unless nameEN.blank?
         
 
         # Return as a JSON String for blacklight-maps
