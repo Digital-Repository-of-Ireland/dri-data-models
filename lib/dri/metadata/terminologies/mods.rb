@@ -34,7 +34,7 @@ module DRI::Metadata::Terminologies
           t.identifier_local(ref: :identifier_record, attributes: { type: 'local' }, namespace_prefix: MODS_NS_PREFIX)
           t.identifier_asset(ref: :identifier_record, attributes: { type: 'asset' }, namespace_prefix: MODS_NS_PREFIX)
 
-          t.abstract(path: 'abstract', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
+          t.abstract(path: 'abstract', index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable],
                      namespace_prefix: MODS_NS_PREFIX)
 
           t.role_term(path: 'roleTerm', namespace_prefix: MODS_NS_PREFIX) {
@@ -297,55 +297,55 @@ module DRI::Metadata::Terminologies
           t.identifier(proxy: [:mods, :identifier_record])
           # Title
           t.title(proxy: [:mods, :title_info, :main_title],
-                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                  index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
           # Creator
           t.creator(path: 'mods/mods:name[mods:role/mods:roleTerm/@authority="marcrelator" and mods:role/mods:roleTerm/@type="code" and (mods:role/mods:roleTerm[@type="code" and @authority="marcrelator"] = "cre")]/mods:namePart',
-                    index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable],
+                    index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable, :sortable],
                     namespace_prefix: MODS_NS_PREFIX)
           # Contributor
           t.contributor(path: 'mods/mods:name[mods:role/mods:roleTerm/@authority="marcrelator" and (mods:role/mods:roleTerm = "ctb")]/mods:namePart',
-                        index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable],
+                        index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable, :sortable],
                         namespace_prefix: MODS_NS_PREFIX)
 
           # Description: abstract, tableOfContents, or note
           t.description(path: '//mods:mods/mods:abstract | //mods:mods[not(mods:abstract)]/mods:note | //mods:mods[not(mods:abstract) and not(mods:note)]/mods:tableOfContents | //mods:mods[not(mods:abstract) and not(mods:note) and not(mods:tableOfContents)]/mods:physicalDescription/mods:note',
-                        index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_abstract(proxy: [:mods, :abstract], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_note(proxy: [:mods, :note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_toc(proxy: [:mods, :table_contents], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_physdesc_note(proxy: [:mods, :physical_description, :phys_desc_note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                        index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+          t.desc_abstract(proxy: [:mods, :abstract], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+          t.desc_note(proxy: [:mods, :note], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+          t.desc_toc(proxy: [:mods, :table_contents], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+          t.desc_physdesc_note(proxy: [:mods, :physical_description, :phys_desc_note], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
           # Subject: defaults to subject/topic
           t.subject(proxy: [:mods, :main_subject, :subject_topic],
-                    index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
+                    index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
           # language
           t.language(proxy: [:mods, :language_any, :language_code],
-                     index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.language_facetable])
+                     index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.language_facetable])
           t.mods_language_text(proxy: [:mods, :language_any, :language_text])
 
           # Source
           t.source(path: 'mods/mods:relatedItem[@type="original"]/mods:location/mods:physicalLocation | mods/mods:relatedItem[@type="original" and not(mods:location)]/mods:titleInfo/mods:title',
-                   index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable],
+                   index_as: [DRI::Metadata::OmDescriptors.cleaned_displayable, DRI::Metadata::OmDescriptors.cleaned_facetable],
                    namespace_prefix: MODS_NS_PREFIX)
           t.source_location(proxy: [:mods, :related_item_original, :ri_location, :location_title])
           t.source_physical_location(proxy: [:mods, :related_item_original, :ri_location, :physical_location])
 
           # Type
           t.resource_type(proxy: [:mods, :type_resource],
-                 index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                 index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
           t.mods_type_collection(proxy: [:mods, :type_resource_collection])
           t.mods_genre(proxy: [:mods, :genre])
 
           # Rights - the type attribute with value 'use and reproduction' is DRI compulsory
           t.rights(proxy: [:mods, :access_condition],
-                   index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                   index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
           t.copyrightmd_rights(proxy: [:mods, :access_condition, :copyright, :rights_holder],
-                               index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                               index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
           # Publisher
           t.publisher(proxy: [:mods, :origin_info, :publisher],
-                      index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                      index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
           # Published_date
           t.published_date(proxy: [:mods, :origin_info, :o_date_issued])
@@ -368,7 +368,7 @@ module DRI::Metadata::Terminologies
 
           # geographical_coverage
           t.geographical_coverage(proxy: [:mods, :main_subject, :subject_geographic],
-                                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
+                                  index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable],
                                   namespace_prefix: MODS_NS_PREFIX)
 
           t.mods_geographic_code(proxy: [:mods, :main_subject, :subject_geographic_code], namespace_prefix: MODS_NS_PREFIX)
@@ -379,7 +379,7 @@ module DRI::Metadata::Terminologies
               # Marc_relators that can be indexed
               t.send "role_#{role}",
                    path: "mods/mods:name[mods:role/mods:roleTerm/@authority='marcrelator' and mods:role/mods:roleTerm/@type='code' and mods:role/mods:roleTerm = \"#{role}\"]/mods:namePart[not(@type=\"date\")]",
-                   index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
+                   index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable],
                    namespace_prefix: MODS_NS_PREFIX
             else
               # create marc relator terms but do not index them
@@ -391,7 +391,7 @@ module DRI::Metadata::Terminologies
 
           # MODS Terms
           t.mods_id_local(proxy: [:mods, :identifier_local],
-                          index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
+                          index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable],
                           namespace_prefix: MODS_NS_PREFIX)
           # id_asset - Used for sorting sequenced items
           t.id_asset(proxy: [:mods, :identifier_asset], index_as: [:stored_sortable], namespace_prefix: MODS_NS_PREFIX)
@@ -421,7 +421,7 @@ module DRI::Metadata::Terminologies
             t.send "related_items_ids_#{rel}",
                    path: "relatedItem[@type='#{rel}']/mods:identifier[@type='local']",
                    namespace_prefix: MODS_NS_PREFIX,
-                   index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]
+                   index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable]
           end
 
           # External Relationships

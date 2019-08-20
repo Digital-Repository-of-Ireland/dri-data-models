@@ -5,7 +5,7 @@ module DRI
   # Metadata namespace
   module Metadata
     # Implements helper methods for metadata indexing using Solrizer. Methods mostly used in OM terminologies
-    module Descriptors
+    class Descriptors
       require 'iso-639'
 
       # Creates a facet index in SOLR for ISO 639.2 language codes
