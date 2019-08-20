@@ -93,8 +93,8 @@ describe 'QualifiedDublinCore' do
       @audio.attached_files.keys.should include(:descMetadata)
       @audio.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
       # Check for properties datastream
-      @audio.attached_files.keys.should include(:properties)
-      @audio.properties.should be_kind_of DRI::Metadata::Properties
+      @audio.attached_files.keys.should include(:dri_properties)
+      @audio.dri_properties.should be_kind_of DRI::Metadata::Properties
     end
 
     it 'should not be valid with no metadata' do

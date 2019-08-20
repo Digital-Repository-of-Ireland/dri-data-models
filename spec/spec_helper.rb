@@ -1,4 +1,13 @@
 require 'simplecov'
+require 'coveralls'
+SimpleCov.start do
+  add_filter 'spec/'
+end
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+  SimpleCov::Formatter::HTMLFormatter,
+  Coveralls::SimpleCov::Formatter
+]
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
@@ -15,7 +24,8 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
-ActiveRecord::Migrator.migrate(File.join(Rails.root, 'db/migrate'))
+#ActiveRecord::Migrator.migrate(File.join(Rails.root, 'db/migrate'))
+ActiveRecord::MigrationContext.new('spec/dummy/db/migrate').migrate
 #ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
 
 RSpec.configure do |config|

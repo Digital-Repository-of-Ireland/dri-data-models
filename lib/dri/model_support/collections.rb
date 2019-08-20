@@ -57,7 +57,7 @@ module DRI
       def collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
-        (descMetadata.collection? || properties.collection?) && !generic_files.any?
+        (descMetadata.collection? || dri_properties.collection?) && !generic_files.any?
       end
 
       # Determine whether the digital object is a root, container collection

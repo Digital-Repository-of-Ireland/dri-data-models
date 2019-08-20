@@ -80,8 +80,7 @@ describe 'Documentation' do
     @dc_obj.save
 
     @doc.reload
-    profile_info = JSON.parse(@doc.to_solr[profile_key])
-    expect(profile_info['documentation_for_id']).to eq @dc_obj.id
+    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.id]
 
   end
 
@@ -90,8 +89,8 @@ describe 'Documentation' do
     @doc.attached_files.keys.should include(:descMetadata)
     @doc.descMetadata.should be_kind_of DRI::Metadata::Documentation
     # Check for properties datastream
-    @doc.attached_files.keys.should include(:properties)
-    @doc.properties.should be_kind_of DRI::Metadata::Properties
+    @doc.attached_files.keys.should include(:dri_properties)
+    @doc.dri_properties.should be_kind_of DRI::Metadata::Properties
   end
 
   it 'should not be valid with no metadata' do

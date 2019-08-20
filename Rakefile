@@ -41,8 +41,7 @@ YARD::Rake::YardocTask.new(:yard) do |t|
   t.files = ['lib/**/*.rb', 'app/models/**/*.rb', 'lib/dri/metadata/*.rb']
 end
 
-require 'ci/reporter/rake/rspec'
-RSpec::Core::RakeTask.new(rspec: ['ci:setup:rspec']) do |spec|
+RSpec::Core::RakeTask.new(:rspec) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end
