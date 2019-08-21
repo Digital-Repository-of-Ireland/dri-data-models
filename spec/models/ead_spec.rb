@@ -48,8 +48,8 @@ describe 'EncodedArchivalDescription' do
       @ead_header.descMetadata.should be_kind_of(DRI::Metadata::EncodedArchivalDescription)
       @ead_header.attached_files.keys.should include(:fullMetadata)
       @ead_header.fullMetadata.should be_kind_of(DRI::Metadata::FullMetadata)
-      @ead_header.attached_files.keys.should include(:dri_properties)
-      @ead_header.dri_properties.should be_kind_of(DRI::Metadata::Properties)
+      @ead_header.attached_files.keys.should include(:object_properties)
+      @ead_header.object_properties.should be_kind_of(DRI::Metadata::Properties)
     end
 
     it 'should have the correct metadata type after a reload' do

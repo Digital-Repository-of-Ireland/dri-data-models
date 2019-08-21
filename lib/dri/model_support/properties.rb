@@ -7,55 +7,55 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        has_subresource :dri_properties, class_name: 'DRI::Metadata::Properties'
+        has_subresource :object_properties, class_name: 'DRI::Metadata::Properties'
 
-        delegate :object_type,:object_type=, to: :dri_properties
-        delegate :depositor=, to: :dri_properties
-        delegate :metadata_md5=, to: :dri_properties
-        delegate :model_version=, to: :dri_properties
-        delegate :verified=, to: :dri_properties
-        delegate :doi=, to: :dri_properties
-        delegate :cover_image=, to: :dri_properties
-        delegate :institute,:institute=, to: :dri_properties
-        delegate :depositing_institute=, to: :dri_properties
-        delegate :licence=, to: :dri_properties
-        delegate :ingest_files_from_metadata=, to: :dri_properties
-        delegate :master_file_access=, to: :dri_properties
-        delegate :published_at=, to: :dri_properties
-        delegate :object_version=, to: :dri_properties
-        delegate :status=, to: :dri_properties
+        delegate :object_type,:object_type=, to: :object_properties
+        delegate :depositor=, to: :object_properties
+        delegate :metadata_md5=, to: :object_properties
+        delegate :model_version=, to: :object_properties
+        delegate :verified=, to: :object_properties
+        delegate :doi=, to: :object_properties
+        delegate :cover_image=, to: :object_properties
+        delegate :institute,:institute=, to: :object_properties
+        delegate :depositing_institute=, to: :object_properties
+        delegate :licence=, to: :object_properties
+        delegate :ingest_files_from_metadata=, to: :object_properties
+        delegate :master_file_access=, to: :object_properties
+        delegate :published_at=, to: :object_properties
+        delegate :object_version=, to: :object_properties
+        delegate :status=, to: :object_properties
       end
 
       def cover_image
-        dri_properties.cover_image.first
+        object_properties.cover_image.first
       end
 
       def depositor
-        dri_properties.depositor.first
+        object_properties.depositor.first
       end
 
       def depositing_institute
-        dri_properties.depositing_institute.first
+        object_properties.depositing_institute.first
       end
 
       def doi
-        dri_properties.doi.first
+        object_properties.doi.first
       end
 
       def object_version
-        dri_properties.object_version.first
+        object_properties.object_version.first
       end
 
       def licence
-        dri_properties.licence.first
+        object_properties.licence.first
       end
 
       def metadata_md5
-        dri_properties.metadata_md5.first
+        object_properties.metadata_md5.first
       end
 
       def model_version
-        dri_properties.model_version.first
+        object_properties.model_version.first
       end
 
       # Returns whether the object has a status of 'published'
@@ -66,27 +66,27 @@ module DRI
       end
 
       def published_at
-        dri_properties.published_at.first if dri_properties.published_at.present?
+        object_properties.published_at.first if object_properties.published_at.present?
       end
 
       def ingest_files_from_metadata
-        dri_properties.ingest_files_from_metadata.first
+        object_properties.ingest_files_from_metadata.first
       end
 
       def institute
-        dri_properties.institute.first
+        object_properties.institute.first
       end
 
       def master_file_access
-        dri_properties.master_file_access.first
+        object_properties.master_file_access.first
       end
 
       def status
-        dri_properties.status.first
+        object_properties.status.first
       end
 
       def verified
-        dri_properties.verified.first
+        object_properties.verified.first
       end
     end
   end
