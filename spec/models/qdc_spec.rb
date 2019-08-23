@@ -93,8 +93,8 @@ describe 'QualifiedDublinCore' do
       @audio.attached_files.keys.should include(:descMetadata)
       @audio.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
       # Check for properties datastream
-      @audio.attached_files.keys.should include(:object_properties)
-      @audio.object_properties.should be_kind_of DRI::Metadata::Properties
+      @audio.attached_files.keys.should include(:properties)
+      @audio.properties.should be_kind_of DRI::Metadata::Properties
     end
 
     it 'should not be valid with no metadata' do
@@ -313,7 +313,7 @@ describe 'QualifiedDublinCore' do
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('creation_date')
       @attributes_hash.delete('published_date')
-      @audio.update_attributes( @attributes_hash )
+      @audio.update_attributes(@attributes_hash)
       @audio.should_not be_valid
 
       # From variable assignment
@@ -336,7 +336,7 @@ describe 'QualifiedDublinCore' do
     before(:each) do
       @obj_xml = fixture('audios/dublin_core_audio_lang_sample.xml')
       @obj = DRI::QualifiedDublinCore.new
-      @obj.update_metadata DRI::Metadata::Marc.from_xml(@obj_xml).to_xml
+      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
     end
 
     after(:each) do
@@ -417,8 +417,8 @@ describe 'QualifiedDublinCore' do
       @obj_xml = fixture('relationships/qdc/qdc-rel-obj.xml')
       @col = DRI::QualifiedDublinCore.new
       @obj = DRI::QualifiedDublinCore.new
-      @col.update_metadata DRI::Metadata::Marc.from_xml(@col_xml).to_xml
-      @obj.update_metadata DRI::Metadata::Marc.from_xml(@obj_xml).to_xml
+      @col.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@col_xml).to_xml
+      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
 
       @col.save
       @obj.governing_collection = @col

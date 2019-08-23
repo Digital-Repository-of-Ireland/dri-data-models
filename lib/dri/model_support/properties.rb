@@ -6,56 +6,63 @@ module DRI
     module Properties
       extend ActiveSupport::Concern
 
-      included do
-        has_subresource :object_properties, class_name: 'DRI::Metadata::Properties'
+      class_methods do
+        def dangerous_attribute_method?(method_name)
+          return false if method_name == :properties
+          super
+        end
+      end
 
-        delegate :object_type,:object_type=, to: :object_properties
-        delegate :depositor=, to: :object_properties
-        delegate :metadata_md5=, to: :object_properties
-        delegate :model_version=, to: :object_properties
-        delegate :verified=, to: :object_properties
-        delegate :doi=, to: :object_properties
-        delegate :cover_image=, to: :object_properties
-        delegate :institute,:institute=, to: :object_properties
-        delegate :depositing_institute=, to: :object_properties
-        delegate :licence=, to: :object_properties
-        delegate :ingest_files_from_metadata=, to: :object_properties
-        delegate :master_file_access=, to: :object_properties
-        delegate :published_at=, to: :object_properties
-        delegate :object_version=, to: :object_properties
-        delegate :status=, to: :object_properties
+      included do
+        has_subresource :properties, class_name: 'DRI::Metadata::Properties'
+
+        delegate :object_type,:object_type=, to: :properties
+        delegate :depositor=, to: :properties
+        delegate :metadata_md5=, to: :properties
+        delegate :model_version=, to: :properties
+        delegate :verified=, to: :properties
+        delegate :doi=, to: :properties
+        delegate :cover_image=, to: :properties
+        delegate :institute,:institute=, to: :properties
+        delegate :depositing_institute=, to: :properties
+        delegate :licence=, to: :properties
+        delegate :ingest_files_from_metadata=, to: :properties
+        delegate :master_file_access=, to: :properties
+        delegate :published_at=, to: :properties
+        delegate :object_version=, to: :properties
+        delegate :status=, to: :properties
       end
 
       def cover_image
-        object_properties.cover_image.first
+        properties.cover_image.first
       end
 
       def depositor
-        object_properties.depositor.first
+        properties.depositor.first
       end
 
       def depositing_institute
-        object_properties.depositing_institute.first
+        properties.depositing_institute.first
       end
 
       def doi
-        object_properties.doi.first
+        properties.doi.first
       end
 
       def object_version
-        object_properties.object_version.first
+        properties.object_version.first
       end
 
       def licence
-        object_properties.licence.first
+        properties.licence.first
       end
 
       def metadata_md5
-        object_properties.metadata_md5.first
+        properties.metadata_md5.first
       end
 
       def model_version
-        object_properties.model_version.first
+        properties.model_version.first
       end
 
       # Returns whether the object has a status of 'published'
@@ -66,27 +73,27 @@ module DRI
       end
 
       def published_at
-        object_properties.published_at.first if object_properties.published_at.present?
+        properties.published_at.first if properties.published_at.present?
       end
 
       def ingest_files_from_metadata
-        object_properties.ingest_files_from_metadata.first
+        properties.ingest_files_from_metadata.first
       end
 
       def institute
-        object_properties.institute.first
+        properties.institute.first
       end
 
       def master_file_access
-        object_properties.master_file_access.first
+        properties.master_file_access.first
       end
 
       def status
-        object_properties.status.first
+        properties.status.first
       end
 
       def verified
-        object_properties.verified.first
+        properties.verified.first
       end
     end
   end
