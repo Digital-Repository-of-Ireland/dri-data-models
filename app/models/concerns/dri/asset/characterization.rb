@@ -5,7 +5,7 @@ module DRI::Asset
         has_subresource :characterization, class_name: 'FitsDatastream'
 
         delegate :format_label,          to: :characterization
-        delegate :file_size,             to: :characterization
+        #delegate :file_size,             to: :characterization
         delegate :last_modified,         to: :characterization
         delegate :filename,:filename=,   to: :characterization
         delegate :original_checksum, to: :characterization
@@ -50,7 +50,7 @@ module DRI::Asset
       end
 
       def file_size
-       characterization.file_size
+       characterization.file_size.first.to_i
       end
 
       def file_size=(file_size)

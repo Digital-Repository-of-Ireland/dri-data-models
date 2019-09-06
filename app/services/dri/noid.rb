@@ -1,4 +1,4 @@
-require 'active_fedora/noid'
+require 'noid-rails'
 
 module DRI
   module Noid
@@ -17,7 +17,7 @@ module DRI
     private
 
       def service
-        @service ||= ActiveFedora::Noid::Service.new
+        @service ||= ::Noid::Rails::Service.new
       end
   end
 end

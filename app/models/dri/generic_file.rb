@@ -81,7 +81,7 @@ module DRI
 
       Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
 
-      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
+      solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_size', :stored_sortable, type: :integer) => [file_size])
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?
       solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('height', :stored_sortable, type: :integer) => [height[0].to_i]) unless height.empty?
       unless width.empty? || height.empty?

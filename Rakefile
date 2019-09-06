@@ -1,5 +1,4 @@
 #!/usr/bin/env rake
-require 'rspec/core/rake_task'
 require 'yard'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
@@ -26,6 +25,9 @@ end
 APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
 load 'rails/tasks/engine.rake'
 
+require 'ci/reporter/rake/rspec'
+require 'rspec/core/rake_task'
+
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'DriDataModels'
@@ -41,8 +43,7 @@ YARD::Rake::YardocTask.new(:yard) do |t|
   t.files = ['lib/**/*.rb', 'app/models/**/*.rb', 'lib/dri/metadata/*.rb']
 end
 
-require 'ci/reporter/rake/rspec'
-RSpec::Core::RakeTask.new(rspec: ['ci:setup:rspec']) do |spec|
+RSpec::Core::RakeTask.new(:rspec => ["ci:setup:rspec"]) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end

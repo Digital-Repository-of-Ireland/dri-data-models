@@ -203,7 +203,8 @@ module DRI
         # Index dcterms Point and Box data, and linked data uris into geospatial Solr field
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
           {
-            'geographical_coverage' => geographical_coverage | reconciliation_uris
+            'geographical_coverage' => geographical_coverage | reconciliation_uris,
+            'coverage' => coverage
           }
         )
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?

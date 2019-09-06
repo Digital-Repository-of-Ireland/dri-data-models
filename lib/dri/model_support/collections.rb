@@ -36,9 +36,9 @@ module DRI
         # Collection flag attribute setter
         #
         def collection=(collection)
-          if @collection == collection
-            @collection = collection
-          elsif collection == true && !generic_files.any? # NO digital assets associated
+          return if @collection == collection
+
+          if collection == true && !generic_files.any? # NO digital assets associated
             @collection = collection
           elsif collection == false && !governed_items.any? # NO digital object children
             @collection = collection
@@ -48,7 +48,7 @@ module DRI
         # Collection flag getter
         def collection
           # if @collection not set, then default to false
-          (@collection == true || @collection == false) ? @collection : false
+          @collection ||= false
         end
       end
 

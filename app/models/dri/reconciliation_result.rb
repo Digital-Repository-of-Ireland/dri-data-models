@@ -1,4 +1,4 @@
 module DRI
-  class ReconciliationResult < ActiveRecord::Base
+  class ReconciliationResult < ApplicationRecord
   end
 end

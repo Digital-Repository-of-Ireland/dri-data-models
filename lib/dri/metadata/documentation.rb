@@ -284,9 +284,9 @@ module DRI
       # @param [String] date_field the date string
       # @return [String] the DCMI Period encoded date string for display
       def display_date_for_index(date_field)
-        date_field = date_field.delete_if { |v| /^null$/i.match(v) }
+	      cleaned_date_field = date_field.to_a.delete_if { |v| /^null$/i.match(v) }
 
-        date_field.collect! do |value|
+        cleaned_date_field.collect! do |value|
           begin
             # return value for display as it is
             if value.empty? || DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
@@ -317,9 +317,9 @@ module DRI
       # Creates an array of all names stored in the metadata
       def person_array
         people = contributor | publisher
-        people |= creator.reject { |c| /^null$/i.match(c) }
+        people |= creator.to_a.reject { |c| /^null$/i.match(c) }
 
-        DRI::Vocabulary.marc_relators.each { |role| people |= send("role_#{role}") }
+        DRI::Vocabulary.marc_relators.each { |role| people |= send("role_#{role}").to_a }
 
         people
       end
