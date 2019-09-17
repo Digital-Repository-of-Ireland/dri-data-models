@@ -107,9 +107,24 @@ module DRI::Asset
 
       unless characterization.file_author.empty?
         characterization.file_author.each do |file_author|
-          self.creator << file_author unless self.creator.include?(file_author)
+          self.creator << file_author unless self.file_author.include?(file_title)
         end
       end
+    end
+
+    def characterization_terms
+      h = {}
+      FitsDatastream.terminology.terms.each_pair do |_k, v|
+        next unless v.respond_to? :proxied_term
+        term = v.proxied_term
+        begin
+          value = send(term.name)
+          h[term.name] = value unless value.empty?
+        rescue NoMethodError
+          next
+        end
+      end
+      h
     end
   end
 end
