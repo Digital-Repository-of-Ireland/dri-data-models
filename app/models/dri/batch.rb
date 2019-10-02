@@ -92,6 +92,14 @@ module DRI
       self.object_version = self.object_version.next
     end
 
+    def modified_date
+      m_dates = [descMetadata, properties].map do |file|
+                  file.modified_date.to_i
+                end
+
+      return Time.at(m_dates.sort.last).utc.to_datetime
+    end
+
     # @note Use this in preference over setting xml directly in the OmDatastreams
     # Updates the xml metadata of this object
     #
@@ -119,7 +127,7 @@ module DRI
     def to_solr(solr_doc = {}, _opts = {})
       solr_doc = super(solr_doc)
 
-      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
+      ActiveFedora.index_field_mapper.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc.merge! collections_to_solr
       solr_doc.merge! object_types_to_solr
       solr_doc.merge! file_metadata_to_solr
