@@ -408,6 +408,23 @@ describe 'QualifiedDublinCore' do
       expect(solr_doc['geographical_coverage_sim']).to match(['Co. na Gaillimhe',
                                                                 'name=Kilkenny; east=-7.2561; north=52.6477;'])
     end
+
+    it 'updates the modification time field in solr' do
+      @obj.save
+      @obj.title = ['sample']
+      sleep 1
+      expect { @obj.save }.to change {
+        ActiveFedora::SolrService.query("id:\"#{@obj.id}\"").first['system_modified_dtsi']
+      }
+    end
+
+    it 'does not update the modification time field in solr in no change' do
+      @obj.save
+      sleep 1
+      expect { @obj.save }.not_to change {
+        ActiveFedora::SolrService.query("id:\"#{@obj.id}\"").first['system_modified_dtsi']
+      }
+    end
   end
 
   context 'relationships' do
