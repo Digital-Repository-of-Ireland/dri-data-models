@@ -33,6 +33,11 @@ module DRI
                  class_name: 'DRI::Batch',
                  as: :previous_sibling
 
+        has_and_belongs_to_many :relations,
+                 class_name: 'DRI::Related',
+                 predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOf,
+                 inverse_of: :related
+
         # Collection flag attribute setter
         #
         def collection=(collection)
