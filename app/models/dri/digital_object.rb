@@ -16,6 +16,7 @@ module DRI
 
     include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::Common
+    include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
@@ -83,14 +84,29 @@ module DRI
       DRI::DigitalObject.create(noid: pid)
     end
 
-    def []=(name, value)
-      if descMetadata.class.terminology.has_term?(name)
-        descMetadata[name.to_sym] = value
-      elsif properties.class.terminology.has_term?(name)
-        properties[name.to_sym] = value
-      else
+    def [](key)
         super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          return file.send(key.to_s)
+        end
       end
+
+      raise ArgumentError, "Unknown attribute #{key}"
+    end
+
+    def []=(key, value)
+      super
+    rescue ArgumentError
+      self.declared_attached_files.each do |_name, file|
+        if file.class.terminology.has_term?(key)
+          file.send(key.to_s + "=", value)
+          return
+        end
+      end
+
+      raise ArgumentError, "Unknown attribute #{key}"
     end
 
     def increment_version

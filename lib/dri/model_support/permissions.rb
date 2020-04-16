@@ -126,7 +126,7 @@ module DRI
       def edit_groups_string
         self.edit_groups.join(', ')
       end
-      
+
       # Grant edit permissions to the users specified. Revokes edit permission for
       # any of the eligible_users that are not in users.
       # This may be used when different users are responsible for setting different
@@ -179,7 +179,6 @@ module DRI
       def manager_users_string
         self.manager_users.join(', ')
       end
-
     end
   end
 end

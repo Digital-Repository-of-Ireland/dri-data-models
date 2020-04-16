@@ -14,6 +14,28 @@ module DRI
       # @param solr_doc [Hash] the solr document hash for the object
       # @return [Hash] solr_doc hash for index
       def file_metadata_to_solr(solr_doc = {})
+        if collection?
+          file_type =  ['collection']
+          file_type_display = ['Collection']
+
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type)
+
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :stored_searchable) => file_type_display)
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :facetable) => file_type_display)
+        end
+
+        no_of_files = generic_files.count
+        solr_doc = index_file_metadata(no_of_files, solr_doc) if no_of_files > 0
+
+        unless solr_doc.key?(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable))
+          solr_doc = file_type_from_metadata(solr_doc)
+        end
+
+        solr_doc
+      end # file_metadata_to_solr
+
+      def index_file_metadata(no_of_files, solr_doc = {})
         file_type = []
         file_type_display = []
         file_count = 0
@@ -30,13 +52,8 @@ module DRI
         sample_rate = []
         file_format = []
 
-        if collection?
-          file_type.push 'collection'
-          file_type_display.push 'Collection'
-        end
-
         solr_query = "#{Solrizer.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""
-        results = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
+        results = ActiveFedora::SolrService.query(solr_query, rows: no_of_files, defType: 'edismax')
 
         unless results.nil?
           results.each do |gf|
@@ -82,24 +99,6 @@ module DRI
           end
         end
 
-        if file_type.empty?
-          # As a last resort try to determine the file type from the
-          # DCMI vocabulary in the metadata.
-          resource_type = nil
-          type.each do |value|
-            next unless DRI::Vocabulary.dcmi_type.include?(value.capitalize)
-            file_type.push(value)
-            file_type_display.push(value.capitalize)
-            resource_type = value
-            break
-          end
-
-          if resource_type.nil?
-            file_type.push 'unknown'
-            file_type_display.push 'Unknown'
-          end
-        end
-
         solr_doc.merge!(Solrizer.solr_name('width', :stored_searchable, type: :integer) => width)
         solr_doc.merge!(Solrizer.solr_name('width', :facetable, type: :integer) => width)
         solr_doc.merge!(Solrizer.solr_name('height', :stored_searchable, type: :integer) => height)
@@ -127,11 +126,13 @@ module DRI
           solr_doc.merge!(Solrizer.solr_name('file_size', :facetable, type: :integer) => file_size)
         end
 
-        solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type)
-        solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type)
+        unless file_type.empty?
+          solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type)
+          solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type)
 
-        solr_doc.merge!(Solrizer.solr_name('file_type_display', :stored_searchable) => file_type_display)
-        solr_doc.merge!(Solrizer.solr_name('file_type_display', :facetable) => file_type_display)
+          solr_doc.merge!(Solrizer.solr_name('file_type_display', :stored_searchable) => file_type_display)
+          solr_doc.merge!(Solrizer.solr_name('file_type_display', :facetable) => file_type_display)
+        end
 
         solr_doc.merge!(Solrizer.solr_name('mime_type', :stored_searchable) => mime_type)
         solr_doc.merge!(Solrizer.solr_name('mime_type', :facetable) => mime_type)
@@ -142,7 +143,34 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('file_count', :stored_sortable, type: :integer) => [file_count])
 
         solr_doc
-      end # file_metadata_to_solr
+      end
+
+      def file_type_from_metadata(solr_doc)
+        # As a last resort try to determine the file type from the
+        # DCMI vocabulary in the metadata.
+        file_type = []
+        file_type_display = []
+
+        type.each do |value|
+          next unless DRI::Vocabulary.dcmi_type.include?(value.capitalize)
+          file_type.push(value)
+          file_type_display.push(value.capitalize)
+          break
+        end
+
+        if file_type.empty?
+          file_type.push 'unknown'
+          file_type_display.push 'Unknown'
+        end
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type)
+
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :stored_searchable) => file_type_display)
+        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :facetable) => file_type_display)
+
+        solr_doc
+      end
     end # module
   end # module
 end # module

@@ -45,27 +45,27 @@ module DRI::Asset
       module ClassMethods
         # Restrict mimetypes for images
         def image_mime_types
-          Settings.restrict.mime_types.image
+          ::Settings.restrict.mime_types.image
         end
 
         # Restrict mimetypes for pdf
         def pdf_mime_types
-          Settings.restrict.mime_types.pdf
+          ::Settings.restrict.mime_types.pdf
         end
 
         # Restrict mimetypes for text
         def text_mime_types
-          Settings.restrict.mime_types.text
+          ::Settings.restrict.mime_types.text
         end
 
         # Restrict mimetypes for video
         def video_mime_types
-          Settings.restrict.mime_types.video
+          ::Settings.restrict.mime_types.video
         end
 
         # Restrict mimetypes for audio
         def audio_mime_types
-          Settings.restrict.mime_types.audio
+          ::Settings.restrict.mime_types.audio
         end
       end
     end

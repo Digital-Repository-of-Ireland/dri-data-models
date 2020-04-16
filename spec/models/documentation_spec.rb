@@ -77,8 +77,7 @@ describe 'Documentation' do
     @dc_obj.save
 
     @doc.reload
-    profile_info = JSON.parse(@doc.to_solr[profile_key])
-    expect(profile_info['documentation_for_id']).to eq @dc_obj.id
+    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.id]
 
   end
 
@@ -131,7 +130,7 @@ describe 'Documentation' do
             ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)]
     expect(solr_doc).to include(*keys)
 
-    geojson_value = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-6.25972,53.3478]},\"properties\":{\"placename\":\"Dublin\"}}", "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.44,51.47],[-5.24,51.47],[-5.24,55.39],[-10.44,55.39],[-10.44,51.47]]]},\"properties\":{\"placename\":\"Ireland\"},\"bbox\":[-10.44,51.47,-5.24,55.39]}"]
+    geojson_value = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-6.25972,53.3478]},\"properties\":{\"placename\":\"Dublin\",\"nameEN\":\"Dublin\"}}", "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Polygon\",\"coordinates\":[[[-10.44,51.47],[-5.24,51.47],[-5.24,55.39],[-10.44,55.39],[-10.44,51.47]]]},\"properties\":{\"placename\":\"Ireland\",\"nameEN\":\"Ireland\"},\"bbox\":[-10.44,51.47,-5.24,55.39]}"]
     geo_json_key = ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol)
     expect(solr_doc[geo_json_key]).to match_array(geojson_value)
 

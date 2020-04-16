@@ -1,3 +1,8 @@
+require 'simplecov'
+SimpleCov.start do
+  add_filter 'spec/'
+end
+
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app', 'models'))
@@ -5,8 +10,6 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'app', 'models'))
 ENV["RAILS_ENV"] ||= 'test'
 require File.expand_path("../test_app/config/environment", __FILE__)
 require 'rspec/rails'
-# Remove deprecation, commented below
-#require 'rspec/autorun'
 require 'dri_data_models'
 
 # Requires supporting ruby files with custom matchers and macros, etc,
@@ -15,6 +18,7 @@ Dir[Rails.root.join("spec/support/**/*.rb")].each { |f| require f }
 
 # Checks for pending migrations before tests are run.
 # If you are not using ActiveRecord, you can remove this line.
+ActiveRecord::MigrationContext.new('spec/dummy/db/migrate').migrate
 ActiveRecord::Migration.check_pending! if defined?(ActiveRecord::Migration)
 
 RSpec.configure do |config|

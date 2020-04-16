@@ -1,6 +1,7 @@
 module DRI
   module Metadata
     autoload :Descriptors, 'dri/metadata/descriptors'
+    autoload :OmDescriptors, 'dri/metadata/om_descriptors'
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
     autoload :FullMetadata, 'dri/metadata/full_metadata'
@@ -12,6 +13,7 @@ module DRI
     autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :Terminologies, 'dri/metadata/terminologies'
+    autoload :Documentation, 'dri/metadata/documentation'
 
     # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other Fedora objects. This allows us to add functions

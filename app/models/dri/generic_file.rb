@@ -6,7 +6,6 @@ module DRI
   # DRI::Documentation
   class GenericFile < ActiveRecord::Base
     include ActiveFedora::Indexing
-    include Hydra::Derivatives::ExtractMetadata
 
     include DRI::Permissions
     include DRI::ModelSupport::Permissions
@@ -23,6 +22,10 @@ module DRI
     include DRI::ModelSupport::LocalFile
 
     has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
+
+    include DRI::Derivatives::ExtractMetadata
+
+    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
 
     # one-to-one AF association to associate DRI::DigitalObject
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
@@ -101,6 +104,7 @@ module DRI
       solr_doc.merge!(Solrizer.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
       solr_doc.merge!(Solrizer.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?
       solr_doc.merge!(Solrizer.solr_name('height', :stored_sortable, type: :integer) => [height[0].to_i]) unless height.empty?
+
       unless width.empty? || height.empty?
         solr_doc.merge!(Solrizer.solr_name('area', :stored_sortable, type: :integer) => [width[0].to_i * height[0].to_i])
       end
@@ -109,11 +113,14 @@ module DRI
       solr_doc.merge!(Solrizer.solr_name('channels', :stored_sortable, type: :integer) => [channels[0]]) unless channels.empty?
       solr_doc.merge!(Solrizer.solr_name('sample_rate', :stored_sortable, type: :integer) => [sample_rate[0].to_i]) unless sample_rate.empty?
 
+      solr_doc.merge!(Solrizer.solr_name('mime_type', :stored_searchable) => mime_type) unless mime_type.empty?
+
       file_type = []
       file_type.push('audio') if audio?
       file_type.push('video') if video?
       file_type.push('image') if image?
       file_type.push('text') if text?
+
       solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
       solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
@@ -135,5 +142,13 @@ module DRI
       try(:digital_object).try(:status) == ['processing'.freeze]
     end
 
+    private
+
+    def delete_files
+      local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
+                                        f: id, d: 'content').order('version DESC').to_a
+      local_file_info.each(&:destroy)
+      FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
+    end
   end
 end

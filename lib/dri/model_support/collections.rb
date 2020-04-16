@@ -25,22 +25,27 @@ module DRI
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
 
+        has_and_belongs_to_many :relations,
+                 class_name: 'DRI::Related',
+                 predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOf,
+                 inverse_of: :related
+
         # Collection flag attribute setter
         #
         def collection=(collection)
-          @collection = if @collection == collection
-                          collection
-                        elsif collection == true && !generic_files.any? # NO digital assets associated
-                          collection
-                        elsif collection == false && !governed_items.any? # NO digital object children
-                          collection
-                        end
+          return if @collection == collection
+
+          if collection == true && !generic_files.any? # NO digital assets associated
+            @collection = collection
+          elsif collection == false && !governed_items.any? # NO digital object children
+            @collection = collection
+          end
         end
 
         # Collection flag getter
         def collection
           # if @collection not set, then default to false
-          (@collection == true || @collection == false) ? @collection : false
+          @collection ||= false
         end
       end
 

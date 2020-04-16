@@ -1,4 +1,3 @@
-# DRI namespace
 module DRI
   # Metadata namespace
   module Metadata
@@ -81,8 +80,7 @@ module DRI
 
         p_date = published_date
         if p_date
-          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
-
+          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
           pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => p_date })
           if pdate_ranges.present?
             solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)
@@ -95,6 +93,12 @@ module DRI
 
         ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
         solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
+        if ddate_ranges.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges)
+          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_ranges).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+        end
 
         solr_doc
       end
@@ -118,7 +122,8 @@ module DRI
           begin
             next if value.nil? || value.empty?
 
-            if DRI::Metadata::Transformations.dcmi_period?(value)
+
+            if DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
               value
             else
               # Date range in ISO8601 format?

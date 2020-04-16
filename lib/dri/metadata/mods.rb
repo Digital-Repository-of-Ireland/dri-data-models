@@ -1,6 +1,4 @@
-# DRI namespace
 module DRI
-  # Metadata namespace
   module Metadata
     # A datastream that interacts with MODS.
     class Mods < DRI::Datastreams::OmDatastream
@@ -87,7 +85,11 @@ module DRI
               xml.namePart
               xml.role {
                 xml.roleTerm('cre', type: 'code', authority: 'marcrelator')
-                xml.roleTerm(DRI::Vocabulary.marc_relators_creator['cre'], type: 'text', authority: 'marcrelator')
+                xml.roleTerm(
+                  DRI::Vocabulary.marc_relators_creator['cre'],
+                  type: 'text',
+                  authority: 'marcrelator'
+                )
               }
             }
             # Creation date
@@ -154,11 +156,11 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_for_index) unless name_coverage.empty?
         solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_for_index) unless name_coverage.empty?
 
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array)) unless subject_place_array.empty?
 
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array)) unless subject_temporal_array.empty?
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
@@ -206,8 +208,12 @@ module DRI
         # date dateRange index
         ddate_ranges = date_ranges.select { |key, _value| ['date_other', 'part_date'].include?(key) }
         ddate_index = DRI::Metadata::Transformations.transform_date_ranges(ddate_ranges)
-        solr_doc.merge!(Transformations::DATE_RANGE_SOLR_FIELD => ddate_index) unless ddate_index.empty?
-
+        if ddate_index.present?
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_index)
+          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_index).minmax
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
+          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+        end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
@@ -227,7 +233,7 @@ module DRI
         )
 
         # Index logainm URIs in the appropriate geographic indices
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
         if uris.present?
           linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
 
@@ -315,12 +321,16 @@ module DRI
       # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_single_date_for_index(date_field = [])
         date_field.collect do |value|
-          begin
-            display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
-            DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
-          rescue ISO8601::Errors::StandardError
-            # DCMI Period 'name' is the md value
-            DRI::Metadata::Transformations.create_dcmi_period(value)
+          if Utils.valid_uri?(value)
+            value
+          else
+            begin
+              display_date = ISO8601::DateTime.new(value).strftime('%b %d, %Y')
+              DRI::Metadata::Transformations.create_dcmi_period(display_date, value)
+            rescue ISO8601::Errors::StandardError
+              # DCMI Period 'name' is the md value
+              DRI::Metadata::Transformations.create_dcmi_period(value)
+            end
           end
         end
       end

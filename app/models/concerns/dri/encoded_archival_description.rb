@@ -116,6 +116,30 @@ module DRI
       editable_attrs
     end
 
+    def identifier_id
+      descMetadata.identifier_id.first
+    end
+
+    def repository_code
+      descMetadata.repository_code.first
+    end
+
+    def country_code
+      descMetadata.country_code.first
+    end
+
+    def desc_abstract
+      descMetadata.desc_abstract.first
+    end
+
+    def ead_level
+      descMetadata.ead_level.first
+    end
+
+    def ead_level_other
+      descMetadata.ead_level_other.first
+    end
+
     # Type attribute getter
     #
     # @return [Array<String>] the array of metadata type values
@@ -381,7 +405,7 @@ module DRI
         updated_desc_md = descMetadata.ng_xml.clone
       end
 
-      children_components = DRI::ModelSupport::EadSupport.get_ead_metadata_components(fullMetadata.ng_xml)
+      children_components = DRI::ModelSupport::EadSupport.ead_metadata_components(fullMetadata.ng_xml)
 
       # copy children components from un-synced fullMetadata
       # as descMetadata does not include them

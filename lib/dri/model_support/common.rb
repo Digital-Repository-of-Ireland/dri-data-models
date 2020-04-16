@@ -12,11 +12,11 @@ module DRI
         has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
         # one-to-many AF relationship to associate documentation objects
         has_many :documentation_objects, class_name: 'DRI::Documentation', as: :documentation_for, dependent: :destroy
-        has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true        
         # Complete metadata record datastream
         has_one :fullMetadata, class_name: 'DRI::Metadata::FullMetadata', as: :describable, autosave: true
 
         # TODO: Check that these match the DRI Level 1 and 2 terms
+
         # DRI Mandatory (M)
         # Title (collection-level)
         delegate :title,:title=, to: :descMetadata
@@ -39,20 +39,6 @@ module DRI
         # Language (collection-level)
         delegate :language,:language=, to: :descMetadata
 
-        delegate :status,:status=, to: :properties
-        delegate :object_type,:object_type=, to: :properties
-        delegate :depositor,:depositor=, to: :properties
-        delegate :metadata_md5,:metadata_md5=, to: :properties
-        delegate :model_version,:model_version=, to: :properties
-        delegate :master_file_access,:master_file_access=, to: :properties
-        delegate :verified,:verified=, to: :properties
-        delegate :doi,:doi=, to: :properties
-        delegate :cover_image,:cover_image=, to: :properties
-        delegate :institute,:institute=, to: :properties
-        delegate :depositing_institute=, to: :properties
-        delegate :licence,:licence=, to: :properties
-        delegate :object_version=, to: :properties
-        
         validate :custom_validations
       end
 
@@ -60,14 +46,14 @@ module DRI
 
       def custom_validations
         return true unless descMetadata.class < DRI::Datastreams::OmDatastream
-        
+
         results = descMetadata.custom_validations
         return true if results.empty?
-        
+
         results.each { |key, value| errors.add(key, value) }
-        
+
         false
-      end # custom_validations    
+      end # custom_validations
     end # module
   end # module
 end # module

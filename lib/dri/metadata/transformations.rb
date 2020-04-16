@@ -21,6 +21,8 @@ module DRI
       PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (date)
       DATE_RANGE_SOLR_FIELD = 'ddateRange'
+      DATE_RANGE_START_SOLR_FIELD = 'date_range_start_isi'
+      DATE_RANGE_END_SOLR_FIELD = 'date_range_end_isi'
       # The name of the Solr field for indexing temporal metadata (subject temporal)
       SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
       SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'
@@ -45,50 +47,43 @@ module DRI
         results = []
 
         names.each do |archived_name|
-          name_parts = archived_name.split(',')
+          archived_name = extract_name(CGI.unescapeHTML(archived_name))
+          next if !person_name?(archived_name)
 
-          firstname = ''
-          surname = ''
-          prefix = ''
-          misc = ''
+          name_parts = archived_name.strip.split(',')
+          next if name_parts.empty?
 
-          if name_parts.length > 0
-            surname_parts = name_parts[0].split('(')
-            surname = surname_parts[0].strip
-            misc += surname_parts[1..-1].join('(')
-          end
+          sorted_name = name_parts[0].strip + ", " + name_parts[1..-1].join(" ").strip
+          parsed_name = Namae.parse(sorted_name)
 
-          if name_parts.length > 1
-            firstname_parts = name_parts[1].split('(')
-            firstname = firstname_parts[0].strip
-            misc += firstname_parts[1..-1].join('(')
-          end
-
-          if name_parts.length > 2
-            prefix_parts = name_parts[2].split('(')
-            prefix = prefix_parts[0].strip
-            misc += prefix_parts[1..-1].join('(')
-          end
-
-          result = ''
-          result += "#{firstname} " unless firstname.empty?
-
-          unless prefix.empty?
-            result += prefix
-            result += ' ' unless prefix[-1, 1] == '-'
-          end
-
-          result += "#{surname} " unless surname.empty?
-
-          result += misc unless misc.empty?
-
-          result = result.strip
-
-          results |= [result] unless result.empty?
+          result = parsed_name[0].display_order unless parsed_name.empty?
+          results |= [result] if result
         end
 
         results
       end
+
+      def self.extract_name(name)
+        name = name_from_orcid(name)
+        name_remove_dates(name)
+      end
+
+      def self.name_from_orcid(name)
+        return name unless name.start_with?('name=')
+        name['name='.length..name.index(';')-1]
+      end
+
+      def self.name_remove_dates(name)
+        name.gsub(/\(?\s*\d+\s*-\s*\d+\s*\)?/,'')
+      end
+
+      def self.person_name?(name)
+        return false if name.include?("--") # lcsh style
+
+        name = name.downcase
+        !(%w(ltd ltd. limited archive museum archives library firm nui gallery services consultancy associates university).any? { |word| name.include?(word) })
+      end
+
 
       # A function to convert a title string removing definite articles, unneccessary spaces, etc.
       #
@@ -135,14 +130,14 @@ module DRI
             end
           end
         end
-        
+
         results[:json] = filter_projections(results[:json])
         results
       end
-     
+
       def self.filter_projections(geojson_strings)
         features = geojson_strings.map { |geojson_string| JSON.parse(geojson_string) }
-        
+
         [ 'http://www.opengis.net/def/crs/EPSG/0/2157', 'http://www.opengis.net/def/crs/EPSG/0/29903' ].each do |projection|
           filtered = features.select { |feature| feature['properties'].dig('geometryCRS', 'crs') == projection }
           return filtered.map { |feature| feature.to_json.to_s } unless filtered.empty?
@@ -168,6 +163,7 @@ module DRI
         dates.each do |_key, value|
           value.each do |date_string|
             range = date_range(date_string)
+
             if range.key?('start') && range.key?('end')
               results << "[#{range['start']} TO #{range['end']}]" if valid_range?(range)
             elsif range.key?('start')
@@ -222,9 +218,7 @@ module DRI
         years = []
         ranges.each do |range|
           endpoints = range.gsub(/\[(.*)\]/, '\1').split(/\sTO\s/)
-          endpoints.each do |point|
-            years << ISO8601::DateTime.new(point).year
-          end
+          endpoints.each { |point| years << ISO8601::DateTime.new(point).year }
         end
 
         years
@@ -274,7 +268,7 @@ module DRI
 
       def self.transform_period(value)
         return {} if value.nil?
-        
+
         results = {}
         value.split(/\s*;\s*/).each do |component|
          (k,v) = component.split(/\s*=\s*/)
@@ -308,7 +302,7 @@ module DRI
         start_date = range['start']
         end_date = range['end']
 
-        start_date.to_f < end_date.to_f
+        ISO8601::DateTime.new(start_date).to_f < ISO8601::DateTime.new(end_date).to_f
       end
 
       # Determines whether a date string is formatted according to DCMI Period
@@ -383,7 +377,7 @@ module DRI
 
         "#{name_comp} #{sdate_comp} #{edate_comp} #{scheme_comp}".rstrip
       end
-      
+
       # Transforms a geocode string encoded using DCMI Point or Box into a suitable formatted string of
       # coordinates for their indexing in the geographical indices.
       # E.g. Box: 'eastlimit, northlimit, westlimit, southlimit'

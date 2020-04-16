@@ -10,6 +10,18 @@ describe 'Export concern' do
     (@t.export_as_dri_citation).should eq('A. Tester. A test of citations, Digital Repository of Ireland [Distributor]')
   end
 
+  it 'should parse an orcid' do
+    @t = DRI::QualifiedDublinCore.new
+    @t.title = ['A test of citations']
+    @t.creator = ['name=Tester, A.; authority=ORCID; identifier=https://orcid.org/0000-0000']
+    @t.rights = ['Rights']
+    @t.creation_date = ['2015-05-12']
+    @t.type = ['Text']
+
+    (@t.export_as_dri_citation).should eq('Tester, A. A test of citations, Digital Repository of Ireland [Distributor]')
+
+  end
+
   it 'should add the published year' do
     @t = DRI::QualifiedDublinCore.new
     @t.title = ['A test of citations']

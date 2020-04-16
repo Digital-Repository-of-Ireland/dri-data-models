@@ -1,7 +1,5 @@
 #!/usr/bin/env rake
-require 'rspec/core/rake_task'
 require 'yard'
-require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -24,6 +22,12 @@ Dir.glob(File.expand_path('../tasks/*.rake', __FILE__)).each do |f|
   load(f)
 end
 
+APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
+load 'rails/tasks/engine.rake'
+
+require 'ci/reporter/rake/rspec'
+require 'rspec/core/rake_task'
+
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title    = 'DriDataModels'
@@ -42,8 +46,7 @@ YARD::Rake::YardocTask.new(:yard) do |t|
   t.files = ['lib/**/*.rb', 'app/models/**/*.rb', 'lib/dri/metadata/*.rb']
 end
 
-require 'ci/reporter/rake/rspec'
-RSpec::Core::RakeTask.new(rspec: ['ci:setup:rspec']) do |spec|
+RSpec::Core::RakeTask.new(:rspec => ["ci:setup:rspec"]) do |spec|
   spec.pattern = FileList['spec/**/*_spec.rb']
   spec.pattern += FileList['spec/*_spec.rb']
 end
@@ -51,7 +54,11 @@ end
 desc 'Run Continuous Integration'
 task :ci do
   ENV['environment'] = 'test'
+
   with_solr_test_server do
+    Rake::Task['app:db:migrate'].invoke
+    Rake::Task['app:db:test:prepare'].invoke
+
     Rake::Task['rspec'].invoke
   end
 

@@ -9,6 +9,7 @@ module DRI
   autoload :Solr, 'solr/query'
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
   autoload :Datastreams, 'dri/datastreams'
+  autoload :Derivatives, 'dri/derivatives'
 
   attr_writer :queue
 
@@ -16,4 +17,8 @@ module DRI
     @queue ||= DRI::Resque::Queue.new('dri')
   end
 
+  def self.table_name_prefix
+    'dri_'
+  end
 end
+

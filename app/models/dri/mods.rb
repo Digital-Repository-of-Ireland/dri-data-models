@@ -6,23 +6,21 @@ module DRI
 
     has_one :descMetadata, class_name: 'DRI::Metadata::Mods', as: :describable, autosave: true
 
-    # MODS record identifier mods:identifier[@type='local'], not multi-valued
-    delegate :mods_id_local,:mods_id_local=, to: :descMetadata
+     # MODS record identifier mods:identifier[@type='local'], not multi-valued
+    delegate :mods_id_local=, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
-    delegate :id_asset, to: :descMetadata
+    delegate :id_asset=, to: :descMetadata
     # MODS rest of identifiers are repeatable
-    delegate :identifier, to: :descMetadata
-    delegate :identifier_doi, to: :descMetadata
-    delegate :identifier_uri, to: :descMetadata
+    delegate :identifier,:identifier=, to: :descMetadata
+    delegate :identifier_doi,:identifier_doi=, to: :descMetadata
+    delegate :identifier_uri,:identifier_uri=, to: :descMetadata
 
     # Collection attribute + genre type
-    delegate :mods_type_collection,:mods_type_collection=, to: :descMetadata
-    delegate :mods_genre, to: :descMetadata
-
-    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :mods_type_collection=, to: :descMetadata
+    delegate :mods_genre,:mods_genre=, to: :descMetadata
 
     # subtitle
-    delegate :mods_subtitle, to: :descMetadata
+    delegate :mods_subtitle,:mods_subtitle=, to: :descMetadata
 
     # Description
     delegate :desc_abstract,:desc_abstract=, to: :descMetadata
@@ -35,33 +33,33 @@ module DRI
     # delegate :note_mods_no_type, to: :descMetadata
 
     # Rights copyrightMD
-    delegate :copyrightmd_rights, to: :descMetadata
+    delegate :copyrightmd_rights,:copyrightmd_rights=, to: :descMetadata
 
     # Source
-    delegate :source, to: :descMetadata
-    delegate :source_physical_location, to: :descMetadata
-    delegate :source_location, to: :descMetadata
+    delegate :source,:source=, to: :descMetadata
+    delegate :source_physical_location,:source_physical_location=, to: :descMetadata
+    delegate :source_location,:source_location=, to: :descMetadata
 
     # Dates
-    delegate :date, to: :descMetadata
-    delegate :date_other, to: :descMetadata
-    delegate :date_other_start, to: :descMetadata
-    delegate :date_other_end, to: :descMetadata
-    delegate :captured_date, to: :descMetadata
-    delegate :captured_date_start, to: :descMetadata
-    delegate :captured_date_end, to: :descMetadata
-    delegate :issued_date_start, to: :descMetadata
-    delegate :issued_date_end, to: :descMetadata
+    delegate :date,:date=, to: :descMetadata
+    delegate :date_other,:date_other=, to: :descMetadata
+    delegate :date_other_start,:date_other_start=, to: :descMetadata
+    delegate :date_other_end,:date_other_end=, to: :descMetadata
+    delegate :captured_date,:captured_date=, to: :descMetadata
+    delegate :captured_date_start,:captured_date_start=, to: :descMetadata
+    delegate :captured_date_end,:captured_date_end=, to: :descMetadata
+    delegate :issued_date_start,:issued_date_start=, to: :descMetadata
+    delegate :issued_date_end,:issued_date_end=, to: :descMetadata
     delegate :creation_date_start,:creation_date_start=, to: :descMetadata
     delegate :creation_date_end,:creation_date_end=, to: :descMetadata
 
     # Geographical, temporal, name
-    delegate :name_coverage, to: :descMetadata
-    delegate :geographical_coverage, to: :descMetadata
-    delegate :temporal_coverage, to: :descMetadata
-    delegate :subject_date_start, to: :descMetadata
-    delegate :subject_date_end, to: :descMetadata
-    delegate :geocode_logainm, to: :descMetadata
+    delegate :name_coverage,:name_coverage=, to: :descMetadata
+    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
+    delegate :subject_date_start,:subject_date_start=, to: :descMetadata
+    delegate :subject_date_end,:subject_date_end=, to: :descMetadata
+    delegate :geocode_logainm,:geocode_logainm=, to: :descMetadata
 
     delegate :published_date,:published_date=, to: :descMetadata
     delegate :creation_date,:creation_date=, to: :descMetadata
@@ -70,17 +68,10 @@ module DRI
       # Roles
       DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym, to: :descMetadata }
       # Internal Relationships
-      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym, to: :descMetadata }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym, to: :descMetadata }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
     end
-
-    delegate :resource_type, to: :descMetadata
-    delegate :mods_genre, to: :descMetadata
-
-    delegate :origin_metadata, to: :descMetadata
-
-    delegate :subject_metadata, to: :descMetadata
 
     # Disabled for now
     # around_save :create_multiple_records
@@ -99,6 +90,13 @@ module DRI
       super || build_fullMetadata
     end
 
+    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :mods_genre,:mods_genre=, to: :descMetadata
+
+    delegate :origin_metadata,:origin_metadata=, to: :descMetadata
+
+    delegate :subject_metadata,:subject_metadata=, to: :descMetadata
+
     #
     # @return [Array<Symbol>] MODS DRI terms symbols array
     def self.mods_dri_terms
@@ -107,6 +105,18 @@ module DRI
        :subject_metadata, :source_location, :source_physical_location,
        :publisher, :type, :mods_genre, :language, :roles
       ]
+    end
+
+    def mods_id_local
+      descMetadata.mods_id_local.first
+    end
+
+    def mods_type_collection
+      descMetadata.mods_type_collection.first
+    end
+
+    def id_asset
+      descMetadata.id_asset.first
     end
 
     # AF Override

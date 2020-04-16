@@ -25,11 +25,11 @@ module DRI
     # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
       updated_props = properties.clone
-      
+
       # When updating from DRI form
       # replace type attribute key with resource_type
       updated_props[:resource_type] = updated_props.delete :type
-   
+
       super(updated_props)
     end
 
@@ -64,6 +64,6 @@ module DRI
     def descMetadata
       super || build_descMetadata
     end
-   
-  end 
+
+  end
 end # Module DRI

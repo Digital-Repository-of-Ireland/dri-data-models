@@ -8,25 +8,27 @@ module DRI
     # Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    delegate :creator,:creator=, to: :descMetadata
     delegate :date,:date=, to: :descMetadata
     delegate :relation,:relation=, to: :descMetadata
     delegate :external_relation,:external_relation=, to: :descMetadata
     delegate :source,:source=, to: :descMetadata
     delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
     delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
-    delegate :temporal_coverage_period,:temporal_coverage_period=, to: :descMetadata
     delegate :name_coverage,:name_coverage=, to: :descMetadata
     delegate :resource_type,:resource_type=, to: :descMetadata
     delegate :format,:format=, to: :descMetadata
     delegate :coverage,:coverage=, to: :descMetadata
     delegate :identifier,:identifier=, to: :descMetadata
+    delegate :resource_type,:resource_type=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
-    delegate :id_asset,:id_asset=, to: :descMetadata
+    delegate :id_asset=, to: :descMetadata
     delegate :qdc_id,:qdc_id=, to: :descMetadata
     delegate :geocode_point,:geocode_point=, to: :descMetadata
     delegate :geocode_box,:geocode_box=, to: :descMetadata
+
+    delegate :published_date,:published_date=, to: :descMetadata
+    delegate :creation_date,:creation_date=, to: :descMetadata
 
     delegate :published_date,:published_date=, to: :descMetadata
     delegate :creation_date,:creation_date=, to: :descMetadata
@@ -56,6 +58,10 @@ module DRI
     # @return [String] the AF digital object model name
     def model_name
       DRI::DigitalObject.model_name
+    end
+
+    def id_asset
+      descMetadata.id_asset.first
     end
 
     # Roles attribute setter

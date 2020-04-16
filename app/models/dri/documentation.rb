@@ -27,7 +27,6 @@ module DRI
     delegate :published_date,:published_date=, to: :descMetadata
     delegate :creation_date,:creation_date=, to: :descMetadata
 
-    #
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
         delegate s.prepend('role_').to_sym,s.concat('=').to_sym,

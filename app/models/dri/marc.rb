@@ -6,7 +6,8 @@ module DRI
 
     has_one :descMetadata, class_name: 'DRI::Metadata::Marc', as: :describable, autosave: true
 
-    delegate :leader, to: :descMetadata, multiple: false
+    delegate :leader=, to: :descMetadata
+
     delegate :controlfield, to: :descMetadata
     delegate :controlfield_tag, to: :descMetadata
     delegate :datafield, to: :descMetadata
@@ -16,15 +17,17 @@ module DRI
 
     # MARC record identifier used for internal rels target,
     # NOT multi-valued
-    delegate :marc_id, to: :descMetadata
+    delegate :marc_id=, to: :descMetadata
+
     # MARC record asset identifier used to sort pages/sequenced items
-    delegate :id_asset, to: :descMetadata
+    delegate :id_asset=, to: :descMetadata
 
     # MARC Relationships, mapped from QDC predicate properties
     # Mapped attributes for getting relational information from metadata
     # Internal Relationships
     # 775: Other Edition Entry; Mapped to QDC: isVersionOf
     delegate :relation_ids_isVersionOf, to: :descMetadata
+
     # 776: Additional Physical Form Entry; Mapped to QDC: isFormatOf
     delegate :relation_ids_isFormatOf, to: :descMetadata
     # 787: Other Relationship Entry; Mapped to DC: relation
@@ -39,9 +42,13 @@ module DRI
     delegate :date, to: :descMetadata
     delegate :published_date, to: :descMetadata
 
-    # Disabled below - metadata object update triggers
-    # the creation of duplicated objects
-    # around_save :create_multiple_records
+    def id_asset
+      descMetadata.id_asset.first
+    end
+
+    def leader
+      descMetadata.leader.first
+    end
 
     def descMetadata
       super || build_descMetadata
@@ -49,6 +56,10 @@ module DRI
 
     def fullMetadata
       super || build_fullMetadata
+    end
+
+    def marc_id
+      descMetadata.marc_id.first
     end
 
     # type attribute getter

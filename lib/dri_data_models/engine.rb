@@ -1,19 +1,15 @@
 module DriDataModels
   require 'rails'
   require 'hydra/derivatives'
-  require 'active_fedora/noid'
+  require 'noid-rails'
   require 'resque/server'
   require 'dri/resque'
   require 'rdf/vocab'
 
-  # RoR rails engine class implementation for the gem
   class Engine < ::Rails::Engine
     config.autoload_paths += %W(#{config.root}/app/models/datastreams)
- 
-    isolate_namespace DriDataModels
 
-    ActiveFedora::Base.translate_uri_to_id = ActiveFedora::Noid.config.translate_uri_to_id
-    ActiveFedora::Base.translate_id_to_uri = ActiveFedora::Noid.config.translate_id_to_uri
+    isolate_namespace DriDataModels
 
     config.generators do |g|
       g.test_framework :rspec, :fixture => true
@@ -29,5 +25,15 @@ module DriDataModels
         end
       end
     end
+
+    baseparts = 2 + [(Noid::Rails.config.template.gsub(/\.[rsz]/, '').length.to_f / 2).ceil, 4].min
+    baseurl = "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}"
+
+    ActiveFedora::Base.translate_uri_to_id = lambda do |uri|
+                                               uri.to_s.sub(baseurl, '').split('/', baseparts).last
+                                             end
+    ActiveFedora::Base.translate_id_to_uri = lambda do |id|
+                                               "#{baseurl}/#{Noid::Rails.treeify(id)}"
+                                             end
   end
 end

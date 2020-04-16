@@ -20,15 +20,24 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib', 'app']
 
-  s.add_dependency 'rails', '~> 4.2'
-  s.add_dependency 'globalize', '~> 5'
-  s.add_dependency 'sass-rails', '~> 4.0.3'
   s.add_dependency 'active-fedora'
+  s.add_dependency 'active_fedora-datastreams'
+  s.add_dependency 'rails', '~> 5.2'
+  s.add_dependency 'hydra-head'
   s.add_dependency 'iso-639'
-  s.add_dependency 'hydra-derivatives', '~> 1.0'
-  s.add_dependency 'active_fedora-noid'
-  s.add_dependency 'resque' #, '~> 1.23'
-  s.add_dependency 'resque-pool' #, '~> 0.3'
+  s.add_dependency 'hydra-derivatives'
+  s.add_dependency 'hydra-file_characterization'
+  s.add_dependency 'noid-rails'
+  s.add_dependency 'resque'
   s.add_dependency 'iso8601'
+  s.add_dependency 'namae'
+  s.add_development_dependency 'sqlite3', '~> 1.3', '< 1.4'
   s.add_development_dependency 'rspec'
+
+  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'jquery-rails'
+  s.add_development_dependency 'simplecov'
+  s.add_development_dependency 'ci_reporter_rspec'
+  s.add_development_dependency 'yard'
+  s.add_development_dependency 'solr_wrapper', '~> 0.18'
 end

@@ -173,18 +173,18 @@ module DRI::Metadata::Terminologies
         }
 
         # DRI mandatory fields 1-to-1 mappings
-        t.title(proxy: [:c, :did, :unit_title], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-        t.language(proxy: [:c, :did, :lang_material, :lang], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.language_facetable])
-        t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as:  [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable])
-        t.publisher(proxy: [:c, :did, :repository], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable])
-        t.rights(proxy: [:c, :use_restrict, :p], index_as:  [DRI::Metadata::Descriptors.cleaned_displayable, :stored_searchable])
-        t.resource_type(proxy: [:c, :did, :phys_desc, :genre_form], index_as:  [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.title(proxy: [:c, :did, :unit_title], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+        t.language(proxy: [:c, :did, :lang_material, :lang], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.language_facetable])
+        t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable, :sortable])
+        t.publisher(proxy: [:c, :did, :repository], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable])
+        t.rights(proxy: [:c, :use_restrict, :p], index_as: [DRI::Metadata::OmDescriptors.cleaned_displayable, :stored_searchable])
+        t.resource_type(proxy: [:c, :did, :phys_desc, :genre_form], index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
         t.creation_date(proxy: [:c, :did, :unitdate_creation])
         t.published_date(proxy: [:c, :did, :unitdate_pub])
-        t.subject(proxy: [:c, :control_access, :subject], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.subject(proxy: [:c, :control_access, :subject], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
-        t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
         t.desc_abstract(proxy: [:c, :did, :abstract])
         t.desc_biog_hist(proxy: [:c, :biog_hist, :p])
         t.desc_dao_desc(proxy: [:c, :did, :dao, :dao_desc, :p])
@@ -199,18 +199,18 @@ module DRI::Metadata::Terminologies
         t.creator_famname(proxy: [:c, :did, :origination, :fam_name])
 
         # Subjects (including names, persnames, corpnames and famnames with @role='subject', nested within <controlaccess>)
-        t.name_subject(proxy: [:c, :control_access, :name], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
-        t.persname_subject(proxy: [:c, :control_access, :pers_name], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
-        t.corpname_subject(proxy: [:c, :control_access, :corp_name], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
-        t.famname_subject(proxy: [:c, :control_access, :fam_name], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
-        t.geogname_subject(proxy: [:c, :control_access, :geog_name], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.name_subject(proxy: [:c, :control_access, :name], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+        t.persname_subject(proxy: [:c, :control_access, :pers_name], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+        t.corpname_subject(proxy: [:c, :control_access, :corp_name], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+        t.famname_subject(proxy: [:c, :control_access, :fam_name], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
+        t.geogname_subject(proxy: [:c, :control_access, :geog_name], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
         # EAD level
-        t.ead_level(proxy: [:c, :ead_level_at], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.ead_level(proxy: [:c, :ead_level_at], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
         # Eadlevel - otherlevel
-        t.ead_level_other(proxy: [:c, :other_level_at], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.ead_level_other(proxy: [:c, :other_level_at], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
-        t.format(proxy: [:c, :did, :phys_desc, :extent], index_as:  [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.format(proxy: [:c, :did, :phys_desc, :extent], index_as: [DRI::Metadata::OmDescriptors.cleaned_facetable, DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
         t.dao_did(proxy: [:c, :did, :dao])
         t.dao_other(proxy: [:c, :dao])
@@ -233,9 +233,9 @@ module DRI::Metadata::Terminologies
         t.identifier_public_id(proxy: [:c, :did, :unit_id, :public_id_at])
 
         # Related Material
-        t.related_material(proxy: [:c, :rel_mat, :ext_ref, :href_at], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.related_material(proxy: [:c, :rel_mat, :ext_ref, :href_at], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
         # Alternative Form Available
-        t.alternative_form(proxy: [:c, :alt_form, :ext_ref_p, :ext_ref, :href_at], index_as:  [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.alternative_form(proxy: [:c, :alt_form, :ext_ref_p, :ext_ref, :href_at], index_as: [DRI::Metadata::OmDescriptors.cleaned_searchable, DRI::Metadata::OmDescriptors.cleaned_displayable])
 
         # Mapping to geogname supporting DCMI Point and Box
         t.geocode_point(ref: :geog_name_cvg, attributes: { rules: 'dcterms:Point' })

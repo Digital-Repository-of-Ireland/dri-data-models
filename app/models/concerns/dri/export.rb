@@ -417,12 +417,11 @@ module DRI
     end
 
     def author_list
-      creator.map { |author| clean_end_punctuation(CGI.escapeHTML(author)) }.uniq
+      creator.map { |c| name_from_dcsv(c) || c }.map { |author| clean_end_punctuation(CGI.escapeHTML(author)) }.uniq
     end
 
     def all_authors
-      authors = creator
-
+      authors = creator.map { |c| name_from_dcsv(c) || c }
       return nil if authors.empty?
 
       authors.map { |author| CGI.escapeHTML(author) }
@@ -452,6 +451,14 @@ module DRI
       temp_name = name.split(', ')
 
       temp_name.last + ' ' + temp_name.first
+    end
+
+    def name_from_dcsv(value)
+      value.strip.split(/\s*;\s*/).each do |component|
+        (k,v) = component.split(/\s*=\s*/)
+        return v unless v.nil? || v.empty? if k == 'name'
+      end
+      nil
     end
   end
 end
