@@ -156,11 +156,11 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_for_index) unless name_coverage.empty?
         solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_for_index) unless name_coverage.empty?
 
-        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
-        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array)) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array) unless subject_place_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array)) unless subject_place_array.empty?
 
-        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
-        solr_doc.merge!(Solrizer.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array)) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array) unless subject_temporal_array.empty?
+        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array)) unless subject_temporal_array.empty?
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })

@@ -11,24 +11,21 @@ module DRI
         attr_accessor :collection
 
         # one-to-one AF association to associate the parent of the given object
-        belongs_to :governing_collection, class_name: 'DRI::DigitalObject', polymorphic: true
+        belongs_to :governing_collection, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true
         # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
                  class_name: 'DRI::DigitalObject',
                  as: :governing_collection,
                  dependent: :destroy
 
+        has_and_belongs_to_many :relations, class_name: 'DRI::Related', inverse_of: :related, join_table: 'digital_object_related'
+
         # Additional relationships to keep track of sibling order
         # used in EAD
         # one-to-one AF association to associate the preceding EAD child component for the given object
-        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true
+        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
-
-        has_and_belongs_to_many :relations,
-                 class_name: 'DRI::Related',
-                 predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOf,
-                 inverse_of: :related
 
         # Collection flag attribute setter
         #

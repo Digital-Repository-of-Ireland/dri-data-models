@@ -101,7 +101,7 @@ module DRI
         solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf.fragment, :symbol) => [digital_object.noid])
       end
 
-      solr_doc.merge!(Solrizer.solr_name('file_size', :stored_sortable, type: :integer) => [file_size[0]]) unless file_size.empty?
+      solr_doc.merge!(Solrizer.solr_name('file_size', :stored_sortable, type: :integer) => [file_size])
       solr_doc.merge!(Solrizer.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?
       solr_doc.merge!(Solrizer.solr_name('height', :stored_sortable, type: :integer) => [height[0].to_i]) unless height.empty?
 

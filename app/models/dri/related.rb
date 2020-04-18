@@ -1,7 +1,7 @@
 module DRI
-  class Related < ActiveFedora::Base
-    has_and_belongs_to_many :related,
-                            predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasMember,
-                            class_name: 'DRI::Batch'
+  class Related < ApplicationRecord
+    self.table_name = 'dri_related'
+
+    has_and_belongs_to_many :related, class_name: 'DRI::DigitalObject', join_table: 'digital_object_related'
   end
 end

@@ -18,17 +18,17 @@ module DRI
           file_type =  ['collection']
           file_type_display = ['Collection']
 
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type)
+          solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type)
+          solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type)
 
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :stored_searchable) => file_type_display)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :facetable) => file_type_display)
+          solr_doc.merge!(Solrizer.solr_name('file_type_display', :stored_searchable) => file_type_display)
+          solr_doc.merge!(Solrizer.solr_name('file_type_display', :facetable) => file_type_display)
         end
 
         no_of_files = generic_files.count
         solr_doc = index_file_metadata(no_of_files, solr_doc) if no_of_files > 0
 
-        unless solr_doc.key?(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable))
+        unless solr_doc.key?(Solrizer.solr_name('file_type', :stored_searchable))
           solr_doc = file_type_from_metadata(solr_doc)
         end
 
@@ -52,7 +52,7 @@ module DRI
         sample_rate = []
         file_format = []
 
-        solr_query = "#{Solrizer.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{id}\""
+        solr_query = "#{Solrizer.solr_name('isPartOf', :stored_searchable, type: :symbol)}:\"#{noid}\""
         results = ActiveFedora::SolrService.query(solr_query, rows: no_of_files, defType: 'edismax')
 
         unless results.nil?
@@ -163,11 +163,11 @@ module DRI
           file_type_display.push 'Unknown'
         end
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => file_type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type', :facetable) => file_type)
+        solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type)
+        solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :stored_searchable) => file_type_display)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('file_type_display', :facetable) => file_type_display)
+        solr_doc.merge!(Solrizer.solr_name('file_type_display', :stored_searchable) => file_type_display)
+        solr_doc.merge!(Solrizer.solr_name('file_type_display', :facetable) => file_type_display)
 
         solr_doc
       end

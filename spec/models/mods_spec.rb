@@ -189,8 +189,8 @@ describe 'Mods' do
     it 'should add relationship host and referenced_by' do
       md_relationships_hash = @mods_record.get_relationships_records
 
-      added_rels = [DRI::Identifier.retrieve_object(md_relationships_hash[:referenced_by].first).mods_id_local.first,
-                    DRI::Identifier.retrieve_object(md_relationships_hash[:host].first).mods_id_local.first]
+      added_rels = [DRI::Identifier.retrieve_object(md_relationships_hash[:referenced_by].first).mods_id_local,
+                    DRI::Identifier.retrieve_object(md_relationships_hash[:host].first).mods_id_local]
 
       expect(added_rels).to  match(%w(http://example.org/subcollection/1# MODS-ID-1234))
     end

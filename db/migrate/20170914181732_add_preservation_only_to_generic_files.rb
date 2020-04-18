@@ -1,5 +1,5 @@
-class AddPreservationOnlyToGenericFiles < ActiveRecord::Migration
+class AddPreservationOnlyToGenericFiles < ActiveRecord::Migration[4.2]
   def change
-    add_column :generic_files, :preservation_only, :boolean
+    add_column :dri_generic_files, :preservation_only, :boolean
   end
 end

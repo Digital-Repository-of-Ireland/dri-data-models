@@ -271,24 +271,24 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     it "should expose the EAD components\' identifiers" do
       expect(@ead_collection.identifier).to match_array(['IE/NIVAL KDW'])
-      @ead_collection.country_code.first.should == 'IE'
-      @ead_collection.repository_code.first.should == 'IE-DuNIV'
-      @ead_collection.identifier_id.first.should == 'KDW'
+      @ead_collection.country_code.should == 'IE'
+      @ead_collection.repository_code.should == 'IE-DuNIV'
+      @ead_collection.identifier_id.should == 'KDW'
 
       expect(@ead_series.identifier).to match_array(['KDW/RM'])
-      @ead_series.country_code.first.should == 'IE'
-      @ead_series.repository_code.first.should == 'IE-DuNIV'
-      @ead_series.identifier_id.first.should == 'RM'
+      @ead_series.country_code.should == 'IE'
+      @ead_series.repository_code.should == 'IE-DuNIV'
+      @ead_series.identifier_id.should == 'RM'
 
       expect(@ead_file.identifier).to match_array(['KDW/RM/02'])
-      @ead_file.country_code.first.should == 'IE'
-      @ead_file.repository_code.first.should == 'IE-DuNIV'
-      @ead_file.identifier_id.first.should == '02'
+      @ead_file.country_code.should == 'IE'
+      @ead_file.repository_code.should == 'IE-DuNIV'
+      @ead_file.identifier_id.should == '02'
 
       expect(@ead_item.identifier).to match_array(['KDW/RM/02/04'])
-      @ead_item.country_code.first.should == 'IE'
-      @ead_item.repository_code.first.should == 'IE-DuNIV'
-      @ead_item.identifier_id.first.should == '04'
+      @ead_item.country_code.should == 'IE'
+      @ead_item.repository_code.should == 'IE-DuNIV'
+      @ead_item.identifier_id.should == '04'
     end
 
     it 'should expose the level of the EAD component' do
@@ -497,7 +497,7 @@ describe 'EncodedArchivalDescription descMetadata' do
         curr_object = DRI::EadComponent.new
         curr_object.update_metadata curr_file
         curr_object.identifier.should == ['KDW/RM/02']
-        curr_object.ead_level.first.should == 'file'
+        curr_object.ead_level.should == ['file']
       end
     end
   end # Context validation of DRI compulsory elements

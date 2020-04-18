@@ -3,16 +3,15 @@ module DRI
   # Implementation of DRI EAD digital objects extending from DRI::Base
   module EncodedArchivalDescription
     extend ActiveSupport::Concern
-
     include DRI::ModelSupport::EadSupport
 
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
     delegate :identifier,:identifier=, to: :descMetadata
-    delegate :identifier_id,:identifier_id=, to: :descMetadata, multiple: false
-    delegate :repository_code,:repository_code=, to: :descMetadata, multiple: false
-    delegate :country_code,:country_code=, to: :descMetadata, multiple: false
+    delegate :identifier_id,:identifier_id=, to: :descMetadata
+    delegate :repository_code,:repository_code=, to: :descMetadata
+    delegate :country_code,:country_code=, to: :descMetadata
 
     # ISO Dates
     delegate :creation_date_idx, to: :descMetadata
@@ -20,7 +19,7 @@ module DRI
     delegate :temporal_coverage_idx, to: :descMetadata
 
     # Description properties
-    delegate :desc_abstract, to: :descMetadata, multiple: false
+    delegate :desc_abstract, to: :descMetadata
     delegate :desc_biog_hist, to: :descMetadata
     delegate :desc_scope_content, to: :descMetadata
     delegate :desc_dao_desc, to: :descMetadata
@@ -33,8 +32,8 @@ module DRI
     delegate :geogname_subject,:geogname_subject=, to: :descMetadata
 
     # Types
-    delegate :ead_level,:ead_level=, to: :descMetadata, multiple: false
-    delegate :ead_level_other,:ead_level_other=, to: :descMetadata, multiple: false
+    delegate :ead_level,:ead_level=, to: :descMetadata
+    delegate :ead_level_other,:ead_level_other=, to: :descMetadata
 
     # Files, description
     delegate :dao_proxy, to: :descMetadata
@@ -129,17 +128,16 @@ module DRI
     end
 
     def desc_abstract
-      descMetadata.desc_abstract.first
+      descMetadata.desc_abstract
     end
 
     def ead_level
-      descMetadata.ead_level.first
+      descMetadata.ead_level
     end
 
     def ead_level_other
-      descMetadata.ead_level_other.first
+      descMetadata.ead_level_other
     end
-
     # Type attribute getter
     #
     # @return [Array<String>] the array of metadata type values

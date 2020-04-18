@@ -1,6 +1,6 @@
-class CreateDigitalObjects < ActiveRecord::Migration
+class CreateDigitalObjects < ActiveRecord::Migration[4.2]
   def change
-    create_table :digital_objects do |t|
+    create_table :dri_digital_objects do |t|
       t.string :ingest_files_from_metadata
       t.string :master_file_access
       t.string :published_at
@@ -19,8 +19,8 @@ class CreateDigitalObjects < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_index :digital_objects, [:governing_collection_type, :governing_collection_id], name: 'governing_index'
-    add_index :digital_objects, [:previous_sibling_type, :previous_sibling_id], name: 'sibling_index'
-    add_index :digital_objects, [:documentation_for_type, :documentation_for_id], name: 'doc_for_index'
+    add_index :dri_digital_objects, [:governing_collection_type, :governing_collection_id], name: 'governing_index'
+    add_index :dri_digital_objects, [:previous_sibling_type, :previous_sibling_id], name: 'sibling_index'
+    add_index :dri_digital_objects, [:documentation_for_type, :documentation_for_id], name: 'doc_for_index'
   end
 end

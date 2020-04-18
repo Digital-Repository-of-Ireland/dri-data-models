@@ -1,5 +1,7 @@
 #!/usr/bin/env rake
+require 'rspec/core/rake_task'
 require 'yard'
+require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -38,9 +40,6 @@ RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_files.include('lib/dri/metadata/*.rb')
   rdoc.rdoc_files.include('app/models/**/*.rb')
 end
-
-APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
-load 'rails/tasks/engine.rake'
 
 YARD::Rake::YardocTask.new(:yard) do |t|
   t.files = ['lib/**/*.rb', 'app/models/**/*.rb', 'lib/dri/metadata/*.rb']

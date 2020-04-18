@@ -1,6 +1,6 @@
-class CreateGenericFiles < ActiveRecord::Migration
+class CreateGenericFiles < ActiveRecord::Migration[4.2]
   def change
-    create_table :generic_files do |t|
+    create_table :dri_generic_files do |t|
       t.text :title
       t.text :creator
       t.string :filename
@@ -21,9 +21,7 @@ class CreateGenericFiles < ActiveRecord::Migration
       t.string :manager_users
       t.string :manager_groups
       t.timestamps
-      t.references :digital_object, polymorphic: true 
+      t.references :digital_object, polymorphic: true, index: { name: 'gf_do_idx' }
     end
-
-    add_index :generic_files, [:digital_object_type, :digital_object_id], name: 'gf_do_index'
   end
 end

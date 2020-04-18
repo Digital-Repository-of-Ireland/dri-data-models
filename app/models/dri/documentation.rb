@@ -6,7 +6,7 @@ module DRI
     # Override DRI::ModelSupport::Base definition of descMetadata
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
-    # one-to-one AF association to DRI::Base (documentation for)
+    # one-to-one AF association to DRI::DigitalObject (documentation for)
     belongs_to :documentation_for, class_name: 'DRI::DigitalObject', polymorphic: true
 
     # Accessors for DRI's metadata terms specific to
@@ -15,7 +15,6 @@ module DRI
     delegate :source,:source=, to: :descMetadata
     delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
     delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
-    delegate :temporal_coverage_period,:temporal_coverage_period=, to: :descMetadata
     delegate :resource_type,:resource_type=, to: :descMetadata
     delegate :format,:format=, to: :descMetadata
     delegate :coverage,:coverage=, to: :descMetadata
@@ -69,16 +68,6 @@ module DRI
         end
       end
 
-      # Adding :temporal_coverage_period to properties
-      # if :temporal_coverage present
-      # for temporal indexing
-      if updated_props[:temporal_coverage].present?
-        updated_props[:temporal_coverage].each do |item|
-          next unless DRI::Metadata::Transformations.dcmi_period?(item)
-
-          period_hash[:temporal_coverage_period] << item
-        end
-      end
       # avoid overwriting entries with duplicate keys
       updated_props.merge!(point_hash) { |_k, v0, _v2| v0 } if point_hash[:geocode_point].present?
       updated_props.merge!(box_hash) { |_k, v0, _v2| v0 } if box_hash[:geocode_box].present?
@@ -125,9 +114,7 @@ module DRI
       solr_doc = super(solr_doc, opts)
 
       if documentation_for
-        solr_doc.merge!(
-          Solrizer.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isDescriptionOf, :symbol) => [documentation_for.id]
-        )
+        solr_doc.merge!( {'isDescriptionOf_ssim' => [documentation_for.noid] })
       end
 
       solr_doc

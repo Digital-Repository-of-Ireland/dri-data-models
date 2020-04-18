@@ -2,7 +2,7 @@
 module DRI
   # ModelSupport namespace
   module ModelSupport
-    # Includes the AF properties for DRI properties metadata
+    # Includes the DRI properties metadata
     module Properties
       extend ActiveSupport::Concern
 

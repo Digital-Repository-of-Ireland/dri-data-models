@@ -49,7 +49,7 @@ describe 'QualifiedDublinCore' do
     it 'should create a new object if there isnt an existing object for a given id' do
       @audio2 = DRI::QualifiedDublinCore.find_or_create('fake-dc-id')
       expect(@audio2.new_record?).to eq true
-      @audio2.delete(eradicate: true)
+      @audio2.delete
     end
 
     it 'should load from xml' do
@@ -367,17 +367,16 @@ describe 'QualifiedDublinCore' do
       @obj.save
 
       ld = DRI::LinkedData.new
-      ld.resource_type = ["Dataset"]
-      ld.source = ["http://data.logainm.ie/place/1399926"]
-      ld.spatial = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-7.25218,52.6556]},\"properties\":{\"placename\":\"Cill Chainnigh/Kilkenny\"}}"]
+      ld.resource_type = "Dataset"
+      ld.source = "http://data.logainm.ie/place/1399926"
+      ld.spatial = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-7.25218,52.6556]},\"properties\":{\"placename\":\"Cill Chainnigh/Kilkenny\"}}"
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.id
+      rr.object_id = @obj.noid
       rr.uri = "http://data.logainm.ie/place/1399926"
       rr.save
-
-      expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial[0])
+      expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial)
 
       ld.delete
       rr.delete
@@ -395,7 +394,7 @@ describe 'QualifiedDublinCore' do
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.id
+      rr.object_id = @obj.noid
       rr.uri = "http://data.logainm.ie/place/test"
       rr.save
 
@@ -417,15 +416,15 @@ describe 'QualifiedDublinCore' do
       @obj.title = ['sample']
       sleep 1
       expect { @obj.save }.to change {
-        ActiveFedora::SolrService.query("id:\"#{@obj.id}\"").first['system_modified_dtsi']
+        ActiveFedora::SolrService.query("id:\"#{@obj.noid}\"").first['system_modified_dtsi']
       }
     end
 
-    it 'does not update the modification time field in solr in no change' do
+    it 'does not update the modification time field in solr if no change' do
       @obj.save
-      sleep 1
+      @obj.reload
       expect { @obj.save }.not_to change {
-        ActiveFedora::SolrService.query("id:\"#{@obj.id}\"").first['system_modified_dtsi']
+        ActiveFedora::SolrService.query("id:\"#{@obj.noid}\"").first['system_modified_dtsi']
       }
     end
   end

@@ -1,13 +1,10 @@
-class CreateOmDatastreams < ActiveRecord::Migration
+class CreateOmDatastreams < ActiveRecord::Migration[4.2]
   def change
-    create_table :om_datastreams do |t|
+    create_table :dri_om_datastreams do |t|
       t.string  :type
       t.binary  :datastream_content
-      t.references :describable, polymorphic: true
+      t.references :describable, polymorphic: true, index: { name: 'om_index' }
       t.timestamps 
    end
-
-  add_index :om_datastreams, [:describable_type, :describable_id], name: 'om_index'
-
   end
 end

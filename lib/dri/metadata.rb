@@ -13,7 +13,6 @@ module DRI
     autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :Terminologies, 'dri/metadata/terminologies'
-    autoload :Documentation, 'dri/metadata/documentation'
 
     # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other Fedora objects. This allows us to add functions
@@ -35,6 +34,10 @@ module DRI
       {}
     end
 
+    def filter_uris(array)
+      array.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+    end
+
     # Returns an array with the values of a metadata field if present as an object's attribute
     # @param [String] field the name of the metadata field
     # @return [Array<String>] the array of field metadata values
@@ -47,6 +50,11 @@ module DRI
 
     def prefix(path)
       ''
+    end
+
+    def reconciliation_uris
+      return [] if describable.noid.nil?
+      DRI::ReconciliationResult.where(object_id: describable.noid).pluck(:uri)
     end
 
     # Remove null values from a given field within

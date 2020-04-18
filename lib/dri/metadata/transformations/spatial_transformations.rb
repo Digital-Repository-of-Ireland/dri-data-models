@@ -12,27 +12,21 @@ module DRI::Metadata::Transformations
       result = {}
 
       ld = find_linked_data(url)
-      unless ld.empty?
-        geojson = ld.first.spatial
-        geojson.each do |geo|
-          geojson_hash = JSON.parse(geo, symbolize_names: true)
-          result[:json] = geo
-          result[:name] = geojson_hash[:properties][:placename]
-          result[:coords] = "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
-        end
-      end
+      return result if ld.nil?
+
+      geo = ld.spatial
+      geojson_hash = JSON.parse(geo, symbolize_names: true)
+      result[:json] = geo
+      result[:name] = geojson_hash[:properties][:placename]
+      result[:coords] = "#{geojson_hash[:geometry][:coordinates][0]} #{geojson_hash[:geometry][:coordinates][1]}"
 
       result
     end
 
-    def self.find_linked_data(geostring)
-      results = ActiveFedora::SolrService.query("source_sim:\"#{geostring}\"")
-      return [] if results.blank?
-      begin
-        [DRI::LinkedData.find(results.first[:id])]
-     rescue ActiveRecord::RecordNotFound => e
-          []
-      end
+    def self.find_linked_data(url)
+      DRI::LinkedData.find_by!(source: url)
+    rescue ActiveRecord::RecordNotFound => e
+      nil
     end
 
     def self.parse_dcmi_point(geospatial_string)

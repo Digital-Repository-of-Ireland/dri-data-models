@@ -7,6 +7,10 @@ module DRI
     class Properties < DRI::Datastreams::OmDatastream
       include DRI::Metadata
 
+      def synchronize_metadata_on_save
+        false
+      end
+
       # OM (Opinionated Metadata) terminology mapping
       def self.load_inherited_terminology
         set_terminology do |t|
