@@ -98,7 +98,7 @@ module DRI
       solr_doc[:id] = noid
 
       if digital_object
-        solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf.fragment, :symbol) => [digital_object.noid])
+        solr_doc.merge!(Solrizer.solr_name('isPartOf', :symbol) => [digital_object.noid])
       end
 
       solr_doc.merge!(Solrizer.solr_name('file_size', :stored_sortable, type: :integer) => [file_size])

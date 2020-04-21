@@ -80,7 +80,7 @@ module DRI
 
         p_date = published_date
         if p_date
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
+          solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
           pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => p_date })
           if pdate_ranges.present?
             solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)

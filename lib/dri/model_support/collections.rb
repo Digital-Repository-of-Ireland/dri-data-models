@@ -103,19 +103,11 @@ module DRI
         end
 
         unless governing_collection.nil?
-          solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => [governing_collection.noid])
+          solr_doc.merge!('isGovernedBy_ssim' => [governing_collection.noid])
         end
-
-        #unless governed_items.empty?
-        #  solr_doc.merge!(Solrizer.solr_name(ActiveFedora::RDF::ProjectHydra.isGovernedBy.fragment, :symbol) => governed_items.map(&:noid))
-        #end
 
         if previous_sibling
           solr_doc.merge!(Solrizer.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
-        end
-
-        if next_sibling.present?
-          solr_doc.merge!(Solrizer.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => next_sibling.map(&:noid))
         end
 
         solr_doc.merge!(Solrizer.solr_name('is_collection', :facetable) => collection?)

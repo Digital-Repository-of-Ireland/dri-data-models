@@ -1,7 +1,6 @@
 module DRI
   module Metadata
     autoload :Descriptors, 'dri/metadata/descriptors'
-    autoload :OmDescriptors, 'dri/metadata/om_descriptors'
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
     autoload :FullMetadata, 'dri/metadata/full_metadata'

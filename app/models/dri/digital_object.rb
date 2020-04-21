@@ -235,9 +235,9 @@ module DRI
       solr_doc.merge!(Solrizer.solr_name('object_type', :facetable) => object_types)
       solr_doc.merge!(Solrizer.solr_name('object_type', :displayable) => object_types)
 
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::OmDescriptors.cleaned_facetable) => type)
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::OmDescriptors.cleaned_searchable) => type)
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::OmDescriptors.cleaned_displayable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => type)
+      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => type)
 
       if rights.empty?
         solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable) => ['No rights statement'])

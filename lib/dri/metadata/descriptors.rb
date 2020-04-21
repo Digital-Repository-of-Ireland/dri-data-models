@@ -10,26 +10,26 @@ module DRI
 
       # Creates a facet index in SOLR for ISO 639.2 language codes
       def self.language_facetable
-        @language ||= ActiveFedora::Indexing::Descriptor.new(:string, :indexed, :multivalued,
+        @language ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
                                                converter: language_converter)
       end
 
       # Creates a searchable index in SOLR
       def self.cleaned_searchable
-        @searchable ||= ActiveFedora::Indexing::Descriptor.new(ActiveFedora::Indexing::DefaultDescriptors.stored_searchable_field_definition,
+        @searchable ||= ::Solrizer::Descriptor.new(::Solrizer::DefaultDescriptors.stored_searchable_field_definition,
                                                  converter: input_converter,
                                                  requires_type: true)
       end
 
       # Creates a cleaned, displayable index in Solr
       def self.cleaned_displayable
-        @displayable ||= ActiveFedora::Indexing::Descriptor.new(:string, :indexed, :multivalued,
+        @displayable ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
                                                   converter: input_converter)
       end
 
       # Creates a facet index in SOLR
       def self.cleaned_facetable
-        @facetable ||= ActiveFedora::Indexing::Descriptor.new(:string, :indexed, :multivalued,
+        @facetable ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
                                                 converter: facet_converter)
       end
 
