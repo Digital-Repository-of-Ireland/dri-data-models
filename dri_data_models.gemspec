@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'active-fedora'
   s.add_dependency 'om'
   s.add_dependency 'rails', '~> 5.2'
-  s.add_dependency 'hydra-head'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
   s.add_dependency 'hydra-file_characterization'
