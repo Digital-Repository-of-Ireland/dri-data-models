@@ -7,8 +7,7 @@ module DRI
   # inherit from this class
   #
   class DigitalObject < ActiveRecord::Base
-    include ActiveFedora::Indexing
-
+    include DRI::Indexing
     include DRI::Noid
     include DRI::Export
     include DRI::Permissions
@@ -141,7 +140,7 @@ module DRI
 
     def create_date
       return nil unless created_at
-      DateTime.parse(created_at.to_s).utc
+      DateTime.parse(created_at.to_s).utc.to_datetime
     end
 
     def depositing_institute

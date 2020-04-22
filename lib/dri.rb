@@ -10,6 +10,7 @@ module DRI
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
   autoload :Datastreams, 'dri/datastreams'
   autoload :Derivatives, 'dri/derivatives'
+  autoload :Indexing, 'dri/indexing'
 
   attr_writer :queue
 

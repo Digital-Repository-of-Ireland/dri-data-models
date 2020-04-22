@@ -5,7 +5,7 @@ module DRI
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
   class GenericFile < ActiveRecord::Base
-    include ActiveFedora::Indexing
+    include DRI::Indexing
 
     include DRI::Permissions
     include DRI::ModelSupport::Permissions
@@ -60,12 +60,12 @@ module DRI
 
     def create_date
       return nil unless created_at
-      DateTime.parse(created_at.to_s).utc
+      DateTime.parse(created_at.to_s).utc.to_datetime
     end
 
     def modified_date
       return nil unless updated_at
-      DateTime.parse(updated_at.to_s).utc
+      DateTime.parse(updated_at.to_s).utc.to_datetime
     end
 
     def noid
