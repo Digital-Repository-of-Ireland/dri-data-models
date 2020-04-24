@@ -207,7 +207,7 @@ module DRI
     # @param _opts [Hash] options hash
     # @return [Hash] the solr document to be indexed
     def to_solr(solr_doc = {}, _opts = {})
-      solr_doc = indexing_service.generate_solr_document
+      solr_doc = generate_solr_document
 
       Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
       solr_doc[:id] = noid
@@ -217,7 +217,6 @@ module DRI
       solr_doc.merge! solrize_permissions
 
       #solr_doc.merge!('all_text_timv' => full_text)
-
       solr_doc
     end
 

@@ -10,7 +10,6 @@ module DRI::Metadata::Transformations
 
     def self.from_url(url)
       result = {}
-
       ld = find_linked_data(url)
       return result if ld.nil?
 

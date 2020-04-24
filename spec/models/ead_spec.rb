@@ -89,8 +89,6 @@ describe 'EncodedArchivalDescription' do
       @ead_header.governed_items << @component
       @ead_header.save
 
-      #@component.reload
-
       collection_keys = ['root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
                          'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim']
 

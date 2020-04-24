@@ -2,19 +2,6 @@ module DRI
   module Indexing
     extend ActiveSupport::Concern
 
-    #included do
-    #  include ActiveFedora::Indexing
-    #end
-    included do
-      class_attribute :indexer, instance_accessor: false
-      # This is the default indexer class to use for this model.
-      self.indexer = ActiveFedora::IndexingService
-    end
-
-    def indexing_service
-      @indexing_service ||= self.class.indexer.new(self)
-    end
-
     # Updates Solr index with self.
     def update_index
       ActiveFedora::SolrService.add(to_solr, softCommit: true)
@@ -33,11 +20,33 @@ module DRI
       update_index
     end
 
-    module ClassMethods
-      # @return ActiveFedora::Indexing::Map
-      def index_config
-        @index_config ||= ActiveFedora::Indexing::Map.new
+    # Creates a solr document hash for the {#object}
+    # @yield [Hash] yields the solr document
+    # @return [Hash] the solr document
+    def generate_solr_document
+      solr_doc = {}
+      Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
+      Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
+      solr_doc['has_model_ssim'] = has_model
+      declared_attached_files.each do |name, file|
+        solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
+      yield(solr_doc) if block_given?
+      solr_doc
     end
+
+    protected
+
+      def c_time
+        c_time = create_date.present? ? create_date : DateTime.now
+        c_time = DateTime.parse(c_time) unless c_time.is_a?(DateTime)
+        c_time
+      end
+
+      def m_time
+        m_time = modified_date.present? ? modified_date : DateTime.now
+        m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
+        m_time
+      end
   end
 end

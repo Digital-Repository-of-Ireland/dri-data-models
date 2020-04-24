@@ -115,7 +115,6 @@ module DRI
 
         solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
 
-
         solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].present?
         solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[Solrizer.solr_name('date', :stored_searchable)].present?

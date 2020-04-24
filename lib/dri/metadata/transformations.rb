@@ -224,17 +224,6 @@ module DRI
         years
       end
 
-      def self.find_linked_data(geostring)
-        results = ActiveFedora::SolrService.query("source_sim:\"#{geostring}\"")
-        return [] if results.blank?
-        begin
-          [DRI::LinkedData.find(results.first[:id])]
-        rescue ActiveRecord::RecordNotFound => e
-          []  
-        end
-        
-      end
-
       # Transforms a date range string in ISO8601 (e.g. YYYYmmdd/YYYYmmdd) into a format
       # for indexing of date ranges into Solr
       # @param [String] val the date string

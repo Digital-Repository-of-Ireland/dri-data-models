@@ -376,6 +376,7 @@ describe 'QualifiedDublinCore' do
       rr.object_id = @obj.noid
       rr.uri = "http://data.logainm.ie/place/1399926"
       rr.save
+
       expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial)
 
       ld.delete
