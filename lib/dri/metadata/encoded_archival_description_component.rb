@@ -128,7 +128,7 @@ module DRI
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
         if creation_date_idx.empty?
-          solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => get_field_from_parent('creation_date_idx'))
+          solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => parent_field('creation_date_idx'))
         else
           solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
         end
@@ -217,39 +217,35 @@ module DRI
       # If the component does not have this information it is then inherited from the immediate parent
       # and returned for its indexing as Rights
       def rights_for_index
-        rights.empty? ? get_field_from_parent('rights') : rights
+        rights.empty? ? parent_field('rights') : rights
       end
 
       # Maps to unitdate/@datechar="Creation", if the component does not have this information, it is then
       # inherited from the immediate parent (similar to rights - userestrict)
       def creation_date_for_index
-        if !creation_date.empty?
-          cdate_array = creation_date.collect.with_index do |value, idx|
-            if creation_date(idx).normal_at.empty?
-              DRI::Metadata::Transformations.create_dcmi_period(value)
-            else
-              iso_date = creation_date(idx).normal_at[0]
+        return parent_field('creation_date') if creation_date.empty?
 
-              if (iso_date.include?('/'))
-                range = iso_date.split('/')
-                DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
-              else
-                DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
-              end
+        cdate_array = creation_date.collect.with_index do |value, idx|
+          if creation_date(idx).normal_at.empty?
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          else
+            iso_date = creation_date(idx).normal_at[0]
+             if (iso_date.include?('/'))
+              range = iso_date.split('/')
+              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
+            else
+              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
             end
           end
-
-          cdate_array
-        else
-          # Inherit the information
-          get_field_from_parent('creation_date')
         end
+
+        cdate_array
       end
 
       # Returns all metadata related to creator for Solr indexing
       # @return [Array<String>] array of all creator metadata values, formatted to include role info, for Solr indexing
       def creator_for_index
-        creator.empty? ? get_field_from_parent('creator') : creator_with_roles
+        creator.empty? ? parent_field('creator') : creator_with_roles
       end
 
       # Returns all metadata related to creator for Solr indexing
@@ -268,13 +264,11 @@ module DRI
       # Return the values of the metadata field inherited from the parent
       # @param [String] field_name the metadata field name
       # @return [Array<String>] the array of metadata field values from the parent
-      def get_field_from_parent(field_name)
-        if describable && describable.governing_collection
-          solr_query = "id:\"#{describable.governing_collection.id}\""
-          docs = ActiveFedora::SolrService.query(solr_query, defType: 'edismax')
+      def parent_field(field_name)
+        return [] unless describable && describable.governing_collection
 
-          parent_field = docs.first[Solrizer.solr_name(field_name, :stored_searchable, type: :string)] unless docs.empty?
-        end
+        doc = describable.governing_collection.to_solr
+        parent_field = doc[Solrizer.solr_name(field_name, :stored_searchable, type: :string)]
 
         parent_field || []
       end
@@ -351,7 +345,7 @@ module DRI
       def date_ranges_for_index
         dates_hash = {}
 
-        cdate_array = creation_date_idx.empty? ? get_field_from_parent('creation_date_idx') : creation_date_idx
+        cdate_array = creation_date_idx.empty? ? parent_field('creation_date_idx') : creation_date_idx
 
         dates_hash['creation_date'] = cdate_array unless cdate_array.empty?
         dates_hash['published_date'] = published_date_idx unless published_date_idx.empty?

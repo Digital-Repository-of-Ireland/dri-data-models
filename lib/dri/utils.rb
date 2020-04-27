@@ -35,7 +35,7 @@ module DRI
     def self.checksum_metadata(object)
       if object.attached_files.key?(:descMetadata)
         xml = object.attached_files[:descMetadata].content
-        object.metadata_md5 = Checksum.md5_string(xml)
+        object.metadata_checksum = Checksum.md5_string(xml)
       end
     end
 

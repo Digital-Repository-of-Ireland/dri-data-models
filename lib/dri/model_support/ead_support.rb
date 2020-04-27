@@ -256,22 +256,10 @@ module DRI
       # @param object [DRI::Base] the object to check
       # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
-        result = false
+        return false unless object.governing_collection.present?
 
-        return result unless object.governing_collection.present?
-
-        parent_id = object.governing_collection_id
-        md_hash_key = Solrizer.solr_name('metadata_md5', :stored_searchable, type: :string)
-        governed_key = Solrizer.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
-
-        solr_query = "#{md_hash_key}:\"#{object.metadata_md5}\" AND #{governed_key}:\"#{parent_id}\""
-        documents = ActiveFedora::SolrService.query(solr_query,
-                                                    defType: 'edismax',
-                                                    rows: '10',
-                                                    fl: 'id').delete_if { |obj| obj['id'] == object.id }
-        result = true unless documents.empty?
-
-        result
+        duplicates = DRI::DigitalObject.ǹot(id: object.id).where(metadata_checksum: object.metadata_checksum, governing_collection_id: object.governing_collection_id)
+        !duplicates.empty?
       end
 
       # Triggers the creation of generic files

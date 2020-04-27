@@ -34,7 +34,7 @@ module DRI
         new_object.status = status
         new_object.update_metadata(xml)
         new_object.permissions = permissions.to_a
-        MetadataHelpers.checksum_metadata(new_object)
+        DRI::Utils.checksum_metadata(new_object)
 
         new_object.save if new_object.valid?
       end

@@ -429,41 +429,4 @@ describe 'QualifiedDublinCore' do
       }
     end
   end
-
-  context 'relationships' do
-    # Before each test create test objects
-    before(:each) do
-      @col_xml = fixture('relationships/qdc/qdc-rel-col.xml')
-      @obj_xml = fixture('relationships/qdc/qdc-rel-obj.xml')
-      @col = DRI::QualifiedDublinCore.new
-      @obj = DRI::QualifiedDublinCore.new
-      @col.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@col_xml).to_xml
-      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
-
-      @col.save
-      @obj.governing_collection = @col
-      @obj.save
-    end
-
-    after(:each) do
-      unless @col.new_record?
-        @col.governed_items.each { |o| o.delete }
-        @col.delete
-      end
-    end
-
-    it 'should add relationship has_part and source' do
-      md_relationships_hash = @col.get_relationships_records
-
-      added_rels = DRI::Identifier.retrieve_object!(md_relationships_hash[:parts].first).qdc_id
-      added_rels.should =~ ['MAGOH01']
-    end
-
-    it 'should add relationship is_part_of' do
-      md_relationships_hash = @obj.get_relationships_records
-
-      added_rels = DRI::Identifier.retrieve_object!(md_relationships_hash[:container].first).qdc_id
-      added_rels.should =~ ['MAGOH']
-    end
-  end
 end

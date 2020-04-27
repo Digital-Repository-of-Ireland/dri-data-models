@@ -18,7 +18,6 @@ module DRI
 
         delegate :object_type,:object_type=, to: :properties
         delegate :depositor=, to: :properties
-        delegate :metadata_md5=, to: :properties
         delegate :model_version=, to: :properties
         delegate :verified=, to: :properties
         delegate :doi=, to: :properties
@@ -55,10 +54,6 @@ module DRI
 
       def licence
         properties.licence.first
-      end
-
-      def metadata_md5
-        properties.metadata_md5.first
       end
 
       def model_version

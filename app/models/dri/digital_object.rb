@@ -6,7 +6,7 @@ module DRI
   # Digital objects in DRI that handle the supported metadata standards
   # inherit from this class
   #
-  class DigitalObject < ActiveRecord::Base
+  class DigitalObject < ApplicationRecord
     include DRI::Indexing
     include DRI::Noid
     include DRI::Export
@@ -18,7 +18,6 @@ module DRI
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
-    include DRI::ModelSupport::RelationshipsSupport
 
     self.inheritance_column = 'digital_object_type'
 
@@ -151,10 +150,10 @@ module DRI
       properties.object_version = [properties.object_version.first.next]
     end
 
-    # def modified_date
-    #   return nil unless updated_at
-    #   DateTime.parse(updated_at.to_s).utc
-    # end
+    def metadata_checksum=(checksum)
+      properties.metadata_md5 = checksum
+      super(checksum)
+    end
 
     def modified_date
       m_dates = [descMetadata, properties].map do |file|

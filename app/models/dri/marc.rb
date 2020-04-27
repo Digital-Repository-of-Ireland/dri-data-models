@@ -140,22 +140,6 @@ module DRI
       Solrizer.solr_name('marc_id', :stored_searchable, type: :string)
     end
 
-    # Return a Hash including all the PIDs of fedora objects by relationship type
-    # @return [Hash] the hash of MARC relationships with the Fedora PIDs of the related objects
-    def get_relationships_records
-      { related: retrieve_relation_records(send(self.class.relationships[:related][:field]),
-                                           self.class.solr_relationships_field),
-        is_version: retrieve_relation_records(send(self.class.relationships[:is_version][:field]),
-                                              self.class.solr_relationships_field),
-        is_format: retrieve_relation_records(send(self.class.relationships[:is_format][:field]),
-                                             self.class.solr_relationships_field),
-        preceding: retrieve_relation_records(send(self.class.relationships[:preceding][:field]),
-                                             self.class.solr_relationships_field),
-        succeeding: retrieve_relation_records(send(self.class.relationships[:succeeding][:field]),
-                                              self.class.solr_relationships_field)
-      }
-    end
-
     private
 
     def create_multiple_records
