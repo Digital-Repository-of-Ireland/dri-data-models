@@ -147,7 +147,7 @@ module DRI
     end
 
     def increment_version
-      properties.object_version = [properties.object_version.first.next]
+      object_version = object_version.next
     end
 
     def metadata_checksum=(checksum)
@@ -173,10 +173,6 @@ module DRI
 
     def alternate_identifier
       super || build_alternate_identifier
-    end
-
-    def object_version
-      properties.object_version.first
     end
 
     def declared_attached_files

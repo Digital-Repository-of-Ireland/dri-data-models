@@ -1,5 +1,3 @@
-require 'solrizer'
-
 # DRI namespace
 module DRI
   # Metadata namespace

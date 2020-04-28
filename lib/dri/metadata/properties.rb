@@ -21,16 +21,13 @@ module DRI
           t.depositor(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
           t.metadata_md5(namespace_prefix: nil, index_as: [:stored_searchable])
           t.model_version(namespace_prefix: nil, path: 'model_version')
-          t.verified(namespace_prefix: nil, index_as: [:stored_searchable])
           t.doi(namespace_prefix: nil, index_as: [:stored_searchable, :displayable])
           t.cover_image(namespace_prefix: nil, index_as: [:stored_searchable, :displayable])
           t.institute(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
           t.depositing_institute(namespace_prefix: nil, index_as: [:stored_searchable, :displayable])
           t.licence(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
-          t.ingest_files_from_metadata(namespace_prefix: nil, path: 'ingestFilesFromMetadata', index_as: [:facetable, :displayable])
           t.master_file_access(namespace_prefix: nil, index_as: [:stored_searchable, :facetable])
           t.published_at(namespace_prefix: nil, index_as: [:stored_searchable])
-          t.object_version(path: 'object_version', namespace_prefix: nil)
         end # set_terminology
       end
 

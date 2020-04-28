@@ -10,7 +10,7 @@ module DRI::ModelSupport
       # object ID will be used in the MOAB directory name
       object_id = digital_object.noid
      
-      self.version = digital_object.object_version.to_i || 1
+      self.version = digital_object.object_version || 1
       self.mime_type = opts[:mime_type]
 
       base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
