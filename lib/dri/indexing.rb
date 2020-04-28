@@ -2,9 +2,13 @@ module DRI
   module Indexing
     extend ActiveSupport::Concern
 
+    def conn
+      @conn ||= ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
+    end
+
     # Updates Solr index with self.
     def update_index
-      ActiveFedora::SolrService.add(to_solr, softCommit: true)
+      conn.add(to_solr, params: { softCommit: true })
     end
 
     def _create_record(options = {})

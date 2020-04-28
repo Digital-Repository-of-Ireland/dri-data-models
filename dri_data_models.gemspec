@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib', 'app']
 
-  s.add_dependency 'active-fedora'
   s.add_dependency 'om'
   s.add_dependency 'rails', '~> 5.2'
   s.add_dependency 'iso-639'
