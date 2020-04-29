@@ -15,7 +15,7 @@ module DRI
 
         after_initialize :load_attributes
 
-        # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading fedora objects
+        # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading objects
         # load_attributes changes the descMetadata datastream to load the right metadata class
         def trigger_ingest
           @trigger_ingest || false
@@ -27,7 +27,7 @@ module DRI
         end
       end
 
-      # Process a component's children and create associated objects in Fedora
+      # Process a component's children and create associated objects
       def synchronize_children_to_metadata
         return if self.new_record?
 

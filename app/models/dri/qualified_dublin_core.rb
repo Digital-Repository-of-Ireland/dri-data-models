@@ -1,6 +1,6 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Qualified Dublin Core digital objects extending from DRI::Base
+  # Implementation of DRI Qualified Dublin Core digital objects
   class QualifiedDublinCore < DRI::DigitalObject
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
@@ -84,11 +84,11 @@ module DRI
       super(updated_props)
     end
 
-    # Retrieve an existing Fedora DRI::QualifiedDublinCore object;
+    # Retrieve an existing DRI::QualifiedDublinCore object;
     # creates a new one if object not found for a given PID
     #
     # @param [String] pid the object's PID
-    # @return [DRI::QualifiedDublinCore] the retrieved Fedora object; new object if not found
+    # @return [DRI::QualifiedDublinCore] the retrieved object; new object if not found
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound

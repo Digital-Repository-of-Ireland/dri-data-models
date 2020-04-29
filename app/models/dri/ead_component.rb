@@ -1,6 +1,6 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects extending from DRI::Base
+  # Implementation of DRI Marc digital objects
   class EadComponent < DRI::DigitalObject
     include DRI::EncodedArchivalDescription
 
@@ -20,11 +20,11 @@ module DRI
       descMetadata.collection?
     end
 
-    # Retrieve an existing Fedora DRI::EncodedArchivalDescription object;
+    # Retrieve an existing DRI::EncodedArchivalDescription object;
     # creates a new one if object not found for a given PID
     #
     # @param [String] pid the object's PID
-    # @return [DRI::EncodedArchivalDescription] the retrieved Fedora object; new object if not found
+    # @return [DRI::EncodedArchivalDescription] the retrieved object; new object if not found
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound

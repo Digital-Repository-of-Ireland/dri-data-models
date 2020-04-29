@@ -81,27 +81,10 @@ module DRI
     # @see DRI::ModelSupport::EadSupport#trigger_update
     # @param [Hash] properties the hash with the object's properties
     def attributes=(properties)
-      updated_props = properties.clone
+      super(properties)
 
-      # When updating from DRI form
-      # replace type attribute key with resource_type
-      #updated_props.keys.each do |k|
-      #  next if k.to_sym != :type
-
-      #  updated_props[:resource_type] = updated_props[k]
-      #  updated_props.delete(k)
-      #  break
-      #end
-
-      #puts updated_props
-
-      #modified_attributes = updated_props.select { |key, _value| !DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
-      #super(modified_attributes)
-      super(updated_props)
-
-      term_attributes = updated_props.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
+      term_attributes = properties.select { |key, _value| DRI::EncodedArchivalDescription.ead_dri_terms.include? key.to_sym }
       self.trigger_update = true unless term_attributes.empty?
-      #update_attributes.each { |key, value| self.send("#{key}=", value) unless value.nil? }
     end
 
     #

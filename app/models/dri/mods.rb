@@ -1,6 +1,6 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Mods digital objects extending from DRI::Base
+  # Implementation of DRI Mods digital objects
   class Mods < DRI::DigitalObject
     include DRI::ModelSupport::ModsSupport
 
@@ -341,11 +341,11 @@ module DRI
       Nokogiri::XML(new_xml.to_xml)
     end
 
-    # Retrieve an existing Fedora DRI::Mods object;
+    # Retrieve an existing DRI::Mods object;
     # creates a new one if object not found for a given PID
     #
     # @param [String] pid the object's PID
-    # @return [DRI::Mods] the retrieved Fedora object; new object if not found
+    # @return [DRI::Mods] the retrieved object; new object if not found
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound

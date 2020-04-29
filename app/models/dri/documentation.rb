@@ -1,9 +1,7 @@
 # DRI namespace
 module DRI
   # Implementation of DRI Documentation digital objects
-  # extending from DRI::Base
   class Documentation < DRI::DigitalObject
-    # Override DRI::ModelSupport::Base definition of descMetadata
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
     # one-to-one AF association to DRI::DigitalObject (documentation for)
@@ -98,11 +96,11 @@ module DRI
       descMetadata.resource_type = type
     end
 
-    # Retrieve an existing Fedora DRI::Documentation object;
+    # Retrieve an existing DRI::Documentation object;
     # creates a new one if object not found for a given PID
     #
     # @param [String] pid the object's PID
-    # @return [DRI::Documentation] the retrieved Fedora object; new object if not found
+    # @return [DRI::Documentation] the retrieved object; new object if not found
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
@@ -120,9 +118,6 @@ module DRI
       solr_doc
     end
 
-    # Override from DRI::ModelSupport::Base:
-    # descMetadata doesn't inherit from base
-    # and it loads the correct class
     def load_attributes
     end
 

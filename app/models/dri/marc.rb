@@ -1,6 +1,6 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects extending from DRI::Base
+  # Implementation of DRI Marc digital objects
   class Marc < DRI::DigitalObject
     include DRI::ModelSupport::MarcSupport
 

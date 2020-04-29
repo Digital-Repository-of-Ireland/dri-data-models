@@ -4,7 +4,7 @@ module DRI
   # and associated to Digital Objects extending from DRI::DigitalObject
   # DRI::EncodedArchivalDescription, DRI::QualifiedDublinCore, DRI::Mods, DRI::Marc
   # DRI::Documentation
-  class GenericFile < ActiveRecord::Base
+  class GenericFile < ApplicationRecord
     include DRI::Indexing
 
     include DRI::Permissions

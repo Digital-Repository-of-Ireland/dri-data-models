@@ -2,7 +2,7 @@
 module DRI
   # ModelSupport namespace
   module ModelSupport
-    # Includes AF properties, collection management methods that are common to all the DRI digital object classes
+    # Includes properties, collection management methods that are common to all the DRI digital object classes
     module Collections
       extend ActiveSupport::Concern
 
@@ -58,7 +58,7 @@ module DRI
       # @return [Boolean] true if rootcollection; false otherwise
       def root_collection?
         # It is a root collection if it is already defined to be a collection; it has
-        # been already saved in Fedora; it has no governing collection and
+        # been already saved; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
         # FIXME: #1320
         !new_record? && collection? && governing_collection.nil?

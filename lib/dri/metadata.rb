@@ -14,7 +14,7 @@ module DRI
     autoload :Terminologies, 'dri/metadata/terminologies'
 
     # Boolean flag for metadata types like EAD where extracts of the metadata
-    # may be stored in other Fedora objects. This allows us to add functions
+    # may be stored in other objects. This allows us to add functions
     # to synchronize the XML between several objects
     # @see DRI::Metadata::EncodedArchivalDescription#synchronize_metadata_on_save
     # @see DRI::Metadata::EncodedArchivalDescriptionComponent#synchronize_metadata_on_save

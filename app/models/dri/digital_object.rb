@@ -2,7 +2,7 @@
 # extending from active-fedora
 #
 module DRI
-  # DRI Base, generic DRI digital object
+  # Generic DRI digital object
   # Digital objects in DRI that handle the supported metadata standards
   # inherit from this class
   #
@@ -105,12 +105,6 @@ module DRI
       end
 
       raise ArgumentError, "Unknown attribute #{key}"
-    end
-
-    def increment_version
-      return '1' if object_version.nil?
-
-      self.object_version = self.object_version.next
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -252,5 +246,5 @@ module DRI
       storage = StorageService.new
       storage.delete_bucket(noid)
     end
-  end # Class Base
+  end # Class
 end # Module DRI
