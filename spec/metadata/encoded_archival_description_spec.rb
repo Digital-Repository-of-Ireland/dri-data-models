@@ -292,14 +292,14 @@ describe 'EncodedArchivalDescription descMetadata' do
     end
 
     it 'should expose the level of the EAD component' do
-      @ead_collection.ead_level.first.should == 'fonds'
-      @ead_series.ead_level.first.should == 'series'
-      @ead_file.ead_level.first.should == 'file'
-      @ead_item.ead_level.first.should == 'item'
+      @ead_collection.ead_level.should == 'fonds'
+      @ead_series.ead_level.should == 'series'
+      @ead_file.ead_level.should == 'file'
+      @ead_item.ead_level.should == 'item'
       @ead_series.ead_level = 'otherlevel'
       @ead_series.ead_level_other = 'subcollection'
-      @ead_series.ead_level.first.should == 'otherlevel'
-      @ead_series.ead_level_other.first.should == 'subcollection'
+      @ead_series.ead_level.should == 'otherlevel'
+      @ead_series.ead_level_other.should == 'subcollection'
     end
 
     it 'should use the EAD component level to determine whether the component is a collection or not' do
@@ -497,7 +497,7 @@ describe 'EncodedArchivalDescription descMetadata' do
         curr_object = DRI::EadComponent.new
         curr_object.update_metadata curr_file
         curr_object.identifier.should == ['KDW/RM/02']
-        curr_object.ead_level.should == ['file']
+        curr_object.ead_level.should == 'file'
       end
     end
   end # Context validation of DRI compulsory elements

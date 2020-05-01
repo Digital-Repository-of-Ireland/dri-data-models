@@ -111,15 +111,15 @@ module DRI
     end
 
     def desc_abstract
-      descMetadata.desc_abstract
+      descMetadata.desc_abstract.first
     end
 
     def ead_level
-      descMetadata.ead_level
+      descMetadata.ead_level.first
     end
 
     def ead_level_other
-      descMetadata.ead_level_other
+      descMetadata.ead_level_other.first
     end
     # Type attribute getter
     #
@@ -284,9 +284,9 @@ module DRI
         when DRI::Metadata::EncodedArchivalDescriptionComponent
           object_types.push('Collection') if descMetadata.collection?
           if ead_level.include? 'otherlevel'
-            object_types.push(ead_level_other.split.first.map(&:capitalize) * ' ')
+            object_types.push(ead_level_other.split.map(&:capitalize) * ' ')
           else
-            object_types.push(ead_level.split.first.map(&:capitalize) * ' ')
+            object_types.push(ead_level.split.map(&:capitalize) * ' ')
           end
         when DRI::Metadata::EncodedArchivalDescription
           object_types.push('Collection')
