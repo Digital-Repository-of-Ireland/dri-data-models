@@ -1,6 +1,6 @@
 module DRI::Datastreams
  module Persistence
-          
+
     def persisted_remote_content
       return if new_record?
       @ds_content ||= retrieve_content
@@ -11,14 +11,18 @@ module DRI::Datastreams
       local_or_remote_content(false) != @ds_content
     end
 
+    def changed_for_autosave?
+      content_changed?
+    end
+
     def changed?
       super || content_changed?
     end
-   
+
     # serializes any changed data into the content field
     def serialize!
     end
-   
+
     def persisted_content=(string_or_io)
       attribute_will_change!('content') unless @content == string_or_io
       @content = string_or_io
