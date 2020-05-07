@@ -87,10 +87,10 @@ module DRI
             file_size |= [gf[Solrizer.solr_name('file_size', :stored_sortable, type: :integer)]]
           end
           if gf.key?(Solrizer.solr_name('mime_type', :stored_searchable))
-            mime_type |= gf[Solrizer.solr_name('mime_type', :stored_searchable)]
+            mime_type |= [gf[Solrizer.solr_name('mime_type', :stored_searchable)]]
           end
           if gf.key?(Solrizer.solr_name('file_format', :stored_searchable))
-            file_format |= gf[Solrizer.solr_name('file_format', :stored_searchable)] unless gf[Solrizer.solr_name('file_format', :stored_searchable)].nil?
+            file_format |= [gf[Solrizer.solr_name('file_format', :stored_searchable)]] unless gf[Solrizer.solr_name('file_format', :stored_searchable)].nil?
           end
         end
 

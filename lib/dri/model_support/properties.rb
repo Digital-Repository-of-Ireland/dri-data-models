@@ -6,12 +6,12 @@ module DRI
     module Properties
       extend ActiveSupport::Concern
 
-      class_methods do
-        def dangerous_attribute_method?(method_name)
-          return false if method_name == :properties
-          super
-        end
-      end
+      #class_methods do
+      #  def dangerous_attribute_method?(method_name)
+      #    return false if method_name == :properties
+      #    super
+      #  end
+      #end
 
       included do
         has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true

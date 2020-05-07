@@ -61,7 +61,7 @@ module DRI
     end
 
     def self.find_by_noid(pid)
-      joins(:alternate_identifier).where(identifiers: { alternate_id: pid }).take
+      joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
     end
 
     def self.find_by_noid!(pid)
@@ -84,19 +84,19 @@ module DRI
 
     def [](key)
         super
-    rescue ArgumentError
+    rescue ActiveModel::MissingAttributeError
       self.declared_attached_files.each do |_name, file|
         if file.class.terminology.has_term?(key)
           return file.send(key.to_s)
         end
       end
 
-      raise ArgumentError, "Unknown attribute #{key}"
+      raise ActiveModel::MissingAttributeError, "Unknown attribute #{key}"
     end
 
     def []=(key, value)
       super
-    rescue ArgumentError
+    rescue ActiveModel::MissingAttributeError
       self.declared_attached_files.each do |_name, file|
         if file.class.terminology.has_term?(key)
           file.send(key.to_s + "=", value)
@@ -104,7 +104,7 @@ module DRI
         end
       end
 
-      raise ArgumentError, "Unknown attribute #{key}"
+      raise ActiveModel::MissingAttributeError, "Unknown attribute #{key}"
     end
 
     # @note Use this in preference over setting xml directly in the OmDatastreams
@@ -140,8 +140,14 @@ module DRI
       properties.depositing_institute.first if properties.depositing_institute.present?
     end
 
+    def object_version
+      self[:object_version] || 1
+    end
+
     def increment_version
-      object_version = object_version.next
+      return 1 if object_version.nil?
+
+      self.object_version = self.object_version.next
     end
 
     def metadata_checksum=(checksum)
@@ -179,14 +185,6 @@ module DRI
 
     def properties
       super || build_properties
-    end
-
-    def status
-      properties.status.first
-    end
-
-    def status=(status)
-      properties.status = status
     end
 
     # Return a Hash representation of this object where keys

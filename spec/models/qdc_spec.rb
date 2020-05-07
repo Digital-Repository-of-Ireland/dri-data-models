@@ -329,9 +329,17 @@ describe 'QualifiedDublinCore' do
       @audio.update_attributes(@attributes_hash)
       @audio.title = ['A Test Title']
       @audio.save
+      @audio.reload
       expect(@audio.title.first).to eq('A Test Title')
     end
 
+    it 'should persist properties' do
+      @audio.update_attributes(@attributes_hash)
+      @audio.status = 'published'
+      @audio.save
+      @audio.reload
+      expect(@audio.status).to eq('published')
+    end
   end
 
   context 'indexing' do
