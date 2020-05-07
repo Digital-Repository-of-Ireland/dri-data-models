@@ -5,5 +5,6 @@ module DRI
     autoload :Mods, 'dri/metadata/terminologies/mods'
     autoload :Ead, 'dri/metadata/terminologies/ead'
     autoload :EadComponent, 'dri/metadata/terminologies/ead_component'
+    autoload :Properties, 'dri/metadata/terminologies/properties'
   end
 end
