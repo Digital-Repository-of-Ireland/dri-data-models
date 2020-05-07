@@ -16,7 +16,7 @@ module DRI
         queue = job.respond_to?(:queue_name) ? job.queue_name : default_queue_name
         begin
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
-        rescue Redis::CannotConnectError
+        rescue Redis::CannotConnectError => error
           Rails.logger.error "Redis is down!"
 	  raise error
         rescue Redis::TimeoutError => error
