@@ -106,6 +106,10 @@ module DRI
           solr_doc.merge!('isGovernedBy_ssim' => [governing_collection.noid])
         end
 
+        unless relations.nil?
+          solr_doc.merge!('isMemberOf_ssim' => relations.map(&:id))
+        end
+
         if previous_sibling
           solr_doc.merge!(Solrizer.solr_name(DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment, :symbol) => [previous_sibling.noid])
         end
