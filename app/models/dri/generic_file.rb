@@ -25,8 +25,6 @@ module DRI
 
     include DRI::Derivatives::ExtractMetadata
 
-    before_destroy :delete_files # callback delete files from S3 buckets if deleting the object
-
     # one-to-one AF association to associate DRI::DigitalObject
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true
 
@@ -140,15 +138,6 @@ module DRI
     # Is this file in the middle of being processed by an object?
     def processing?
       try(:digital_object).try(:status) == ['processing'.freeze]
-    end
-
-    private
-
-    def delete_files
-      local_file_info = LocalFile.where('fedora_id LIKE :f AND ds_id LIKE :d',
-                                        f: id, d: 'content').order('version DESC').to_a
-      local_file_info.each(&:destroy)
-      FileUtils.remove_dir(Rails.root.join(Settings.dri.files).join(id), force: true)
     end
   end
 end
