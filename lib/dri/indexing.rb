@@ -2,11 +2,15 @@ module DRI
   module Indexing
     extend ActiveSupport::Concern
 
+     included do
+       after_destroy :delete_from_solr
+     end
+
     def conn
       @conn ||= ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
     end
 
-    # Updates Solr index with self.
+      # Updates Solr index with self.
     def update_index
       conn.add(to_solr, params: { softCommit: true })
     end
@@ -22,6 +26,11 @@ module DRI
     def _update_record(options = {})
       updated = super()
       update_index
+    end
+
+    def delete
+      super
+      delete_from_solr
     end
 
     # Creates a solr document hash for the {#object}
@@ -51,6 +60,10 @@ module DRI
         m_time = modified_date.present? ? modified_date : DateTime.now
         m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
         m_time
+      end
+
+      def delete_from_solr
+        conn.delete_by_id(noid, params: { 'softCommit' => true })
       end
   end
 end

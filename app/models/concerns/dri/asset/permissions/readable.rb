@@ -19,7 +19,7 @@ module DRI::Asset
       # Determine whether the object has a preservation only access status
       # @return [Boolean] true if preservation; false otherwise
       def preservation?
-        self.preservation_only == 'true'
+        self.preservation_only == true
       end
 
       # Determine whether the object has a registered access status

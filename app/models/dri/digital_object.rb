@@ -21,7 +21,8 @@ module DRI
 
     self.inheritance_column = 'digital_object_type'
 
-    after_destroy :delete_bucket
+    after_destroy :delete_files
+    after_destroy :delete_objects
 
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
@@ -239,6 +240,20 @@ module DRI
     end
 
     private
+
+    def delete_objects
+      if collection?
+        if governed_items.count > 0
+          governed_items.each { |g| g.destroy }
+        end
+      end
+    end
+
+    def delete_files
+      if generic_files.count > 0
+        generic_files.each { |gf| gf.destroy }
+      end
+    end
 
     def delete_bucket
       storage = StorageService.new

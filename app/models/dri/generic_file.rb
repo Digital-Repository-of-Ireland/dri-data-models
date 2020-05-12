@@ -32,7 +32,7 @@ module DRI
     serialize :creator
 
     def self.find_by_noid(pid)
-      joins(:alternate_identifier).where(identifiers: { alternate_id: pid }).take
+      joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
     end
 
     def self.find_by_noid!(pid)
@@ -98,6 +98,8 @@ module DRI
       if digital_object
         solr_doc.merge!(Solrizer.solr_name('isPartOf', :symbol) => [digital_object.noid])
       end
+
+      solr_doc.merge!('preservation_only_tesim' => preservation_only)
 
       solr_doc.merge!(Solrizer.solr_name('file_size', :stored_sortable, type: :integer) => [file_size])
       solr_doc.merge!(Solrizer.solr_name('width', :stored_sortable, type: :integer) => [width[0].to_i]) unless width.empty?

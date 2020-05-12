@@ -4,6 +4,7 @@ module DRI::Asset
     included do
       has_one :characterization, class_name: 'FitsDatastream', as: :describable, autosave: true
 
+      delegate :format_label,          to: :characterization
       delegate :last_modified,         to: :characterization
       delegate :filename,:filename=,   to: :characterization
       delegate :original_checksum, to: :characterization
@@ -50,9 +51,9 @@ module DRI::Asset
       super || build_characterization
     end
 
-    def format_label
-      characterization.format_label.first
-    end
+    #def format_label
+    #  characterization.format_label.first
+    #end
 
     def file_size
      characterization.file_size.first.to_i

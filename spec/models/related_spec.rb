@@ -24,6 +24,7 @@ describe 'Related' do
       rels.related = [@a, @b]
       rels.save
       expect(rels).to be_valid
+      rels.delete
     end
 
     it 'should allow assignment to objects' do
@@ -36,18 +37,19 @@ describe 'Related' do
 
       @a.reload
       expect(@a.relations).to eq [rels]
+      rels.delete
     end
 
     it 'should return related' do
       rels = DRI::Related.new
       rels.related = [@a, @b]
       rels.save
-
       @a.relations = [rels]
       @a.save
 
       @a.reload
       expect(@a.relations.first.related).to match_array([@a, @b])
+      rels.delete
     end
   end
 end

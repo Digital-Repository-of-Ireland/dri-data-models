@@ -84,7 +84,7 @@ module DRI
           if gf.key?(Solrizer.solr_name('file_size', :stored_sortable, type: :integer))
             file_size_total = 0 if file_size_total.nil?
             file_size_total += gf[Solrizer.solr_name('file_size', :stored_sortable, type: :integer)].first
-            file_size |= [gf[Solrizer.solr_name('file_size', :stored_sortable, type: :integer)]]
+            file_size |= gf[Solrizer.solr_name('file_size', :stored_sortable, type: :integer)]
           end
           if gf.key?(Solrizer.solr_name('mime_type', :stored_searchable))
             mime_type |= [gf[Solrizer.solr_name('mime_type', :stored_searchable)]]
@@ -116,7 +116,7 @@ module DRI
         end
 
         unless file_size_total.nil?
-          solr_doc.merge!(Solrizer.solr_name('file_size_total', :stored_sortable, type: :integer) => [file_size_total])
+          solr_doc.merge!(Solrizer.solr_name('file_size_total', :stored_sortable, type: :integer) => file_size_total)
           solr_doc.merge!(Solrizer.solr_name('file_size', :stored_searchable, type: :integer) => file_size)
           solr_doc.merge!(Solrizer.solr_name('file_size', :facetable, type: :integer) => file_size)
         end
