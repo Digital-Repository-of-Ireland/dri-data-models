@@ -18,7 +18,10 @@ module DRI
                  as: :governing_collection,
                  dependent: :destroy
 
-        has_and_belongs_to_many :relations, -> { distinct }, class_name: 'DRI::Related', inverse_of: :related, join_table: 'digital_object_related'
+        has_many :collection_relationships
+        has_many :collection_relatives, through: :collection_relationships
+        has_many :inverse_collection_relationships, class_name: 'DRI::CollectionRelationship', :foreign_key => "collection_relative_id"
+        has_many :inverse_collection_relatives, through: :inverse_collection_relationships, source: :digital_object
 
         # Additional relationships to keep track of sibling order
         # used in EAD
@@ -106,8 +109,8 @@ module DRI
           solr_doc.merge!('isGovernedBy_ssim' => [governing_collection.noid])
         end
 
-        unless relations.blank?
-          solr_doc.merge!('isMemberOf_ssim' => relations.map(&:id))
+        unless collection_relatives.blank?
+          solr_doc.merge!('isMemberOf_ssim' => collection_relatives.map(&:noid))
         end
 
         if previous_sibling
