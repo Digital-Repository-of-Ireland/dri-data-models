@@ -30,6 +30,8 @@ module DRI
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
 
+        after_save :update_governed_items
+
         # Collection flag attribute setter
         #
         def collection=(collection)
@@ -122,6 +124,12 @@ module DRI
 
         solr_doc
       end # collections_to_solr
+
+      def update_governed_items
+        governed_items.each do |item|
+          item.update_index
+        end
+      end
     end # module
   end # module
 end # module
