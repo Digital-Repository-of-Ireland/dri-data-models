@@ -84,7 +84,6 @@ module DRI
         !(%w(ltd ltd. limited archive museum archives library firm nui gallery services consultancy associates university).any? { |word| name.include?(word) })
       end
 
-
       # A function to convert a title string removing definite articles, unneccessary spaces, etc.
       #
       # @param [String] title_string the metadata title string
@@ -217,8 +216,13 @@ module DRI
       def self.date_range_years(ranges)
         years = []
         ranges.each do |range|
-          endpoints = range.gsub(/\[(.*)\]/, '\1').split(/\sTO\s/)
-          endpoints.each { |point| years << ISO8601::DateTime.new(point).year }
+          endpoints = range.gsub(/\[|\]/, '').strip.split(/\sTO\s/)
+          endpoints.each do |point|
+            begin
+              years << ISO8601::DateTime.new(point).year
+            rescue ISO8601::Errors::StandardError
+            end
+          end
         end
 
         years
