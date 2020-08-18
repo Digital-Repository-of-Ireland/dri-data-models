@@ -11,12 +11,17 @@ module DRI
         attr_accessor :collection
 
         # one-to-one AF association to associate the parent of the given object
-        belongs_to :governing_collection, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true
+        belongs_to :governing_collection,
+                   class_name: 'DRI::DigitalObject',
+                   polymorphic: true,
+                   optional: true,
+                   autosave: true
         # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
                  class_name: 'DRI::DigitalObject',
                  as: :governing_collection,
-                 dependent: :destroy
+                 dependent: :destroy,
+                 autosave: true
 
         has_many :collection_relationships
         has_many :collection_relatives, through: :collection_relationships
@@ -29,8 +34,6 @@ module DRI
         belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
-
-        after_save :update_governed_items
 
         # Collection flag attribute setter
         #
@@ -124,12 +127,6 @@ module DRI
 
         solr_doc
       end # collections_to_solr
-
-      def update_governed_items
-        governed_items.each do |item|
-          item.update_index
-        end
-      end
     end # module
   end # module
 end # module
