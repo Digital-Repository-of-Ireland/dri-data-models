@@ -74,9 +74,9 @@ module DRI
             new_child.save
             # Do the preservation actions
             preservation = Preservation::Preservator.new(new_child)
-            preservation.preserve(true, true, ['descMetadata','properties'])
+            preservation.preserve(['descMetadata','properties'])
             begin
-              DRI::Utils.create_reader_group(new_child.id) if new_child.collection?
+              DRI::Utils.create_reader_group(new_child.noid) if new_child.collection?
             rescue
               Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
@@ -126,7 +126,7 @@ module DRI
 
           true
         rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{id}\n"
+          logger.error "Error loading url: #{file_url} PID: #{noid}\n"
           logger.error e.backtrace.join("\n")
 
           false
@@ -258,7 +258,7 @@ module DRI
       def object_duplicates?(object)
         return false unless object.governing_collection.present?
 
-        duplicates = DRI::DigitalObject.ǹot(id: object.id).where(metadata_checksum: object.metadata_checksum, governing_collection_id: object.governing_collection_id)
+        duplicates = DRI::DigitalObject.where.not(id: object.id).where(metadata_checksum: object.metadata_checksum, governing_collection_id: object.governing_collection_id)
         !duplicates.empty?
       end
 
@@ -279,7 +279,7 @@ module DRI
 
         if content_changed && generic_files.empty? &&
             !dao_href_proxy.empty? && !new_record?
-          DRI.queue.push(IngestFilesFromMetadataJob.new(id))
+          DRI.queue.push(IngestFilesFromMetadataJob.new(noid))
         end
       end # ingest_files_if_changed
     end # module
