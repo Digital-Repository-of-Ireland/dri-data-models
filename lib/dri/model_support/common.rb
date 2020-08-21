@@ -2,7 +2,7 @@
 module DRI
   # ModelSupport namespace
   module ModelSupport
-    # Includes AF properties, methods common to all metadata digital object classes
+    # Includes properties, methods common to all metadata digital object classes
     module Common
       extend ActiveSupport::Concern
 
