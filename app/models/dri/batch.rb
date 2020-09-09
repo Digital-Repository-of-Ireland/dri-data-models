@@ -19,6 +19,11 @@ module DRI
     include DRI::ModelSupport::Collections
     include DRI::ModelSupport::RelationshipsSupport
 
+    property :date_modified, predicate: ::RDF::Vocab::DC.modified, multiple: false do |index|
+      index.type :date
+      index.as :stored_sortable
+    end
+
     after_destroy :delete_bucket
 
     # Creates a digital object depending on the metadata standard
@@ -92,14 +97,6 @@ module DRI
       self.object_version = self.object_version.next
     end
 
-    def modified_date
-      m_dates = [descMetadata, properties].map do |file|
-                  file.modified_date.to_i
-                end
-
-      return Time.at(m_dates.sort.last).utc.to_datetime
-    end
-
     # @note Use this in preference over setting xml directly in the OmDatastreams
     # Updates the xml metadata of this object
     #
@@ -116,6 +113,14 @@ module DRI
     # Asserts the model class
     def assert_content_model
       self.has_model = [self.class.to_s, self.class.superclass.to_s]
+    end
+
+    def _update_record(_options = {})
+      if (changed? || descMetadata.changed? || properties.changed?)
+        self.date_modified = DateTime.now
+      end
+
+      super
     end
 
     # Return a Hash representation of this object where keys
