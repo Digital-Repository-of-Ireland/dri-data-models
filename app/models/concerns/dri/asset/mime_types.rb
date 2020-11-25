@@ -31,6 +31,13 @@ module DRI::Asset
         self.class.audio_mime_types.include? mime_type
       end
 
+      # Check if 3D file
+      # @return [Boolean] true if mime_type included in audio mimetypes
+      def threeD?
+        self.class._3D_mime_types.include?(mime_type) &&
+          self.class._3D_file_formats.any?{ |f| file_format.downcase.include?(f.downcase) }
+      end
+
       # Formatting the file format label for display
       # @return [String] formatted file format label; nil if not available
       def file_format
@@ -66,6 +73,16 @@ module DRI::Asset
         # Restrict mimetypes for audio
         def audio_mime_types
           ::Settings.restrict.mime_types.audio
+        end
+
+        # Restrict mimetypes for 3D
+        def _3D_mime_types
+          ::Settings.restrict.mime_types._3D
+        end
+
+        # Restrict mimetypes for 3D
+        def _3D_file_formats
+          ::Settings.restrict.file_formats._3D
         end
       end
     end

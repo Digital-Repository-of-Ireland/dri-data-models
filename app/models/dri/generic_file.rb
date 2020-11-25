@@ -120,6 +120,10 @@ module DRI
       file_type.push('video') if video?
       file_type.push('image') if image?
       file_type.push('text') if text?
+      file_type.push('3d') if threeD?
+      
+      solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
+      solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type) unless file_type.empty?
 
       solr_doc.merge!(Solrizer.solr_name('file_type', :stored_searchable) => file_type) unless file_type.empty?
       solr_doc.merge!(Solrizer.solr_name('file_type', :facetable) => file_type) unless file_type.empty?

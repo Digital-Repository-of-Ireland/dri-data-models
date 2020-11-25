@@ -110,6 +110,7 @@ describe 'EncodedArchivalDescription' do
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:image?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:text?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:pdf?).and_return(true)
+      allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:threeD?).and_return(true)
 
       file_md_keys = ['width_isim', 'width_sim', 'height_isim', 'height_sim', 'area_isim', 'area_sim',
                       'channels_isim', 'channels_sim', 'bit_depth_isim', 'bit_depth_sim', 'sample_rate_isim',
