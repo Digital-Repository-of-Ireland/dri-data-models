@@ -2,9 +2,11 @@ module DRI
   module Indexing
     extend ActiveSupport::Concern
 
-     included do
-       after_destroy :delete_from_solr
-     end
+    included do
+      before_create :assign_noid
+      after_save    :update_index
+      after_destroy :delete_from_solr
+    end
 
     def conn
       @conn ||= ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
@@ -13,19 +15,6 @@ module DRI
       # Updates Solr index with self.
     def update_index
       conn.add(to_solr, params: { softCommit: true })
-    end
-
-    def _create_record(options = {})
-      if !self.noid && new_id = assign_id
-        self.noid = new_id
-      end
-      id = super()
-      update_index
-    end
-
-    def _update_record(options = {})
-      updated = super()
-      update_index
     end
 
     def delete
@@ -49,6 +38,12 @@ module DRI
     end
 
     protected
+
+      def assign_noid
+        if !self.noid && new_id = assign_id
+          self.noid = new_id
+        end
+      end
 
       def c_time
         c_time = create_date.present? ? create_date : DateTime.now
