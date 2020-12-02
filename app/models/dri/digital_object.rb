@@ -188,50 +188,6 @@ module DRI
       super || build_properties
     end
 
-    # Return a Hash representation of this object where keys
-    # in the hash are appropriate Solr field names.
-    #
-    # @param solr_doc [Hash] hash to insert the fields into
-    # @param _opts [Hash] options hash
-    # @return [Hash] the solr document to be indexed
-    def to_solr(solr_doc = {}, _opts = {})
-      solr_doc = generate_solr_document
-
-      Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.to_s, :stored_sortable)
-      solr_doc[:id] = noid
-      solr_doc.merge! collections_to_solr
-      solr_doc.merge! object_types_to_solr
-      solr_doc.merge! file_metadata_to_solr
-      solr_doc.merge! solrize_permissions
-
-      #solr_doc.merge!('all_text_timv' => full_text)
-      solr_doc
-    end
-
-    # Add object types as a hierarchical tree into the Solr fields
-    #
-    # @param solr_doc [Hash] hash to insert the fields into
-    # @return [Hash] the solr document to be indexed
-    def object_types_to_solr(solr_doc = {})
-      object_types = []
-
-      type.each { |cat| object_types.push cat.split.map(&:capitalize)*' ' }
-      object_types.push('Unknown') if object_types.count < 1
-
-      solr_doc.merge!(Solrizer.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(Solrizer.solr_name('object_type', :displayable) => object_types)
-
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => type)
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => type)
-      solr_doc.merge!(Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => type)
-
-      if rights.empty?
-        solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable) => ['No rights statement'])
-      end
-
-      solr_doc
-    end
-
     # Returns whether the object has a status of 'published'
     #
     # @return [Boolean] true if status is published

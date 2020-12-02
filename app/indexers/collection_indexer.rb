@@ -1,0 +1,64 @@
+# frozen_string_literal: true
+class CollectionIndexer
+  attr_reader :resource
+  def initialize(resource:)
+    @resource = resource
+  end
+
+  def to_solr
+    solr_doc = {}
+
+    # Add title metadata from parent collections
+    ancestor_titles = []
+    ancestor_ids = []
+
+    return solr_doc unless resource.respond_to?(:governing_collection)
+    curr_gov_collection = resource.governing_collection
+
+    until curr_gov_collection.nil?
+      ancestor_titles << curr_gov_collection.title[0]
+      ancestor_ids << curr_gov_collection.noid
+      curr_gov_collection = curr_gov_collection.governing_collection
+    end
+
+    if ancestor_ids.empty?
+      # This must be a root collection
+      solr_doc.merge!('root_collection_sim' => [resource.title.first])
+      solr_doc.merge!('root_collection_tesim' => [resource.title.first])
+      solr_doc.merge!('root_collection_id_sim' => [resource.noid])
+      solr_doc.merge!('root_collection_id_tesim' => [resource.noid])
+    else
+      solr_doc.merge!('ancestor_title_sim' => ancestor_titles)
+      solr_doc.merge!('ancestor_title_tesim' => ancestor_titles)
+      #solr_doc.merge!(Solrizer.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
+      solr_doc.merge!('ancestor_id_sim' => ancestor_ids)
+      # governing_id needed for user_group gem!!!
+      solr_doc.merge!('governing_id_sim' => [ancestor_ids.first])
+      solr_doc.merge!('collection_id_sim' => [ancestor_ids.first])
+      #solr_doc.merge!('collection_id_tesim' => [ancestor_ids.first])
+      solr_doc.merge!('collection_sim' => [ancestor_titles.first])
+      solr_doc.merge!('collection_tesim' => [ancestor_titles.first])
+      solr_doc.merge!('root_collection_id_sim' => [ancestor_ids.last])
+      #solr_doc.merge!('root_collection_id_tesim' => [ancestor_ids.last])
+      solr_doc.merge!('root_collection_sim' => [ancestor_titles.last])
+      solr_doc.merge!('root_collection_tesim' => [ancestor_titles.last])
+    end
+
+    unless resource.governing_collection.nil?
+      solr_doc.merge!('isGovernedBy_ssim' => [resource.governing_collection.noid])
+    end
+
+    unless resource.collection_relatives.blank?
+      solr_doc.merge!('isMemberOf_ssim' => resource.collection_relatives.map(&:noid))
+    end
+
+    if resource.previous_sibling
+      solr_doc.merge!("#{DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment}_ssim" => [resource.previous_sibling.noid])
+    end
+
+    solr_doc.merge!('is_collection_sim' => resource.collection?)
+    #solr_doc.merge!('is_collection_tesim' => collection?)
+
+    solr_doc
+  end
+end

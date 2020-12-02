@@ -384,7 +384,6 @@ describe 'QualifiedDublinCore' do
       rr.object_id = @obj.noid
       rr.uri = "http://data.logainm.ie/place/1399926"
       rr.save
-
       expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial)
 
       ld.delete
@@ -419,7 +418,7 @@ describe 'QualifiedDublinCore' do
       expect(solr_doc['geographical_coverage_sim']).to match(['Co. na Gaillimhe',
                                                                 'name=Kilkenny; east=-7.2561; north=52.6477;'])
     end
-    
+
     it 'updates the modification time field in solr' do
       @obj.save
       @obj.title = ['sample']

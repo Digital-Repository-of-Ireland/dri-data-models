@@ -8,13 +8,13 @@ module DRI
       after_destroy :delete_from_solr
     end
 
-    def conn
-      @conn ||= ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
+    def adapter
+      @adapter ||= Valkyrie::MetadataAdapter.find(:index_solr)
     end
 
       # Updates Solr index with self.
     def update_index
-      conn.add(to_solr, params: { softCommit: true })
+      adapter.persister.save(resource: self)
     end
 
     def delete
@@ -22,19 +22,32 @@ module DRI
       delete_from_solr
     end
 
-    # Creates a solr document hash for the {#object}
-    # @yield [Hash] yields the solr document
-    # @return [Hash] the solr document
-    def generate_solr_document
-      solr_doc = {}
-      Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
-      Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
-      solr_doc['has_model_ssim'] = has_model
-      declared_attached_files.each do |name, file|
-        solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
-      end
-      yield(solr_doc) if block_given?
-      solr_doc
+    def optimistic_locking_enabled?
+      false
+    end
+
+    def internal_resource
+      @internal_resource ||= ['Valkyrie::Resource']
+    end
+
+    def internal_resource=(klass)
+      @internal_resource = klass
+    end
+
+    def optimistic_lock_token=(token)
+      @optimistic_lock_token = token
+    end
+
+    def new_record
+      @new_record ||= persisted?
+    end
+
+    def new_record=(is_new)
+      @new_record = is_new
+    end
+
+    def to_solr
+      adapter.resource_indexer.new(resource: self).to_solr
     end
 
     protected
@@ -45,20 +58,8 @@ module DRI
         end
       end
 
-      def c_time
-        c_time = create_date.present? ? create_date : DateTime.now
-        c_time = DateTime.parse(c_time) unless c_time.is_a?(DateTime)
-        c_time
-      end
-
-      def m_time
-        m_time = modified_date.present? ? modified_date : DateTime.now
-        m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
-        m_time
-      end
-
       def delete_from_solr
-        conn.delete_by_id(noid, params: { 'softCommit' => true })
+        adapter.persister.delete(resource: self)
       end
   end
 end

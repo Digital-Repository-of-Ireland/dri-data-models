@@ -52,7 +52,6 @@ describe 'Documentation' do
     @doc.update_attributes(@attributes_hash)
     @doc.documentation_for = @dc_obj
     @doc.save
-    puts @doc.documentation_for.noid
     coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
 
     @doc.new_record?.should == false

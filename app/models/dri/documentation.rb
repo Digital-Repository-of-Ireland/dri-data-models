@@ -107,17 +107,6 @@ module DRI
       DRI::Documentation.create(noid: pid)
     end
 
-    # Override from DRI::Base, default AF method
-    def to_solr(solr_doc = {}, opts = {})
-      solr_doc = super(solr_doc, opts)
-
-      if documentation_for
-        solr_doc.merge!( {'isDescriptionOf_ssim' => [documentation_for.noid] })
-      end
-
-      solr_doc
-    end
-
     def load_attributes
     end
 
