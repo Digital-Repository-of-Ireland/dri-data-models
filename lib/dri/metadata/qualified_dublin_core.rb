@@ -102,34 +102,34 @@ module DRI
         solr_doc = super(solr_doc, opts)
 
         # Index dates here, for display
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => display_date_for_index(creation_date))
-        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => display_date_for_index(published_date))
+        solr_doc.merge!('creation_date_tesim' => display_date_for_index(creation_date))
+        solr_doc.merge!('published_date_tesim' => display_date_for_index(published_date))
 
         temporal_coverage_dates = display_date_for_index(temporal_coverage)
         if temporal_coverage_dates.present?
-          solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => temporal_coverage_dates)
-          solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => filter_uris(temporal_coverage_dates))
+          solr_doc.merge!('temporal_coverage_tesim' => temporal_coverage_dates)
+          solr_doc.merge!('temporal_coverage_sim' => filter_uris(temporal_coverage_dates))
         end
 
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => filter_uris(geographical_coverage))
+        solr_doc.merge!('geographical_coverage_sim' => filter_uris(geographical_coverage))
 
-        solr_doc.merge!(Solrizer.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc.merge!('date_tesim' => display_date_for_index(date))
 
-        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc[Solrizer.solr_name('published_date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc[Solrizer.solr_name('date', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)].present?
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc['creation_date_tesim'].present?
+        solr_doc = remove_null_values(solr_doc, 'published_date') if solr_doc['published_date_tesim'].present?
+        solr_doc = remove_null_values(solr_doc, 'date') if solr_doc['date_tesim'].present?
+        solr_doc = remove_null_values(solr_doc, 'temporal_coverage') if solr_doc['temporal_coverage_tesim'].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc['creator_tesim'].present?
 
         # Retrieve list of all people and add them to facet and search indexes in solr document
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc.merge!('person_sim' => person_array)
+        solr_doc.merge!('person_tesim' => person_array | DRI::Metadata::Transformations.transform_name(person_array))
 
         # title_sorted - A SOLR index for sorting titles
         if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
           unless sorted_title.empty?
-            solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+            solr_doc.merge!('title_sorted_ssi' => [sorted_title])
           end
         end
 
@@ -139,7 +139,7 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc.merge!('all_metadata_tesim' => [all_metadata])
 
         # Split facets into different languages based on xml:lang
         faceted_language_indexes = {}
@@ -154,15 +154,15 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages('name_coverage')
 
         faceted_language_indexes.each do |key, value|
-          solr_doc.merge!(Solrizer.solr_name(key, :stored_searchable, type: :text) => value)
-          solr_doc.merge!(Solrizer.solr_name(key, :facetable, type: :text) => filter_uris(value))
+          solr_doc.merge!("#{key}_tesim" => value)
+          solr_doc.merge!("#{key}_sim" => filter_uris(value))
         end
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.qdc_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
 
         external_rels.each do |elem|
-          solr_doc.merge!(Solrizer.solr_name(elem, :stored_searchable) => send(elem)) unless send(elem) == []
+          solr_doc.merge!("#{elem}_tesim" => send(elem)) unless send(elem) == []
         end
 
         # dateRangeField is defined in Solr's schema.xml as a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
@@ -211,8 +211,8 @@ module DRI
         solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
 
         unless geospatial_hash[:name].empty?
-          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name])
-          solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name])
+          solr_doc.merge!("#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim" => geospatial_hash[:name])
+          solr_doc.merge!("#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim" => geospatial_hash[:name])
         end
 
         unless geospatial_hash[:json].empty?

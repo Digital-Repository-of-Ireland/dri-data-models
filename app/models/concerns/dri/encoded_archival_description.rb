@@ -240,67 +240,6 @@ module DRI
       descMetadata.add_language(languages) unless languages.empty?
     end
 
-    # Override from collection.rb adding EAD-specific solr additions
-    def collections_to_solr(solr_doc = {})
-      solr_doc = super(solr_doc)
-
-      if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent) && previous_sibling.nil?
-        solr_doc.merge!(Solrizer.solr_name('is_first_sibling', :stored_searchable) => '1')
-      end
-
-      solr_doc
-    end
-
-    # Override from files.rb adding EAD-specific solr additions
-    def file_metadata_to_solr(solr_doc = {})
-      solr_doc = super(solr_doc)
-
-      file_type = []
-      file_type_display = []
-
-      return solr_doc unless collection?
-
-      file_type.push('collection')
-
-      if !root_collection? && !ead_level.blank?
-        file_type_display.push ead_level.first.strip.capitalize
-      else
-        file_type_display.push('Collection')
-      end
-
-      solr_doc
-    end
-
-    # Indexing object types as a hierarchical tree
-    def object_types_to_solr(solr_doc = {})
-      # Add title metadata from parent collections
-      object_types = []
-      descMetadata.resource_type.each do |curr_category|
-        object_types.push(curr_category.split.map(&:capitalize) * ' ') unless curr_category.blank?
-      end
-
-      if object_types.empty?
-        case descMetadata
-        when DRI::Metadata::EncodedArchivalDescriptionComponent
-          object_types.push('Collection') if descMetadata.collection?
-          if ead_level.include? 'otherlevel'
-            object_types.push(ead_level_other.split.map(&:capitalize) * ' ')
-          else
-            object_types.push(ead_level.split.map(&:capitalize) * ' ')
-          end
-        when DRI::Metadata::EncodedArchivalDescription
-          object_types.push('Collection')
-        end
-      end
-
-      object_types.push('Unknown') if object_types.count < 1
-
-      solr_doc.merge!(Solrizer.solr_name('object_type', :facetable) => object_types)
-      solr_doc.merge!(Solrizer.solr_name('object_type', :displayable) => object_types)
-
-      solr_doc
-    end
-
     # Updates the XML metadata for the object's descMetadata datastream
     # @param [String, File] xml_text String or file containing xml metadata to be updated
     # @param [Boolean] ingest  true if ingest operation; false if metadata update operation

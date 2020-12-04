@@ -90,18 +90,19 @@ describe 'EncodedArchivalDescription' do
       @ead_header.save
 
       collection_keys = ['root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
-                         'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim']
+                         'is_collection_sim']
 
-      component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_tesim', 'ancestor_id_sim',
-                        'governing_id_sim', 'collection_id_sim', 'collection_id_tesim', 'collection_sim',
-                        'collection_tesim', 'root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
-                        'root_collection_tesim', 'is_collection_sim', 'is_collection_tesim', 'is_first_sibling_tesim', 'isGovernedBy_ssim']
+      component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_sim',
+                        'governing_id_sim', 'collection_id_sim', 'collection_sim',
+                        'collection_tesim', 'root_collection_id_sim', 'root_collection_sim',
+                        'root_collection_tesim', 'is_collection_sim', 'is_first_sibling_tesim',
+                        'isGovernedBy_ssim']
 
-      expect(@ead_header.collections_to_solr.keys).to match_array(collection_keys)
-      expect(@ead_header.collections_to_solr).not_to have_key(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable))
+      expect(@ead_header.to_solr.keys).to include(*collection_keys)
+      expect(@ead_header.to_solr).not_to have_key(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable))
 
-      expect(@component.collections_to_solr.keys).to match_array(component_keys)
-      expect(@component.collections_to_solr).to include(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
+      expect(@component.to_solr.keys).to include(*component_keys)
+      expect(@component.to_solr).to include(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
     end
 
     it "should add file metadata information to the object\'s solr document" do
@@ -111,6 +112,9 @@ describe 'EncodedArchivalDescription' do
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:text?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:pdf?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:threeD?).and_return(true)
+
+      allow_any_instance_of(DRI::GenericFile).to receive(:width).and_return([500])
+      allow_any_instance_of(DRI::GenericFile).to receive(:height).and_return([500])
 
       file_md_keys = ['width_isim', 'width_sim', 'height_isim', 'height_sim', 'area_isim', 'area_sim',
                       'channels_isim', 'channels_sim', 'bit_depth_isim', 'bit_depth_sim', 'sample_rate_isim',
@@ -136,9 +140,8 @@ describe 'EncodedArchivalDescription' do
       @component.save
 
       #expect(@ead_header.file_metadata_to_solr.keys).to match_array(file_md_keys)
-      expect(@ead_header.file_metadata_to_solr).to include(ActiveFedora.index_field_mapper.solr_name('file_type', :stored_searchable) => ['collection'])
-
-      expect(@component.file_metadata_to_solr.keys).to match_array(file_md_keys)
+      expect(@ead_header.to_solr).to include('file_type_tesim' => ['collection'])
+      expect(@component.to_solr.keys).to include(*file_md_keys)
     end
 
     it "should add object type information to the object\'s solr document" do
@@ -161,15 +164,15 @@ describe 'EncodedArchivalDescription' do
 
       solr_field = ActiveFedora.index_field_mapper.solr_name('object_type', :displayable)
 
-      expect(@ead_header.object_types_to_solr.keys).to match_array(object_type_keys)
-      expect(@ead_header.object_types_to_solr).to include(solr_field => ['Collection'])
+      expect(@ead_header.to_solr.keys).to include(*object_type_keys)
+      expect(@ead_header.to_solr).to include(solr_field => ['Collection'])
 
-      expect(@component.object_types_to_solr.keys).to match_array(object_type_keys)
-      expect(@component.object_types_to_solr).to have_key(solr_field)
-      expect(@component.object_types_to_solr[solr_field]).to match_array(['Manuscript'])
+      expect(@component.to_solr.keys).to include(*object_type_keys)
+      expect(@component.to_solr).to have_key(solr_field)
+      expect(@component.to_solr[solr_field]).to match_array(['Manuscript'])
 
       @component.type = []
-      expect(@component.object_types_to_solr[solr_field]).to match_array(['Collection', 'Subcollection'])
+      expect(@component.to_solr[solr_field]).to match_array(['Collection', 'Subcollection'])
     end
   end
 

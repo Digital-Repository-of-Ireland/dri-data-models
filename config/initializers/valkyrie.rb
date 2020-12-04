@@ -10,6 +10,7 @@ Rails.application.config.to_prepare do
     CollectionIndexer,
     AttachedFilesIndexer,
     ObjectTypesIndexer,
+    EadObjectTypesIndexer,
     FileMetadataIndexer,
     DocumentationIndexer,
     RightsIndexer

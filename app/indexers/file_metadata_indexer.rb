@@ -7,29 +7,35 @@ class FileMetadataIndexer
 
   def to_solr
     solr_doc = {}
-    return solr_doc unless resource.respond_to?(:generic_file)
+    return solr_doc unless resource.respond_to?(:generic_files)
 
     if resource.collection?
       file_type =  ['collection']
       file_type_display = ['Collection']
 
-      solr_doc.merge!('file_type_tesim' => file_type)
-      solr_doc.merge!('file_type_sim' => file_type)
-
-      solr_doc.merge!('file_type_display_tesim' => file_type_display)
-      solr_doc.merge!('file_type_display_sim' => file_type_display)
+      file_type_display = if resource.is_a?(DRI::EadCollection) && !resource.root_collection? && !resource.ead_level.blank?
+                            [resource.ead_level.first.strip.capitalize]
+                          else
+                            ['Collection']
+                          end
+      solr_doc = {
+                   'file_type_tesim' => file_type,
+                   'file_type_sim' => file_type,
+                   'file_type_display_tesim' => file_type_display,
+                   'file_type_display_sim' => file_type_display
+                 }
     end
 
-    solr_doc = index_file_metadata(solr_doc) if resource.generic_files.count > 0
+    solr_doc.merge!(index_file_metadata) if resource.generic_files.count > 0
 
     unless solr_doc.key?('file_type_tesim')
-      solr_doc = file_type_from_metadata(solr_doc)
+      solr_doc.merge!(file_type_from_metadata)
     end
 
     solr_doc
   end
 
-  def index_file_metadata(no_of_files, solr_doc = {})
+  def index_file_metadata
     file_type = []
     file_type_display = []
     file_count = 0
@@ -89,51 +95,56 @@ class FileMetadataIndexer
       end
     end
 
-    solr_doc.merge!('width_isim' => width)
-    solr_doc.merge!('width_sim' => width)
-    solr_doc.merge!('height_isim' => height)
-    solr_doc.merge!('height_sim' => height)
-    solr_doc.merge!('area_isim' => area)
-    solr_doc.merge!('area_sim' => area)
-    solr_doc.merge!('channels_isim' => channels)
-    solr_doc.merge!('channels_sim' => channels)
-    solr_doc.merge!('bit_depth_isim' => bit_depth)
-    solr_doc.merge!('bit_depth_sim' => bit_depth)
-     solr_doc.merge!('sample_rate_isim' => sample_rate)
-    solr_doc.merge!('sample_rate_sim' => sample_rate)
+    file_metadata = {
+      'width_isim' => width,
+      'width_sim' => width,
+      'height_isim' => height,
+      'height_sim' => height,
+      'area_isim' => area,
+      'area_sim' => area,
+      'channels_isim' => channels,
+      'channels_sim' => channels,
+      'bit_depth_isim' => bit_depth,
+      'bit_depth_sim' => bit_depth,
+      'sample_rate_isim' => sample_rate,
+      'sample_rate_sim' => sample_rate
+    }
 
     unless duration_total.nil?
-      solr_doc.merge!('duration_total_isi' => [duration_total])
-      solr_doc.merge!('duration_tesim' => duration)
-      solr_doc.merge!('duration_sim' => duration)
+      file_metadata.merge!({
+        'duration_total_isi' => [duration_total],
+        'duration_tesim' => duration,
+        'duration_sim' => duration
+      })
     end
 
     unless file_size_total.nil?
-      solr_doc.merge!('file_size_total_isi' => file_size_total)
-      solr_doc.merge!('file_size_isim' => file_size)
-      solr_doc.merge!('file_size_sim' => file_size)
+      file_metadata.merge!({
+        'file_size_total_isi' => file_size_total,
+        'file_size_isim' => file_size,
+        'file_size_sim' => file_size
+      })
     end
 
     unless file_type.empty?
-      solr_doc.merge!('file_type_tesim' => file_type)
-      solr_doc.merge!('file_type_sim' => file_type)
-
-      solr_doc.merge!('file_type_display_tesim' => file_type_display)
-      solr_doc.merge!('file_type_display_sim' => file_type_display)
+      file_metadata.merge!({
+        'file_type_tesim' => file_type,
+        'file_type_sim' => file_type,
+        'file_type_display_tesim' => file_type_display,
+        'file_type_display_sim' => file_type_display
+      })
     end
 
-    solr_doc.merge!('mime_type_tesim' => mime_type)
-    solr_doc.merge!('mime_type_sim' => mime_type)
-
-    solr_doc.merge!('file_format_tesim' => file_format)
-    solr_doc.merge!('file_format_sim' => file_format)
-
-    solr_doc.merge!('file_count_isi' => [file_count])
-
-    solr_doc
+    file_metadata.merge({
+      'mime_type_tesim' => mime_type,
+      'mime_type_sim' => mime_type,
+      'file_format_tesim' => file_format,
+      'file_format_sim' => file_format,
+      'file_count_isi' => [file_count]
+    })
   end
 
-  def file_type_from_metadata(solr_doc)
+  def file_type_from_metadata
     # As a last resort try to determine the file type from the
     # DCMI vocabulary in the metadata.
     file_type = []
@@ -151,12 +162,11 @@ class FileMetadataIndexer
       file_type_display.push 'Unknown'
     end
 
-    solr_doc.merge!('file_type_tesim' => file_type)
-    solr_doc.merge!('file_type_sim' => file_type)
-
-    solr_doc.merge!('file_type_display_tesim' => file_type_display)
-    solr_doc.merge!('file_type_display_sim' => file_type_display)
-
-    solr_doc
+    {
+      'file_type_tesim' => file_type,
+      'file_type_sim' => file_type,
+      'file_type_display_tesim' => file_type_display,
+      'file_type_display_sim' => file_type_display
+    }
   end
 end

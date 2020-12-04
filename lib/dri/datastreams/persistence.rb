@@ -60,20 +60,8 @@ module DRI::Datastreams
       end
 
       def local_or_remote_content(ensure_fetch = true)
-        return @content if new_record?
-
-        @content ||= ensure_fetch ? persisted_remote_content : @ds_content
-
-        if behaves_like_io?(@content)
-          begin
-            @content.rewind
-            @content.read
-          ensure
-            @content.rewind
-          end
-        else
-          @content
-        end
+        @content ||= ensure_fetch ? remote_content : @ds_content unless new_record?
+        @content.rewind if behaves_like_io?(@content)
         @content
       end
   end

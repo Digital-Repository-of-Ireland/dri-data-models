@@ -137,7 +137,7 @@ module DRI
     # i.e. marc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      Solrizer.solr_name('marc_id', :stored_searchable, type: :string)
+      'marc_id_tesim'
     end
 
     private
