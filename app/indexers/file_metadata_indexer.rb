@@ -88,7 +88,7 @@ class FileMetadataIndexer
         file_size |= gf['file_size_isi']
       end
       if gf.key?('mime_type_tesim')
-        mime_type |= [gf['mime_type_tesim']]
+        mime_type |= gf['mime_type_tesim']
       end
       if gf.key?('file_format_tesim')
         file_format |= [gf['file_format_tesim']] unless gf['file_format_tesim'].nil?

@@ -1,14 +1,5 @@
 module DRI::Permissions
 
-  def solrize_permissions(solr_doc = {})
-    %w(discover read edit manager).each do |permission|
-      solr_doc.merge!(Solrizer.solr_name("#{permission}_access_group", :symbol) => permission_array("#{permission}_groups"))
-      solr_doc.merge!(Solrizer.solr_name("#{permission}_access_person", :symbol) => permission_array("#{permission}_users"))
-    end
-
-    solr_doc
-  end
-
   def permission_array(permission)
     value = read_attribute("#{permission}")
     return [] unless value

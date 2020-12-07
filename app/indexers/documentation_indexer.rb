@@ -6,7 +6,7 @@ class DocumentationIndexer
   end
 
   def to_solr
-    return {} unless resource.respond_to?(:documentation_for)
+    return {} unless resource.respond_to?(:documentation_for) && !resource.documentation_for.nil?
 
     { 'isDescriptionOf_ssim' => [resource.documentation_for.noid] }
   end

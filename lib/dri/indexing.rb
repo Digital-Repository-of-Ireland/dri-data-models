@@ -59,7 +59,7 @@ module DRI
       end
 
       def delete_from_solr
-        adapter.persister.delete(resource: self)
+        adapter.persister.connection.delete_by_id(noid, params: { 'softCommit' => true })
       end
   end
 end

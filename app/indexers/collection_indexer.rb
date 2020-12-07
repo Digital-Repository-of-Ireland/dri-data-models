@@ -27,8 +27,7 @@ class CollectionIndexer
         {
           'root_collection_sim' => [resource.title.first],
           'root_collection_tesim' => [resource.title.first],
-          'root_collection_id_sim' => [resource.noid],
-          'root_collection_id_tesim' => [resource.noid]
+          'root_collection_id_ssi' => resource.noid,
         }
       )
     else
@@ -37,14 +36,14 @@ class CollectionIndexer
           'ancestor_title_sim' => ancestor_titles,
           'ancestor_title_tesim' => ancestor_titles,
           #solr_doc.merge!(Solrizer.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
-          'ancestor_id_sim' => ancestor_ids,
+          'ancestor_id_ssim' => ancestor_ids,
           # governing_id needed for user_group gem!!!
           'governing_id_sim' => [ancestor_ids.first],
           'collection_id_sim' => [ancestor_ids.first],
           #solr_doc.merge!('collection_id_tesim' => [ancestor_ids.first])
           'collection_sim' => [ancestor_titles.first],
           'collection_tesim' => [ancestor_titles.first],
-          'root_collection_id_sim' => [ancestor_ids.last],
+          'root_collection_id_ssi' => ancestor_ids.last,
           #solr_doc.merge!('root_collection_id_tesim' => [ancestor_ids.last])
           'root_collection_sim' => [ancestor_titles.last],
           'root_collection_tesim' => [ancestor_titles.last]
@@ -66,7 +65,7 @@ class CollectionIndexer
       solr_doc['is_first_sibling_tesim'] = '1'
     end
 
-    solr_doc['is_collection_sim'] = resource.collection?
+    solr_doc['is_collection_ssi'] = resource.collection?
     #solr_doc.merge!('is_collection_tesim' => collection?)
 
     solr_doc
