@@ -89,13 +89,13 @@ describe 'EncodedArchivalDescription' do
       @ead_header.governed_items << @component
       @ead_header.save
 
-      collection_keys = ['root_collection_id_sim', 'root_collection_id_tesim', 'root_collection_sim',
-                         'is_collection_sim']
+      collection_keys = ['root_collection_id_ssi', 'root_collection_sim',
+                         'is_collection_ssi']
 
-      component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_sim',
+      component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_ssim',
                         'governing_id_sim', 'collection_id_sim', 'collection_sim',
-                        'collection_tesim', 'root_collection_id_sim', 'root_collection_sim',
-                        'root_collection_tesim', 'is_collection_sim', 'is_first_sibling_tesim',
+                        'collection_tesim', 'root_collection_id_ssi', 'root_collection_sim',
+                        'root_collection_tesim', 'is_collection_ssi', 'is_first_sibling_tesim',
                         'isGovernedBy_ssim']
 
       expect(@ead_header.to_solr.keys).to include(*collection_keys)
