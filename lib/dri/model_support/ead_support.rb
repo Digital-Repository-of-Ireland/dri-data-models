@@ -122,7 +122,8 @@ module DRI
           open(file_url) { |data| temp_file.write data.read }
           temp_file.close
 
-          add_file(temp_file, file_name)
+          added = add_file_to_object(temp_file, file_name)
+          return added unless added
 
           true
         rescue Exception => e
@@ -136,6 +137,9 @@ module DRI
           temp_file.unlink unless temp_file.nil?
         end
       end # add_file_from_url
+
+      def add_file_to_object(temp_file, file_name)
+      end
 
       # Searchs for the node's children ead:components (c | c01..12 XML nodes)
       # @param [Nokogiri::XML::Document] node the document to search
