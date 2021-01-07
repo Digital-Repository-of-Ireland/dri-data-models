@@ -6,7 +6,6 @@ module DRI::Metadata::Terminologies
         # Selects the root node of the XML document
         t.root(path: 'properties', xmlns: '', namespace_prefix: nil)
         t.status(namespace_prefix: nil, index_as: [:symbol, :stored_searchable, :displayable, :facetable])
-        t.object_type(namespace_prefix: nil, path: 'objectType', index_as: [:displayable, :facetable])
         t.depositor(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
         t.metadata_md5(namespace_prefix: nil, index_as: [:stored_searchable])
         t.model_version(namespace_prefix: nil, path: 'model_version')
@@ -15,7 +14,6 @@ module DRI::Metadata::Terminologies
         t.institute(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
         t.depositing_institute(namespace_prefix: nil, index_as: [:stored_searchable, :displayable])
         t.licence(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
-        t.master_file_access(namespace_prefix: nil, index_as: [:stored_searchable, :facetable])
         t.published_at(namespace_prefix: nil, index_as: [:stored_searchable])
       end # set_terminology
     end

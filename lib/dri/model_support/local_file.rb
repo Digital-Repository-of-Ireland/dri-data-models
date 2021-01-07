@@ -1,5 +1,4 @@
 # Represents a file stored on the local filesystem.
-
 require 'pathname'
 
 module DRI::ModelSupport
@@ -13,9 +12,13 @@ module DRI::ModelSupport
       self.version = opts[:version].presence || digital_object.object_version || 1
       self.mime_type = opts[:mime_type]
 
-      base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
-      FileUtils.mkdir_p(base_dir)
-      self.path = File.join(base_dir, opts[:file_name])
+      self.path = if opts[:moab_path].present?
+                    File.join(aip_dir(object_id), opts[:moab_path])
+                  else
+                    base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
+                    FileUtils.mkdir_p(base_dir)
+                    File.join(base_dir, opts[:file_name])
+                  end
       upload_to_file(upload)
     end
 
@@ -42,7 +45,11 @@ module DRI::ModelSupport
       end
 
       def version_path(object_id, version)
-        File.join(local_storage_dir, build_hash_dir(object_id), version_string(version))
+        File.join(aip_dir(object_id), version_string(version))
+      end
+
+      def aip_dir(object_id)
+        File.join(local_storage_dir, build_hash_dir(object_id))
       end
 
       # data path

@@ -6,17 +6,10 @@ module DRI
     module Properties
       extend ActiveSupport::Concern
 
-      #class_methods do
-      #  def dangerous_attribute_method?(method_name)
-      #    return false if method_name == :properties
-      #    super
-      #  end
-      #end
-
       included do
         has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true
 
-        delegate :object_type,:object_type=, to: :properties
+        #delegate :object_type,:object_type=, to: :properties
         delegate :depositor=, to: :properties
         delegate :model_version=, to: :properties
         delegate :verified=, to: :properties
@@ -25,7 +18,6 @@ module DRI
         delegate :institute,:institute=, to: :properties
         delegate :depositing_institute=, to: :properties
         delegate :licence=, to: :properties
-        delegate :master_file_access=, to: :properties
         delegate :published_at=, to: :properties
         delegate :status=, to: :properties
       end
@@ -67,10 +59,6 @@ module DRI
 
       def institute
         properties.institute.first
-      end
-
-      def master_file_access
-        properties.master_file_access.first
       end
 
       def status

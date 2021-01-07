@@ -7,6 +7,8 @@ class PermissionsIndexer
 
   def to_solr
 	  solr_doc = {}
+
+    solr_doc['master_file_access_ssi'] = resource.master_file_access if resource.respond_to?(:master_file_access)
     %w(discover read edit manager).each do |permission|
       solr_doc.merge!(
         {

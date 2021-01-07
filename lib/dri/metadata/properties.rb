@@ -26,9 +26,9 @@ module DRI
 
       # Determine whether the metadata describes a collection
       # @return [Boolean] true if metadata specified this is a collection; false otherwise
-      def collection?
-        object_type.include? 'Collection'
-      end
+      # def collection?
+      #   object_type.include? 'Collection'
+      # end
 
       load_inherited_terminology
     end

@@ -8,7 +8,7 @@ module DRI::Permissions
 
   def permissions
     graph = RDF::Graph.new
-    %w(manager edit read discover).each do |permission|
+    %w(manager edit read).each do |permission|
       permission_array("#{permission}_users").each do |entry|
         graph << [ RDF::URI.new("http://projecthydra.org/ns/auth/person##{entry}"), mode(permission), "#{noid}" ]
       end
@@ -18,19 +18,25 @@ module DRI::Permissions
       end
     end
 
+    if master_file_access
+      graph << [
+                 RDF::URI.new("http://projecthydra.org/ns/auth/group##{master_file_access}"),
+                 RDF::URI.new("https://dri.ie/ns/auth/acl#ReadMaster"),
+                 "#{noid}"
+               ]
+    end
+
     graph.dump(:ntriples)
   end
 
   def mode(permission)
     case permission
     when 'manager'
-      ::ACL.Control
+      ::RDF::Vocab::ACL.Control
     when 'edit'
-      ::ACL.Write
+      ::RDF::Vocab::ACL.Write
     when 'read'
-      ::ACL.Read
-    when 'discover'
-      Hydra::ACL.Discover
+      ::RDF::Vocab::ACL.Read
     end
   end
 end
