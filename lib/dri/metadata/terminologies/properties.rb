@@ -5,8 +5,6 @@ module DRI::Metadata::Terminologies
       set_terminology do |t|
         # Selects the root node of the XML document
         t.root(path: 'properties', xmlns: '', namespace_prefix: nil)
-        t.status(namespace_prefix: nil, index_as: [:symbol, :stored_searchable, :displayable, :facetable])
-        t.depositor(namespace_prefix: nil, index_as: [:stored_searchable, :displayable, :facetable])
         t.metadata_md5(namespace_prefix: nil, index_as: [:stored_searchable])
         t.model_version(namespace_prefix: nil, path: 'model_version')
         t.doi(namespace_prefix: nil, index_as: [:stored_searchable, :displayable])

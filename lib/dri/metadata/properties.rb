@@ -17,7 +17,6 @@ module DRI
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.properties {
             xml.model_version DriDataModels::VERSION
-            xml.status 'draft'
           }
         end
 

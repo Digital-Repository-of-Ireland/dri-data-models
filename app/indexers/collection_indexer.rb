@@ -62,11 +62,10 @@ class CollectionIndexer
     if !resource.previous_sibling.blank?
       solr_doc["#{DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment}_ssim"] = [resource.previous_sibling.noid]
     elsif resource.is_a?(DRI::EadComponent)
-      solr_doc['is_first_sibling_tesim'] = '1'
+      solr_doc['is_first_sibling_isi'] = 1
     end
 
     solr_doc['is_collection_ssi'] = resource.collection?
-    #solr_doc.merge!('is_collection_tesim' => collection?)
 
     solr_doc
   end

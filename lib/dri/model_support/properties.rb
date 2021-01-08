@@ -9,8 +9,6 @@ module DRI
       included do
         has_one :properties, class_name: 'DRI::Metadata::Properties', as: :describable, autosave: true
 
-        #delegate :object_type,:object_type=, to: :properties
-        delegate :depositor=, to: :properties
         delegate :model_version=, to: :properties
         delegate :verified=, to: :properties
         delegate :doi=, to: :properties
@@ -19,15 +17,10 @@ module DRI
         delegate :depositing_institute=, to: :properties
         delegate :licence=, to: :properties
         delegate :published_at=, to: :properties
-        delegate :status=, to: :properties
       end
 
       def cover_image
         properties.cover_image.first
-      end
-
-      def depositor
-        properties.depositor.first
       end
 
       def depositing_institute
@@ -59,10 +52,6 @@ module DRI
 
       def institute
         properties.institute.first
-      end
-
-      def status
-        properties.status.first
       end
 
       def verified

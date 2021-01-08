@@ -5,7 +5,6 @@ describe 'DRI::Metadata::Properties' do
   end
 
   it 'should expose system metadata for DRI digital objects' do
-    expect(@ds.status).to match_array(['published'])
     expect(@ds.model_version).to match_array(['0.1.0'])
   end
 end

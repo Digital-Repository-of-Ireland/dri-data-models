@@ -195,6 +195,10 @@ module DRI
       status == 'published'
     end
 
+    def status
+      super || 'draft'
+    end
+
     private
 
     def delete_objects

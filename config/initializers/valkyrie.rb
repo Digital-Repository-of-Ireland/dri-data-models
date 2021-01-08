@@ -4,6 +4,7 @@ require_relative 'dri_data_models'
 
 Rails.application.config.to_prepare do
     indexer =  Valkyrie::Persistence::Solr::CompositeIndexer.new(
+    SystemIndexer,
     PermissionsIndexer,
     DigitalObjectIndexer,
     GenericFileIndexer,

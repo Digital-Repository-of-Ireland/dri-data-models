@@ -95,14 +95,14 @@ describe 'EncodedArchivalDescription' do
       component_keys = ['ancestor_title_sim', 'ancestor_title_tesim', 'ancestor_id_ssim',
                         'governing_id_sim', 'collection_id_sim', 'collection_sim',
                         'collection_tesim', 'root_collection_id_ssi', 'root_collection_sim',
-                        'root_collection_tesim', 'is_collection_ssi', 'is_first_sibling_tesim',
+                        'root_collection_tesim', 'is_collection_ssi', 'is_first_sibling_isi',
                         'isGovernedBy_ssim']
 
       expect(@ead_header.to_solr.keys).to include(*collection_keys)
-      expect(@ead_header.to_solr).not_to have_key(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable))
+      expect(@ead_header.to_solr).not_to have_key('is_first_sibling_isi')
 
       expect(@component.to_solr.keys).to include(*component_keys)
-      expect(@component.to_solr).to include(ActiveFedora.index_field_mapper.solr_name('is_first_sibling', :stored_searchable) => '1')
+      expect(@component.to_solr).to include('is_first_sibling_isi' => 1)
     end
 
     it "should add file metadata information to the object\'s solr document" do
