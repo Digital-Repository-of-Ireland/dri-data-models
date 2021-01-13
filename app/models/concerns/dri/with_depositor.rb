@@ -9,7 +9,10 @@ module DRI
       if respond_to? :depositor
         self.depositor = depositor_id
       end
-      self.edit_users += [depositor_id]
+
+      if respond_to? :edit_users
+        self.edit_users += [depositor_id]
+      end
       true
     end
   end

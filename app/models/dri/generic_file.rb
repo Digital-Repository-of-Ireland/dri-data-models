@@ -7,8 +7,6 @@ module DRI
   class GenericFile < ApplicationRecord
     include DRI::Indexing
 
-    include DRI::Permissions
-    include DRI::ModelSupport::Permissions
     include DRI::WithDepositor
 
     include DRI::Noid

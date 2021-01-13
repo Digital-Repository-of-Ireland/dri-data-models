@@ -10,6 +10,9 @@ class DigitalObjectIndexer
 
     {
       'status_ssi' => resource.status,
+      'depositor_sim' => resource.depositor,
+      'depositor_ss' => resource.depositor,
+      'published_at_dttsi' => resource.published_at
     }
   end
 end

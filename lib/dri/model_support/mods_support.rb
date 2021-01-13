@@ -40,7 +40,7 @@ module DRI
         new_object.depositor = depositor
         new_object.status = status
         new_object.update_metadata(xml)
-        
+
         new_object.read_users_string = read_users_string
         new_object.read_groups_string = read_groups_string
         new_object.edit_users_string = edit_users_string

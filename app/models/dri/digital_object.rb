@@ -10,11 +10,10 @@ module DRI
     include DRI::Indexing
     include DRI::Noid
     include DRI::Export
-    include DRI::Permissions
     include DRI::WithDepositor
 
-    include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::Common
+    include DRI::ModelSupport::Permissions
     include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
@@ -174,6 +173,10 @@ module DRI
 
     def alternate_identifier
       super || build_alternate_identifier
+    end
+
+    def access_control
+      super || build_access_control
     end
 
     def declared_attached_files

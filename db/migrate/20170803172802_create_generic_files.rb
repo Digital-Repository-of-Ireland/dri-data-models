@@ -12,14 +12,6 @@ class CreateGenericFiles < ActiveRecord::Migration[4.2]
       t.string :checksum_md5
       t.string :checksum_sha256
       t.string :checksum_rmd160
-      t.string :discover_users
-      t.string :discover_groups
-      t.string :read_users
-      t.string :read_groups
-      t.string :edit_users
-      t.string :edit_groups
-      t.string :manager_users
-      t.string :manager_groups
       t.timestamps
       t.references :digital_object, polymorphic: true, index: { name: 'gf_do_idx' }
     end

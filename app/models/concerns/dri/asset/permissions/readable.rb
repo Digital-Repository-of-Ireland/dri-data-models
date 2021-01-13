@@ -25,7 +25,13 @@ module DRI::Asset
       # Determine whether the object has a registered access status
       # @return [Boolean] true if registered; false otherwise
       def registered?
-        read_groups.include?('registered')
+        governing_object = self.digital_object
+        while governing_object.read_groups.blank?
+          governing_object = governing_object.governing_collection
+          return false if governing_object.nil?
+        end
+
+        governing_object.read_groups.include?('registered')
       end
 
       # Determine whether the object has a private access status

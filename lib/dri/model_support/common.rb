@@ -15,7 +15,7 @@ module DRI
         # Complete metadata record datastream
         has_one :fullMetadata, class_name: 'DRI::Metadata::FullMetadata', as: :describable, autosave: true
 
-        # TODO: Check that these match the DRI Level 1 and 2 terms
+        has_one :access_control, autosave: true
 
         # DRI Mandatory (M)
         # Title (collection-level)

@@ -7,14 +7,15 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        serialize :manager_groups, Array
-        serialize :manager_users, Array
-        serialize :edit_groups, Array
-        serialize :edit_users, Array
-        serialize :read_groups, Array
-        serialize :read_users, Array
-        serialize :discover_groups, Array
-        serialize :discover_users, Array
+        delegate :manager_groups,:manager_groups=, to: :access_control
+        delegate :manager_users,:manager_users=, to: :access_control
+        delegate :edit_groups,:edit_groups=, to: :access_control
+        delegate :edit_users,:edit_users=, to: :access_control
+        delegate :read_groups,:read_groups=, to: :access_control
+        delegate :read_users,:read_users=, to: :access_control
+        delegate :discover_groups,:discover_groups=, to: :access_control
+        delegate :discover_users,:discover_users=, to: :access_control
+        delegate :master_file_access,:master_file_access=, to: :access_control
       end
 
       # Grant discover permissions to the groups specified. Revokes discover permission for all other groups.
@@ -55,7 +56,7 @@ module DRI
         self.discover_users=users.split(/[\s,]+/)
       end
 
-      # Display the users as a comma delimeted string
+      # Display the users as a comma delimited string
       def discover_users_string
         self.discover_users.join(', ')
       end
@@ -71,7 +72,7 @@ module DRI
         self.read_groups=groups.split(/[\s,]+/)
       end
 
-      # Display the groups a comma delimeted string
+      # Display the groups as a comma delimited string
       def read_groups_string
         self.read_groups.join(', ')
       end

@@ -16,7 +16,6 @@ module DRI
         delegate :institute,:institute=, to: :properties
         delegate :depositing_institute=, to: :properties
         delegate :licence=, to: :properties
-        delegate :published_at=, to: :properties
       end
 
       def cover_image
@@ -37,17 +36,6 @@ module DRI
 
       def model_version
         properties.model_version.first
-      end
-
-      # Returns whether the object has a status of 'published'
-      #
-      # @return [Boolean] true if status is published
-      def published?
-        status == 'published'
-      end
-
-      def published_at
-        properties.published_at.first if properties.published_at.present?
       end
 
       def institute
