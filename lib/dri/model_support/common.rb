@@ -39,6 +39,8 @@ module DRI
         # Language (collection-level)
         delegate :language,:language=, to: :descMetadata
 
+        serialize :institute, Array
+
         validate :custom_validations
       end
 

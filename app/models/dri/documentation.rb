@@ -32,7 +32,7 @@ module DRI
     end
 
     def declared_attached_files
-      { descMetadata: descMetadata, properties: properties }
+      { descMetadata: descMetadata }
     end
 
     def descMetadata

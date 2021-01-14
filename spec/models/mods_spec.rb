@@ -47,8 +47,6 @@ describe 'Mods' do
       @mods_record.descMetadata.should be_kind_of(DRI::Metadata::Mods)
       @mods_record.attached_files.keys.should include('fullMetadata')
       @mods_record.fullMetadata.should be_kind_of(DRI::Metadata::FullMetadata)
-      @mods_record.attached_files.keys.should include('properties')
-      @mods_record.properties.should be_kind_of(DRI::Metadata::Properties)
     end
 
     it 'should have mods namespace prefix' do

@@ -8,7 +8,6 @@ module DRI
     autoload :ModsSupport, 'dri/model_support/mods_support'
     autoload :MarcSupport, 'dri/model_support/marc_support'
     autoload :Permissions, 'dri/model_support/permissions'
-    autoload :Properties, 'dri/model_support/properties'
     autoload :RelationshipsSupport, 'dri/model_support/relationships_support'
   end
 end

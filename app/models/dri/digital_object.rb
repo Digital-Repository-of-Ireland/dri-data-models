@@ -14,7 +14,6 @@ module DRI
 
     include DRI::ModelSupport::Common
     include DRI::ModelSupport::Permissions
-    include DRI::ModelSupport::Properties
     include DRI::ModelSupport::Files
     include DRI::ModelSupport::Collections
 
@@ -136,10 +135,6 @@ module DRI
       DateTime.parse(created_at.to_s).utc.to_datetime
     end
 
-    def depositing_institute
-      properties.depositing_institute.first if properties.depositing_institute.present?
-    end
-
     def object_version
       self[:object_version] || 1
     end
@@ -150,17 +145,8 @@ module DRI
       self.object_version = self.object_version.next
     end
 
-    def metadata_checksum=(checksum)
-      properties.metadata_md5 = checksum
-      super(checksum)
-    end
-
     def modified_date
-      m_dates = [descMetadata, properties].map do |file|
-                  file.updated_at.to_i
-                end
-
-      return Time.at(m_dates.sort.last).utc.to_datetime
+      Time.at(descMetadata.updated_at.to_i).utc.to_datetime
     end
 
     def noid
@@ -180,15 +166,11 @@ module DRI
     end
 
     def declared_attached_files
-      { descMetadata: descMetadata, properties: properties, fullMetadata: fullMetadata }
+      { descMetadata: descMetadata, fullMetadata: fullMetadata }
     end
 
     def attached_files
       @attached_files ||= ActiveSupport::HashWithIndifferentAccess.new(declared_attached_files)
-    end
-
-    def properties
-      super || build_properties
     end
 
     # Returns whether the object has a status of 'published'
