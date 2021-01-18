@@ -1,6 +1,6 @@
 require 'solr_wrapper'
 
-namespace :jetty do
+namespace :server do
 
   task(:config).clear
 
@@ -15,7 +15,7 @@ namespace :jetty do
   end
 
   task config: :environment do
-    Rake::Task['jetty:start'].invoke unless solr.started? 
+    Rake::Task['server:start'].invoke unless solr.started? 
 
     client = SolrWrapper::Client.new(solr.url)
 
