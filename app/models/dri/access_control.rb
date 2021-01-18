@@ -15,11 +15,11 @@ module DRI
       graph = RDF::Graph.new
       %w(manager edit read).each do |permission|
         permission_array("#{permission}_users").each do |entry|
-          graph << [ RDF::URI.new("http://projecthydra.org/ns/auth/person##{entry}"), mode(permission), "#{digital_object.noid}" ]
+          graph << [ RDF::URI.new("http://projecthydra.org/ns/auth/person##{entry}"), mode(permission), "#{digital_object.alternate_id}" ]
         end
 
         permission_array("#{permission}_groups").each do |entry|
-          graph << [ RDF::URI.new("http://projecthydra.org/ns/auth/group##{entry}"), mode(permission), "#{digital_object.noid}" ]
+          graph << [ RDF::URI.new("http://projecthydra.org/ns/auth/group##{entry}"), mode(permission), "#{digital_object.alternate_id}" ]
         end
       end
 
@@ -27,7 +27,7 @@ module DRI
         graph << [
                    RDF::URI.new("http://projecthydra.org/ns/auth/group##{master_file_access}"),
                    RDF::URI.new("https://dri.ie/ns/auth/acl#ReadMaster"),
-                   "#{digital_object.noid}"
+                   "#{digital_object.alternate_id}"
                  ]
       end
 

@@ -26,7 +26,7 @@ describe 'Mods' do
 
     it 'should find an existing object from fedora' do
       @mods_record.save
-      @collection = DRI::Mods.find_or_create(@mods_record.noid)
+      @collection = DRI::Mods.find_or_create(@mods_record.alternate_id)
       expect(@collection.new_record?).to eq false
     end
 

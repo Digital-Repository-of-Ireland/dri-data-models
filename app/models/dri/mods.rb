@@ -349,7 +349,7 @@ module DRI
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::Mods.create(noid: pid)
+      DRI::Mods.create(alternate_id: pid)
     end
 
     # For relationships display in the UI, creates Hash where the keys are

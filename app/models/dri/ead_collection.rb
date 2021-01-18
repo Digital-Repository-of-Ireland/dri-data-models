@@ -28,7 +28,7 @@ module DRI
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::EadCollection.create(noid: pid)
+      DRI::EadCollection.create(alternate_id: pid)
     end
 
     def method_missing(method, *args)

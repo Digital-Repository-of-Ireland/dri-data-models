@@ -28,7 +28,7 @@ describe 'EncodedArchivalDescription' do
 
     it 'should find an existing object from fedora' do
       @ead_header.save
-      @collection = DRI::EadCollection.find_or_create(@ead_header.noid)
+      @collection = DRI::EadCollection.find_or_create(@ead_header.alternate_id)
       expect(@collection.new_record?).to eq false
     end
 

@@ -92,7 +92,7 @@ module DRI
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::QualifiedDublinCore.create(noid: pid)
+      DRI::QualifiedDublinCore.create(alternate_id: pid)
     end
 
     # Type attribute getter

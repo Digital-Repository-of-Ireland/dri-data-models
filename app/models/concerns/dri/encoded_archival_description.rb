@@ -369,14 +369,13 @@ module DRI
       yield
 
       return unless content_changed && !new_record?
-
       if trigger_ingest
         # This is an EAD ingest, not MD update
-        DRI.queue.push(SynchronizeChildrenToMetadataJob.new(noid))
+        DRI.queue.push(SynchronizeChildrenToMetadataJob.new(alternate_id))
       elsif trigger_update && descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
         # ONLY for EncodedArchivalDescriptionComponent
         # descMetadata update, trigger parent fullMetadata sync
-        DRI.queue.push(UpdateParentMetadataJob.new(noid))
+        DRI.queue.push(UpdateParentMetadataJob.new(alternate_id))
         self.trigger_update = false
       end
     end

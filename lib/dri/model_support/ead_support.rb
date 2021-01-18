@@ -73,10 +73,9 @@ module DRI
             Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
             new_child.save
             # Do the preservation actions
-            preservation = Preservation::Preservator.new(new_child)
-            preservation.preserve(['descMetadata','properties'])
+            preserve(new_child)
             begin
-              DRI::Utils.create_reader_group(new_child.noid) if new_child.collection?
+              DRI::Utils.create_reader_group(new_child.alternate_id) if new_child.collection?
             rescue
               Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
@@ -95,6 +94,11 @@ module DRI
           metadata_child_index += 1
         end
       end # synchronize_children_to_metadata
+
+      def preserve(new_child)
+        preservation = ::Preservation::Preservator.new(new_child)
+        preservation.preserve(['descMetadata'])
+      end
 
       # Create associated generic file from a given URL
       def process_ingest_of_file_urls
@@ -127,7 +131,7 @@ module DRI
 
           true
         rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{noid}\n"
+          logger.error "Error loading url: #{file_url} PID: #{alternate_id}\n"
           logger.error e.backtrace.join("\n")
 
           false
@@ -283,7 +287,7 @@ module DRI
 
         if content_changed && generic_files.empty? &&
             !dao_href_proxy.empty? && !new_record?
-          DRI.queue.push(IngestFilesFromMetadataJob.new(noid))
+          DRI.queue.push(IngestFilesFromMetadataJob.new(alternate_id))
         end
       end # ingest_files_if_changed
     end # module

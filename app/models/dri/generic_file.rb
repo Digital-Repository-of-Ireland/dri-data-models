@@ -29,21 +29,21 @@ module DRI
     serialize :title
     serialize :creator
 
-    def self.find_by_noid(pid)
+    def self.find_by_alternate_id(pid)
       joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
     end
 
-    def self.find_by_noid!(pid)
-      object = find_by_noid(pid)
-      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::GenericFile with 'noid'=#{pid}") unless object
+    def self.find_by_alternate_id!(pid)
+      object = find_by_alternate_id(pid)
+      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::GenericFile with 'alternate_id'=#{pid}") unless object
 
       object
     end
 
     def self.find_or_create(pid)
-      DRI::GenericFile.find_by_noid!(pid)
+      DRI::GenericFile.find_by_alternate_id!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::GenericFile.create(noid: pid)
+      DRI::GenericFile.create(alternate_id: pid)
     end
 
     def declared_attached_files
@@ -64,11 +64,11 @@ module DRI
       DateTime.parse(updated_at.to_s).utc.to_datetime
     end
 
-    def noid
+    def alternate_id
       alternate_identifier.alternate_id
     end
 
-    def noid=(identifier)
+    def alternate_id=(identifier)
       alternate_identifier.alternate_id=identifier
     end
 

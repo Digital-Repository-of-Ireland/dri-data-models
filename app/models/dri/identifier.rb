@@ -8,7 +8,7 @@ module DRI
 
     def self.retrieve_object!(pid)
       object = retrieve_object(pid)
-      raise ActiveRecord::RecordNotFound.new("Couldn't find object with 'noid'=#{pid}") unless object
+      raise ActiveRecord::RecordNotFound.new("Couldn't find object with 'identifier'=#{pid}") unless object
 
       object
     end

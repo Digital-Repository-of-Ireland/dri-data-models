@@ -104,7 +104,7 @@ module DRI
     def self.find_or_create(pid)
       DRI::Identifier.retrieve_object!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::Documentation.create(noid: pid)
+      DRI::Documentation.create(alternate_id: pid)
     end
 
     def load_attributes

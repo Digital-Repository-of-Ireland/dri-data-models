@@ -51,8 +51,8 @@ module DRI
     end
 
     def reconciliation_uris
-      return [] if describable.noid.nil?
-      DRI::ReconciliationResult.where(object_id: describable.noid).pluck(:uri)
+      return [] if describable.alternate_id.nil?
+      DRI::ReconciliationResult.where(object_id: describable.alternate_id).pluck(:uri)
     end
 
     # Remove null values from a given field within

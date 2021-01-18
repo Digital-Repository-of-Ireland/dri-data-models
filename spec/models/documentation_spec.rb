@@ -33,7 +33,7 @@ describe 'Documentation' do
     @doc.update_attributes(@attributes_hash)
     @doc.documentation_for = @dc_obj
     @doc.save
-    @doc2 = DRI::Documentation.find_or_create(@doc.noid)
+    @doc2 = DRI::Documentation.find_or_create(@doc.alternate_id)
     expect(@doc2.new_record?).to eq false
   end
 
@@ -55,7 +55,7 @@ describe 'Documentation' do
     coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
 
     @doc.new_record?.should == false
-    @doc2 = DRI::Documentation.find_or_create(@doc.noid)
+    @doc2 = DRI::Documentation.find_or_create(@doc.alternate_id)
     @doc2.title.should == @attributes_hash[:title]
     @doc2.rights.should == @attributes_hash[:rights]
     @doc2.description.should == @attributes_hash[:description]
@@ -82,7 +82,7 @@ describe 'Documentation' do
     @dc_obj.save
 
     @doc.reload
-    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.noid]
+    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.alternate_id]
 
   end
 

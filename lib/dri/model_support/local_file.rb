@@ -7,7 +7,7 @@ module DRI::ModelSupport
     #
     def add_file(upload, opts = {})
       # object ID will be used in the MOAB directory name
-      object_id = digital_object.noid
+      object_id = digital_object.alternate_id
 
       self.version = opts[:version].presence || digital_object.object_version || 1
       self.mime_type = opts[:mime_type]

@@ -40,7 +40,7 @@ describe 'CollectionRelationship' do
       rel.save
 
       @a.reload
-      expect(@a.to_solr['isMemberOf_ssim']).to eq [@b.noid]
+      expect(@a.to_solr['isMemberOf_ssim']).to eq [@b.alternate_id]
     end
 
   end

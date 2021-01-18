@@ -19,6 +19,8 @@ module DRI
 
     self.inheritance_column = 'digital_object_type'
 
+    after_initialize :set_model_version
+
     after_destroy :delete_files
     after_destroy :delete_objects
 
@@ -59,13 +61,13 @@ module DRI
       end
     end
 
-    def self.find_by_noid(pid)
+    def self.find_by_alternate_id(pid)
       joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
     end
 
-    def self.find_by_noid!(pid)
-      object = find_by_noid(pid)
-      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::DigitalObject with 'noid'=#{pid}") unless object
+    def self.find_by_alternate_id!(pid)
+      object = find_by_alternate_id(pid)
+      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::DigitalObject with 'alternate_id'=#{pid}") unless object
 
       object
     end
@@ -76,9 +78,13 @@ module DRI
     # @param pid [String] the pid of the object to retrieve
     # @return [DRI::Base] the digital object.
     def self.find_or_create(pid)
-      DRI::DigitalObject.find_by_noid!(pid)
+      DRI::DigitalObject.find_by_alternate_id!(pid)
     rescue ActiveRecord::RecordNotFound
-      DRI::DigitalObject.create(noid: pid)
+      DRI::DigitalObject.create(alternate_id: pid)
+    end
+
+    def set_model_version
+      self.model_version ||= DriDataModels::VERSION if self.new_record?
     end
 
     def [](key)
@@ -149,11 +155,11 @@ module DRI
       Time.at(descMetadata.updated_at.to_i).utc.to_datetime
     end
 
-    def noid
+    def alternate_id
       alternate_identifier.alternate_id
     end
 
-    def noid=(identifier)
+    def alternate_id=(identifier)
       alternate_identifier.alternate_id=identifier
     end
 
@@ -202,7 +208,7 @@ module DRI
 
     def delete_bucket
       storage = StorageService.new
-      storage.delete_bucket(noid)
+      storage.delete_bucket(alternate_id)
     end
   end # Class
 end # Module DRI

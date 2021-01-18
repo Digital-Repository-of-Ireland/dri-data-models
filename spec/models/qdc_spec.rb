@@ -66,7 +66,7 @@ describe 'QualifiedDublinCore' do
       @audio.update_attributes(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
-      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.noid)
+      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.alternate_id)
       @audio3.title.should == @attributes_hash['title']
       @audio3.rights.should == @attributes_hash['rights']
       @audio3.description.should == @attributes_hash['description']
@@ -378,7 +378,7 @@ describe 'QualifiedDublinCore' do
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.noid
+      rr.object_id = @obj.alternate_id
       rr.uri = "http://data.logainm.ie/place/1399926"
       rr.save
       expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial)
@@ -399,7 +399,7 @@ describe 'QualifiedDublinCore' do
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.noid
+      rr.object_id = @obj.alternate_id
       rr.uri = "http://data.logainm.ie/place/test"
       rr.save
 
@@ -421,7 +421,7 @@ describe 'QualifiedDublinCore' do
       @obj.title = ['sample']
       sleep 1
       expect { @obj.save }.to change {
-        ActiveFedora::SolrService.query("id:\"#{@obj.noid}\"").first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_identifier:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
 
@@ -429,7 +429,7 @@ describe 'QualifiedDublinCore' do
       @obj.save
       @obj.reload
       expect { @obj.save }.not_to change {
-        ActiveFedora::SolrService.query("id:\"#{@obj.noid}\"").first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_identifier:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
   end

@@ -3,7 +3,7 @@ module DRI
     extend ActiveSupport::Concern
 
     included do
-      before_create :assign_noid
+      before_create :assign_alternate_id
       after_save    :update_index
       after_destroy :delete_from_solr
     end
@@ -52,14 +52,14 @@ module DRI
 
     protected
 
-      def assign_noid
-        if !self.noid && new_id = assign_id
-          self.noid = new_id
+      def assign_alternate_id
+        if !self.alternate_id && new_id = assign_id
+          self.alternate_id = new_id
         end
       end
 
       def delete_from_solr
-        adapter.persister.connection.delete_by_id(noid, params: { 'softCommit' => true })
+        adapter.persister.connection.delete_by_id(alternate_id, params: { 'softCommit' => true })
       end
   end
 end

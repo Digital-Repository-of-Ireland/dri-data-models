@@ -2,14 +2,18 @@
 describe 'EncodedArchivalDescription' do
 
   before(:each) do
+    allow(DRI.queue).to receive(:push)
+    allow_any_instance_of(DRI::ModelSupport::EadSupport).to receive(:preserve)
+
     @collection_xml = fixture("ead/collections/ead_collection_dtd.xml")
     @collection_modified_xml = fixture("ead/collections/ead_collection_modified_dtd.xml")
-    @ead_collection = DRI::EncodedArchivalDescription.new :collection
-    @ead_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml
+    @ead_collection = DRI::EadCollection.new
+    @ead_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml, true)
+    @ead_collection.ingest_files_from_metadata = 'false'
     @ead_collection.save
   end
 
-  xit "should add new children if it's metadata specifies this" do
+  it "should add new children if it's metadata specifies this" do
     #@ead_collection.save
     @ead_collection.synchronize_children_to_metadata
 
@@ -20,16 +24,16 @@ describe 'EncodedArchivalDescription' do
     @ead_collection.governed_items.each do |curr_child|
         expected_nodes.has_key?(curr_child.identifier.first).should == true
 
-        if (curr_child.previous_sibling == nil)
+        if (curr_child.previous_sibling.blank?)
           expected_nodes[curr_child.identifier.first]["prev"].should == nil
         else
           expected_nodes[curr_child.identifier.first]["prev"].should == curr_child.previous_sibling.id
         end
 
-        if (curr_child.next_sibling == nil)
+        if (curr_child.next_sibling.blank?)
           expected_nodes[curr_child.identifier.first]["next"].should == nil
         else
-          expected_nodes[curr_child.identifier.first]["next"].should == curr_child.next_sibling.id
+          expected_nodes[curr_child.identifier.first]["next"].should == curr_child.next_sibling.first.id
         end
 
         curr_child.title.should == [expected_nodes[curr_child.identifier.first]["title"]]
@@ -37,10 +41,10 @@ describe 'EncodedArchivalDescription' do
     end
   end
 
-  xit "should add new children if the object is a EncodedArchivalDescriptionComponent" do
+  it "should add new children if the object is a EncodedArchivalDescriptionComponent" do
     # @ead_collection.save
     @ead_collection.synchronize_children_to_metadata
-    ead_series = DRI::EncodedArchivalDescription.find(@ead_collection.governed_items[0].id.to_s)
+    ead_series = DRI::EadComponent.find_by_alternate_id(@ead_collection.governed_items[0].alternate_id)
     ead_series.synchronize_children_to_metadata
 
     expected_nodes = { "KDW/RM/02" => { "prev" => nil, "next" => nil, "title" => "Ephemera", "level" => "file" }}
@@ -50,13 +54,13 @@ describe 'EncodedArchivalDescription' do
     ead_series.governed_items.each do |curr_child|
         expected_nodes.has_key?(curr_child.identifier.first).should == true
 
-        if (curr_child.previous_sibling == nil)
+        if (curr_child.previous_sibling.blank?)
           expected_nodes[curr_child.identifier.first]["prev"].should == nil
         else
           expected_nodes[curr_child.identifier.first]["prev"].should == curr_child.previous_sibling.id
         end
 
-        if (curr_child.next_sibling == nil)
+        if (curr_child.next_sibling.blank?)
           expected_nodes[curr_child.identifier.first]["next"].should == nil
         else
           expected_nodes[curr_child.identifier.first]["next"].should == curr_child.next_sibling.id
@@ -67,7 +71,7 @@ describe 'EncodedArchivalDescription' do
     end
   end
 
-  xit "should not modify a child's metadata if the updated child's metadata is identical to it's previous version" do
+  it "should not modify a child's metadata if the updated child's metadata is identical to it's previous version" do
     # compare the datestamps of children that should not change
     # @ead_collection.save
     @ead_collection.synchronize_children_to_metadata
@@ -87,26 +91,19 @@ describe 'EncodedArchivalDescription' do
 
   xit "should modify children's metadata if metadata specifies this" do
     # Load in the previously saved collection the new metadata (one component child has been added)
-    new_collection = DRI::EncodedArchivalDescription.find_or_create(@ead_collection.id.to_s)
-    new_collection.update_metadata DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_modified_xml).to_xml
+    new_collection = DRI::EadCollection.find_or_create(@ead_collection.alternate_id)
+    new_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_modified_xml).to_xml, false)
     new_collection.save
 
     title = "Fake Invitation"
     solr_query = "title_tesim:\"#{title.to_s}\""
-    new_obj = ActiveFedora::SolrService.query(solr_query, :defType => "edismax", :qf => "id,title")
+    new_obj = Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: solr_query, defType: "edismax", qf: "alternate_identifier,title" })['response']['docs']
     new_obj.length.should == 1
   end
 
   after(:each) do
     unless @ead_collection.new_record?
-      # Delete all descendants of @ead_collection and their generic files
-      DRI::EncodedArchivalDescription.where(ActiveFedora::SolrQueryBuilder.solr_name('ancestor_id', :stored_searchable, type: :string) => @ead_collection.id.to_s).each do |obj|
-        obj.generic_files.each do |file_obj|
-          file_obj.delete
-        end
-        obj.delete
-      end
-      @ead_collection = DRI::EncodedArchivalDescription.find(@ead_collection.id.to_s) #hmmm, have to do this before I delete otherwise I get a 404 error!
+      @ead_collection = DRI::EadCollection.find_by_alternate_id(@ead_collection.alternate_id) #hmmm, have to do this before I delete otherwise I get a 404 error!
       @ead_collection.delete
     end
   end

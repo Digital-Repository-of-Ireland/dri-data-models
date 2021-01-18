@@ -10,7 +10,7 @@ class GenericFileIndexer
     solr_doc = {}
 
     if resource.digital_object
-      solr_doc['isPartOf_ssim'] = [resource.digital_object.noid]
+      solr_doc['isPartOf_ssim'] = [resource.digital_object.alternate_id]
     end
 
     solr_doc.merge!(
