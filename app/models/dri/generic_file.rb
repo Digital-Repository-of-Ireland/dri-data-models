@@ -23,7 +23,7 @@ module DRI
 
     include DRI::Derivatives::ExtractMetadata
 
-    # one-to-one AF association to associate DRI::DigitalObject
+    # one-to-one association to associate DRI::DigitalObject
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true, autosave: true
 
     serialize :title

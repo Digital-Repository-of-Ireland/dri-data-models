@@ -421,7 +421,7 @@ describe 'QualifiedDublinCore' do
       @obj.title = ['sample']
       sleep 1
       expect { @obj.save }.to change {
-        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_identifier:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
 
@@ -429,7 +429,7 @@ describe 'QualifiedDublinCore' do
       @obj.save
       @obj.reload
       expect { @obj.save }.not_to change {
-        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_identifier:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
   end

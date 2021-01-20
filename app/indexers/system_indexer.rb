@@ -7,7 +7,8 @@ class SystemIndexer
 
   def to_solr
     {
-      alternate_identifier: resource.alternate_id,
+      id: resource.alternate_id,
+      alternate_id: resource.alternate_id,
       'active_fedora_model_ssi' => resource.class.to_s,
       'has_model_ssim' => resource.has_model,
       'internal_resource_ssim' => [resource.class.to_s],

@@ -15,7 +15,7 @@ class GenericFileIndexer
 
     solr_doc.merge!(
         {
-            'preservation_only_tesim' => resource.preservation_only,
+            'preservation_only_ssi' => resource.preservation_only,
             'file_size_isi' => [resource.file_size]
         }
     )

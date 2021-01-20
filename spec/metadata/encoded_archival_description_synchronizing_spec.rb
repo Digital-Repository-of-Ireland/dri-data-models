@@ -97,7 +97,7 @@ describe 'EncodedArchivalDescription' do
 
     title = "Fake Invitation"
     solr_query = "title_tesim:\"#{title.to_s}\""
-    new_obj = Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: solr_query, defType: "edismax", qf: "alternate_identifier,title" })['response']['docs']
+    new_obj = Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: solr_query, defType: "edismax", qf: "alternate_id,title" })['response']['docs']
     new_obj.length.should == 1
   end
 
