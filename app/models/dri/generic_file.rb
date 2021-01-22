@@ -40,12 +40,6 @@ module DRI
       object
     end
 
-    def self.find_or_create(pid)
-      DRI::GenericFile.find_by_alternate_id!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::GenericFile.create(alternate_id: pid)
-    end
-
     def declared_attached_files
       { 'characterization' => characterization }
     end

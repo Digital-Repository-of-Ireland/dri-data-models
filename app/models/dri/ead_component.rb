@@ -20,17 +20,6 @@ module DRI
       descMetadata.collection?
     end
 
-    # Retrieve an existing DRI::EncodedArchivalDescription object;
-    # creates a new one if object not found for a given PID
-    #
-    # @param [String] pid the object's PID
-    # @return [DRI::EncodedArchivalDescription] the retrieved object; new object if not found
-    def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::EadComponent.create(alternate_id: pid)
-    end
-
     def method_missing(method, *args)
       descMetadata.send(method, *args) if descMetadata.respond_to?(method)
     end

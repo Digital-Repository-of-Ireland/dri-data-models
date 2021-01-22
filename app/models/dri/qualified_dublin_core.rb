@@ -84,17 +84,6 @@ module DRI
       super(updated_props)
     end
 
-    # Retrieve an existing DRI::QualifiedDublinCore object;
-    # creates a new one if object not found for a given PID
-    #
-    # @param [String] pid the object's PID
-    # @return [DRI::QualifiedDublinCore] the retrieved object; new object if not found
-    def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::QualifiedDublinCore.create(alternate_id: pid)
-    end
-
     # Type attribute getter
     #
     # @return [Array<String>] the array of metadata type values

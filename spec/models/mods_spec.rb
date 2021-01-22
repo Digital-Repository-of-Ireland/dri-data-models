@@ -26,15 +26,8 @@ describe 'Mods' do
 
     it 'should find an existing object from fedora' do
       @mods_record.save
-      @collection = DRI::Mods.find_or_create(@mods_record.alternate_id)
+      @collection = DRI::Mods.find_by_alternate_id(@mods_record.alternate_id)
       expect(@collection.new_record?).to eq false
-    end
-
-    it 'should create a new object if there isnt an existing object for a given id' do
-      @mods_record.save
-      @collection = DRI::Mods.find_or_create('fake-mods-id')
-      expect(@collection.new_record?).to eq true
-      @collection.delete
     end
 
     it 'should be a kind of Base and Mods' do

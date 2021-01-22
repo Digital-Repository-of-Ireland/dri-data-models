@@ -25,7 +25,7 @@ describe 'QualifiedDublinCore' do
 
     after(:each) do
       unless @audio.new_record?
-        @audio.delete
+        @audio.destroy
       end
     end
 
@@ -45,13 +45,6 @@ describe 'QualifiedDublinCore' do
       expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::DigitalObject'])
     end
 
-
-    it 'should create a new object if there isnt an existing object for a given id' do
-      @audio2 = DRI::QualifiedDublinCore.find_or_create('fake-dc-id')
-      expect(@audio2.new_record?).to eq true
-      @audio2.delete
-    end
-
     it 'should load from xml' do
       @dc = fixture('audios/dublin_core_audio_sample1.xml')
       @ds = DRI::Metadata::QualifiedDublinCore.from_xml(@dc)
@@ -66,7 +59,7 @@ describe 'QualifiedDublinCore' do
       @audio.update_attributes(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
-      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.alternate_id)
+      @audio3 = DRI::QualifiedDublinCore.find_by_alternate_id(@audio.alternate_id)
       @audio3.title.should == @attributes_hash['title']
       @audio3.rights.should == @attributes_hash['rights']
       @audio3.description.should == @attributes_hash['description']
@@ -348,7 +341,7 @@ describe 'QualifiedDublinCore' do
     end
 
     after(:each) do
-      @obj.delete unless @obj.new_record?
+      @obj.destroy unless @obj.new_record?
     end
 
     it 'excludes DCMI Point, Box, Period metadata values from languages-based indices' do
@@ -421,7 +414,7 @@ describe 'QualifiedDublinCore' do
       @obj.title = ['sample']
       sleep 1
       expect { @obj.save }.to change {
-        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
 
@@ -429,7 +422,7 @@ describe 'QualifiedDublinCore' do
       @obj.save
       @obj.reload
       expect { @obj.save }.not_to change {
-        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
       }
     end
   end

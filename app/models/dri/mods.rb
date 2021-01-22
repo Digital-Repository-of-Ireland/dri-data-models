@@ -341,17 +341,6 @@ module DRI
       Nokogiri::XML(new_xml.to_xml)
     end
 
-    # Retrieve an existing DRI::Mods object;
-    # creates a new one if object not found for a given PID
-    #
-    # @param [String] pid the object's PID
-    # @return [DRI::Mods] the retrieved object; new object if not found
-    def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::Mods.create(alternate_id: pid)
-    end
-
     # For relationships display in the UI, creates Hash where the keys are
     # relationship names, which contain a displayable label and the model metadata field
     # for the given relationship

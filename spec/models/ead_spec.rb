@@ -22,20 +22,14 @@ describe 'EncodedArchivalDescription' do
 
     it 'should load the correct metadata class after retrieving object from fedora' do
       @ead_header.save
-      @collection = DRI::EadCollection.find_or_create(@ead_header.id)
+      @collection = DRI::EadCollection.find_by_alternate_id(@ead_header.alternate_id)
       expect(@collection.descMetadata.class).to eq DRI::Metadata::EncodedArchivalDescription
     end
 
     it 'should find an existing object from fedora' do
       @ead_header.save
-      @collection = DRI::EadCollection.find_or_create(@ead_header.alternate_id)
+      @collection = DRI::EadCollection.find_by_alternate_id(@ead_header.alternate_id)
       expect(@collection.new_record?).to eq false
-    end
-
-    it 'should create a new object if there is existing object for a given id' do
-      @ead_header.save
-      @collection = DRI::EadCollection.find_or_create('fake-ead-id')
-      expect(@collection.new_record?).to eq true
     end
 
     it 'should be a kind of Base and EncodedArchivalDescription' do

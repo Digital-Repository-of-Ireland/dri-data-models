@@ -8,7 +8,6 @@ class GenericFileIndexer
   def to_solr
     return {} unless resource.is_a?(::DRI::GenericFile)
     solr_doc = {}
-
     if resource.digital_object
       solr_doc['isPartOf_ssim'] = [resource.digital_object.alternate_id]
     end

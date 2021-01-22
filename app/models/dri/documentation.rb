@@ -96,17 +96,6 @@ module DRI
       descMetadata.resource_type = type
     end
 
-    # Retrieve an existing DRI::Documentation object;
-    # creates a new one if object not found for a given PID
-    #
-    # @param [String] pid the object's PID
-    # @return [DRI::Documentation] the retrieved object; new object if not found
-    def self.find_or_create(pid)
-      DRI::Identifier.retrieve_object!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::Documentation.create(alternate_id: pid)
-    end
-
     def load_attributes
     end
 

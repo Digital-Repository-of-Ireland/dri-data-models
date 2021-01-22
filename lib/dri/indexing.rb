@@ -4,7 +4,7 @@ module DRI
 
     included do
       before_create :assign_alternate_id
-      after_save    :update_index
+      after_commit  :update_index, on: [:create, :update]
       after_destroy :delete_from_solr
     end
 
@@ -39,11 +39,12 @@ module DRI
     end
 
     def new_record
-      @new_record ||= persisted?
+    #   @new_record ||= persisted?
+      @new_record ||= new_record?
     end
 
     def new_record=(is_new)
-      @new_record = is_new
+       @new_record = is_new
     end
 
     def to_solr

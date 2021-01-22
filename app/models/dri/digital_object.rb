@@ -72,17 +72,6 @@ module DRI
       object
     end
 
-    # Retrieves a digital object from fedora given its pid; creates
-    # a new object if object not found
-    #
-    # @param pid [String] the pid of the object to retrieve
-    # @return [DRI::Base] the digital object.
-    def self.find_or_create(pid)
-      DRI::DigitalObject.find_by_alternate_id!(pid)
-    rescue ActiveRecord::RecordNotFound
-      DRI::DigitalObject.create(alternate_id: pid)
-    end
-
     def set_model_version
       self.model_version ||= DriDataModels::VERSION if self.new_record?
     end

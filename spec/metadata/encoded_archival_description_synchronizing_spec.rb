@@ -91,7 +91,7 @@ describe 'EncodedArchivalDescription' do
 
   xit "should modify children's metadata if metadata specifies this" do
     # Load in the previously saved collection the new metadata (one component child has been added)
-    new_collection = DRI::EadCollection.find_or_create(@ead_collection.alternate_id)
+    new_collection = DRI::EadCollection.find_by_alternate_id(@ead_collection.alternate_id)
     new_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_modified_xml).to_xml, false)
     new_collection.save
 

@@ -33,16 +33,8 @@ describe 'Documentation' do
     @doc.update_attributes(@attributes_hash)
     @doc.documentation_for = @dc_obj
     @doc.save
-    @doc2 = DRI::Documentation.find_or_create(@doc.alternate_id)
+    @doc2 = DRI::Documentation.find_by_alternate_id(@doc.alternate_id)
     expect(@doc2.new_record?).to eq false
-  end
-
-  it 'should create a new object if there isnt an existing object for a given id' do
-    @doc.update_attributes(@attributes_hash)
-    @doc.save
-    @doc2 = DRI::Documentation.find_or_create('fake-doc-id')
-    expect(@doc2.new_record?).to eq true
-    @doc2.delete
   end
 
   it 'should retrieve an existing object' do
@@ -55,7 +47,7 @@ describe 'Documentation' do
     coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
 
     @doc.new_record?.should == false
-    @doc2 = DRI::Documentation.find_or_create(@doc.alternate_id)
+    @doc2 = DRI::Documentation.find_by_alternate_id(@doc.alternate_id)
     @doc2.title.should == @attributes_hash[:title]
     @doc2.rights.should == @attributes_hash[:rights]
     @doc2.description.should == @attributes_hash[:description]
