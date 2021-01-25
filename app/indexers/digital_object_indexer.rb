@@ -6,19 +6,21 @@ class DigitalObjectIndexer
   end
 
   def to_solr
-    return {} if resource.is_a?(::DRI::GenericFile)
+    return {} if resource.wrapped_object.is_a?(::DRI::GenericFile)
 
     {
-      'status_ssi' => resource.status,
-      'depositor_sim' => resource.depositor,
-      'depositor_ss' => resource.depositor,
-      'published_at_dttsi' => resource.published_at,
-      'metadata_checksum_ssi' => resource.metadata_checksum,
-      'depositing_institute_ssi' => resource.depositing_institute,
-      'institute_tesim' => resource.institute,
-      'institute_sim' => resource.institute,
-      'doi_ss' => resource.doi,
-      'cover_image_ss' => resource.cover_image
+      'status_ssi' => resource.wrapped_object.status,
+      'depositor_sim' => resource.wrapped_object.depositor,
+      'depositor_ss' => resource.wrapped_object.depositor,
+      'published_at_dttsi' => resource.wrapped_object.published_at,
+      'metadata_checksum_ssi' => resource.wrapped_object.metadata_checksum,
+      'depositing_institute_ssi' => resource.wrapped_object.depositing_institute,
+      'institute_tesim' => resource.wrapped_object.institute,
+      'institute_sim' => resource.wrapped_object.institute,
+      'doi_ss' => resource.wrapped_object.doi,
+      'cover_image_ss' => resource.wrapped_object.cover_image,
+      'licence_sim' => resource.wrapped_object.licence,
+      'licence_tesim' => resource.wrapped_object.licence
     }
   end
 end

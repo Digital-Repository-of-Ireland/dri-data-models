@@ -7,9 +7,9 @@ class AttachedFilesIndexer
 
   def to_solr
     solr_doc = {}
-    return solr_doc if resource.attached_files.blank?
+    return solr_doc if resource.wrapped_object.attached_files.blank?
 
-    resource.declared_attached_files.each do |name, file|
+    resource.wrapped_object.declared_attached_files.each do |name, file|
       solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
     end
 

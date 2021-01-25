@@ -12,8 +12,8 @@ class CollectionIndexer
     ancestor_titles = []
     ancestor_ids = []
 
-    return solr_doc unless resource.respond_to?(:governing_collection)
-    curr_gov_collection = resource.governing_collection
+    return solr_doc unless resource.wrapped_object.respond_to?(:governing_collection)
+    curr_gov_collection = resource.wrapped_object.governing_collection
 
     until curr_gov_collection.nil?
       ancestor_titles << curr_gov_collection.title[0]
@@ -25,9 +25,9 @@ class CollectionIndexer
       # This must be a root collection
       solr_doc.merge!(
         {
-          'root_collection_sim' => [resource.title.first],
-          'root_collection_tesim' => [resource.title.first],
-          'root_collection_id_ssi' => resource.alternate_id,
+          'root_collection_sim' => [resource.wrapped_object.title.first],
+          'root_collection_tesim' => [resource.wrapped_object.title.first],
+          'root_collection_id_ssi' => resource.wrapped_object.alternate_id,
         }
       )
     else
@@ -51,21 +51,21 @@ class CollectionIndexer
       )
     end
 
-    unless resource.governing_collection.nil?
-      solr_doc['isGovernedBy_ssim'] = [resource.governing_collection.alternate_id]
+    unless resource.wrapped_object.governing_collection.nil?
+      solr_doc['isGovernedBy_ssim'] = [resource.wrapped_object.governing_collection.alternate_id]
     end
 
-    unless resource.collection_relatives.blank?
-      solr_doc['isMemberOf_ssim'] = resource.collection_relatives.map(&:alternate_id)
+    unless resource.wrapped_object.collection_relatives.blank?
+      solr_doc['isMemberOf_ssim'] = resource.wrapped_object.collection_relatives.map(&:alternate_id)
     end
 
-    if !resource.previous_sibling.blank?
-      solr_doc["#{DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment}_ssim"] = [resource.previous_sibling.alternate_id]
-    elsif resource.is_a?(DRI::EadComponent)
+    if !resource.wrapped_object.previous_sibling.blank?
+      solr_doc["#{DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment}_ssim"] = [resource.wrapped_object.previous_sibling.alternate_id]
+    elsif resource.wrapped_object.is_a?(DRI::EadComponent)
       solr_doc['is_first_sibling_isi'] = 1
     end
 
-    solr_doc['is_collection_ssi'] = resource.collection?
+    solr_doc['is_collection_ssi'] = resource.wrapped_object.collection?
 
     solr_doc
   end

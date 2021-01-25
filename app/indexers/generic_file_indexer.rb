@@ -6,36 +6,36 @@ class GenericFileIndexer
   end
 
   def to_solr
-    return {} unless resource.is_a?(::DRI::GenericFile)
+    return {} unless resource.wrapped_object.is_a?(::DRI::GenericFile)
     solr_doc = {}
-    if resource.digital_object
-      solr_doc['isPartOf_ssim'] = [resource.digital_object.alternate_id]
+    if resource.wrapped_object.digital_object
+      solr_doc['isPartOf_ssim'] = [resource.wrapped_object.digital_object.alternate_id]
     end
 
     solr_doc.merge!(
         {
-            'preservation_only_ssi' => resource.preservation_only,
-            'file_size_isi' => [resource.file_size]
+            'preservation_only_ssi' => resource.wrapped_object.preservation_only,
+            'file_size_isi' => [resource.wrapped_object.file_size]
         }
     )
-    solr_doc['width_isi'] = [resource.width[0].to_i] unless resource.width.empty?
-    solr_doc['height_isi'] = [resource.height[0].to_i] unless resource.height.empty?
+    solr_doc['width_isi'] = [resource.wrapped_object.width[0].to_i] unless resource.wrapped_object.width.empty?
+    solr_doc['height_isi'] = [resource.wrapped_object.height[0].to_i] unless resource.wrapped_object.height.empty?
 
-    unless resource.width.empty? || resource.height.empty?
-      solr_doc['area_isi'] = [resource.width[0].to_i * resource.height[0].to_i]
+    unless resource.wrapped_object.width.empty? || resource.wrapped_object.height.empty?
+      solr_doc['area_isi'] = [resource.wrapped_object.width[0].to_i * resource.wrapped_object.height[0].to_i]
     end
 
-    solr_doc['duration_isi'] = [resource.milliseconds[0]] unless resource.milliseconds.empty?
-    solr_doc['channels_isi'] = [resource.channels[0]] unless resource.channels.empty?
-    solr_doc['sample_rate_isi'] = [resource.sample_rate[0].to_i] unless resource.sample_rate.empty?
-    solr_doc['mime_type_tesim'] = resource.mime_type unless resource.mime_type.empty?
+    solr_doc['duration_isi'] = [resource.wrapped_object.milliseconds[0]] unless resource.wrapped_object.milliseconds.empty?
+    solr_doc['channels_isi'] = [resource.wrapped_object.channels[0]] unless resource.wrapped_object.channels.empty?
+    solr_doc['sample_rate_isi'] = [resource.wrapped_object.sample_rate[0].to_i] unless resource.wrapped_object.sample_rate.empty?
+    solr_doc['mime_type_tesim'] = resource.wrapped_object.mime_type unless resource.wrapped_object.mime_type.empty?
 
     file_type = []
-    file_type.push('audio') if resource.audio?
-    file_type.push('video') if resource.video?
-    file_type.push('image') if resource.image?
-    file_type.push('text') if resource.text?
-    file_type.push('3d') if resource.threeD?
+    file_type.push('audio') if resource.wrapped_object.audio?
+    file_type.push('video') if resource.wrapped_object.video?
+    file_type.push('image') if resource.wrapped_object.image?
+    file_type.push('text') if resource.wrapped_object.text?
+    file_type.push('3d') if resource.wrapped_object.threeD?
 
     unless file_type.empty?
       solr_doc.merge!(
@@ -46,9 +46,9 @@ class GenericFileIndexer
       )
     end
 
-    solr_doc['label_tesim'] = resource.label
-    solr_doc['file_format_tesim'] = resource.file_format
-    solr_doc['file_format_sim'] = resource.file_format
+    solr_doc['label_tesim'] = resource.wrapped_object.label
+    solr_doc['file_format_tesim'] = resource.wrapped_object.file_format
+    solr_doc['file_format_sim'] = resource.wrapped_object.file_format
     #solr_doc['all_text_timv'] = full_text.content
 
     solr_doc

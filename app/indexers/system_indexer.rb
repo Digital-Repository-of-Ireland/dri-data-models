@@ -8,11 +8,10 @@ class SystemIndexer
   def to_solr
     {
       id: resource.alternate_id,
-      resource_id_isi: resource.id,
+      resource_id_isi: resource.wrapped_object.id,
       alternate_id: resource.alternate_id,
-      'active_fedora_model_ssi' => resource.class.to_s,
-      'has_model_ssim' => resource.has_model,
-      'internal_resource_ssim' => [resource.class.to_s],
+      'active_fedora_model_ssi' => resource.wrapped_object.class.to_s,
+      'has_model_ssim' => resource.wrapped_object.has_model,
       'system_create_dtsi' => c_time,
       'system_modified_dtsi' => m_time
     }

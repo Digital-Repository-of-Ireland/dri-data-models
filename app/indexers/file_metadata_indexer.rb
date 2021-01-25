@@ -7,14 +7,14 @@ class FileMetadataIndexer
 
   def to_solr
     solr_doc = {}
-    return solr_doc unless resource.respond_to?(:generic_files)
+    return solr_doc unless resource.wrapped_object.respond_to?(:generic_files)
 
-    if resource.collection?
+    if resource.wrapped_object.collection?
       file_type =  ['collection']
       file_type_display = ['Collection']
 
-      file_type_display = if resource.is_a?(DRI::EadCollection) && !resource.root_collection? && !resource.ead_level.blank?
-                            [resource.ead_level.first.strip.capitalize]
+      file_type_display = if resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && !resource.wrapped_object.ead_level.blank?
+                            [resource.wrapped_object.ead_level.first.strip.capitalize]
                           else
                             ['Collection']
                           end
@@ -26,7 +26,7 @@ class FileMetadataIndexer
                  }
     end
 
-    solr_doc.merge!(index_file_metadata) if resource.generic_files.count > 0
+    solr_doc.merge!(index_file_metadata) if resource.wrapped_object.generic_files.count > 0
 
     unless solr_doc.key?('file_type_tesim')
       solr_doc.merge!(file_type_from_metadata)
@@ -52,10 +52,10 @@ class FileMetadataIndexer
     sample_rate = []
     file_format = []
 
-    resource.generic_files.each do |generic_file|
+    resource.wrapped_object.generic_files.each do |generic_file|
       gf = generic_file.to_solr
       file_count += 1
-      if !resource.collection? && gf.key?('file_type_tesim')
+      if !resource.wrapped_object.collection? && gf.key?('file_type_tesim')
         file_type |= [gf['file_type_tesim'][0]]
         file_type_display |= [gf['file_type_tesim'][0].capitalize]
       end
@@ -140,7 +140,7 @@ class FileMetadataIndexer
       'mime_type_sim' => mime_type,
       'file_format_tesim' => file_format,
       'file_format_sim' => file_format,
-      'file_count_isi' => [file_count]
+      'file_count_isi' => file_count
     })
   end
 
@@ -150,7 +150,7 @@ class FileMetadataIndexer
     file_type = []
     file_type_display = []
 
-    resource.type.each do |value|
+    resource.wrapped_object.type.each do |value|
       next unless DRI::Vocabulary.dcmi_type.include?(value.capitalize)
       file_type.push(value)
       file_type_display.push(value.capitalize)
