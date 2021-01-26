@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateGenericFiles < ActiveRecord::Migration[4.2]
   def change
     create_table :dri_generic_files do |t|

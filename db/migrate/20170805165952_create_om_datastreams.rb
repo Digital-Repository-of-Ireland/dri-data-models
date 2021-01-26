@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateOmDatastreams < ActiveRecord::Migration[4.2]
   def change
     create_table :dri_om_datastreams do |t|

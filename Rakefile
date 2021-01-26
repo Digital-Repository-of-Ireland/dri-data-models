@@ -1,6 +1,8 @@
 #!/usr/bin/env rake
+# frozen_string_literal: true
 require 'rspec/core/rake_task'
 require 'yard'
+require 'rubocop/rake_task'
 require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
@@ -29,6 +31,12 @@ load 'rails/tasks/engine.rake'
 
 require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
+
+desc 'Run RuboCop style checker'
+RuboCop::RakeTask.new(:rubocop) do |task|
+  task.requires << 'rubocop-rspec'
+  task.fail_on_error = true
+end
 
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'

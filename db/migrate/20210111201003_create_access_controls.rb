@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateAccessControls < ActiveRecord::Migration[5.2]
   def change
     create_table :dri_access_controls do |t|

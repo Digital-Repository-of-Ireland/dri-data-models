@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CreateDigitalObjects < ActiveRecord::Migration[4.2]
   def change
     create_table :dri_digital_objects do |t|

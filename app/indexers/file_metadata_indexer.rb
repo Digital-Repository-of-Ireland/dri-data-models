@@ -10,30 +10,27 @@ class FileMetadataIndexer
     return solr_doc unless resource.wrapped_object.respond_to?(:generic_files)
 
     if resource.wrapped_object.collection?
-      file_type =  ['collection']
-      file_type_display = ['Collection']
-
-      file_type_display = if resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && !resource.wrapped_object.ead_level.blank?
+      file_type = ['collection']
+      file_type_display = if ead_level?
                             [resource.wrapped_object.ead_level.first.strip.capitalize]
                           else
                             ['Collection']
                           end
       solr_doc = {
-                   'file_type_tesim' => file_type,
-                   'file_type_sim' => file_type,
-                   'file_type_display_tesim' => file_type_display,
-                   'file_type_display_sim' => file_type_display
-                 }
+        'file_type_tesim' => file_type,
+        'file_type_sim' => file_type,
+        'file_type_display_tesim' => file_type_display,
+        'file_type_display_sim' => file_type_display
+      }
     end
 
-    solr_doc.merge!(index_file_metadata) if resource.wrapped_object.generic_files.count > 0
-
-    unless solr_doc.key?('file_type_tesim')
-      solr_doc.merge!(file_type_from_metadata)
-    end
+    solr_doc.merge!(index_file_metadata) if resource.wrapped_object.generic_files.count.positive?
+    solr_doc.merge!(file_type_from_metadata) unless solr_doc.key?('file_type_tesim')
 
     solr_doc
   end
+
+  private
 
   def index_file_metadata
     file_type = []
@@ -55,28 +52,20 @@ class FileMetadataIndexer
     resource.wrapped_object.generic_files.each do |generic_file|
       gf = generic_file.to_solr
       file_count += 1
+
       if !resource.wrapped_object.collection? && gf.key?('file_type_tesim')
         file_type |= [gf['file_type_tesim'][0]]
         file_type_display |= [gf['file_type_tesim'][0].capitalize]
       end
-      if gf.key?('width_isi')
-        width |= [gf['width_isi']]
-      end
-      if gf.key?('height_isi')
-        height |= [gf['height_isi']]
-      end
-      if gf.key?('area_isi')
-        area |= [gf['area_ssi']]
-      end
-      if gf.key?('channels_isi')
-        channels |= [gf['channels_isi']]
-      end
-      if gf.key?('bit_depth_isi')
-        bit_depth |= [gf['bit_depth_isi']]
-      end
-      if gf.key?('sample_rate_isi')
-        sample_rate |= [gf['sample_rate_isi']]
-      end
+
+      width |= [gf['width_isi']] if gf.key?('width_isi')
+      height |= [gf['height_isi']] if gf.key?('height_isi')
+      area |= [gf['area_ssi']] if gf.key?('area_isi')
+      channels |= [gf['channels_isi']] if gf.key?('channels_isi')
+      bit_depth |= [gf['bit_depth_isi']] if gf.key?('bit_depth_isi')
+      sample_rate |= [gf['sample_rate_isi']] if gf.key?('sample_rate_isi')
+      mime_type |= gf['mime_type_tesim'] if gf.key?('mime_type_tesim')
+
       if gf.key?('duration_isi')
         duration_total = 0 if duration_total.nil?
         duration_total += gf['duration_isi']
@@ -87,9 +76,7 @@ class FileMetadataIndexer
         file_size_total += gf['file_size_isi'].first
         file_size |= gf['file_size_isi']
       end
-      if gf.key?('mime_type_tesim')
-        mime_type |= gf['mime_type_tesim']
-      end
+
       if gf.key?('file_format_tesim')
         file_format |= [gf['file_format_tesim']] unless gf['file_format_tesim'].nil?
       end
@@ -111,37 +98,45 @@ class FileMetadataIndexer
     }
 
     unless duration_total.nil?
-      file_metadata.merge!({
-        'duration_total_isi' => [duration_total],
-        'duration_tesim' => duration,
-        'duration_sim' => duration
-      })
+      file_metadata.merge!(
+        {
+          'duration_total_isi' => [duration_total],
+          'duration_tesim' => duration,
+          'duration_sim' => duration
+        }
+      )
     end
 
     unless file_size_total.nil?
-      file_metadata.merge!({
-        'file_size_total_isi' => file_size_total,
-        'file_size_isim' => file_size,
-        'file_size_sim' => file_size
-      })
+      file_metadata.merge!(
+        {
+          'file_size_total_isi' => file_size_total,
+          'file_size_isim' => file_size,
+          'file_size_sim' => file_size
+        }
+      )
     end
 
     unless file_type.empty?
-      file_metadata.merge!({
-        'file_type_tesim' => file_type,
-        'file_type_sim' => file_type,
-        'file_type_display_tesim' => file_type_display,
-        'file_type_display_sim' => file_type_display
-      })
+      file_metadata.merge!(
+        {
+          'file_type_tesim' => file_type,
+          'file_type_sim' => file_type,
+          'file_type_display_tesim' => file_type_display,
+          'file_type_display_sim' => file_type_display
+        }
+      )
     end
 
-    file_metadata.merge({
-      'mime_type_tesim' => mime_type,
-      'mime_type_sim' => mime_type,
-      'file_format_tesim' => file_format,
-      'file_format_sim' => file_format,
-      'file_count_isi' => file_count
-    })
+    file_metadata.merge(
+      {
+        'mime_type_tesim' => mime_type,
+        'mime_type_sim' => mime_type,
+        'file_format_tesim' => file_format,
+        'file_format_sim' => file_format,
+        'file_count_isi' => file_count
+      }
+    )
   end
 
   def file_type_from_metadata
@@ -168,5 +163,9 @@ class FileMetadataIndexer
       'file_type_display_tesim' => file_type_display,
       'file_type_display_sim' => file_type_display
     }
+  end
+
+  def ead_level?
+    resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
   end
 end

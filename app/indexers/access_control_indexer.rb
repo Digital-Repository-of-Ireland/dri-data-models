@@ -7,11 +7,10 @@ class AccessControlIndexer
 
   def to_solr
     return {} unless resource.wrapped_object.respond_to?(:access_control)
-
-	  solr_doc = {}
+    solr_doc = {}
 
     solr_doc['master_file_access_ssi'] = resource.wrapped_object.master_file_access if resource.wrapped_object.respond_to?(:master_file_access)
-    %w(discover read edit manager).each do |permission|
+    %w[discover read edit manager].each do |permission|
       solr_doc.merge!(
         {
           "#{permission}_access_group_ssim" => resource.wrapped_object.access_control.permission_array("#{permission}_groups"),

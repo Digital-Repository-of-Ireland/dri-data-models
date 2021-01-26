@@ -1,4 +1,4 @@
- # frozen_string_literal: true
+# frozen_string_literal: true
 class DocumentationIndexer
   attr_reader :resource
   def initialize(resource:)
