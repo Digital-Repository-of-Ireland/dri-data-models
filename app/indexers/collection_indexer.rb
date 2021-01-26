@@ -12,7 +12,7 @@ class CollectionIndexer
 
     ancestor_ids_and_titles = ancestor_collections
     solr_doc = ancestor_ids_and_titles.empty? ? root_collection_fields : sub_collection_fields(ancestor_ids_and_titles)
-    solr_doc['isGovernedBy_ssim'] = governing_collection_id unless resource.wrapped_object.governing_collection.nil?
+    solr_doc['isGovernedBy_ssim'] = [governing_collection_id] unless resource.wrapped_object.governing_collection.nil?
     solr_doc['isMemberOf_ssim'] = collection_relatives_ids if resource.wrapped_object.collection_relatives.present?
 
     siblings = sibling_fields
