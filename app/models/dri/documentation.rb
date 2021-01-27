@@ -96,9 +96,6 @@ module DRI
       descMetadata.resource_type = type
     end
 
-    def load_attributes
-    end
-
     # Override from DRI::ModelSupport::Base
     # Documentation does not inherit from DRI::Metadata::Base
     # Perform additional DRI validations before saving the object

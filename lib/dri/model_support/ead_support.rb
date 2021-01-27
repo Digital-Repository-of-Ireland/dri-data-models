@@ -9,11 +9,8 @@ module DRI
       included do
         around_save :ingest_files_if_changed # callback for generating EAD Generic Files from ead:dao links
 
-        attr_accessor :desc_metadata_class
         attr_accessor :trigger_ingest
         attr_accessor :trigger_update
-
-        after_initialize :load_attributes
 
         # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading objects
         # load_attributes changes the descMetadata datastream to load the right metadata class
@@ -55,14 +52,10 @@ module DRI
           new_child.update_metadata metadata_children[metadata_child_index].to_xml
           new_child.previous_sibling = prev_obj unless prev_obj.nil?
           new_child.governing_collection = self
-          # Add depositor, status and permissions from parent
+          # Add depositor and status from parent
           new_child.depositor = depositor
           new_child.status = status
-          # Copy permissions from parent
-          new_child.read_groups_string = read_groups_string
-          new_child.edit_groups_string = edit_groups_string
-          new_child.manager_groups_string = manager_groups_string
-          new_child.manager_users_string = manager_users_string
+
           # ingest_files_from_metadata
           new_child.ingest_files_from_metadata = ingest_files_from_metadata
           DRI::Utils.checksum_metadata(new_child)
@@ -102,14 +95,10 @@ module DRI
 
       # Create associated generic file from a given URL
       def process_ingest_of_file_urls
-        case descMetadata
-        when DRI::Metadata::EncodedArchivalDescription
-        when DRI::Metadata::EncodedArchivalDescriptionComponent
+       if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
           dao_href_proxy.each do |url|
             add_file_from_url(url.strip) unless url.blank?
           end
-        else # Do nothing
-          return
         end
       end # process_ingest_of_file_urls
 
@@ -119,7 +108,6 @@ module DRI
       def add_file_from_url(file_url)
         file_name = File.basename(URI(file_url).path)
         begin
-
           # We have a copy of the remote file for processing
           temp_file = Tempfile.new(['tmp', File.extname(file_url)])
           temp_file.binmode
@@ -198,54 +186,6 @@ module DRI
         result
       end # metadata_class_from_xml
 
-      def load_attributes
-        ead_classes = %w(DRI::Metadata::EncodedArchivalDescription
-                         DRI::Metadata::EncodedArchivalDescriptionComponent)
-        ds = nil
-
-        if new_record? && !desc_metadata_class.nil?
-          # For new objects, check what metadata class was asked for during initialization
-          ds_class = @desc_metadata_class.to_s
-
-          if ead_classes.include? ds_class
-            ds = ds_class.constantize.new
-          else
-            # Load class from :desc_metadata_class which is set ingest_controller
-            if ead_classes.include? desc_metadata_class
-              ds = desc_metadata_class.constantize.new
-            else
-              # if NOT EAD or EADComponent, do not create DS
-              return
-            end
-          end
-        end
-
-        return if ds.nil?
-
-        ds.instance_variable_set(:@dsid, :descMetadata)
-        attach_file(ds, 'descMetadata')
-      end # load_attributes
-
-      def load_attached_files
-        super
-
-        attach_desc_metadata
-      end
-
-      def attach_desc_metadata
-        ds_class = metadata_class_from_xml(descMetadata.to_xml)
-
-        return unless %w(DRI::Metadata::EncodedArchivalDescription
-                         DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
-
-        old_digital_object = descMetadata.uri
-        ds = ds_class.constantize.from_xml(descMetadata.to_xml)
-        ds.uri = old_digital_object
-
-        ds.instance_variable_set(:@dsid, :descMetadata)
-        attached_files[:descMetadata] = ds
-      end
-
       # Returns an array of children EAD components
       # @param metadata [Nokogiri::XML] EAD component XML metadata
       # @return [Array<Nokogiri::XML::NodeSet>] Array of children EAD components
@@ -261,7 +201,7 @@ module DRI
       end
 
       # Checks whether the passed object is a duplicate
-      # @param object [DRI::Base] the object to check
+      # @param object [DRI::DigitalObject] the object to check
       # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
         return false unless object.governing_collection.present?

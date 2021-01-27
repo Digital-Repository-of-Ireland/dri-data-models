@@ -131,12 +131,12 @@
                   <origination label="Creator:">
                     <persname role="Institution" encodinganalog="3.2.1">Kilkenny Design Workshops</persname>
                   </origination>
-                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_r.jpg" actuate="onRequest" show="new">
+                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_r.jpg" actuate="onrequest" show="new">
                     <daodesc>
                       <p>Invitation to Kilkenny Design Workshops 1984 retrospective exhibition </p>
                     </daodesc>
                   </dao>
-                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_v.jpg" actuate="onRequest" show="new">
+                  <dao href="http://www.nival.ie/uploads/tx_frarchivaldescription/KDW_Eph_1984_invite_v.jpg" actuate="onrequest" show="new">
                     <daodesc>
                       <p>Invitation to Kilkenny Design Workshops 1984 retrospective exhibition </p>
                     </daodesc>
