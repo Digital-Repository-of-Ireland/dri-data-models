@@ -12,12 +12,8 @@ class GenericFileIndexer
       solr_doc['isPartOf_ssim'] = [resource.wrapped_object.digital_object.alternate_id]
     end
 
-    solr_doc.merge!(
-        {
-            'preservation_only_ssi' => resource.wrapped_object.preservation_only,
-            'file_size_isi' => [resource.wrapped_object.file_size]
-        }
-    )
+    solr_doc['preservation_only_ssi'] = resource.wrapped_object.preservation_only
+    solr_doc['file_size_isi'] = [resource.wrapped_object.file_size]
     solr_doc['width_isi'] = [resource.wrapped_object.width[0].to_i] unless resource.wrapped_object.width.empty?
     solr_doc['height_isi'] = [resource.wrapped_object.height[0].to_i] unless resource.wrapped_object.height.empty?
 
@@ -37,19 +33,15 @@ class GenericFileIndexer
     file_type.push('text') if resource.wrapped_object.text?
     file_type.push('3d') if resource.wrapped_object.threeD?
 
-    unless file_type.empty?
-      solr_doc.merge!(
-        {
-            'file_type_tesim' => file_type,
-            'file_type_sim' => file_type
-        }
-      )
+    if file_type.present?
+      solr_doc['file_type_tesim'] = file_type
+      solr_doc['file_type_sim'] = file_type
     end
 
     solr_doc['label_tesim'] = resource.wrapped_object.label
     solr_doc['file_format_tesim'] = resource.wrapped_object.file_format
     solr_doc['file_format_sim'] = resource.wrapped_object.file_format
-    #solr_doc['all_text_timv'] = full_text.content
+    # solr_doc['all_text_timv'] = full_text.content
 
     solr_doc
   end

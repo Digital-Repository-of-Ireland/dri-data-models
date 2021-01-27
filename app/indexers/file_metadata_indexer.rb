@@ -6,23 +6,9 @@ class FileMetadataIndexer
   end
 
   def to_solr
-    solr_doc = {}
-    return solr_doc unless resource.wrapped_object.respond_to?(:generic_files)
+    return {} unless resource.wrapped_object.respond_to?(:generic_files)
 
-    if resource.wrapped_object.collection?
-      file_type = ['collection']
-      file_type_display = if ead_level?
-                            [resource.wrapped_object.ead_level.first.strip.capitalize]
-                          else
-                            ['Collection']
-                          end
-      solr_doc = {
-        'file_type_tesim' => file_type,
-        'file_type_sim' => file_type,
-        'file_type_display_tesim' => file_type_display,
-        'file_type_display_sim' => file_type_display
-      }
-    end
+    solr_doc = collection_file_types
 
     solr_doc.merge!(index_file_metadata) if resource.wrapped_object.generic_files.count.positive?
     solr_doc.merge!(file_type_from_metadata) unless solr_doc.key?('file_type_tesim')
@@ -31,6 +17,28 @@ class FileMetadataIndexer
   end
 
   private
+
+  def collection_file_types
+    return {} unless resource.wrapped_object.collection?
+
+    file_type = ['collection']
+    file_type_display = if ead_level?
+                          [resource.wrapped_object.ead_level.first.strip.capitalize]
+                        else
+                          ['Collection']
+                        end
+
+    file_type_fields(file_type, file_type_display)
+  end
+
+  def file_type_fields(file_type, file_type_display)
+    {
+      'file_type_tesim' => file_type,
+      'file_type_sim' => file_type,
+      'file_type_display_tesim' => file_type_display,
+      'file_type_display_sim' => file_type_display
+    }
+  end
 
   def index_file_metadata
     file_type = []
@@ -117,16 +125,8 @@ class FileMetadataIndexer
       )
     end
 
-    unless file_type.empty?
-      file_metadata.merge!(
-        {
-          'file_type_tesim' => file_type,
-          'file_type_sim' => file_type,
-          'file_type_display_tesim' => file_type_display,
-          'file_type_display_sim' => file_type_display
-        }
-      )
-    end
+
+    file_metadata.merge!(file_type_fields(file_type, file_type_display)) unless file_type.empty?
 
     file_metadata.merge(
       {
@@ -157,12 +157,7 @@ class FileMetadataIndexer
       file_type_display.push 'Unknown'
     end
 
-    {
-      'file_type_tesim' => file_type,
-      'file_type_sim' => file_type,
-      'file_type_display_tesim' => file_type_display,
-      'file_type_display_sim' => file_type_display
-    }
+    file_type_fields(file_type, file_type_display)
   end
 
   def ead_level?

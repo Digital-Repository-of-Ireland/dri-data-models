@@ -6,7 +6,7 @@ class RightsIndexer
   end
 
   def to_solr
-	  return {} unless resource.wrapped_object.respond_to?(:rights) && resource.wrapped_object.rights.empty?
+    return {} unless resource.wrapped_object.respond_to?(:rights) && resource.wrapped_object.rights.empty?
 
     { 'rights_tesim' => ['No rights statement'] }
   end

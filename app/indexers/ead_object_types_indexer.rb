@@ -12,32 +12,34 @@ class EadObjectTypesIndexer
     # Add title metadata from parent collections
     object_types = []
     resource.wrapped_object.resource_type.each do |curr_category|
-      object_types.push(curr_category.split.map(&:capitalize) * ' ') unless curr_category.blank?
+      object_types.push(curr_category.split.map(&:capitalize) * ' ') if curr_category.present?
     end
 
-    if object_types.empty?
-      case resource.wrapped_object.class.to_s
-      when "DRI::EadComponent"
-        object_types.push('Collection') if resource.wrapped_object.collection?
-        if resource.wrapped_object.ead_level.include? 'otherlevel'
-          object_types.push(resource.wrapped_object.ead_level_other.split.map(&:capitalize) * ' ')
-        else
-          object_types.push(resource.wrapped_object.ead_level.split.map(&:capitalize) * ' ')
-        end
-      when "DRI::EadCollection"
-        object_types.push('Collection')
-      end
-    end
+    object_types = object_types_from_class if object_types.empty?
+    object_types.push('Unknown') if object_types.empty?
 
-    object_types.push('Unknown') if object_types.count < 1
-
-    solr_doc.merge!(
-      {
-        'object_type_sim' => object_types,
-        'object_type_ssm' => object_types
-      }
-    )
+    solr_doc['object_type_sim'] = object_types
+    solr_doc['object_type_ssm'] = object_types
 
     solr_doc
+  end
+
+  private
+
+  def object_types_from_class
+    object_types = []
+    case resource.wrapped_object.class.to_s
+    when "DRI::EadComponent"
+      object_types.push('Collection') if resource.wrapped_object.collection?
+      if resource.wrapped_object.ead_level.include? 'otherlevel'
+        object_types.push(resource.wrapped_object.ead_level_other.split.map(&:capitalize) * ' ')
+      else
+        object_types.push(resource.wrapped_object.ead_level.split.map(&:capitalize) * ' ')
+      end
+    when "DRI::EadCollection"
+      object_types.push('Collection')
+    end
+
+    object_types
   end
 end

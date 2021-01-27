@@ -7,7 +7,6 @@ class DigitalObjectIndexer
 
   def to_solr
     return {} if resource.wrapped_object.is_a?(::DRI::GenericFile)
-
     {
       'status_ssi' => resource.wrapped_object.status,
       'depositor_sim' => resource.wrapped_object.depositor,
