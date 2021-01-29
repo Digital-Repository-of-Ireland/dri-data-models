@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Implements a resque job to handle the update/synchronisation
 # of EAD parent components metadata when updating child component
 class UpdateParentMetadataJob < IdBasedJob

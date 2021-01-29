@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'noid-rails'
 
 module DRI
@@ -16,8 +17,8 @@ module DRI
 
     private
 
-      def service
-        @service ||= ::Noid::Rails::Service.new
-      end
+    def service
+      @service ||= ::Noid::Rails::Service.new
+    end
   end
 end

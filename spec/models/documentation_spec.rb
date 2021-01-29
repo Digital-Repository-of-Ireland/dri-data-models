@@ -26,7 +26,7 @@ describe 'Documentation' do
   end
 
   it 'should have asserted the content model' do
-    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::DigitalObject'])
+    expect(@doc.model_types.to_a).to match_array(['DRI::Documentation', 'DRI::DigitalObject'])
   end
 
   it 'should find an existing object' do

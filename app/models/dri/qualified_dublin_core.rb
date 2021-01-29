@@ -8,42 +8,45 @@ module DRI
     # Contributor, Date, Type, Format, Identifier, Source,
     # Language, Relation, Coverage, Rights
     # All DC elements added to the DM - Simple DC Ingest form
-    delegate :date,:date=, to: :descMetadata
-    delegate :relation,:relation=, to: :descMetadata
-    delegate :external_relation,:external_relation=, to: :descMetadata
-    delegate :source,:source=, to: :descMetadata
-    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
-    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
-    delegate :name_coverage,:name_coverage=, to: :descMetadata
-    delegate :resource_type,:resource_type=, to: :descMetadata
-    delegate :format,:format=, to: :descMetadata
-    delegate :coverage,:coverage=, to: :descMetadata
-    delegate :identifier,:identifier=, to: :descMetadata
-    delegate :resource_type,:resource_type=, to: :descMetadata
+    delegate :date, :date=, to: :descMetadata
+    delegate :relation, :relation=, to: :descMetadata
+    delegate :external_relation, :external_relation=, to: :descMetadata
+    delegate :source, :source=, to: :descMetadata
+    delegate :geographical_coverage, :geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage, :temporal_coverage=, to: :descMetadata
+    delegate :name_coverage, :name_coverage=, to: :descMetadata
+    delegate :resource_type, :resource_type=, to: :descMetadata
+    delegate :format, :format=, to: :descMetadata
+    delegate :coverage, :coverage=, to: :descMetadata
+    delegate :identifier, :identifier=, to: :descMetadata
+    delegate :resource_type, :resource_type=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
     delegate :id_asset=, to: :descMetadata
-    delegate :qdc_id,:qdc_id=, to: :descMetadata
-    delegate :geocode_point,:geocode_point=, to: :descMetadata
-    delegate :geocode_box,:geocode_box=, to: :descMetadata
+    delegate :qdc_id, :qdc_id=, to: :descMetadata
+    delegate :geocode_point, :geocode_point=, to: :descMetadata
+    delegate :geocode_box, :geocode_box=, to: :descMetadata
 
-    delegate :published_date,:published_date=, to: :descMetadata
-    delegate :creation_date,:creation_date=, to: :descMetadata
+    delegate :published_date, :published_date=, to: :descMetadata
+    delegate :creation_date, :creation_date=, to: :descMetadata
 
-    delegate :published_date,:published_date=, to: :descMetadata
-    delegate :creation_date,:creation_date=, to: :descMetadata
+    delegate :published_date, :published_date=, to: :descMetadata
+    delegate :creation_date, :creation_date=, to: :descMetadata
     class_eval do
       # Dynamically populate the marcrelator code model attributes
       # e.g. role_cre (creator), role_ctb (contributor), ...
-      DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
-                                                       to: :descMetadata}
+      DRI::Vocabulary.marc_relators.map do |s|
+        delegate s.prepend('role_').to_sym, s.concat('=').to_sym, to: :descMetadata
+      end
       # Internal Relationships (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('relation_ids_').to_sym,s.concat('=').to_sym,
-                                                                to: :descMetadata}
+      DRI::Vocabulary.qdc_relationship_types.map do |s|
+        delegate s.prepend('relation_ids_').to_sym, s.concat('=').to_sym, to: :descMetadata
+      end
       # External relationships (contain a URI to resources external to DRI)
       # (dynamically populate the model attributes)
-      DRI::Vocabulary.qdc_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym,
-                                                                to: :descMetadata}
+      DRI::Vocabulary.qdc_relationship_types.map do |s|
+        delegate s.prepend('ext_related_items_ids_').to_sym, s.concat('=').to_sym, to: :descMetadata
+      end
     end
 
     def descMetadata
@@ -103,7 +106,8 @@ module DRI
     #
     # @return [Hash] relationships hash including label/field
     def self.relationships
-      { related: { label: 'Is Related To', field: 'relation_ids_relation' },
+      {
+        related: { label: 'Is Related To', field: 'relation_ids_relation' },
         referenced: { label: 'Is Referenced By', field: 'relation_ids_isReferencedBy' },
         references: { label: 'References', field: 'relation_ids_references' },
         container: { label: 'Is Part Of', field: 'relation_ids_isPartOf' },

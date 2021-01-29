@@ -7,7 +7,7 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
+        has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable
         # one-to-many AF relationship to associate digital assets with their object
         has_many :generic_files, class_name: 'DRI::GenericFile', inverse_of: :digital_object, dependent: :destroy
         # one-to-many AF relationship to associate documentation objects

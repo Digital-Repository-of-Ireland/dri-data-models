@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Implements a resque job to handle the ingest of EAD digital assets
 # associated with EAD children components
 class IngestFilesFromMetadataJob < IdBasedJob

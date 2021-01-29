@@ -8,10 +8,10 @@ module DRI
     # Specific EAD terms mapped
     # Identifier - for ead header maps to eadid; for components to unitid
     # (!) Important - change on identifier for components: repeatable
-    delegate :identifier,:identifier=, to: :descMetadata
-    delegate :identifier_id,:identifier_id=, to: :descMetadata
-    delegate :repository_code,:repository_code=, to: :descMetadata
-    delegate :country_code,:country_code=, to: :descMetadata
+    delegate :identifier, :identifier=, to: :descMetadata
+    delegate :identifier_id, :identifier_id=, to: :descMetadata
+    delegate :repository_code, :repository_code=, to: :descMetadata
+    delegate :country_code, :country_code=, to: :descMetadata
 
     # ISO Dates
     delegate :creation_date_idx, to: :descMetadata
@@ -25,15 +25,15 @@ module DRI
     delegate :desc_dao_desc, to: :descMetadata
 
     # Subjects
-    delegate :name_subject,:name_subject=, to: :descMetadata
-    delegate :persname_subject,:persname_subject=, to: :descMetadata
-    delegate :corpname_subject,:corpname_subject=, to: :descMetadata
-    delegate :famname_subject,:famname_subject=, to: :descMetadata
-    delegate :geogname_subject,:geogname_subject=, to: :descMetadata
+    delegate :name_subject, :name_subject=, to: :descMetadata
+    delegate :persname_subject, :persname_subject=, to: :descMetadata
+    delegate :corpname_subject, :corpname_subject=, to: :descMetadata
+    delegate :famname_subject, :famname_subject=, to: :descMetadata
+    delegate :geogname_subject, :geogname_subject=, to: :descMetadata
 
     # Types
-    delegate :ead_level,:ead_level=, to: :descMetadata
-    delegate :ead_level_other,:ead_level_other=, to: :descMetadata
+    delegate :ead_level, :ead_level=, to: :descMetadata
+    delegate :ead_level_other, :ead_level_other=, to: :descMetadata
 
     # Files, description
     delegate :dao_proxy, to: :descMetadata
@@ -59,7 +59,7 @@ module DRI
     delegate :geocode_point, to: :descMetadata
     delegate :geocode_box, to: :descMetadata
     delegate :geocode_logainm, to: :descMetadata
-    delegate :format,:format=, to: :descMetadata
+    delegate :format, :format=, to: :descMetadata
 
     delegate :published_date, to: :descMetadata
     delegate :creation_date, to: :descMetadata
@@ -67,11 +67,12 @@ module DRI
     #
     # @return [Array<Symbol>] EAD DRI terms symbols array
     def self.ead_dri_terms
-      [:title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
-       :creation_date, :published_date, :name_coverage, :temporal_coverage,
-       :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
-       :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :resource_type,
-       :related_material, :alternative_form, :language, :format
+      [
+        :title, :creator, :contributor, :desc_scope_content, :desc_abstract, :desc_biog_hist,
+        :creation_date, :published_date, :name_coverage, :temporal_coverage,
+        :rights, :subject, :name_subject, :persname_subject, :corpname_subject,
+        :geogname_subject, :geogname_coverage_access, :famname_subject, :publisher, :resource_type,
+        :related_material, :alternative_form, :language, :format
       ]
     end
 
@@ -92,7 +93,7 @@ module DRI
     def editable_attributes
       editable_attrs = {}
       DRI::EncodedArchivalDescription.ead_dri_terms.each do |attr|
-        editable_attrs[attr] = send("#{attr}")
+        editable_attrs[attr] = send(attr.to_s)
       end
 
       editable_attrs
@@ -121,6 +122,7 @@ module DRI
     def ead_level_other
       descMetadata.ead_level_other.first
     end
+
     # Type attribute getter
     #
     # @return [Array<String>] the array of metadata type values
@@ -244,7 +246,7 @@ module DRI
     # @param [String, File] xml_text String or file containing xml metadata to be updated
     # @param [Boolean] ingest  true if ingest operation; false if metadata update operation
     # @return [Boolean] true if xml updated successfully; false otherwise
-    def update_metadata(xml_text, ingest=true)
+    def update_metadata(xml_text, ingest = true)
       # Differentiate between ingest and individual object update
       ingest ? (self.trigger_ingest = true) : (self.trigger_update = true)
 
@@ -252,19 +254,14 @@ module DRI
 
       if ingest
         fullMetadata.ng_xml = xml_text
-        xml_text = split_ead_xml(xml_text, descMetadata.class.to_s)
-
-        descMetadata.ng_xml = xml_text
       else
-        if fullMetadata.ng_xml.root.children.empty?
-          fullMetadata.ng_xml = xml_text
-        end
-        # For EAD XML updates discard any children components in the XML
-        # as NO hierarchy updates are supported, only MD
-        xml_text = split_ead_xml(xml_text, descMetadata.class.to_s)
-        descMetadata.ng_xml = xml_text
+        fullMetadata.ng_xml = xml_text if fullMetadata.ng_xml.root.children.empty?
       end
 
+      # For EAD XML updates discard any children components in the XML
+      # as NO hierarchy updates are supported, only MD
+      xml_text = split_ead_xml(xml_text, descMetadata.class.to_s)
+      descMetadata.ng_xml = xml_text
       true
     end
 
@@ -274,11 +271,11 @@ module DRI
     # @param [String] xml_type the type of object (DRI::Base class)
     # @return [Nokogiri::XML] the modified XML document
     def split_ead_xml(xml_text, xml_type)
-      if xml_text.is_a?(Nokogiri::XML::Document)
-        xml = xml_text
-      else
-        xml = Nokogiri::XML xml_text
-      end
+      xml = if xml_text.is_a?(Nokogiri::XML::Document)
+              xml_text
+            else
+              Nokogiri::XML xml_text
+            end
       # Remove namespaces from XML - handle EAD XSD
       # (EAD data model is namespace-free)
       xml.remove_namespaces!
@@ -342,14 +339,13 @@ module DRI
             # grouped under dsc, if present
             dsc.add_child(node)
           else
-             # directly nested under the parent's component
+            # directly nested under the parent's component
             updated_desc_md.root.add_child(node)
           end
         end
       end
 
       fullMetadata.ng_xml = updated_desc_md
-
       true
     end
 

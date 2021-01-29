@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class IdBasedJob
   def queue_name
     :id_based
@@ -10,11 +11,11 @@ class IdBasedJob
   end
 
   def object
-    @object ||= DRI::Identifier::retrieve_object(id)
+    @object ||= DRI::Identifier.retrieve_object(id)
   end
 
-  alias_method :generic_file, :object
-  alias_method :generic_file_id, :id
+  alias generic_file object
+  alias generic_file_id id
 
   def run
     raise "Define #run in a subclass"

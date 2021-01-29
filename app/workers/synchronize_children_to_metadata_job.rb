@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Implements a resque job to handle the creation of EAD children components
 class SynchronizeChildrenToMetadataJob < IdBasedJob
   # Assign the resque queue name for this job

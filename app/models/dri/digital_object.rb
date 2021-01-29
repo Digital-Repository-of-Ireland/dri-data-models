@@ -24,13 +24,15 @@ module DRI
     after_destroy :delete_files
     after_destroy :delete_objects
 
+    delegate :alternate_id, :alternate_id=, to: :alternate_identifier
+
     # Declare a 'extracted' DS, of the following type
     # Unused for NOW
-    #has_many 'extracted', class_name: 'DRI::Metadata::Extracted'
+    # has_many 'extracted', class_name: 'DRI::Metadata::Extracted'
 
     # Declare the attributes of 'extracted' DS - 'full_text' - and that the DS is repeatable
     # Unused for NOW
-    #delegate :full_text, to: 'extracted'
+    # delegate :full_text, to: 'extracted'
 
     # Creates a digital object depending on the metadata standard
     #
@@ -49,7 +51,7 @@ module DRI
       when :qdc
         QualifiedDublinCore.new(args)
       when :ead_collection
-       EadCollection.new(args)
+        EadCollection.new(args)
       when :ead_component
         EadComponent.new(args)
       when :mods
@@ -67,22 +69,20 @@ module DRI
 
     def self.find_by_alternate_id!(pid)
       object = find_by_alternate_id(pid)
-      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::DigitalObject with 'alternate_id'=#{pid}") unless object
+      raise(ActiveRecord::RecordNotFound, "Couldn't find DRI::DigitalObject with 'alternate_id'=#{pid}") unless object
 
       object
     end
 
     def set_model_version
-      self.model_version ||= DriDataModels::VERSION if self.new_record?
+      self.model_version ||= DriDataModels::VERSION if new_record?
     end
 
     def [](key)
-        super
+      super
     rescue ActiveModel::MissingAttributeError
-      self.declared_attached_files.each do |_name, file|
-        if file.class.terminology.has_term?(key)
-          return file.send(key.to_s)
-        end
+      declared_attached_files.each do |_name, file|
+        return file.send(key.to_s) if file.class.terminology.has_term?(key)
       end
 
       raise ActiveModel::MissingAttributeError, "Unknown attribute #{key}"
@@ -91,7 +91,7 @@ module DRI
     def []=(key, value)
       super
     rescue ActiveModel::MissingAttributeError
-      self.declared_attached_files.each do |_name, file|
+      declared_attached_files.each do |_name, file|
         if file.class.terminology.has_term?(key)
           file.send(key.to_s + "=", value)
           return
@@ -115,7 +115,7 @@ module DRI
     end
 
     # Asserts the model class
-    def has_model
+    def model_types
       [self.class.to_s, self.class.superclass.to_s]
     end
 
@@ -137,19 +137,11 @@ module DRI
     def increment_version
       return 1 if object_version.nil?
 
-      self.object_version = self.object_version.next
+      self.object_version = object_version.next
     end
 
     def modified_date
       Time.at(descMetadata.updated_at.to_i).utc.to_datetime
-    end
-
-    def alternate_id
-      alternate_identifier.alternate_id
-    end
-
-    def alternate_id=(identifier)
-      alternate_identifier.alternate_id=identifier
     end
 
     def alternate_identifier
@@ -182,17 +174,13 @@ module DRI
     private
 
     def delete_objects
-      if collection?
-        if governed_items.count > 0
-          governed_items.each { |g| g.destroy }
-        end
-      end
+      return unless collection? && governed_items.count.positive?
+      governed_items.each(&:destroy)
     end
 
     def delete_files
-      if generic_files.count > 0
-        generic_files.each { |gf| gf.destroy }
-      end
+      return unless generic_files.count.positive?
+      generic_files.each(&:destroy)
     end
 
     def delete_bucket

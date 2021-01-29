@@ -121,25 +121,21 @@ module DRI
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
           unless sorted_title.empty?
-            solr_doc.merge!('title_sorted_ssi' => [sorted_title])
+            solr_doc['title_sorted_ssi'] = [sorted_title]
           end
         end
 
         # Type
         type_for_index = type_of_resource
-        solr_doc.merge!({
-          'type_tesim' => type_for_index,
-          'type_sim' => type_for_index
-        })
-        if collection?
-          solr_doc.merge!('type_tesim' => 'Collection')
-        end
+        solr_doc['type_tesim'] = type_for_index
+        solr_doc['type_sim'] = type_for_index
+        solr_doc['type_tesim'] = 'Collection' if collection?
 
         # MODS has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index
 
-        solr_doc.merge!('person_sim' => person_array)
-        solr_doc.merge!('person_tesim' => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc['person_sim'] = person_array
+        solr_doc['person_tesim'] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ''
@@ -147,41 +143,41 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!('all_metadata_tesim' => [all_metadata])
+        solr_doc['all_metadata_tesim'] = [all_metadata]
 
         # Subject
-        solr_doc.merge!('subject_tesim' => subject) unless subject == []
-        solr_doc.merge!('subject_sim' => subject) unless subject == []
+        solr_doc['subject_tesim'] = subject unless subject == []
+        solr_doc['subject_sim'] = subject unless subject == []
 
         subject_place_array = subject_place_for_index
         subject_temporal_array = subject_temporal_for_index
 
-        solr_doc.merge!('name_coverage_tesim' => subject_name_for_index) unless name_coverage.empty?
-        solr_doc.merge!('name_coverage_sim' => subject_name_for_index) unless name_coverage.empty?
+        solr_doc['name_coverage_tesim'] = subject_name_for_index unless name_coverage.empty?
+        solr_doc['name_coverage_sim'] = subject_name_for_index unless name_coverage.empty?
 
-        solr_doc.merge!('geographical_coverage_tesim' => subject_place_array) unless subject_place_array.empty?
-        solr_doc.merge!('geographical_coverage_sim' => filter_uris(subject_place_array)) unless subject_place_array.empty?
+        solr_doc['geographical_coverage_tesim'] = subject_place_array unless subject_place_array.empty?
+        solr_doc['geographical_coverage_sim'] = filter_uris(subject_place_array) unless subject_place_array.empty?
 
-        solr_doc.merge!('temporal_coverage_tesim' => subject_temporal_array) unless subject_temporal_array.empty?
-        solr_doc.merge!('temporal_coverage_sim' => filter_uris(subject_temporal_array)) unless subject_temporal_array.empty?
+        solr_doc['temporal_coverage_tesim'] = subject_temporal_array unless subject_temporal_array.empty?
+        solr_doc['temporal_coverage_sim'] = filter_uris(subject_temporal_array) unless subject_temporal_array.empty?
 
         # Indices for external relationships (to be displayed as URL)
         external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
 
         external_rels.each do |elem|
-          solr_doc.merge!("#{elem}_tesim" => send(elem)) unless send(elem) == []
+          solr_doc["#{elem}_tesim"] = send(elem) unless send(elem) == []
         end
 
         # Index creation_date
-        solr_doc.merge!('creation_date_tesim' => creation_date_for_index)
+        solr_doc['creation_date_tesim'] = creation_date_for_index
 
         # Index creation_date
-        solr_doc.merge!('date_tesim' => date_for_index)
+        solr_doc['date_tesim'] = date_for_index
 
         # Index Published Date
         unless published_date.empty? && issued_date_start.empty?
-          solr_doc.merge!('published_date_tesim' => display_single_date_for_index(published_date) |
-                              display_date_range_for_index(issued_date_start, issued_date_end))
+          solr_doc['published_date_tesim'] = display_single_date_for_index(published_date) |
+                              display_date_range_for_index(issued_date_start, issued_date_end)
         end
 
         # Index date ranges
@@ -190,42 +186,42 @@ module DRI
         cdate_ranges = date_ranges.select { |key, _value| ['creation_date', 'captured_date'].include?(key) }
         cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
         if cdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD] = cdate_index
           cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD] = cdate_years
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD] = cdate_years.min
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD] = cdate_years.max
         end
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['issued_date'].include?(key) }
         pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
         if pdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_index
           pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
         end
 
         # date dateRange index
         ddate_ranges = date_ranges.select { |key, _value| ['date_other', 'part_date'].include?(key) }
         ddate_index = DRI::Metadata::Transformations.transform_date_ranges(ddate_ranges)
         if ddate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_index)
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD] = ddate_index
           ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_index).minmax
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD] = ddate_years[0]
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD] = ddate_years[1]
         end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
         sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
         if sdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD] = sdate_index
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD] = sdate_years[0]
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD] = sdate_years[1]
         end
 
         # Geospatial indexing
@@ -245,14 +241,14 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
 
-        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] if geospatial_hash[:coords].present?
 
         unless geospatial_hash[:name].empty?
-          solr_doc.merge!("#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim" => geospatial_hash[:name])
-          solr_doc.merge!("#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim" => geospatial_hash[:name])
+          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name]
+          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name]
         end
 
-        solr_doc.merge!('geojson_ssim' => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc['geojson_ssim'] = geospatial_hash[:json] if geospatial_hash[:json].present?
 
         solr_doc
       end
@@ -874,11 +870,9 @@ module DRI
               p_term = elem.at('./mods:placeTerm', { 'xmlns:mods' => MODS_NS })
               place_hash[:content] = p_term.content
               origin_info_hash["#{index}"] = place_hash
-              index += 1
             when 'issuance', 'publisher', 'edition', 'frequency'
               elem_hash = { tag: tag, content: elem.content }
               origin_info_hash["#{index}"] = elem_hash
-              index += 1
             else
               # date
               date_hash = { tag: tag, start: '', end: '', encoding: '' }
@@ -896,8 +890,9 @@ module DRI
               date_hash[:encoding] << (elem['encoding'].nil? ? '' : elem['encoding'])
 
               origin_info_hash["#{index}"] = date_hash
-              index += 1
             end
+
+            index += 1
           end
 
           origin_metadata_array << origin_info_hash
@@ -1019,42 +1014,42 @@ module DRI
         type_result = false
         date_result = false
 
-        creator_result = true if creator.any? { |v| !v.blank? }
+        creator_result = true if creator.any?(&:present?)
 
         unless creator_result == true
           marc_rels = *(DRI::Vocabulary.marc_relators.map { |s| s.prepend('role_').to_sym })
 
           marc_rels.each do |role|
-            res = send(role).any? { |v| !v.blank? }
+            res = send(role).any?(&:present?)
             creator_result = true if res
             break if res
           end
         end
         # This is the mods identifier used internally in DRI:
         # uniquely identify a record/relationships management
-        identifier_result = true if mods_id_local.any? { |v| !v.blank? }
-        identifier_uri.each { |value| uri_result = false unless !value.blank? && Utils.valid_uri?(value) }
+        identifier_result = true if mods_id_local.any?(&:present?)
+        identifier_uri.each { |value| uri_result = false unless value.present? && Utils.valid_uri?(value) }
         # Check that for external relationships terms, the specified URIs are valid
         related_items_digital.each do |value|
-          ext_uri_result = false unless !value.blank? && Utils.valid_uri?(value)
+          ext_uri_result = false unless value.present? && Utils.valid_uri?(value)
         end
-        title_result = true if title.any? { |v| !v.blank? }
-        description_result = true if description.any? { |v| !v.blank? }
-        rights_result = true if rights.any? { |v| !v.blank? }
-        type_result = true if resource_type.any? { |v| !v.blank? }
+        title_result = true if title.any?(&:present?)
+        description_result = true if description.any?(&:present?)
+        rights_result = true if rights.any?(&:present?)
+        type_result = true if resource_type.any?(&:present?)
 
         unless type_result == true
-          type_result = true if mods_genre.any? { |v| !v.blank? }
+          type_result = true if mods_genre.any?(&:present?)
         end
 
         # Creation date can either be: dateCreated, dateIssued,
         # dateCaptured (in this priority order)
-        date_result = true if creation_date.any? { |v| !v.blank? }
+        date_result = true if creation_date.any?(&:present?)
         dates_array = [creation_date_start, published_date, issued_date_start, captured_date,
                        captured_date_start, other_date, other_date_start]
         unless date_result
           dates_array.each do |dates|
-            res = dates.any? { |v| !v.blank? }
+            res = dates.any?(&:present?)
             date_result = true if res
             break if res
           end

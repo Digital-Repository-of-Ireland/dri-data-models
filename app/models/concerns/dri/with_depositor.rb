@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module WithDepositor
     # Adds metadata about the depositor to the asset and
@@ -6,13 +7,9 @@ module DRI
     def apply_depositor_metadata(depositor)
       depositor_id = depositor.respond_to?(:user_key) ? depositor.user_key : depositor
 
-      if respond_to? :depositor
-        self.depositor = depositor_id
-      end
+      self.depositor = depositor_id if respond_to? :depositor
+      self.edit_users += [depositor_id] if respond_to? :edit_users
 
-      if respond_to? :edit_users
-        self.edit_users += [depositor_id]
-      end
       true
     end
   end

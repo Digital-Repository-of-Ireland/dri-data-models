@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # Implementation of DRI Documentation digital objects
@@ -9,20 +10,20 @@ module DRI
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
-    delegate :date,:date=, to: :descMetadata
-    delegate :source,:source=, to: :descMetadata
-    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
-    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
-    delegate :resource_type,:resource_type=, to: :descMetadata
-    delegate :format,:format=, to: :descMetadata
-    delegate :coverage,:coverage=, to: :descMetadata
-    delegate :identifier,:identifier=, to: :descMetadata
-    delegate :geocode_point,:geocode_point=, to: :descMetadata
-    delegate :geocode_box,:geocode_box=, to: :descMetadata
-    delegate :relation,:relation=, to: :descMetadata
+    delegate :date, :date=, to: :descMetadata
+    delegate :source, :source=, to: :descMetadata
+    delegate :geographical_coverage, :geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage, :temporal_coverage=, to: :descMetadata
+    delegate :resource_type, :resource_type=, to: :descMetadata
+    delegate :format, :format=, to: :descMetadata
+    delegate :coverage, :coverage=, to: :descMetadata
+    delegate :identifier, :identifier=, to: :descMetadata
+    delegate :geocode_point, :geocode_point=, to: :descMetadata
+    delegate :geocode_box, :geocode_box=, to: :descMetadata
+    delegate :relation, :relation=, to: :descMetadata
 
-    delegate :published_date,:published_date=, to: :descMetadata
-    delegate :creation_date,:creation_date=, to: :descMetadata
+    delegate :published_date, :published_date=, to: :descMetadata
+    delegate :creation_date, :creation_date=, to: :descMetadata
 
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|

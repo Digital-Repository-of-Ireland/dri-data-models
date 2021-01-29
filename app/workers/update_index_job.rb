@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Implements a resque job to handle the update/re-index of solr fields for a given
 # digital object
 class UpdateIndexJob < IdBasedJob

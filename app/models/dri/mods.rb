@@ -6,81 +6,77 @@ module DRI
 
     has_one :descMetadata, class_name: 'DRI::Metadata::Mods', as: :describable, autosave: true
 
-     # MODS record identifier mods:identifier[@type='local'], not multi-valued
+    # MODS record identifier mods:identifier[@type='local'], not multi-valued
     delegate :mods_id_local=, to: :descMetadata
     # MODS record asset identifier used to sort pages/sequenced items
     delegate :id_asset=, to: :descMetadata
     # MODS rest of identifiers are repeatable
-    delegate :identifier,:identifier=, to: :descMetadata
-    delegate :identifier_doi,:identifier_doi=, to: :descMetadata
-    delegate :identifier_uri,:identifier_uri=, to: :descMetadata
+    delegate :identifier, :identifier=, to: :descMetadata
+    delegate :identifier_doi, :identifier_doi=, to: :descMetadata
+    delegate :identifier_uri, :identifier_uri=, to: :descMetadata
 
     # Collection attribute + genre type
     delegate :mods_type_collection=, to: :descMetadata
-    delegate :mods_genre,:mods_genre=, to: :descMetadata
+    delegate :mods_genre, :mods_genre=, to: :descMetadata
 
     # subtitle
-    delegate :mods_subtitle,:mods_subtitle=, to: :descMetadata
+    delegate :mods_subtitle, :mods_subtitle=, to: :descMetadata
 
     # Description
-    delegate :desc_abstract,:desc_abstract=, to: :descMetadata
-    delegate :desc_toc,:desc_toc=, to: :descMetadata
-    delegate :desc_note,:desc_note=, to: :descMetadata
-    delegate :desc_physdesc_note,:desc_physdesc_note=, to: :descMetadata
+    delegate :desc_abstract, :desc_abstract=, to: :descMetadata
+    delegate :desc_toc, :desc_toc=, to: :descMetadata
+    delegate :desc_note, :desc_note=, to: :descMetadata
+    delegate :desc_physdesc_note, :desc_physdesc_note=, to: :descMetadata
     # delegate :abstract, to: :descMetadata
     # delegate :toc, to: :descMetadata
     # delegate :note_mods_type, to: :descMetadata
     # delegate :note_mods_no_type, to: :descMetadata
 
     # Rights copyrightMD
-    delegate :copyrightmd_rights,:copyrightmd_rights=, to: :descMetadata
+    delegate :copyrightmd_rights, :copyrightmd_rights=, to: :descMetadata
 
     # Source
-    delegate :source,:source=, to: :descMetadata
-    delegate :source_physical_location,:source_physical_location=, to: :descMetadata
-    delegate :source_location,:source_location=, to: :descMetadata
+    delegate :source, :source=, to: :descMetadata
+    delegate :source_physical_location, :source_physical_location=, to: :descMetadata
+    delegate :source_location, :source_location=, to: :descMetadata
 
     # Dates
-    delegate :date,:date=, to: :descMetadata
-    delegate :date_other,:date_other=, to: :descMetadata
-    delegate :date_other_start,:date_other_start=, to: :descMetadata
-    delegate :date_other_end,:date_other_end=, to: :descMetadata
-    delegate :captured_date,:captured_date=, to: :descMetadata
-    delegate :captured_date_start,:captured_date_start=, to: :descMetadata
-    delegate :captured_date_end,:captured_date_end=, to: :descMetadata
-    delegate :issued_date_start,:issued_date_start=, to: :descMetadata
-    delegate :issued_date_end,:issued_date_end=, to: :descMetadata
-    delegate :creation_date_start,:creation_date_start=, to: :descMetadata
-    delegate :creation_date_end,:creation_date_end=, to: :descMetadata
+    delegate :date, :date=, to: :descMetadata
+    delegate :date_other, :date_other=, to: :descMetadata
+    delegate :date_other_start, :date_other_start=, to: :descMetadata
+    delegate :date_other_end, :date_other_end=, to: :descMetadata
+    delegate :captured_date, :captured_date=, to: :descMetadata
+    delegate :captured_date_start, :captured_date_start=, to: :descMetadata
+    delegate :captured_date_end, :captured_date_end=, to: :descMetadata
+    delegate :issued_date_start, :issued_date_start=, to: :descMetadata
+    delegate :issued_date_end, :issued_date_end=, to: :descMetadata
+    delegate :creation_date_start, :creation_date_start=, to: :descMetadata
+    delegate :creation_date_end, :creation_date_end=, to: :descMetadata
 
     # Geographical, temporal, name
-    delegate :name_coverage,:name_coverage=, to: :descMetadata
-    delegate :geographical_coverage,:geographical_coverage=, to: :descMetadata
-    delegate :temporal_coverage,:temporal_coverage=, to: :descMetadata
-    delegate :subject_date_start,:subject_date_start=, to: :descMetadata
-    delegate :subject_date_end,:subject_date_end=, to: :descMetadata
-    delegate :geocode_logainm,:geocode_logainm=, to: :descMetadata
+    delegate :name_coverage, :name_coverage=, to: :descMetadata
+    delegate :geographical_coverage, :geographical_coverage=, to: :descMetadata
+    delegate :temporal_coverage, :temporal_coverage=, to: :descMetadata
+    delegate :subject_date_start, :subject_date_start=, to: :descMetadata
+    delegate :subject_date_end, :subject_date_end=, to: :descMetadata
+    delegate :geocode_logainm, :geocode_logainm=, to: :descMetadata
 
-    delegate :published_date,:published_date=, to: :descMetadata
-    delegate :creation_date,:creation_date=, to: :descMetadata
+    delegate :published_date, :published_date=, to: :descMetadata
+    delegate :creation_date, :creation_date=, to: :descMetadata
+
+    delegate :collection?, to: :descMetadata
 
     class_eval do
       # Roles
       DRI::Vocabulary.marc_relators.map { |s| delegate s.prepend('role_').to_sym, to: :descMetadata }
       # Internal Relationships
-      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('related_items_ids_').to_sym, s.concat('=').to_sym, to: :descMetadata }
       # External relationships (contain a URI to resources external to DRI)
-      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym,s.concat('=').to_sym, to: :descMetadata }
+      DRI::Vocabulary.mods_relationship_types.map { |s| delegate s.prepend('ext_related_items_ids_').to_sym, s.concat('=').to_sym, to: :descMetadata }
     end
 
     # Disabled for now
     # around_save :create_multiple_records
-
-    # Determine whether the metadata describes a collection
-    # @return [Boolean] true if metadata specified this is a collection; false otherwise
-    def collection?
-      descMetadata.collection?
-    end
 
     def descMetadata
       super || build_descMetadata
@@ -90,20 +86,19 @@ module DRI
       super || build_fullMetadata
     end
 
-    delegate :resource_type,:resource_type=, to: :descMetadata
-    delegate :mods_genre,:mods_genre=, to: :descMetadata
-
-    delegate :origin_metadata,:origin_metadata=, to: :descMetadata
-
-    delegate :subject_metadata,:subject_metadata=, to: :descMetadata
+    delegate :resource_type, :resource_type=, to: :descMetadata
+    delegate :mods_genre, :mods_genre=, to: :descMetadata
+    delegate :origin_metadata, :origin_metadata=, to: :descMetadata
+    delegate :subject_metadata, :subject_metadata=, to: :descMetadata
 
     #
     # @return [Array<Symbol>] MODS DRI terms symbols array
     def self.mods_dri_terms
-      [:title, :creator, :contributor, :desc_abstract, :desc_note,
-       :desc_physdesc_note, :desc_toc, :origin_metadata, :rights,
-       :subject_metadata, :source_location, :source_physical_location,
-       :publisher, :type, :mods_genre, :language, :roles
+      [
+        :title, :creator, :contributor, :desc_abstract, :desc_note,
+        :desc_physdesc_note, :desc_toc, :origin_metadata, :rights,
+        :subject_metadata, :source_location, :source_physical_location,
+        :publisher, :type, :mods_genre, :language, :roles
       ]
     end
 
@@ -138,7 +133,7 @@ module DRI
       editable_attrs = {}
 
       DRI::Mods.mods_dri_terms.each do |attr|
-        editable_attrs[attr] = send("#{attr}")
+        editable_attrs[attr] = send(attr.to_s)
       end
 
       editable_attrs
@@ -150,10 +145,8 @@ module DRI
     # @return [Hash] Hash of DRI MODS metadata
     def retrieve_hash_attributes
       retrieved_attributes = descMetadata.retrieve_terms_hash
-      if retrieved_attributes.key?(:resource_type)
-        retrieved_attributes[:type] = retrieved_attributes.delete(:resource_type)
-      end
 
+      retrieved_attributes[:type] = retrieved_attributes.delete(:resource_type) if retrieved_attributes.key?(:resource_type)
       retrieved_attributes
     end
 
@@ -166,7 +159,7 @@ module DRI
     class_eval do
       DRI::Vocabulary.marc_relators.each do |role|
         # name: role_xxx, where xxx is the marcrelator code
-        method_name = "#{role.prepend('role_')}"
+        method_name = role.prepend('role_')
 
         define_method "#{method_name}=" do |values|
           # the descMetadata roles method expect a Hash with
@@ -298,11 +291,11 @@ module DRI
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a? File
 
-      if xml_text.is_a? Nokogiri::XML::Document
-        xml = xml_text
-      else
-        xml = Nokogiri::XML xml_text
-      end
+      xml = if xml_text.is_a? Nokogiri::XML::Document
+              xml_text
+            else
+              Nokogiri::XML xml_text
+            end
 
       xml_no_blanks = Nokogiri::XML.parse(xml.to_xml, &:noblanks)
 
@@ -347,7 +340,8 @@ module DRI
     #
     # @return [Hash] relationships hash including label/field
     def self.relationships
-      { preceding: { label: 'Preceding', field: 'related_items_ids_preceding' },
+      {
+        preceding: { label: 'Preceding', field: 'related_items_ids_preceding' },
         succeeding: { label: 'Succeeding', field: 'related_items_ids_succeeding' },
         original: { label: 'Has Original', field: 'related_items_ids_original' },
         host: { label: 'Is Part Of', field: 'related_items_ids_host' },
@@ -381,7 +375,7 @@ module DRI
 
       begin
         DRI.queue.push(CreateModsRecordsJob.new(id))
-      rescue Exception => e
+      rescue => e
         Rails.logger.error(e.message)
       end
     end # end create_multiple_records

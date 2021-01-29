@@ -42,7 +42,7 @@ describe 'QualifiedDublinCore' do
     end
 
     it 'should have asserted the content model' do
-      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::DigitalObject'])
+      expect(@audio.model_types.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::DigitalObject'])
     end
 
     it 'should load from xml' do

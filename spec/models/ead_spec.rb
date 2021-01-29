@@ -9,7 +9,7 @@ describe 'EncodedArchivalDescription' do
     end
 
     after(:each) do
-      @ead_header.delete unless @ead_header.new_record?
+      @ead_header.destroy unless @ead_header.new_record?
     end
 
     it 'should load the correct metadata class after initialisation' do
@@ -216,11 +216,11 @@ describe 'EncodedArchivalDescription' do
     end
 
     after(:each) do
-      @ead_item.delete unless @ead_item.new_record?
-      @ead_file.delete unless @ead_file.new_record?
-      @ead_series.delete unless @ead_series.new_record?
-      @ead_root.delete unless @ead_root.new_record?
-      @collection.delete unless @collection.new_record?
+      @ead_item.destroy unless @ead_item.new_record?
+      @ead_file.destroy unless @ead_file.new_record?
+      @ead_series.destroy unless @ead_series.new_record?
+      @ead_root.destroy unless @ead_root.new_record?
+      @collection.destroy unless @collection.new_record?
     end
 
     it "should update the object\'s fullMetadata ds when updating object's metadata" do

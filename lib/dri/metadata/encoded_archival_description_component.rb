@@ -58,31 +58,31 @@ module DRI
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
-        solr_doc.merge!(Solrizer.solr_name('title', :stored_searchable, type: :string) => title)
+        solr_doc[Solrizer.solr_name('title', :stored_searchable, type: :string)] = title
         # Title
         # title_sorted - A SOLR index for sorting titles
         if title.length > 0
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-          solr_doc.merge!(Solrizer.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title]) unless sorted_title.empty?
+          solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = [sorted_title] if sorted_title.present?
         end
 
         # Type
         type_array = type_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('type', :stored_searchable) => type_array)
-        solr_doc.merge!(Solrizer.solr_name('type', :facetable) => type_array)
+        solr_doc[Solrizer.solr_name('type', :stored_searchable)] = type_array
+        solr_doc[Solrizer.solr_name('type', :facetable)] = type_array
 
         # Person  - EAD has several "name" tags, so we merge them together into the SOLR document
         person_array = person_array_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(Solrizer.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc[Solrizer.solr_name('person', :facetable)] = person_array
+        solr_doc[Solrizer.solr_name('person', :stored_searchable, type: :text)] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
 
         # Creator
         creator_array = creator_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('creator', :facetable) => creator_array)
-        solr_doc.merge!(Solrizer.solr_name('creator', :stored_searchable, type: :text) => creator_array)
+        solr_doc[Solrizer.solr_name('creator', :facetable)] = creator_array
+        solr_doc[Solrizer.solr_name('creator', :stored_searchable, type: :text)] = creator_array
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ''
@@ -90,47 +90,47 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(Solrizer.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
         # Rights
         rights_array = rights_for_index
-        solr_doc.merge!(Solrizer.solr_name('rights', :stored_searchable, type: :string) => rights_array)
+        solr_doc[Solrizer.solr_name('rights', :stored_searchable, type: :string)] = rights_array
 
         # Subject: generic, name and place
         subject_array = subject_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('subject', :stored_searchable) => subject_array)
-        solr_doc.merge!(Solrizer.solr_name('subject', :facetable) => subject_array)
+        solr_doc[Solrizer.solr_name('subject', :stored_searchable)] = subject_array
+        solr_doc[Solrizer.solr_name('subject', :facetable)] = subject_array
 
         subject_name_array = subject_name_for_index
         subject_place_array = subject_place_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :stored_searchable) => subject_name_array)
-        solr_doc.merge!(Solrizer.solr_name('name_coverage', :facetable) => subject_name_array)
+        solr_doc[Solrizer.solr_name('name_coverage', :stored_searchable)] = subject_name_array
+        solr_doc[Solrizer.solr_name('name_coverage', :facetable)] = subject_name_array
 
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => subject_place_array)
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_array))
+        solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)] = subject_place_array
+        solr_doc[Solrizer.solr_name('geographical_coverage', :facetable)] = filter_uris(subject_place_array)
 
         # Display of Creation Date
         creation_date_array = creation_date_for_index
-        solr_doc.merge!(Solrizer.solr_name('creation_date', :stored_searchable) => creation_date_array) unless creation_date_array == []
+        solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)] = creation_date_array unless creation_date_array == []
         solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].present?
 
         # Geographical Coverage
-        solr_doc.merge!(Solrizer.solr_name('geographical_coverage', :stored_searchable) => geographical_coverage)
+        solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)] = geographical_coverage
 
         # Indexing dates for display
         # Display of Subject(Temporal)
         subject_temporal_array = subject_temporal_for_index
 
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(Solrizer.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array))
+        solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)] = subject_temporal_array
+        solr_doc[Solrizer.solr_name('temporal_coverage', :facetable)] = filter_uris(subject_temporal_array)
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
         if creation_date_idx.empty?
-          solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => parent_field('creation_date_idx'))
+          solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = parent_field('creation_date_idx')
         else
-          solr_doc.merge!(Solrizer.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
+          solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = creation_date_idx
         end
 
         # Published Date
@@ -149,7 +149,7 @@ module DRI
           end
         end
 
-        solr_doc.merge!(Solrizer.solr_name('published_date', :stored_searchable) => pdate_array) unless published_date.empty?
+        solr_doc[Solrizer.solr_name('published_date', :stored_searchable)] = pdate_array unless published_date.empty?
         # Index date ranges
         date_ranges = date_ranges_for_index # ALL the date ranges
 
@@ -157,32 +157,32 @@ module DRI
         cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
         cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
         if cdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD] = cdate_index
           cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD] = cdate_years
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD] = cdate_years.min
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD] = cdate_years.max
         end
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
         pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
         if pdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_index
           pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
         end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
         sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
         if sdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD] = sdate_index
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD] = sdate_years[0]
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD] = sdate_years[1]
         end
 
         # Geospatial indexing
@@ -198,10 +198,10 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
 
-        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(Solrizer.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] unless geospatial_hash[:coords].empty?
+        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[Solrizer.solr_name('geojson', :stored_searchable, type: :symbol)] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
 
         solr_doc
       end # to_solr
@@ -891,11 +891,11 @@ module DRI
           end
 
           # Need to remove the added ns declarations to the component before comparing
-          child_xml_str = child_xml.root.serialize(save_with:0).gsub("\n", '').gsub('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ', '')
+          child_xml_str = child_xml.root.serialize(save_with:0).delete("\n").delete('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ')
 
-          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).gsub("\n", ''))
+          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).delete("\n"))
         else
-          same_metadata = child_xml.root.serialize(save_with:0).gsub("\n", '') == parent_xml.root.serialize(save_with:0).gsub("\n", '')
+          same_metadata = child_xml.root.serialize(save_with:0).delete("\n") == parent_xml.root.serialize(save_with:0).delete("\n")
         end
 
         # Check if the component node in parent XML is different
@@ -912,7 +912,7 @@ module DRI
 
             # Queue synchronization between parent and grandparent
             if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-              DRI.queue.push(UpdateParentMetadataJob.new(parent.id))
+              DRI.queue.push(UpdateParentMetadataJob.new(parent.alternate_id))
             end
           end
 
@@ -920,11 +920,11 @@ module DRI
         end
 
         if component_node.nil?
-          Rails.logger.error("update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata")
-          "update_parent_metadata for #{parent.id}: Couldn't find component XML in parent's fullMetadata"
+          Rails.logger.error("update_parent_metadata for #{parent.alternate_id}: Couldn't find component XML in parent's fullMetadata")
+          "update_parent_metadata for #{parent.alternate_id}: Couldn't find component XML in parent's fullMetadata"
         else
-          Rails.logger.info("update_parent_metadata for #{parent.id}: No differences in fullMetadata")
-          "update_parent_metadata for #{parent.id}: No differences in fullMetadata"
+          Rails.logger.info("update_parent_metadata for #{parent.alternate_id}: No differences in fullMetadata")
+          "update_parent_metadata for #{parent.parent_id}: No differences in fullMetadata"
         end
       end # update_parent_metadata
 
@@ -944,12 +944,12 @@ module DRI
         ead_level_other_result = false
 
         # Title
-        title_result = true if title.any? { |v| !v.blank? }
+        title_result = true if title.any?(&:present?)
 
         # EAD-specific
         if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-          ead_level_result = true if ead_level.any? { |v| !v.blank? }
-          ead_level_other_result = true if ead_level_other.any? { |v| !v.blank? }
+          ead_level_result = true if ead_level.any?(&:present?)
+          ead_level_other_result = true if ead_level_other.any?(&:present?)
         end
 
         # For validation of unitid or eadid we now use identifier
@@ -958,9 +958,9 @@ module DRI
         first_cc = country_code[0]
         first_rc = repository_code[0]
         # Handle the case where multiple unitid are present: only the first should carry the attributes
-        unit_id_result = true unless first_id.blank?
-        cc_result = true unless first_cc.blank?
-        rc_result = true unless first_rc.blank?
+        unit_id_result = true if first_id.present?
+        cc_result = true if first_cc.present?
+        rc_result = true if first_rc.present?
 
         # DRI
         errors[:title] = "can't be blank" if title_result == false

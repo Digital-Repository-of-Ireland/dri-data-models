@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # Metadata namespace
@@ -35,11 +36,9 @@ module DRI
       def self.language_converter
         lambda do |_type|
           lambda do |val|
-            begin
-              standardise_language_code(val)
-            rescue
-              nil
-            end
+            standardise_language_code(val)
+          rescue
+            nil
           end
         end
       end
@@ -48,11 +47,9 @@ module DRI
       def self.facet_converter
         lambda do |_type|
           lambda do |val|
-            begin
-              standardise_facet(val)
-            rescue
-              nil
-            end
+            standardise_facet(val)
+          rescue
+            nil
           end
         end
       end
@@ -61,15 +58,13 @@ module DRI
       def self.input_converter
         lambda do |_type|
           lambda do |val|
-            begin
-              clean_val = val.strip
+            clean_val = val.strip
 
-              return 'N/A' if clean_val.downcase == 'n/a'
+            return 'N/A' if clean_val.casecmp('n/a').zero?
 
-              clean_val.empty? ? nil : clean_val
-            rescue
-              nil
-            end
+            clean_val.empty? ? nil : clean_val
+          rescue
+            nil
           end
         end
       end
@@ -80,7 +75,7 @@ module DRI
       def standardise_facet(val = '')
         clean_val = val.strip
 
-        return nil if clean_val.blank? || clean_val.downcase == 'n/a' || clean_val.empty?
+        return nil if clean_val.blank? || clean_val.casecmp('n/a').zero?
 
         clean_val.capitalize
       end

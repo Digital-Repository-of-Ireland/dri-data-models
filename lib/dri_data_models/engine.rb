@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DriDataModels
   require 'rails'
   require 'hydra/derivatives'
@@ -9,7 +10,7 @@ module DriDataModels
   require 'solrizer'
 
   class Engine < ::Rails::Engine
-    config.autoload_paths += %W(#{config.root}/app/models/datastreams)
+    config.autoload_paths += %W[#{config.root}/app/models/datastreams]
 
     isolate_namespace DriDataModels
 

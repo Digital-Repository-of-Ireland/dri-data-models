@@ -42,6 +42,8 @@ module DRI
     delegate :date, to: :descMetadata
     delegate :published_date, to: :descMetadata
 
+    delegate :type, to: :descMetadata
+
     def id_asset
       descMetadata.id_asset.first
     end
@@ -62,12 +64,6 @@ module DRI
       descMetadata.marc_id.first
     end
 
-    # type attribute getter
-    # @return [Array<String>] array of type metadata term values
-    def type
-      descMetadata.type
-    end
-
     # Updates the XML metadata for the object's descMetadata datastream
     # @param [String, File] xml_text String or file containing xml metadata to be updated
     # @param [Boolean] _ingest  true if ingest operation; false if metadata update operation
@@ -75,11 +71,11 @@ module DRI
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a? File
 
-      if xml_text.is_a? Nokogiri::XML::Document
-        xml = xml_text
-      else
-        xml = Nokogiri::XML xml_text
-      end
+      xml = if xml_text.is_a? Nokogiri::XML::Document
+              xml_text
+            else
+              Nokogiri::XML xml_text
+            end
 
       xml_no_blanks = Nokogiri::XML.parse(xml.to_xml, &:noblanks)
 
@@ -99,12 +95,12 @@ module DRI
       # the first marc:record and we then process the rest when saving
       collection = xml_text.search('//collection')
 
-      if collection.empty?
-        record = xml_text
-      else
-        records = collection.children
-        record = records[0]
-      end
+      record = if collection.empty?
+                 xml_text
+               else
+                 records = collection.children
+                 records[0]
+               end
 
       record.to_xml
     end
@@ -125,7 +121,8 @@ module DRI
     #
     # @return [Hash] relationships hash including label/field
     def self.relationships
-      { related: { label: 'Is Related To', field: 'relation_ids_relation' },
+      {
+        related: { label: 'Is Related To', field: 'relation_ids_relation' },
         is_version: { label: 'Is Version Of', field: 'relation_ids_isVersionOf' },
         is_format: { label: 'Is Format Of', field: 'relation_ids_isFormatOf' },
         preceding: { label: 'Preceding', field: 'relation_ids_preceding' },
@@ -152,7 +149,7 @@ module DRI
 
       begin
         DRI.queue.push(CreateMarcRecordsJob.new(id))
-      rescue Exception => e
+      rescue => e
         Rails.logger.error(e.message)
       end
     end

@@ -10,31 +10,31 @@ module DRI
       require 'iso8601'
 
       # The name of the Solr field for indexing temporal metadata (creation date)
-      CREATION_DATE_RANGE_SOLR_FIELD = 'cdateRange'
-      CREATION_DATE_YEAR_SOLR_FIELD = 'cdate_year_iim'
-      CREATION_DATE_RANGE_START_SOLR_FIELD = 'cdate_range_start_isi'
-      CREATION_DATE_RANGE_END_SOLR_FIELD = 'cdate_range_end_isi'
+      CREATION_DATE_RANGE_SOLR_FIELD = 'cdateRange'.freeze
+      CREATION_DATE_YEAR_SOLR_FIELD = 'cdate_year_iim'.freeze
+      CREATION_DATE_RANGE_START_SOLR_FIELD = 'cdate_range_start_isi'.freeze
+      CREATION_DATE_RANGE_END_SOLR_FIELD = 'cdate_range_end_isi'.freeze
       # The name of the Solr field for indexing temporal metadata (published date)
-      PUBLISHED_DATE_RANGE_SOLR_FIELD = 'pdateRange'
-      PUBLISHED_DATE_YEAR_SOLR_FIELD = 'pdate_year_iim'
-      PUBLISHED_DATE_RANGE_START_SOLR_FIELD = 'pdate_range_start_isi'
-      PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'
+      PUBLISHED_DATE_RANGE_SOLR_FIELD = 'pdateRange'.freeze
+      PUBLISHED_DATE_YEAR_SOLR_FIELD = 'pdate_year_iim'.freeze
+      PUBLISHED_DATE_RANGE_START_SOLR_FIELD = 'pdate_range_start_isi'.freeze
+      PUBLISHED_DATE_RANGE_END_SOLR_FIELD = 'pdate_range_end_isi'.freeze
       # The name of the Solr field for indexing temporal metadata (date)
-      DATE_RANGE_SOLR_FIELD = 'ddateRange'
-      DATE_RANGE_START_SOLR_FIELD = 'date_range_start_isi'
-      DATE_RANGE_END_SOLR_FIELD = 'date_range_end_isi'
+      DATE_RANGE_SOLR_FIELD = 'ddateRange'.freeze
+      DATE_RANGE_START_SOLR_FIELD = 'date_range_start_isi'.freeze
+      DATE_RANGE_END_SOLR_FIELD = 'date_range_end_isi'.freeze
       # The name of the Solr field for indexing temporal metadata (subject temporal)
-      SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'
-      SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'
-      SUBJECT_DATE_RANGE_END_SOLR_FIELD = 'sdate_range_end_isi'
+      SUBJECT_DATE_RANGE_SOLR_FIELD = 'sdateRange'.freeze
+      SUBJECT_DATE_RANGE_START_SOLR_FIELD = 'sdate_range_start_isi'.freeze
+      SUBJECT_DATE_RANGE_END_SOLR_FIELD = 'sdate_range_end_isi'.freeze
       # The name of the Solr field for indexing geographical metadata
-      GEOSPATIAL_SOLR_FIELD = 'geospatial'
+      GEOSPATIAL_SOLR_FIELD = 'geospatial'.freeze
 
       # The name of the Solr field for indexing coordinates geographical metadata (geojson index)
       # Solrizer only creates _tesim; for BL Maps we need _ssim
-      GEOJSON_SOLR_FIELD = 'geojson_ssim'
+      GEOJSON_SOLR_FIELD = 'geojson_ssim'.freeze
       # The name of the Solr field for indexing placenames for geographical metadata (geojson index)
-      PLACENAME_SOLR_FIELD = 'placename_field'
+      PLACENAME_SOLR_FIELD = 'placename_field'.freeze
 
       # A function to convert an array of names that conform to archiving formatting
       # standards into human-readable names
@@ -122,11 +122,11 @@ module DRI
                        { name: geo_string } #not a point or box so index string into placename solr field
                      end
 
-            unless result.empty?
-              results[:coords].push(result[:coords]) if result[:coords].present?
-              results[:name].push(result[:name]) unless result[:name].nil?
-              results[:json].push(result[:json]) if result[:json].present?
-            end
+            next if result.blank?
+
+            results[:coords].push(result[:coords]) if result[:coords].present?
+            results[:name].push(result[:name]) unless result[:name].nil?
+            results[:json].push(result[:json]) if result[:json].present?
           end
         end
 
@@ -137,14 +137,13 @@ module DRI
       def self.filter_projections(geojson_strings)
         features = geojson_strings.map { |geojson_string| JSON.parse(geojson_string) }
 
-        [ 'http://www.opengis.net/def/crs/EPSG/0/2157', 'http://www.opengis.net/def/crs/EPSG/0/29903' ].each do |projection|
+        ['http://www.opengis.net/def/crs/EPSG/0/2157', 'http://www.opengis.net/def/crs/EPSG/0/29903'].each do |projection|
           filtered = features.select { |feature| feature['properties'].dig('geometryCRS', 'crs') == projection }
-          return filtered.map { |feature| feature.to_json.to_s } unless filtered.empty?
+          return filtered.map { |feature| feature.to_json.to_s } if filtered.present?
         end
 
         features.map { |feature| feature.to_json.to_s }
       end
-
 
       #---------------------------------------------------------------------------------------------------------------
       # Date, Time transformations for indexing
@@ -166,7 +165,7 @@ module DRI
             if range.key?('start') && range.key?('end')
               results << "[#{range['start']} TO #{range['end']}]" if valid_range?(range)
             elsif range.key?('start')
-              results << "#{range['start']}"
+              results << range['start']
             end
           end
         end
@@ -265,7 +264,7 @@ module DRI
         results = {}
         value.split(/\s*;\s*/).each do |component|
          (k,v) = component.split(/\s*=\s*/)
-         results[k.to_sym] = v unless v.nil? || v.empty?
+         results[k.to_sym] = v if v.present?
         end
 
         results
@@ -308,7 +307,7 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k, _v) = component.split(/\s*=\s*/)
 
-          result = true if %w(start end scheme).include? k
+          result = true if %w[start end scheme].include? k
         end
 
         result
@@ -324,7 +323,7 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k, _v) = component.split(/\s*=\s*/)
 
-          result = true if %w(east north elevation projection).include? k
+          result = true if %w[east north elevation projection].include? k
         end
 
         result
@@ -340,7 +339,7 @@ module DRI
         value.split(/\s*;\s*/).each do |component|
           (k, _v) = component.split(/\s*=\s*/)
 
-          comps_array = %w(eastlimit northlimit southlimit westlimit uplimit downlimit)
+          comps_array = %w[eastlimit northlimit southlimit westlimit uplimit downlimit]
 
           result = true if comps_array.include? k
         end
@@ -387,9 +386,9 @@ module DRI
           geo_string.split(/\s*;\s*/).each do |component|
             (k, v) = component.split(/\s*=\s*/)
             if k == 'east'
-              lat = v.strip unless v.nil? || v.empty?
+              lat = v.strip if v.present?
             elsif k == 'north'
-              long = v.strip unless v.nil? || v.empty?
+              long = v.strip if v.present?
             end
           end
 
@@ -403,13 +402,13 @@ module DRI
           geo_string.split(/\s*;\s*/).each do |component|
             (k, v) = component.split(/\s*=\s*/)
             if k == 'eastlimit'
-              eastlimit = v.strip unless v.nil? || v.empty?
+              eastlimit = v.strip if v.present?
             elsif k == 'northlimit'
-              northlimit = v.strip unless v.nil? || v.empty?
+              northlimit = v.strip if v.present?
             elsif k == 'westlimit'
-              westlimit = v.strip unless v.nil? || v.empty?
+              westlimit = v.strip if v.present?
             elsif k == 'southlimit'
-              southlimit = v.strip unless v.nil? || v.empty?
+              southlimit = v.strip if v.present?
             end
           end
           coords_array = [eastlimit, northlimit, westlimit, southlimit]

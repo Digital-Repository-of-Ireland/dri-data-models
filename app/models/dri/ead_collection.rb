@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # Implementation of DRI Marc digital objects
@@ -8,6 +9,8 @@ module DRI
 
     has_one :descMetadata, class_name: 'DRI::Metadata::EncodedArchivalDescription', as: :describable, autosave: true
 
+    delegate :collection?, to: :descMetadata
+
     def descMetadata
       super || build_descMetadata
     end
@@ -16,12 +19,10 @@ module DRI
       super || build_fullMetadata
     end
 
-    def collection?
-      descMetadata.collection?
-    end
-
     def method_missing(method, *args)
-      descMetadata.send(method, *args) if descMetadata.respond_to?(method)
+      return descMetadata.send(method, *args) if descMetadata.respond_to?(method)
+
+      super
     end
   end
 end

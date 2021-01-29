@@ -19,7 +19,7 @@ module DRI
 
     include DRI::ModelSupport::LocalFile
 
-    has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, autosave: true
+    has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable
 
     include DRI::Derivatives::ExtractMetadata
 
@@ -29,13 +29,15 @@ module DRI
     serialize :title
     serialize :creator
 
+    delegate :alternate_id, :alternate_id=, to: :alternate_identifier
+
     def self.find_by_alternate_id(pid)
       joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
     end
 
     def self.find_by_alternate_id!(pid)
       object = find_by_alternate_id(pid)
-      raise ActiveRecord::RecordNotFound.new("Couldn't find DRI::GenericFile with 'alternate_id'=#{pid}") unless object
+      raise(ActiveRecord::RecordNotFound, "Couldn't find DRI::GenericFile with 'alternate_id'=#{pid}") unless object
 
       object
     end
@@ -58,27 +60,19 @@ module DRI
       DateTime.parse(updated_at.to_s).utc.to_datetime
     end
 
-    def alternate_id
-      alternate_identifier.alternate_id
-    end
-
-    def alternate_id=(identifier)
-      alternate_identifier.alternate_id=identifier
-    end
-
     def alternate_identifier
       super || build_alternate_identifier
     end
 
     # Asserts the model class
-    def has_model
+    def model_types
       [self.class.to_s]
     end
 
     # Return number of milliseconds for the duration of this asset file
     # @return [Integer] number of milliseconds
     def milliseconds
-      characterization.milliseconds.blank? ? characterization.video_milliseconds : characterization.milliseconds
+      characterization.milliseconds.presence || characterization.video_milliseconds
     end
 
     def related_files
