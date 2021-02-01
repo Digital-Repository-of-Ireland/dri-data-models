@@ -1,17 +1,17 @@
+# frozen_string_literal: true
 require 'uri'
 
 # DRI namespace
 module DRI
   # Module Utils - general utilities methods
   module Utils
-
     # Validates a String URI
     # @param string_uri [String] the string URI
     # return true if valid URI; false otherwise
     #
     def self.valid_uri?(string_uri)
       uri = URI.parse(string_uri)
-      %w(http https).include?(uri.scheme)
+      %w[http https].include?(uri.scheme)
     rescue URI::BadURIError, URI::InvalidURIError
       false
     end
@@ -33,10 +33,10 @@ module DRI
     #
     # @param object [DRI::Base] the digital object
     def self.checksum_metadata(object)
-      if object.attached_files.key?(:descMetadata)
-        xml = object.attached_files[:descMetadata].content
-        object.metadata_checksum = Checksum.md5_string(xml)
-      end
+      return unless object.attached_files.key?(:descMetadata)
+
+      xml = object.attached_files[:descMetadata].content
+      object.metadata_checksum = Checksum.md5_string(xml)
     end
 
     # Create default reader group permissions for the object and save
@@ -56,9 +56,9 @@ module DRI
     # @param obj [DRI::Base] the object to check
     def self.retrieve_linked_data(obj)
       if AuthoritiesConfig
-        DRI.queue.push(LinkedDataJob.new(obj.id)) unless obj.geographical_coverage.blank?
+        DRI.queue.push(LinkedDataJob.new(obj.alternate_id)) if obj.geographical_coverage.present?
       end
-    rescue Exception => e
+    rescue => e
       Rails.logger.error "Unable to submit linked data job: #{e.message}"
     end
   end # Module Utils

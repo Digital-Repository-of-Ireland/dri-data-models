@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module Metadata
     autoload :Descriptors, 'dri/metadata/descriptors'
@@ -33,7 +34,7 @@ module DRI
     end
 
     def filter_uris(array)
-      array.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+      array.reject { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
     end
 
     # Returns an array with the values of a metadata field if present as an object's attribute
@@ -46,7 +47,7 @@ module DRI
       []
     end
 
-    def prefix(path)
+    def prefix(_path)
       ''
     end
 
@@ -64,7 +65,7 @@ module DRI
     def remove_null_values(solr_doc, field)
       [:stored_searchable, :facetable].each do |index_type|
         if solr_doc[Solrizer.solr_name(field, index_type)].present?
-          solr_doc[Solrizer.solr_name(field, index_type)].delete_if{ |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
+          solr_doc[Solrizer.solr_name(field, index_type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
         end
       end
 

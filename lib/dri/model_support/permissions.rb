@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   #ModelSupport namespace
@@ -7,15 +8,15 @@ module DRI
       extend ActiveSupport::Concern
 
       included do
-        delegate :manager_groups,:manager_groups=, to: :access_control
-        delegate :manager_users,:manager_users=, to: :access_control
-        delegate :edit_groups,:edit_groups=, to: :access_control
-        delegate :edit_users,:edit_users=, to: :access_control
-        delegate :read_groups,:read_groups=, to: :access_control
-        delegate :read_users,:read_users=, to: :access_control
-        delegate :discover_groups,:discover_groups=, to: :access_control
-        delegate :discover_users,:discover_users=, to: :access_control
-        delegate :master_file_access,:master_file_access=, to: :access_control
+        delegate :manager_groups, :manager_groups=, to: :access_control
+        delegate :manager_users, :manager_users=, to: :access_control
+        delegate :edit_groups, :edit_groups=, to: :access_control
+        delegate :edit_users, :edit_users=, to: :access_control
+        delegate :read_groups, :read_groups=, to: :access_control
+        delegate :read_users, :read_users=, to: :access_control
+        delegate :discover_groups, :discover_groups=, to: :access_control
+        delegate :discover_users, :discover_users=, to: :access_control
+        delegate :master_file_access, :master_file_access=, to: :access_control
       end
 
       # Grant discover permissions to the groups specified. Revokes discover permission for all other groups.
@@ -26,7 +27,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def discover_groups_string=(groups)
-        self.discover_groups=groups.split(/[\s,]+/)
+        self.discover_groups = groups.split(/[\s,]+/)
       end
 
       # Display the groups a comma delimeted string
@@ -41,9 +42,9 @@ module DRI
       #  r.discover_users
       #  => ['one', 'two', 'three']
       #
-      #def discover_users=(users)
+      # def discover_users=(users)
       #  set_discover_users(users, discover_users)
-      #end
+      # end
 
       # Grant discover permissions to the groups specified. Revokes discover permission for all other users.
       # @param[String] users a list of usernames
@@ -53,7 +54,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def discover_users_string=(users)
-        self.discover_users=users.split(/[\s,]+/)
+        self.discover_users = users.split(/[\s,]+/)
       end
 
       # Display the users as a comma delimited string
@@ -69,7 +70,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def read_groups_string=(groups)
-        self.read_groups=groups.split(/[\s,]+/)
+        self.read_groups = groups.split(/[\s,]+/)
       end
 
       # Display the groups as a comma delimited string
@@ -104,7 +105,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def read_users_string=(users)
-        self.read_users=users.split(/[\s,]+/)
+        self.read_users = users.split(/[\s,]+/)
       end
 
       # Display the users as a comma delimeted string
@@ -120,7 +121,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def edit_groups_string=(groups)
-        self.edit_groups=groups.split(/[\s,]+/)
+        self.edit_groups = groups.split(/[\s,]+/)
       end
 
       # Display the groups a comma delimeted string
@@ -148,7 +149,7 @@ module DRI
       end
 
       def edit_users_string=(users)
-        self.edit_users=users.split(/[\s,]+/)
+        self.edit_users = users.split(/[\s,]+/)
       end
 
       # Display the groups a comma delimeted string
@@ -164,7 +165,7 @@ module DRI
       #  => ['one', 'two', 'three']
       #
       def manager_groups_string=(groups)
-        self.manager_groups=groups.split(/[\s,]+/)
+        self.manager_groups = groups.split(/[\s,]+/)
       end
 
       # Display the groups a comma delimeted string
@@ -173,7 +174,7 @@ module DRI
       end
 
       def manager_users_string=(users)
-        self.manager_users=users.split(/[\s,]+/)
+        self.manager_users = users.split(/[\s,]+/)
       end
 
       # Display the groups a comma delimeted string

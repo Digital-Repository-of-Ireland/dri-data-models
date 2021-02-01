@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -19,25 +20,25 @@ module DRI
 
         # DRI Mandatory (M)
         # Title (collection-level)
-        delegate :title,:title=, to: :descMetadata
+        delegate :title, :title=, to: :descMetadata
         # Description (collection-level)
-        delegate :description,:description=, to: :descMetadata
+        delegate :description, :description=, to: :descMetadata
         # ADDED TYPE, it is compulsory
         # delegate :type, to: 'descMetadata', multiple: true
         # Rights (collection-level)
-        delegate :rights,:rights=, to: :descMetadata
+        delegate :rights, :rights=, to: :descMetadata
         # Creator (collection-level)
-        delegate :creator,:creator=, to: :descMetadata
+        delegate :creator, :creator=, to: :descMetadata
 
         # DRI Recommended (R)
         # Contributor
-        delegate :contributor,:contributor=, to: :descMetadata
+        delegate :contributor, :contributor=, to: :descMetadata
         # Publisher (collection-level, DRI pre-populated)
-        delegate :publisher,:publisher=, to: :descMetadata
+        delegate :publisher, :publisher=, to: :descMetadata
         # Subject (collection-level)
-        delegate :subject,:subject=, to: :descMetadata
+        delegate :subject, :subject=, to: :descMetadata
         # Language (collection-level)
-        delegate :language,:language=, to: :descMetadata
+        delegate :language, :language=, to: :descMetadata
 
         serialize :institute, Array
 

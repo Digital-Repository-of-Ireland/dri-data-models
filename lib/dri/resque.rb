@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Borrowed from:
 # https://github.com/jeremy/resque-rails/blob/master/lib/resque/rails/queue.rb
 require 'redis'
@@ -18,7 +19,7 @@ module DRI
           ::Resque.enqueue_to queue, MarshaledJob, Base64.encode64(Marshal.dump(job))
         rescue Redis::CannotConnectError => error
           Rails.logger.error "Redis is down!"
-	  raise error
+          raise error
         rescue Redis::TimeoutError => error
           Rails.logger.warn "Redis Timed out.  Trying again! #{job.inspect}"
           push_tries += 1

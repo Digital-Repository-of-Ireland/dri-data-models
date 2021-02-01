@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module Datastreams
     autoload :OmDatastream, 'dri/datastreams/om_datastream'

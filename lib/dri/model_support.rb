@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module ModelSupport
     autoload :Common, 'dri/model_support/common'

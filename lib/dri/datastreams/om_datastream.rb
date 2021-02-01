@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "om"
 
 module DRI::Datastreams
@@ -30,28 +31,6 @@ module DRI::Datastreams
       solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix, key].join] = value }
     end
 
-    # ** Experimental **
-    # @return [Boolean] true if either the key for name exists in solr or if its string value exists
-    # @param [String] name Name of key to look for
-    # @param [Solr::Document] solr_doc Solr doc to query
-    def has_solr_name?(name, solr_doc = {})
-      solr_doc[name].present? || solr_doc[name.to_s].present?
-    end
-
-    # ** Experimental **
-    # @return true if the term_pointer contains an index
-    # ====Example:
-    #     [:image, {:title_set=>1}, :title] return true
-    #     [:image, :title_set, :title]      return false
-    def is_hierarchical_term_pointer?(*term_pointer)
-      if term_pointer.length > 1
-        term_pointer.each do |pointer|
-          return true if pointer.is_a?(Hash)
-        end
-      end
-      false
-    end
-
     # Update field values within the current datastream using {#update_values}, which is a wrapper for {http://rdoc.info/gems/om/1.2.4/OM/XML/TermValueOperators#update_values-instance_method OM::TermValueOperators#update_values}
     # Ignores any fields from params that this datastream's Terminology doesn't recognize
     #
@@ -79,7 +58,7 @@ module DRI::Datastreams
     #   </mods>
     def update_indexed_attributes(params = {}, _opts = {})
       if self.class.terminology.nil?
-        raise "No terminology is set for this OmDatastream class.  Cannot perform update_indexed_attributes"
+        raise "No terminology is set for this OmDatastream class. Cannot perform update_indexed_attributes"
       end
       # remove any fields from params that this datastream doesn't recognize
       # make sure to make a copy of params so not to modify hash that might be passed to other methods

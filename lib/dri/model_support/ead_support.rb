@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -95,10 +96,10 @@ module DRI
 
       # Create associated generic file from a given URL
       def process_ingest_of_file_urls
-       if descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-          dao_href_proxy.each do |url|
-            add_file_from_url(url.strip) unless url.blank?
-          end
+        return unless descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+
+        dao_href_proxy.each do |url|
+          add_file_from_url(url.strip) if url.present?
         end
       end # process_ingest_of_file_urls
 
@@ -118,7 +119,7 @@ module DRI
           return added unless added
 
           true
-        rescue Exception => e
+        rescue => e
           logger.error "Error loading url: #{file_url} PID: #{alternate_id}\n"
           logger.error e.backtrace.join("\n")
 
@@ -130,8 +131,7 @@ module DRI
         end
       end # add_file_from_url
 
-      def add_file_to_object(temp_file, file_name)
-      end
+      def add_file_to_object(temp_file, file_name); end
 
       # Searchs for the node's children ead:components (c | c01..12 XML nodes)
       # @param [Nokogiri::XML::Document] node the document to search
@@ -165,8 +165,7 @@ module DRI
       private
 
       def metadata_class_from_xml(xml_text)
-        result = nil
-        ead_components = %w(c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12)
+        ead_components = %w[c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12]
 
         xml = if xml_text.is_a? Nokogiri::XML::Document
                 xml_text
@@ -174,9 +173,7 @@ module DRI
                 Nokogiri::XML xml_text
               end
 
-        namespace = xml.namespaces
         root_name = xml.root.name
-
         result = if (xml.internal_subset.present? && xml.internal_subset.name == 'ead') || root_name == 'ead'
                    'DRI::Metadata::EncodedArchivalDescription'
                  elsif ead_components.include? root_name
@@ -204,7 +201,7 @@ module DRI
       # @param object [DRI::DigitalObject] the object to check
       # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
-        return false unless object.governing_collection.present?
+        return false if object.governing_collection.blank?
 
         duplicates = DRI::DigitalObject.where.not(id: object.id).where(metadata_checksum: object.metadata_checksum, governing_collection_id: object.governing_collection_id)
         !duplicates.empty?
@@ -226,7 +223,7 @@ module DRI
         return if collection?
 
         if content_changed && generic_files.empty? &&
-            !dao_href_proxy.empty? && !new_record?
+           !dao_href_proxy.empty? && !new_record?
           DRI.queue.push(IngestFilesFromMetadataJob.new(alternate_id))
         end
       end # ingest_files_if_changed

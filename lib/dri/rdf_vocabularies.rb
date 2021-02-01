@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module RDFVocabularies
     autoload :DriRelsVocabulary, 'dri/rdf_vocabularies/dri_rels_vocabulary'

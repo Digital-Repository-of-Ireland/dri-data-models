@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module Datastreams
     module NokogiriDatastream
@@ -52,10 +53,6 @@ module DRI
         attribute_will_change!('ng_xml')
       end
 
-      #def ng_xml_doesnt_change!
-      #  changes.delete('ng_xml')
-      #end
-
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_changed?
         changed.include?('ng_xml')
@@ -64,12 +61,12 @@ module DRI
       def remote_content
         @ds_content ||= Nokogiri::XML(persisted_remote_content).to_xml(&:no_declaration).strip
       end
-           
+
       def content=(new_content)
         if remote_content != new_content.to_s
           attribute_will_change!('ng_xml')
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
-          
+
           attribute_will_change!('content') unless @content == new_content.to_s
           @content = new_content.to_s
         end
@@ -107,7 +104,7 @@ module DRI
         @content = to_xml if ng_xml_changed? || (new_record? && @content.nil?)
         persisted_content
       end
-      
+
       def xml_loaded
         instance_variable_defined? :@ng_xml
       end

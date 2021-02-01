@@ -21,7 +21,7 @@ def with_solr_server(environment)
       return
     end
     solr.with_collection(name: "#{environment}", dir: solr_config_path) do
-        yield
+      yield
     end
   end
   ENV["#{environment}_SERVER_STARTED"] = 'false'

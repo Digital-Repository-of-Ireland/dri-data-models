@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module Indexing
     extend ActiveSupport::Concern
@@ -12,7 +13,7 @@ module DRI
       @adapter ||= Valkyrie::MetadataAdapter.find(:index_solr)
     end
 
-      # Updates Solr index with self.
+    # Updates Solr index with self.
     def update_index
       adapter.persister.save(resource: ValkyrieWrapper.new(wrapped_object: self))
     end
@@ -28,14 +29,14 @@ module DRI
 
     protected
 
-      def assign_alternate_id
-        if !self.alternate_id && new_id = assign_id
-          self.alternate_id = new_id
-        end
+    def assign_alternate_id
+      if !self.alternate_id && (new_id = assign_id)
+        self.alternate_id = new_id
       end
+    end
 
-      def delete_from_solr
-        adapter.persister.connection.delete_by_id(alternate_id, params: { 'softCommit' => true })
-      end
+    def delete_from_solr
+      adapter.persister.connection.delete_by_id(alternate_id, params: { 'softCommit' => true })
+    end
   end
 end

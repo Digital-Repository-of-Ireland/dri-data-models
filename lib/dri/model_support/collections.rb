@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -25,7 +26,7 @@ module DRI
 
         has_many :collection_relationships
         has_many :collection_relatives, through: :collection_relationships
-        has_many :inverse_collection_relationships, class_name: 'DRI::CollectionRelationship', :foreign_key => "collection_relative_id"
+        has_many :inverse_collection_relationships, class_name: 'DRI::CollectionRelationship', foreign_key: "collection_relative_id"
         has_many :inverse_collection_relatives, through: :inverse_collection_relationships, source: :digital_object
 
         # Additional relationships to keep track of sibling order

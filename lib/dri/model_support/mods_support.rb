@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -8,7 +9,7 @@ module DRI
 
       # Creates a set of DRI::Mods digital objects from the MODS record metadata
       def create_mods_records
-        return if self.new_record?
+        return if new_record?
         xml_no_blanks = Nokogiri::XML.parse(fullMetadata.to_xml, &:noblanks)
 
         return if xml_no_blanks.search('/mods:modsCollection').empty?
@@ -16,7 +17,7 @@ module DRI
         collection = xml_no_blanks.search('/mods:modsCollection')
         records = collection.children
         records.each_with_index do |r, i|
-          next if i == 0
+          next if i.zero?
 
           # Need to add the namespace declarations to the mods:mods root element
           # Otherwise the terminology (xpath) won't find the elements
@@ -27,7 +28,7 @@ module DRI
             }
           end
           # Skip the first one, which has already been generated
-          create_object(new_xml.to_xml) if records.index(r) > 0
+          create_object(new_xml.to_xml) if records.index(r).positive?
         end
       end # create_mods_records
 
@@ -41,17 +42,10 @@ module DRI
         new_object.status = status
         new_object.update_metadata(xml)
 
-        new_object.read_users_string = read_users_string
-        new_object.read_groups_string = read_groups_string
-        new_object.edit_users_string = edit_users_string
-        new_object.edit_groups_string = edit_groups_string
-        new_object.manager_users_string = manager_users_string
-        new_object.manager_groups_string = manager_groups_string
-
         DRI::Utils.checksum_metadata(new_object)
 
         new_object.save if new_object.valid?
-        self.save
+        save
       end # create_object
     end # modsSupport
   end # modelSupport
