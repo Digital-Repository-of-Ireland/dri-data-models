@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects
+  # Implementation of DRI EAD digital objects
   class EadCollection < DRI::DigitalObject
     include DRI::EncodedArchivalDescription
 
