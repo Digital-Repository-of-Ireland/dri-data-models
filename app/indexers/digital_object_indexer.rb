@@ -7,7 +7,8 @@ class DigitalObjectIndexer
 
   def to_solr
     return {} if resource.wrapped_object.is_a?(::DRI::GenericFile)
-    {
+
+    solr_doc = {
       'status_ssi' => resource.wrapped_object.status,
       'depositor_sim' => resource.wrapped_object.depositor,
       'depositor_ss' => resource.wrapped_object.depositor,
@@ -21,5 +22,29 @@ class DigitalObjectIndexer
       'licence_sim' => resource.wrapped_object.licence,
       'licence_tesim' => resource.wrapped_object.licence
     }
+
+    solr_doc.merge!(collection_file_types) if resource.wrapped_object.collection?
+
+    solr_doc
+  end
+
+  def collection_file_types
+    file_type = ['collection']
+    file_type_display = if ead_level?
+                          [resource.wrapped_object.ead_level.first.strip.capitalize]
+                        else
+                          ['Collection']
+                        end
+
+    {
+      'file_type_tesim' => file_type,
+      'file_type_sim' => file_type,
+      'file_type_display_tesim' => file_type_display,
+      'file_type_display_sim' => file_type_display
+    }
+  end
+
+  def ead_level?
+    resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
   end
 end

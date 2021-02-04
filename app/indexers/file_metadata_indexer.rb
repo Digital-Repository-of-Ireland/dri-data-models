@@ -6,9 +6,9 @@ class FileMetadataIndexer
   end
 
   def to_solr
-    return {} unless resource.wrapped_object.respond_to?(:generic_files)
+    return {} unless resource.wrapped_object.respond_to?(:generic_files) && resource.wrapped_object.generic_files.present?
 
-    solr_doc = collection_file_types
+    solr_doc = {}
 
     solr_doc.merge!(index_file_metadata) if resource.wrapped_object.generic_files.count.positive?
     solr_doc.merge!(file_type_from_metadata) unless solr_doc.key?('file_type_tesim')
@@ -17,19 +17,6 @@ class FileMetadataIndexer
   end
 
   private
-
-  def collection_file_types
-    return {} unless resource.wrapped_object.collection?
-
-    file_type = ['collection']
-    file_type_display = if ead_level?
-                          [resource.wrapped_object.ead_level.first.strip.capitalize]
-                        else
-                          ['Collection']
-                        end
-
-    file_type_fields(file_type, file_type_display)
-  end
 
   def file_type_fields(file_type, file_type_display)
     {
@@ -158,9 +145,5 @@ class FileMetadataIndexer
     end
 
     file_type_fields(file_type, file_type_display)
-  end
-
-  def ead_level?
-    resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
   end
 end
