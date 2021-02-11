@@ -18,9 +18,11 @@ module DRI::ModelSupport
                   else
                     base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
                     FileUtils.mkdir_p(base_dir)
-                    File.join(base_dir, opts[:file_name])
+                    path = File.join(base_dir, opts[:file_name])
+
+                    upload_to_file(upload)
+                    path
                   end
-      upload_to_file(upload)
     end
 
     # Remove the file from the filesystem if it exists
