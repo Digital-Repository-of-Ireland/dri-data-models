@@ -6,7 +6,7 @@ module DRI
     included do
       before_create :assign_alternate_id
       after_commit  :update_index, on: [:create, :update]
-      after_destroy :delete_from_solr
+      after_commit :delete_from_solr, on: :destroy
     end
 
     def adapter
@@ -30,8 +30,8 @@ module DRI
     protected
 
     def assign_alternate_id
-      if !self.alternate_id && (new_id = assign_id)
-        self.alternate_id = new_id
+      if !self.alternate_identifier.alternate_id && (new_id = assign_id)
+        self.alternate_identifier.alternate_id = new_id
       end
     end
 
