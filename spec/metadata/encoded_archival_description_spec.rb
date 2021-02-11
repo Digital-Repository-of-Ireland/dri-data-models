@@ -256,16 +256,16 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     after(:each) do
       unless @ead_item.new_record?
-        @ead_item.delete
+        @ead_item.destroy
       end
       unless @ead_file.new_record?
-        @ead_file.delete
+        @ead_file.destroy
       end
       unless @ead_series.new_record?
-        @ead_series.delete
+        @ead_series.destroy
       end
       unless @ead_collection.new_record?
-        @ead_collection.delete
+        @ead_collection.destroy
       end
     end
 
@@ -554,13 +554,13 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     after(:each) do
       unless @component.new_record?
-        @component.delete
+        @component.destroy
       end
       unless @component_item.new_record?
-        @component_item.delete
+        @component_item.destroy
       end
       unless @collection.new_record?
-        @collection.delete
+        @collection.destroy
       end
     end
 
