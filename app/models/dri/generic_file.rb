@@ -19,7 +19,7 @@ module DRI
 
     include DRI::ModelSupport::LocalFile
 
-    has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable
+    has_one :alternate_identifier, class_name: 'DRI::Identifier', as: :identifiable, dependent: :nullify
 
     include DRI::Derivatives::ExtractMetadata
 
