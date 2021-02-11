@@ -68,8 +68,8 @@ class FileMetadataIndexer
       end
       if gf.key?('file_size_isi')
         file_size_total = 0 if file_size_total.nil?
-        file_size_total += gf['file_size_isi'].first
-        file_size |= gf['file_size_isi']
+        file_size_total += gf['file_size_isi']
+        file_size |= [gf['file_size_isi']]
       end
 
       if gf.key?('file_format_tesim')
