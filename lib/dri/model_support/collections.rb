@@ -32,7 +32,7 @@ module DRI
         # Additional relationships to keep track of sibling order
         # used in EAD
         # one-to-one AF association to associate the preceding EAD child component for the given object
-        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true
+        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true, inverse_of: :next_sibling
         # one-to-many AF association to associate the succeeding EAD children component for the given object
         has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
 
