@@ -45,6 +45,6 @@ class DigitalObjectIndexer
   end
 
   def ead_level?
-    resource.wrapped_object.is_a?(DRI::EadCollection) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
+    resource.wrapped_object.respond_to?(:ead_level) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
   end
 end
