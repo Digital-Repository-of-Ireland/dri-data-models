@@ -13,16 +13,14 @@ module DRI::ModelSupport
       self.version = opts[:version].presence || digital_object.object_version || 1
       self.mime_type = opts[:mime_type]
 
-      self.path = if opts[:moab_path].present?
-                    File.join(aip_dir(object_id), opts[:moab_path])
-                  else
-                    base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
-                    FileUtils.mkdir_p(base_dir)
-                    path = File.join(base_dir, opts[:file_name])
-
-                    upload_to_file(upload)
-                    path
-                  end
+      if opts[:moab_path].present?
+        self.path = File.join(aip_dir(object_id), opts[:moab_path])
+      else
+        base_dir = opts[:directory].presence || File.join(content_path(object_id, version))
+        FileUtils.mkdir_p(base_dir)
+        self.path = File.join(base_dir, opts[:file_name])
+        upload_to_file(upload)
+      end
     end
 
     # Remove the file from the filesystem if it exists
