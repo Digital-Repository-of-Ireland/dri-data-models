@@ -31,7 +31,7 @@ class DigitalObjectIndexer
   def collection_file_types
     file_type = ['collection']
     file_type_display = if ead_level?
-                          [resource.wrapped_object.ead_level.first.strip.capitalize]
+                          [resource.wrapped_object.ead_level.strip.capitalize]
                         else
                           ['Collection']
                         end
