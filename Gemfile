@@ -9,5 +9,5 @@ gemspec
 group :test do
   # dri-user-group gem added for the rspec tests
   gem 'paper_trail'
-  gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'develop'
+  gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'active-record'
 end

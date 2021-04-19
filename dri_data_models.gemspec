@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'iso8601'
   s.add_dependency 'namae'
   s.add_dependency 'valkyrie'
+  s.add_dependency 'reform-rails', '~> 0.2.2'
   s.add_development_dependency 'sqlite3', '~> 1.3', '< 1.4'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
