@@ -100,16 +100,18 @@ module DRI::Asset
 
     # Populate GenericFile's properties with fields from FITS (e.g. Author from pdfs)
     def append_metadata
-      unless characterization.file_title.empty?
+      unless characterization.file_title.blank?
+        title ||= []
         characterization.file_title.each do |file_title|
           title << file_title unless title.include?(file_title)
         end
       end
 
-      return if characterization.file_author.empty?
+      return if characterization.file_author.blank?
 
+      creator ||= []
       characterization.file_author.each do |file_author|
-        creator << file_author unless self.file_author.include?(file_title)
+        creator << file_author unless creator.include?(file_author)
       end
     end
 
