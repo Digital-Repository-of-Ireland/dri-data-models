@@ -26,29 +26,20 @@ describe 'Mods' do
 
     it 'should find an existing object from fedora' do
       @mods_record.save
-      @collection = DRI::Mods.find_or_create(@mods_record.id)
+      @collection = DRI::Mods.find_by_alternate_id(@mods_record.alternate_id)
       expect(@collection.new_record?).to eq false
     end
 
-    it 'should create a new object if there isnt an existing object for a given id' do
-      @mods_record.save
-      @collection = DRI::Mods.find_or_create('fake-mods-id')
-      expect(@collection.new_record?).to eq true
-      @collection.delete
-    end
-
-    it 'should be a kind of Batch and Mods' do
-      @mods_record.should be_kind_of(DRI::Batch)
+    it 'should be a kind of Base and Mods' do
+      @mods_record.should be_kind_of(DRI::DigitalObject)
       @mods_record.should be_kind_of(DRI::Mods)
     end
 
     it 'should have the specified datastreams' do
-      @mods_record.attached_files.keys.should include(:descMetadata)
+      @mods_record.attached_files.keys.should include('descMetadata')
       @mods_record.descMetadata.should be_kind_of(DRI::Metadata::Mods)
-      @mods_record.attached_files.keys.should include(:fullMetadata)
+      @mods_record.attached_files.keys.should include('fullMetadata')
       @mods_record.fullMetadata.should be_kind_of(DRI::Metadata::FullMetadata)
-      @mods_record.attached_files.keys.should include(:properties)
-      @mods_record.properties.should be_kind_of(DRI::Metadata::Properties)
     end
 
     it 'should have mods namespace prefix' do
@@ -158,48 +149,6 @@ describe 'Mods' do
       @mods_record_att.roles = new_roles
       @mods_record_att.role_pro.should == ['new producer']
       @mods_record_att.role_hst.should == ['new host']
-    end
-  end
-
-  context 'Relationships' do
-    # Before each test create test objects
-    before(:each) do
-      @mods_wrapper_xml = fixture('mods/ns/modscollection-container.xml')
-      @mods_record_xml = fixture('mods/ns/sample-mods.xml')
-      @mods_subcol_xml = fixture('mods/ns/mods-subcollection.xml')
-
-      @mods_wrapper = DRI::Mods.new
-      @ds_w = DRI::Metadata::Mods.from_xml(@mods_wrapper_xml)
-      @mods_wrapper.update_metadata(@ds_w.to_xml)
-      @mods_wrapper.save
-
-      @mods_record = DRI::Mods.new
-      @ds = DRI::Metadata::Mods.from_xml(@mods_record_xml)
-      @mods_record.update_metadata(@ds.to_xml)
-      @mods_record.governing_collection = @mods_wrapper
-      @mods_record.save
-
-      @mods_subcol = DRI::Mods.new
-      @ds_s = DRI::Metadata::Mods.from_xml(@mods_subcol_xml)
-      @mods_subcol.update_metadata(@ds_s.to_xml)
-      @mods_subcol.governing_collection = @mods_wrapper
-      @mods_subcol.save
-    end
-
-    it 'should add relationship host and referenced_by' do
-      md_relationships_hash = @mods_record.get_relationships_records
-
-      added_rels = [DRI::Mods.find(md_relationships_hash[:referenced_by].first).mods_id_local,
-                    DRI::Mods.find(md_relationships_hash[:host].first).mods_id_local]
-
-      expect(added_rels).to  match(%w(http://example.org/subcollection/1# MODS-ID-1234))
-    end
-
-    after(:each) do
-      unless @mods_wrapper.new_record?
-        @mods_wrapper.governed_items.each { |o| o.delete }
-        @mods_wrapper.delete
-      end
     end
   end
 end

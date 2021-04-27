@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'dri/metadata'
 
 module DRI
@@ -6,10 +7,11 @@ module DRI
   autoload :Vocabulary, 'dri/vocabulary'
   autoload :Utils, 'dri/utils'
   autoload :Checksum, 'dri/checksum'
-  autoload :Solr, 'solr/query'
   autoload :RDFVocabularies, 'dri/rdf_vocabularies'
+  autoload :Datastreams, 'dri/datastreams'
   autoload :Derivatives, 'dri/derivatives'
- 
+  autoload :Indexing, 'dri/indexing'
+
   attr_writer :queue
 
   def self.queue

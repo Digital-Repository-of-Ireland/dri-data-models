@@ -35,7 +35,7 @@ describe 'Export concern' do
 
     @t.type = ['Text']
 
-    (@t.export_as_dri_citation).should eq("A. Tester. (#{year}) A test of citations, Digital Repository of Ireland [Distributor]")
+    expect(@t.export_as_dri_citation).to eq("A. Tester. (#{year}) A test of citations, Digital Repository of Ireland [Distributor]")
   end
 
   it 'should add the depositing institute' do

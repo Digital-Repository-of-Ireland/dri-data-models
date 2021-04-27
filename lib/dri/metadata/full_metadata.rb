@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI
 module DRI
   module Metadata
@@ -8,7 +9,8 @@ module DRI
     #   MODS: <mods:modsCollection> wrapper
     #   EAD: <ead:dsc> wrapper
     #   MARC <marc:collection> wrapper
-    class FullMetadata < ActiveFedora::OmDatastream
+    class FullMetadata < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
     end
   end
 end

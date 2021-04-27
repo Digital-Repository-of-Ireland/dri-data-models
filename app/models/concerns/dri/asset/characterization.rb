@@ -2,11 +2,11 @@ module DRI::Asset
   module Characterization
     extend ActiveSupport::Concern
     included do
-      has_subresource :characterization, class_name: 'FitsDatastream'
+      has_one :characterization, class_name: 'FitsDatastream', as: :describable, autosave: true
 
       delegate :format_label,          to: :characterization
       delegate :last_modified,         to: :characterization
-      delegate :filename,:filename=,   to: :characterization
+      delegate :filename, :filename=,   to: :characterization
       delegate :original_checksum, to: :characterization
       delegate :rights_basis,      to: :characterization
       delegate :copyright_basis,   to: :characterization
@@ -14,8 +14,8 @@ module DRI::Asset
       delegate :well_formed,       to: :characterization
       delegate :valid,             to: :characterization
       delegate :message,           to: :characterization
-      delegate :file_title,        to: :characterization
       delegate :file_author,       to: :characterization
+      delegate :file_title,        to: :characterization
       delegate :page_count,        to: :characterization
       delegate :file_language,     to: :characterization
       delegate :word_count,        to: :characterization
@@ -48,16 +48,16 @@ module DRI::Asset
       delegate :frame_rate,        to: :characterization
     end
 
+    def characterization
+      super || build_characterization
+    end
+
     def file_size
      characterization.file_size.first.to_i
     end
 
     def file_size=(file_size)
-     characterization.file_size = file_size
-    end
-
-    def file_title
-     characterization.file_title
+      characterization.file_size = file_size
     end
 
     def file_title=(file_title)
@@ -73,42 +73,45 @@ module DRI::Asset
     end
 
     def width
-      characterization.width.blank? ? characterization.video_width : characterization.width
+      characterization.width.presence || characterization.video_width
     end
 
     def height
-      characterization.height.blank? ? characterization.video_height : characterization.height
+      characterization.height.presence || characterization.video_height
     end
 
     def duration
-      characterization.duration.blank? ? characterization.video_duration : characterization.duration
+      characterization.duration.presence || characterization.video_duration
     end
 
     def sample_rate
-      characterization.sample_rate.blank? ? characterization.video_sample_rate : characterization.sample_rate
+      characterization.sample_rate.presence || characterization.video_sample_rate
     end
 
-    ## Extract the metadata from the content datastream and record it in the characterization datastream
+    ## Extract the metadata from the content datastream
+    # and record it in the characterization datastream
     def characterize
       metadata = extract_metadata
       characterization.ng_xml = metadata if metadata.present?
       append_metadata
-      self.filename = [self.label]
+      self.filename = [label]
       save
     end
 
     # Populate GenericFile's properties with fields from FITS (e.g. Author from pdfs)
     def append_metadata
-      unless characterization.file_title.empty?
+      unless characterization.file_title.blank?
+        title ||= []
         characterization.file_title.each do |file_title|
-          self.title << file_title unless self.title.include?(file_title)
+          title << file_title unless title.include?(file_title)
         end
       end
 
-      unless characterization.file_author.empty?
-        characterization.file_author.each do |file_author|
-          self.creator << file_author unless self.file_author.include?(file_title)
-        end
+      return if characterization.file_author.blank?
+
+      creator ||= []
+      characterization.file_author.each do |file_author|
+        creator << file_author unless creator.include?(file_author)
       end
     end
 

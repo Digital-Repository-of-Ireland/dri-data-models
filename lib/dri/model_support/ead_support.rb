@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -9,13 +10,10 @@ module DRI
       included do
         around_save :ingest_files_if_changed # callback for generating EAD Generic Files from ead:dao links
 
-        attr_accessor :desc_metadata_class
         attr_accessor :trigger_ingest
         attr_accessor :trigger_update
 
-        after_initialize :load_attributes
-
-        # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading fedora objects
+        # Issue 1195 - Trigger ingest, additional flag to avoid ead updates when loading objects
         # load_attributes changes the descMetadata datastream to load the right metadata class
         def trigger_ingest
           @trigger_ingest || false
@@ -27,7 +25,7 @@ module DRI
         end
       end
 
-      # Process a component's children and create associated objects in Fedora
+      # Process a component's children and create associated objects
       def synchronize_children_to_metadata
         return if self.new_record?
 
@@ -51,18 +49,14 @@ module DRI
 
         while metadata_child_index < metadata_children.length
           # Create a new child
-          new_child = DRI::EncodedArchivalDescription.new(:component)
+          new_child = DRI::EadComponent.new
           new_child.update_metadata metadata_children[metadata_child_index].to_xml
           new_child.previous_sibling = prev_obj unless prev_obj.nil?
           new_child.governing_collection = self
-          # Add depositor, status and permissions from parent
+          # Add depositor and status from parent
           new_child.depositor = depositor
           new_child.status = status
-          # Copy permissions from parent
-          new_child.read_groups_string = read_groups_string
-          new_child.edit_groups_string = edit_groups_string
-          new_child.manager_groups_string = manager_groups_string
-          new_child.manager_users_string = manager_users_string
+
           # ingest_files_from_metadata
           new_child.ingest_files_from_metadata = ingest_files_from_metadata
           DRI::Utils.checksum_metadata(new_child)
@@ -73,10 +67,9 @@ module DRI
             Rails.logger.info("EAD_SAVE: #{new_child.title} is valid!")
             new_child.save
             # Do the preservation actions
-            preservation = Preservation::Preservator.new(new_child)
-            preservation.preserve(true, true, ['descMetadata','properties'])
+            preserve(new_child)
             begin
-              DRI::Utils.create_reader_group(new_child.id) if new_child.collection?
+              DRI::Utils.create_reader_group(new_child.alternate_id) if new_child.collection?
             rescue
               Rails.logger.error("synchronize_children_to_metadata: SQL exception in create_reader_group for object: #{new_child.id} ")
             end
@@ -96,16 +89,17 @@ module DRI
         end
       end # synchronize_children_to_metadata
 
+      def preserve(new_child)
+        preservation = ::Preservation::Preservator.new(new_child)
+        preservation.preserve(['descMetadata'])
+      end
+
       # Create associated generic file from a given URL
       def process_ingest_of_file_urls
-        case descMetadata
-        when DRI::Metadata::EncodedArchivalDescription
-        when DRI::Metadata::EncodedArchivalDescriptionComponent
-          dao_href_proxy.each do |url|
-            add_file_from_url(url.strip) unless url.blank?
-          end
-        else # Do nothing
-          return
+        return unless descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
+
+        dao_href_proxy.each do |url|
+          add_file_from_url(url.strip) if url.present?
         end
       end # process_ingest_of_file_urls
 
@@ -115,18 +109,18 @@ module DRI
       def add_file_from_url(file_url)
         file_name = File.basename(URI(file_url).path)
         begin
-
           # We have a copy of the remote file for processing
           temp_file = Tempfile.new(['tmp', File.extname(file_url)])
           temp_file.binmode
           open(file_url) { |data| temp_file.write data.read }
           temp_file.close
 
-          add_file(temp_file, 'content', file_name)
+          added = add_file_to_object(temp_file, file_name)
+          return added unless added
 
           true
-        rescue Exception => e
-          logger.error "Error loading url: #{file_url} PID: #{id}\n"
+        rescue => e
+          logger.error "Error loading url: #{file_url} PID: #{alternate_id}\n"
           logger.error e.backtrace.join("\n")
 
           false
@@ -136,6 +130,8 @@ module DRI
           temp_file.unlink unless temp_file.nil?
         end
       end # add_file_from_url
+
+      def add_file_to_object(temp_file, file_name); end
 
       # Searchs for the node's children ead:components (c | c01..12 XML nodes)
       # @param [Nokogiri::XML::Document] node the document to search
@@ -169,8 +165,7 @@ module DRI
       private
 
       def metadata_class_from_xml(xml_text)
-        result = nil
-        ead_components = %w(c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12)
+        ead_components = %w[c c01 c02 c03 c04 c05 c06 c07 c08 c09 c10 c11 c12]
 
         xml = if xml_text.is_a? Nokogiri::XML::Document
                 xml_text
@@ -178,9 +173,7 @@ module DRI
                 Nokogiri::XML xml_text
               end
 
-        namespace = xml.namespaces
         root_name = xml.root.name
-
         result = if (xml.internal_subset.present? && xml.internal_subset.name == 'ead') || root_name == 'ead'
                    'DRI::Metadata::EncodedArchivalDescription'
                  elsif ead_components.include? root_name
@@ -189,54 +182,6 @@ module DRI
 
         result
       end # metadata_class_from_xml
-
-      def load_attributes
-        ead_classes = %w(DRI::Metadata::EncodedArchivalDescription
-                         DRI::Metadata::EncodedArchivalDescriptionComponent)
-        ds = nil
-
-        if new_record? && !desc_metadata_class.nil?
-          # For new objects, check what metadata class was asked for during initialization
-          ds_class = @desc_metadata_class.to_s
-
-          if ead_classes.include? ds_class
-            ds = ds_class.constantize.new
-          else
-            # Load class from :desc_metadata_class which is set ingest_controller
-            if ead_classes.include? desc_metadata_class
-              ds = desc_metadata_class.constantize.new
-            else
-              # if NOT EAD or EADComponent, do not create DS
-              return
-            end
-          end
-        end
-
-        return if ds.nil?
-
-        ds.instance_variable_set(:@dsid, :descMetadata)
-        attach_file(ds, 'descMetadata')
-      end # load_attributes
-
-      def load_attached_files
-        super
-
-        attach_desc_metadata
-      end
-
-      def attach_desc_metadata
-        ds_class = metadata_class_from_xml(descMetadata.to_xml)
-
-        return unless %w(DRI::Metadata::EncodedArchivalDescription
-                         DRI::Metadata::EncodedArchivalDescriptionComponent).include? ds_class
-
-        old_digital_object = descMetadata.uri
-        ds = ds_class.constantize.from_xml(descMetadata.to_xml)
-        ds.uri = old_digital_object
-
-        ds.instance_variable_set(:@dsid, :descMetadata)
-        attached_files[:descMetadata] = ds
-      end
 
       # Returns an array of children EAD components
       # @param metadata [Nokogiri::XML] EAD component XML metadata
@@ -253,25 +198,13 @@ module DRI
       end
 
       # Checks whether the passed object is a duplicate
-      # @param object [DRI::Batch] the object to check
+      # @param object [DRI::DigitalObject] the object to check
       # @return [Boolean] true if object is a duplicate; false otherwise
       def object_duplicates?(object)
-        result = false
+        return false if object.governing_collection.blank?
 
-        return result unless object.governing_collection.present?
-
-        parent_id = object.governing_collection_id
-        md_hash_key = ActiveFedora::SolrQueryBuilder.solr_name('metadata_md5', :stored_searchable, type: :string)
-        governed_key = ActiveFedora::SolrQueryBuilder.solr_name('isGovernedBy', :stored_searchable, type: :symbol)
-
-        solr_query = "#{md_hash_key}:\"#{object.metadata_md5}\" AND #{governed_key}:\"#{parent_id}\""
-        documents = ActiveFedora::SolrService.query(solr_query,
-                                                    defType: 'edismax',
-                                                    rows: '10',
-                                                    fl: 'id').delete_if { |obj| obj['id'] == object.id }
-        result = true unless documents.empty?
-
-        result
+        duplicates = DRI::DigitalObject.where.not(id: object.id).where(metadata_checksum: object.metadata_checksum, governing_collection_id: object.governing_collection_id)
+        !duplicates.empty?
       end
 
       # Triggers the creation of generic files
@@ -290,8 +223,8 @@ module DRI
         return if collection?
 
         if content_changed && generic_files.empty? &&
-            !dao_href_proxy.empty? && !new_record?
-          DRI.queue.push(IngestFilesFromMetadataJob.new(id))
+           !dao_href_proxy.empty? && !new_record?
+          DRI.queue.push(IngestFilesFromMetadataJob.new(alternate_id))
         end
       end # ingest_files_if_changed
     end # module

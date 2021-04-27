@@ -24,16 +24,16 @@ module DRI
         '%W' => 'Digital Repository of Ireland'
       }
       text = []
-      text << '%0 Batch'
+      text << '%0 Object'
       end_note_format.each do |endnote_key, mapping|
         if mapping.is_a? String
           values = [mapping]
         else
-          values = self.send(mapping[0]) if self.respond_to? mapping[0]
+          values = send(mapping[0]) if respond_to? mapping[0]
           values = mapping[1].call(values) if mapping.length == 2
           values = [values] unless values.is_a? Array
         end
-        next if values.empty? or values.first.nil?
+        next if values.empty? || values.first.nil?
         spaced_values = values.join('; ')
         text << "#{endnote_key} #{spaced_values}"
       end
@@ -63,14 +63,14 @@ module DRI
         rights: 'rights'
       }
       field_map.each do |element, kev|
-        values = self.send(element)
+        values = send(element)
         next if values.empty? || values.first.nil?
         values.each do |value|
           export_text << "rft.#{kev}=#{CGI.escape(value)}"
         end
       end
 
-      export_text.join('&') unless export_text.blank?
+      export_text.join('&') if export_text.present?
     end
 
     # Exports the citation in DRI format
@@ -97,7 +97,7 @@ module DRI
       end
       text << authors_list_final.join
 
-      unless text.blank?
+      if text.present?
         if text[-1, 1] != '.'
           text << '. '
         else
@@ -113,7 +113,7 @@ module DRI
         title_info << clean_end_punctuation(CGI.escapeHTML(t)).strip + ', '
       end
 
-      text << title_info unless title_info.blank?
+      text << title_info if title_info.present?
 
       # Set database name
       text << setup_database_name
@@ -121,17 +121,16 @@ module DRI
       # Set depositing institute
       depositing_institute = self.depositing_institute
 
-      if depositing_institute.nil?
+      if depositing_institute.blank?
         gov = self
-        while depositing_institute.nil?
+        while depositing_institute.blank?
           gov = gov.governing_collection
           break if gov.nil?
           depositing_institute = gov.depositing_institute
         end
       end
-      text << ", #{depositing_institute} [Depositing Institution]" unless depositing_institute.nil?
-
-      text << ", https://doi.org/#{doi}" unless doi.nil?
+      text << ", #{depositing_institute} [Depositing Institution]" if depositing_institute.present?
+      text << ", https://doi.org/#{doi}" if doi.present?
 
       text.html_safe
     end
@@ -159,7 +158,7 @@ module DRI
         end
       end
       text << authors_list_final.join
-      unless text.blank?
+      if text.present?
         if text[-1, 1] != '.'
           text << '. '
         else
@@ -175,7 +174,7 @@ module DRI
 
       # Publisher info
       text << setup_pub_info unless setup_pub_info.nil?
-      text += '.' if !text.blank? && text[-1, 1] != '.'
+      text += '.' if text.present? && text[-1, 1] != '.'
 
       text << setup_database_name
 
@@ -206,7 +205,7 @@ module DRI
           end
         end
         text << authors_final.join
-        unless text.blank?
+        if text.present?
           if text[-1, 1] != '.'
             text << '. '
           else
@@ -218,7 +217,7 @@ module DRI
       end
       # setup title
       title_info = setup_title_info
-      text << '<i>' + mla_citation_title(title_info) + '</i> ' unless title.blank?
+      text << '<i>' + mla_citation_title(title_info) + '</i> ' if title.present?
 
       # Publication
       text << setup_pub_info unless setup_pub_info.nil?
@@ -228,7 +227,7 @@ module DRI
       date = 'n.d' if date.nil?
 
       text << ', ' + date
-      text << '.' if !text.blank? && text[-1, 1] != '.'
+      text << '.' if text.present? && text[-1, 1] != '.'
 
       # Set database name
       text << setup_database_name
@@ -246,13 +245,13 @@ module DRI
     def export_as_chicago_citation
       author_text = ''
       authors = all_authors
-      unless authors.blank?
+      if authors.present?
         if authors.length > 10
           authors.each_with_index do |author, index|
             next unless index < 7
 
-            if index == 0
-              author_text << "#{author}"
+            if index.zero?
+              author_text << author.to_s
               if author.ends_with?(',')
                 author_text << ' '
               else
@@ -265,8 +264,8 @@ module DRI
           author_text << ' et al.'
         elsif authors.length > 1
           authors.each_with_index do |author, index|
-            if index == 0
-              author_text << "#{author}"
+            if index.zero?
+              author_text << author.to_s
               if author.ends_with?(',')
                 author_text << ' '
               else
@@ -283,20 +282,20 @@ module DRI
         end
       end
       title_info = ''
-      title_info << citation_title(clean_end_punctuation(CGI.escapeHTML(title.first)).strip) unless title.blank?
+      title_info << citation_title(clean_end_punctuation(CGI.escapeHTML(title.first)).strip) if title.present?
 
       pub_info = ''
       place = '' # self.based_near.first
       publisher = self.publisher.first
-      unless place.blank?
+      if place.present?
         place = CGI.escapeHTML(place)
         pub_info << place
-        pub_info << ': ' unless publisher.blank?
+        pub_info << ': ' if publisher.present?
       end
 
       published_date = setup_pub_date('chicago')
 
-      unless publisher.blank?
+      if publisher.present?
         publisher = CGI.escapeHTML(publisher)
         pub_info << publisher
         pub_info << ', ' unless published_date.nil?
@@ -304,10 +303,10 @@ module DRI
       pub_info << published_date unless published_date.nil?
 
       citation = ''
-      citation << "#{author_text} " unless author_text.blank?
-      citation << "<i>#{title_info}.</i> " unless title_info.blank?
-      citation << "#{pub_info}." unless pub_info.blank?
-      citation << "#{setup_database_name}"
+      citation << "#{author_text} " if author_text.present?
+      citation << "<i>#{title_info}.</i> " if title_info.present?
+      citation << "#{pub_info}." if pub_info.present?
+      citation << setup_database_name
       citation << " Accessed #{access_date_chicago}."
       citation << " doi: #{doi}." unless doi.nil?
 
@@ -332,7 +331,7 @@ module DRI
 
     def setup_pub_date(format)
       first_date = published_at
-      unless first_date.blank?
+      if first_date.present?
         first_date = CGI.escapeHTML(first_date)
         date = Time.parse(first_date) # first_date.gsub(/[^0-9|n\.d\.]/, "")[0,4]
         date_value = date.strftime('%Y, %B %-d') if format.eql?('apa')
@@ -350,13 +349,13 @@ module DRI
       place = '' # self.based_near.first
       publisher = self.publisher.first
 
-      unless place.blank?
+      if place.present?
         place = CGI.escapeHTML(place)
         text << place
-        text << ': ' unless publisher.blank?
+        text << ': ' if publisher.present?
       end
 
-      unless publisher.blank?
+      if publisher.present?
         publisher = CGI.escapeHTML(publisher)
         text << publisher
       end
@@ -367,7 +366,7 @@ module DRI
     end
 
     def mla_citation_title(text)
-      no_upcase = %w(a an and but by for it of the to with)
+      no_upcase = %w[a an and but by for it of the to with]
       new_text = []
       word_parts = text.split(' ')
       word_parts.each do |w|
@@ -382,10 +381,10 @@ module DRI
     end
 
     def citation_title(title_text)
-      prepositions = %w(a about across an and before but by for it of the to with without)
+      prepositions = %w[a about across an and before but by for it of the to with without]
       new_text = []
       title_text.split(' ').each_with_index do |word, index|
-        if (index == 0 && word != word.upcase) ||
+        if (index.zero? && word != word.upcase) ||
            (word.length > 1 && word != word.upcase && !prepositions.include?(word))
           # the split("-") will handle the capitalization of hyphenated words
           new_text << word.split('-').map!(&:capitalize).join('-')
@@ -399,7 +398,7 @@ module DRI
     def setup_title_info
       text = ''
       title = self.title.first
-      unless title.blank?
+      if title.present?
         title = CGI.escapeHTML(title)
         title_info = clean_end_punctuation(title.strip)
         text << title_info
@@ -411,7 +410,7 @@ module DRI
     end
 
     def clean_end_punctuation(text)
-      return text[0, (text.length - 1)] if %w(. , : ; /).include? text[-1, 1]
+      return text[0, (text.length - 1)] if %w[. , : ; /].include? text[-1, 1]
 
       text
     end
@@ -455,8 +454,10 @@ module DRI
 
     def name_from_dcsv(value)
       value.strip.split(/\s*;\s*/).each do |component|
-        (k,v) = component.split(/\s*=\s*/)
-        return v unless v.nil? || v.empty? if k == 'name'
+        (k, v) = component.split(/\s*=\s*/)
+        if k == 'name'
+          return v if v.present?
+        end
       end
       nil
     end

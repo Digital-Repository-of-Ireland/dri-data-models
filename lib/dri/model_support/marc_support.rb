@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
@@ -8,7 +9,7 @@ module DRI
 
       # Creates a set of DRI::Marc digital objects from the MARC record metadata
       def create_marc_records
-        return if self.new_record?
+        return if new_record?
 
         xml_no_ns = fullMetadata.ng_xml.clone
         xml_no_ns.remove_namespaces!
@@ -24,17 +25,16 @@ module DRI
       # @param [String] xml the XML metadata for the digital object to be created
       #
       def create_object(xml)
-        new_object = DRI::Batch.with_standard(:marc)
-        if governing_collection.nil?
-          new_object.governing_collection = self
-        else
-          new_object.governing_collection = governing_collection
-        end
+        new_object = DRI::DigitalObject.with_standard(:marc)
+        new_object.governing_collection = if governing_collection.nil?
+                                            self
+                                          else
+                                            governing_collection
+                                          end
         new_object.depositor = depositor
         new_object.status = status
         new_object.update_metadata(xml)
-        new_object.permissions = permissions.to_a
-        MetadataHelpers.checksum_metadata(new_object)
+        DRI::Utils.checksum_metadata(new_object)
 
         new_object.save if new_object.valid?
       end

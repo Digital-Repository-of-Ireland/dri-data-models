@@ -241,31 +241,31 @@ describe 'EncodedArchivalDescription descMetadata' do
       @file_xml = fixture('ead/components/component_file.xml')
       @item_xml = fixture('ead/components/component_item.xml')
 
-      @ead_collection = DRI::EncodedArchivalDescription.new :collection
+      @ead_collection = DRI::EadCollection.new
       @ead_collection.update_metadata(DRI::Metadata::EncodedArchivalDescription.from_xml(@collection_xml).to_xml, false)
 
-      @ead_series = DRI::EncodedArchivalDescription.new :component
+      @ead_series = DRI::EadComponent.new
       @ead_series.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@series_xml).to_xml, false)
 
-      @ead_file = DRI::EncodedArchivalDescription.new :component
+      @ead_file = DRI::EadComponent.new
       @ead_file.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@file_xml).to_xml, false)
 
-      @ead_item = DRI::EncodedArchivalDescription.new :component
+      @ead_item = DRI::EadComponent.new
       @ead_item.update_metadata(DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(@item_xml).to_xml, false)
     end
 
     after(:each) do
       unless @ead_item.new_record?
-        @ead_item.delete
+        @ead_item.destroy
       end
       unless @ead_file.new_record?
-        @ead_file.delete
+        @ead_file.destroy
       end
       unless @ead_series.new_record?
-        @ead_series.delete
+        @ead_series.destroy
       end
       unless @ead_collection.new_record?
-        @ead_collection.delete
+        @ead_collection.destroy
       end
     end
 
@@ -494,30 +494,30 @@ describe 'EncodedArchivalDescription descMetadata' do
         curr_file = DRI::Metadata::EncodedArchivalDescriptionComponent.from_xml(file_xml2).to_xml
         curr_file = curr_file.gsub(/^<c/, '<'+curr_node_name)
         curr_file = curr_file.gsub(/c>$/, curr_node_name+'>')
-        curr_batch = DRI::EncodedArchivalDescription.new :component
-        curr_batch.update_metadata curr_file
-        curr_batch.identifier.should == ['KDW/RM/02']
-        curr_batch.ead_level.should == 'file'
+        curr_object = DRI::EadComponent.new
+        curr_object.update_metadata curr_file
+        curr_object.identifier.should == ['KDW/RM/02']
+        curr_object.ead_level.should == 'file'
       end
     end
   end # Context validation of DRI compulsory elements
 
   context 'terminology mappings' do
     before(:each) do
-      @collection = DRI::EncodedArchivalDescription.new(:collection)
+      @collection = DRI::EadCollection.new
       @collection.identifier = ['IE/NIVAL KDW']
       @collection.identifier_id = 'KDW'
       @collection.country_code = 'IE'
       @collection.repository_code = 'IE-DuNIV'
 
-      @component = DRI::EncodedArchivalDescription.new(:component)
+      @component = DRI::EadComponent.new
       @component.identifier = ['IE/NIVAL KDW']
       @component.identifier_id = 'KDW'
       @component.country_code = 'IE'
       @component.repository_code = 'IE-DuNIV'
       @component.ead_level = 'file'
 
-      @component_item = DRI::EncodedArchivalDescription.new(:component)
+      @component_item = DRI::EadComponent.new
       @component_item.identifier = ['IE/NIVAL KDW']
       @component_item.identifier_id = 'KDW'
       @component_item.country_code = 'IE'
@@ -554,13 +554,13 @@ describe 'EncodedArchivalDescription descMetadata' do
 
     after(:each) do
       unless @component.new_record?
-        @component.delete
+        @component.destroy
       end
       unless @component_item.new_record?
-        @component_item.delete
+        @component_item.destroy
       end
       unless @collection.new_record?
-        @collection.delete
+        @collection.destroy
       end
     end
 

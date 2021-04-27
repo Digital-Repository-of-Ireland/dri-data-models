@@ -270,7 +270,7 @@ describe 'Mods' do
     end
 
     it "should expose the collection\'s identifiers" do
-      expect(@mods_col.mods_id_local).to eq 'MODS-ID-1234' # :multiple => false
+      expect(@mods_col.mods_id_local).to eq 'MODS-ID-1234'
       expect(@mods_col.identifier).to match_array(%w(MODS-ID-1234
                                                      http://example.org/collection/2#
                                                      MS11182-030_1))

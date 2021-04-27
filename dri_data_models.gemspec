@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 $:.push File.expand_path('../lib', __FILE__)
 
 # Maintain your gem's version:
@@ -7,11 +8,11 @@ require 'dri_data_models/version'
 Gem::Specification.new do |s|
   s.name        = 'dri_data_models'
   s.version     = DriDataModels::VERSION
-  s.authors     = 'Damien Gallagher'
-  s.email       = 'damien.gallagher@nuim.ie'
+  s.authors     = ["Damien Gallagher, Stuart Kenny, Kathryn Cassidy, Augustina Martinez"]
+  s.email       = 'dri@ria.ie'
   s.homepage    = 'http://www.dri.ie'
-  s.summary     = 'DRI metadata and data models needed for a DRI Hydra-Head.'
-  s.description = 'DRI metadata and data models needed for a DRI Hydra-Head.'
+  s.summary     = 'DRI metadata and data models needed for the DRI application.'
+  s.description = 'DRI metadata and data models needed for the DRI application.'
 
   s.required_ruby_version = '>= 1.9.3'
 
@@ -20,10 +21,8 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib', 'app']
 
-  s.add_dependency 'active-fedora'
-  s.add_dependency 'active_fedora-datastreams'
+  s.add_dependency 'om'
   s.add_dependency 'rails', '~> 5.2'
-  s.add_dependency 'hydra-head'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
   s.add_dependency 'hydra-file_characterization'
@@ -31,12 +30,15 @@ Gem::Specification.new do |s|
   s.add_dependency 'resque'
   s.add_dependency 'iso8601'
   s.add_dependency 'namae'
+  s.add_dependency 'valkyrie', '~> 2.1'
   s.add_development_dependency 'sqlite3', '~> 1.3', '< 1.4'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'bixby'
+
   s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'jquery-rails'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'ci_reporter_rspec'
   s.add_development_dependency 'yard'
-  s.add_development_dependency 'solr_wrapper', '~> 0.18'
-  s.add_development_dependency 'fcrepo_wrapper', '0.9.0'
+  s.add_development_dependency 'solr_wrapper'
 end

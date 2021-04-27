@@ -1,4 +1,5 @@
+# frozen_string_literal: true
 module DriDataModels
   # DRI Data Models version number
-  VERSION = '3.2.9'
+  VERSION = '4.0.0'
 end

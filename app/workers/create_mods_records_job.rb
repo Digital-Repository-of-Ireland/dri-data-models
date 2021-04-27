@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 # Implements a resque job to handle the creation of MARC records
-class CreateModsRecordsJob < ActiveFedoraIdBasedJob
+class CreateModsRecordsJob < IdBasedJob
   # Assign the resque queue name for this job
   def queue_name
     :mods
@@ -8,7 +9,7 @@ class CreateModsRecordsJob < ActiveFedoraIdBasedJob
   # Run CreateModsRecordsJob job
   def run
     sleep 3
-    mods_object = DRI::Mods.find(self.pid)
+    mods_object = DRI::Identifier.retrieve_object(pid)
     mods_object.create_mods_records
   end
 end

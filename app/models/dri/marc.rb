@@ -1,12 +1,13 @@
 # DRI namespace
 module DRI
-  # Implementation of DRI Marc digital objects extending from DRI::Batch
-  class Marc < DRI::Batch
+  # Implementation of DRI Marc digital objects
+  class Marc < DRI::DigitalObject
     include DRI::ModelSupport::MarcSupport
 
-    has_subresource :descMetadata, class_name: 'DRI::Metadata::Marc'
+    has_one :descMetadata, class_name: 'DRI::Metadata::Marc', as: :describable, autosave: true
 
     delegate :leader=, to: :descMetadata
+
     delegate :controlfield, to: :descMetadata
     delegate :controlfield_tag, to: :descMetadata
     delegate :datafield, to: :descMetadata
@@ -19,7 +20,7 @@ module DRI
     delegate :marc_id=, to: :descMetadata
 
     # MARC record asset identifier used to sort pages/sequenced items
-    delegate :id_asset=, to: :descMetadata #multiple: false do |index|
+    delegate :id_asset=, to: :descMetadata
 
     # MARC Relationships, mapped from QDC predicate properties
     # Mapped attributes for getting relational information from metadata
@@ -41,6 +42,8 @@ module DRI
     delegate :date, to: :descMetadata
     delegate :published_date, to: :descMetadata
 
+    delegate :type, to: :descMetadata
+
     def id_asset
       descMetadata.id_asset.first
     end
@@ -49,14 +52,16 @@ module DRI
       descMetadata.leader.first
     end
 
-    def marc_id
-      descMetadata.marc_id.first
+    def descMetadata
+      super || build_descMetadata
     end
 
-    # type attribute getter
-    # @return [Array<String>] array of type metadata term values
-    def type
-      descMetadata.type
+    def fullMetadata
+      super || build_fullMetadata
+    end
+
+    def marc_id
+      descMetadata.marc_id.first
     end
 
     # Updates the XML metadata for the object's descMetadata datastream
@@ -66,11 +71,11 @@ module DRI
     def update_metadata(xml_text, _ingest = true)
       xml_text = xml_text.read if xml_text.is_a? File
 
-      if xml_text.is_a? Nokogiri::XML::Document
-        xml = xml_text
-      else
-        xml = Nokogiri::XML xml_text
-      end
+      xml = if xml_text.is_a? Nokogiri::XML::Document
+              xml_text
+            else
+              Nokogiri::XML xml_text
+            end
 
       xml_no_blanks = Nokogiri::XML.parse(xml.to_xml, &:noblanks)
 
@@ -90,12 +95,12 @@ module DRI
       # the first marc:record and we then process the rest when saving
       collection = xml_text.search('//collection')
 
-      if collection.empty?
-        record = xml_text
-      else
-        records = collection.children
-        record = records[0]
-      end
+      record = if collection.empty?
+                 xml_text
+               else
+                 records = collection.children
+                 records[0]
+               end
 
       record.to_xml
     end
@@ -116,7 +121,8 @@ module DRI
     #
     # @return [Hash] relationships hash including label/field
     def self.relationships
-      { related: { label: 'Is Related To', field: 'relation_ids_relation' },
+      {
+        related: { label: 'Is Related To', field: 'relation_ids_relation' },
         is_version: { label: 'Is Version Of', field: 'relation_ids_isVersionOf' },
         is_format: { label: 'Is Format Of', field: 'relation_ids_isFormatOf' },
         preceding: { label: 'Preceding', field: 'relation_ids_preceding' },
@@ -128,23 +134,7 @@ module DRI
     # i.e. marc_id_tesim
     # @return [String] AF solrizer solr index field name
     def self.solr_relationships_field
-      ActiveFedora.index_field_mapper.solr_name('marc_id', :stored_searchable, type: :string)
-    end
-
-    # Return a Hash including all the PIDs of fedora objects by relationship type
-    # @return [Hash] the hash of MARC relationships with the Fedora PIDs of the related objects
-    def get_relationships_records
-      { related: retrieve_relation_records(send(self.class.relationships[:related][:field]),
-                                           self.class.solr_relationships_field),
-        is_version: retrieve_relation_records(send(self.class.relationships[:is_version][:field]),
-                                              self.class.solr_relationships_field),
-        is_format: retrieve_relation_records(send(self.class.relationships[:is_format][:field]),
-                                             self.class.solr_relationships_field),
-        preceding: retrieve_relation_records(send(self.class.relationships[:preceding][:field]),
-                                             self.class.solr_relationships_field),
-        succeeding: retrieve_relation_records(send(self.class.relationships[:succeeding][:field]),
-                                              self.class.solr_relationships_field)
-      }
+      'marc_id_tesim'
     end
 
     private
@@ -159,7 +149,7 @@ module DRI
 
       begin
         DRI.queue.push(CreateMarcRecordsJob.new(id))
-      rescue Exception => e
+      rescue => e
         Rails.logger.error(e.message)
       end
     end

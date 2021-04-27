@@ -1,8 +1,9 @@
+# frozen_string_literal: true
 # DRI namespace
 module DRI
   # ModelSupport namespace
   module ModelSupport
-    # Includes AF properties, collection management methods that are common to all the DRI digital object classes
+    # Includes properties, collection management methods that are common to all the DRI digital object classes
     module Collections
       extend ActiveSupport::Concern
 
@@ -12,31 +13,28 @@ module DRI
 
         # one-to-one AF association to associate the parent of the given object
         belongs_to :governing_collection,
-                   predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                   class_name: 'DRI::Batch'
+                   class_name: 'DRI::DigitalObject',
+                   polymorphic: true,
+                   optional: true,
+                   autosave: true
         # one-to-many AF association to associate the children of the given object
         has_many :governed_items,
-                 predicate: ActiveFedora::RDF::ProjectHydra.isGovernedBy,
-                 class_name: 'DRI::Batch',
+                 class_name: 'DRI::DigitalObject',
                  as: :governing_collection,
-                 dependent: :destroy
+                 dependent: :destroy,
+                 autosave: true
+
+        has_many :collection_relationships
+        has_many :collection_relatives, through: :collection_relationships
+        has_many :inverse_collection_relationships, class_name: 'DRI::CollectionRelationship', foreign_key: "collection_relative_id"
+        has_many :inverse_collection_relatives, through: :inverse_collection_relationships, source: :digital_object
 
         # Additional relationships to keep track of sibling order
         # used in EAD
         # one-to-one AF association to associate the preceding EAD child component for the given object
-        belongs_to :previous_sibling,
-                   predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                   class_name: 'DRI::Batch'
+        belongs_to :previous_sibling, class_name: 'DRI::DigitalObject', polymorphic: true, optional: true, inverse_of: :next_sibling
         # one-to-many AF association to associate the succeeding EAD children component for the given object
-        has_many :next_sibling,
-                 predicate: DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy,
-                 class_name: 'DRI::Batch',
-                 as: :previous_sibling
-
-        has_and_belongs_to_many :relations,
-                 class_name: 'DRI::Related',
-                 predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOf,
-                 inverse_of: :related
+        has_many :next_sibling, class_name: 'DRI::DigitalObject', as: :previous_sibling
 
         # Collection flag attribute setter
         #
@@ -62,62 +60,17 @@ module DRI
       def collection?
         # It is a collection if metadata specifies this
         # or using the collection accessor and it has no associated assets
-        (descMetadata.collection? || properties.collection?) && !generic_files.any?
+        (descMetadata.collection? || collection?) && !generic_files.any?
       end
 
       # Determine whether the digital object is a root, container collection
       # @return [Boolean] true if rootcollection; false otherwise
       def root_collection?
         # It is a root collection if it is already defined to be a collection; it has
-        # been already saved in Fedora; it has no governing collection and
+        # been already saved; it has no governing collection and
         # it's not a member of any other collection (collection.count == 0)
-        # FIXME: #1320
         !new_record? && collection? && governing_collection.nil?
       end
-
-      private
-
-      def collections_to_solr(solr_doc = {})
-        # Add title metadata from parent collections
-        ancestor_titles = []
-        ancestor_ids = []
-
-        curr_gov_collection = governing_collection
-
-        until curr_gov_collection.nil?
-          ancestor_titles << curr_gov_collection.title[0]
-          ancestor_ids << curr_gov_collection.id
-          curr_gov_collection = curr_gov_collection.governing_collection
-        end
-
-        if ancestor_ids.empty?
-          # This must be a root collection
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [title.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [title.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [id])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [id])
-        else
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :facetable) => ancestor_titles)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_title', :stored_searchable) => ancestor_titles)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_id', :stored_searchable) => ancestor_ids)
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('ancestor_id', :facetable) => ancestor_ids)
-          # governing_id needed for user_group gem!!!
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('governing_id', :facetable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection_id', :facetable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection_id', :stored_searchable) => [ancestor_ids.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection', :facetable) => [ancestor_titles.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('collection', :stored_searchable) => [ancestor_titles.first])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :facetable) => [ancestor_ids.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection_id', :stored_searchable) => [ancestor_ids.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :facetable) => [ancestor_titles.last])
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('root_collection', :stored_searchable) => [ancestor_titles.last])
-        end
-
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :facetable) => collection?)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('is_collection', :stored_searchable) => collection?)
-
-        solr_doc
-      end # collections_to_solr
     end # module
   end # module
 end # module

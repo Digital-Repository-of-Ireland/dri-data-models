@@ -25,7 +25,7 @@ describe 'QualifiedDublinCore' do
 
     after(:each) do
       unless @audio.new_record?
-        @audio.delete
+        @audio.destroy
       end
     end
 
@@ -41,20 +41,8 @@ describe 'QualifiedDublinCore' do
       expect(@audio.collection?).to eq true
     end
 
-    it 'should assert content model' do
-      expect_any_instance_of(DRI::Batch).to receive(:assert_content_model)
-      @dc = DRI::Batch.with_standard(:qdc)
-    end
-
     it 'should have asserted the content model' do
-      expect(@audio.has_model.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::Batch'])
-    end
-
-
-    it 'should create a new object if there isnt an existing object for a given id' do
-      @audio2 = DRI::QualifiedDublinCore.find_or_create('fake-dc-id')
-      expect(@audio2.new_record?).to eq true
-      @audio2.delete(eradicate: true)
+      expect(@audio.model_types.to_a).to match_array(['DRI::QualifiedDublinCore', 'DRI::DigitalObject'])
     end
 
     it 'should load from xml' do
@@ -67,11 +55,11 @@ describe 'QualifiedDublinCore' do
       audio2.creator.should == ['Gallagher, Damien']
     end
 
-    it 'should retrieve an existing object from fedora' do
+    it 'should retrieve an existing object' do
       @audio.update_attributes(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
-      @audio3 = DRI::QualifiedDublinCore.find_or_create(@audio.id)
+      @audio3 = DRI::QualifiedDublinCore.find_by_alternate_id(@audio.alternate_id)
       @audio3.title.should == @attributes_hash['title']
       @audio3.rights.should == @attributes_hash['rights']
       @audio3.description.should == @attributes_hash['description']
@@ -90,11 +78,8 @@ describe 'QualifiedDublinCore' do
 
     it 'should have the specified datastreams' do
       # Check for descMetadata datastream with MODS in it
-      @audio.attached_files.keys.should include(:descMetadata)
+      @audio.attached_files.keys.should include('descMetadata')
       @audio.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
-      # Check for properties datastream
-      @audio.attached_files.keys.should include(:properties)
-      @audio.properties.should be_kind_of DRI::Metadata::Properties
     end
 
     it 'should not be valid with no metadata' do
@@ -329,6 +314,22 @@ describe 'QualifiedDublinCore' do
       @audio.date = ['']
       @audio.should_not be_valid
     end
+
+    it 'should persist changes' do
+      @audio.update_attributes(@attributes_hash)
+      @audio.title = ['A Test Title']
+      @audio.save
+      @audio.reload
+      expect(@audio.title.first).to eq('A Test Title')
+    end
+
+    it 'should persist properties' do
+      @audio.update_attributes(@attributes_hash)
+      @audio.status = 'published'
+      @audio.save
+      @audio.reload
+      expect(@audio.status).to eq('published')
+    end
   end
 
   context 'indexing' do
@@ -340,7 +341,7 @@ describe 'QualifiedDublinCore' do
     end
 
     after(:each) do
-      @obj.delete unless @obj.new_record?
+      @obj.destroy unless @obj.new_record?
     end
 
     it 'excludes DCMI Point, Box, Period metadata values from languages-based indices' do
@@ -364,17 +365,16 @@ describe 'QualifiedDublinCore' do
       @obj.save
 
       ld = DRI::LinkedData.new
-      ld.resource_type = ["Dataset"]
-      ld.source = ["http://data.logainm.ie/place/1399926"]
-      ld.spatial = ["{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-7.25218,52.6556]},\"properties\":{\"placename\":\"Cill Chainnigh/Kilkenny\"}}"]
+      ld.resource_type = "Dataset"
+      ld.source = "http://data.logainm.ie/place/1399926"
+      ld.spatial = "{\"type\":\"Feature\",\"geometry\":{\"type\":\"Point\",\"coordinates\":[-7.25218,52.6556]},\"properties\":{\"placename\":\"Cill Chainnigh/Kilkenny\"}}"
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.id
+      rr.object_id = @obj.alternate_id
       rr.uri = "http://data.logainm.ie/place/1399926"
       rr.save
-
-      expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial[0])
+      expect(@obj.to_solr['geojson_ssim'][0]).to eq(ld.spatial)
 
       ld.delete
       rr.delete
@@ -392,7 +392,7 @@ describe 'QualifiedDublinCore' do
       ld.save
 
       rr = DRI::ReconciliationResult.new
-      rr.object_id = @obj.id
+      rr.object_id = @obj.alternate_id
       rr.uri = "http://data.logainm.ie/place/test"
       rr.save
 
@@ -408,42 +408,22 @@ describe 'QualifiedDublinCore' do
       expect(solr_doc['geographical_coverage_sim']).to match(['Co. na Gaillimhe',
                                                                 'name=Kilkenny; east=-7.2561; north=52.6477;'])
     end
-  end
 
-  context 'relationships' do
-    # Before each test create test objects
-    before(:each) do
-      @col_xml = fixture('relationships/qdc/qdc-rel-col.xml')
-      @obj_xml = fixture('relationships/qdc/qdc-rel-obj.xml')
-      @col = DRI::QualifiedDublinCore.new
-      @obj = DRI::QualifiedDublinCore.new
-      @col.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@col_xml).to_xml
-      @obj.update_metadata DRI::Metadata::QualifiedDublinCore.from_xml(@obj_xml).to_xml
-
-      @col.save
-      @obj.governing_collection = @col
+    it 'updates the modification time field in solr' do
       @obj.save
+      @obj.title = ['sample']
+      sleep 1
+      expect { @obj.save }.to change {
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+      }
     end
 
-    after(:each) do
-      unless @col.new_record?
-        @col.governed_items.each { |o| o.delete }
-        @col.delete
-      end
-    end
-
-    it 'should add relationship has_part and source' do
-      md_relationships_hash = @col.get_relationships_records
-
-      added_rels = DRI::QualifiedDublinCore.find(md_relationships_hash[:parts].first).qdc_id
-      added_rels.should =~ ['MAGOH01']
-    end
-
-    it 'should add relationship is_part_of' do
-      md_relationships_hash = @obj.get_relationships_records
-
-      added_rels = DRI::QualifiedDublinCore.find(md_relationships_hash[:container].first).qdc_id
-      added_rels.should =~ ['MAGOH']
+    it 'does not update the modification time field in solr if no change' do
+      @obj.save
+      @obj.reload
+      expect { @obj.save }.not_to change {
+        Valkyrie::MetadataAdapter.find(:index_solr).persister.connection.get('select', params: { q: "alternate_id:\"#{@obj.alternate_id}\"" })['response']['docs'].first['system_modified_dtsi']
+      }
     end
   end
 end

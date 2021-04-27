@@ -1,8 +1,14 @@
 module DRI
- module Metadata
-    # An ActiveFedora datastream that interacts with MARC-XML Metadata.
-    class Marc < DRI::Metadata::Base
+  # Metadata namespace
+  module Metadata
+    # A datastream that interacts with MARC-XML Metadata.
+    class Marc < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
       extend DRI::Metadata::Terminologies::Marc
+
+      def resource_type
+        ['Collection'] if collection?
+      end
 
       # Determine whether the metadata describes a collection
       # From: Appendix 2 - Conversion rules for Leader06 - dc:Type mapping
@@ -44,18 +50,18 @@ module DRI
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => type)
+        solr_doc[Solrizer.solr_name('type', :stored_searchable)] = type
+        solr_doc[Solrizer.solr_name('type', :facetable)] = type
 
         # Retrieve list of all people and add to
         # facet and search indexes in solr document
         person_array = person_array_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array | DRI::Metadata::Transformations.transform_name(person_array))
+        solr_doc[Solrizer.solr_name('person', :facetable)] = person_array
+        solr_doc[Solrizer.solr_name('person', :stored_searchable, type: :text)] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
 
         # Index Creator with null fields removed
-        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)].present?
+        solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
 
         # all_metadata - A SOLR index of all the text
         # contained in the XML document
@@ -64,35 +70,34 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => df_240a)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('author_sorted', :stored_sortable, type: :string) => df_100a)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('library_sorted', :stored_sortable, type: :string) => df_850a)
+        solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = df_240a
+        solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a
+        solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('date', :stored_searchable) => display_date_for_index(date))
+        solr_doc[Solrizer.solr_name('date', :stored_searchable)] = display_date_for_index(date)
 
         p_date = published_date
         if p_date
-          solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => display_date_for_index(p_date))
-
+          solr_doc[Solrizer.solr_name('published_date', :stored_searchable)] = display_date_for_index(p_date)
           pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'published_date' => p_date })
           if pdate_ranges.present?
-            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_ranges)
+            solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_ranges
             pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_ranges)
-            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
-            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
-            solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+            solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
+            solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
+            solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
           end
         end
 
         ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges({ 'date' => date })
-        solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges) unless ddate_ranges == []
+        solr_doc[DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD] = ddate_ranges unless ddate_ranges == []
         if ddate_ranges.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD => ddate_ranges)
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD] = ddate_ranges
           ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_ranges).minmax
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD => ddate_years[0])
-          solr_doc.merge!(DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD => ddate_years[1])
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD] = ddate_years[0]
+          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD] = ddate_years[1]
         end
 
         solr_doc
@@ -114,25 +119,23 @@ module DRI
       # @return [String] the DCMI Period encoded date string for display
       def display_date_for_index(date_field)
         date_field.collect do |value|
-          begin
-            next if value.nil? || value.empty?
+          next if value.blank?
 
-            if DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
-              value
-            else
-              # Date range in ISO8601 format?
-              formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
-              DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
-            end
-          rescue ISO8601::Errors::StandardError
-            # DCMI Period 'name' is the md value
-            DRI::Metadata::Transformations.create_dcmi_period(value)
+          if DRI::Metadata::Transformations.dcmi_period?(value) || Utils.valid_uri?(value)
+            value
+          else
+            # Date range in ISO8601 format?
+            formatted_date = ISO8601::DateTime.new(value).strftime('%Y-%m-%d')
+            DRI::Metadata::Transformations.create_dcmi_period(value, formatted_date)
           end
+        rescue ISO8601::Errors::StandardError
+          # DCMI Period 'name' is the md value
+          DRI::Metadata::Transformations.create_dcmi_period(value)
         end
       end
 
       def date_from_all_materials
-        return [] if all_materials_dates.empty? || ['b','c','d','n'].include?(all_materials_dates[:type])
+        return [] if all_materials_dates.empty? || ['b', 'c', 'd', 'n'].include?(all_materials_dates[:type])
 
         type_of_date = all_materials_dates[:type]
         date1 = all_materials_dates[:date1]
@@ -155,7 +158,7 @@ module DRI
           name = "p#{date1}#{date2}"
           start_date = ''
           end_date = ''
-        when 'm','i','k','q'
+        when 'm', 'i', 'k', 'q'
           name = "#{date1} - #{date2}"
           start_date = date1
           end_date = date2
@@ -206,8 +209,8 @@ module DRI
         all_materials = controlfield[tag_index]
         type_of_date = all_materials[6]
 
-        date1 = all_materials.slice(7,4)
-        date2 = all_materials.slice(11,4)
+        date1 = all_materials.slice(7, 4)
+        date2 = all_materials.slice(11, 4)
 
         all_materials = {}
         all_materials[:type] = type_of_date
@@ -237,14 +240,14 @@ module DRI
         creator_result = true unless creator.join.squish.empty?
         rights_result = true unless rights.join.squish.empty?
         date_result = true unless date.join.squish.empty?
-        published_date.each { |curr_date| date_result = true unless curr_date.blank? } unless published_date.nil? || date_result
+        published_date.each { |curr_date| date_result = true if curr_date.present? } unless published_date.nil? || date_result
 
-        title_result = true if title.any? { |v| !v.blank? }
-        type_result = true if type.any? { |v| !v.blank? }
-        description_result = true if description.any? { |v| !v.blank? }
-        creator_result = true if creator.any? { |v| !v.blank? }
-        rights_result = true if rights.any? { |v| !v.blank? }
-        date_result = true if date.any? { |v| !v.blank? }
+        title_result = true if title.any?(&:present?)
+        type_result = true if type.any?(&:present?)
+        description_result = true if description.any?(&:present?)
+        creator_result = true if creator.any?(&:present?)
+        rights_result = true if rights.any?(&:present?)
+        date_result = true if date.any?(&:present?)
 
         errors[:title] = "can\'t be blank" if title_result == false
         errors[:type] = "can\'t be blank" if type_result == false
@@ -281,7 +284,7 @@ module DRI
             subfield_node['code'] = subfield['subfield_code'].first
             subfield_node.content = subfield['subfield_value'].first
 
-            node.add_child(subfield_node) unless subfield_node.content.blank?
+            node.add_child(subfield_node) if subfield_node.content.present?
           end
 
           record.add_child(node) unless node.children.empty?
@@ -300,7 +303,7 @@ module DRI
           node['tag'] = controlfield['controlfield_tag'].first
           node.content = controlfield['controlfield_value'].first
 
-          record.add_child(node) unless node.content.blank?
+          record.add_child(node) if node.content.present?
         end
       end
 

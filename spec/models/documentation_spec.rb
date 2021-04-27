@@ -25,49 +25,43 @@ describe 'Documentation' do
     @dc_obj.delete unless @dc_obj.new_record?
   end
 
-  it 'should assert content model' do
-    expect_any_instance_of(DRI::Batch).to receive(:assert_content_model)
-    @doc_obj = DRI::Batch.with_standard(:documentation)
-  end
-
   it 'should have asserted the content model' do
-    expect(@doc.has_model.to_a).to match_array(['DRI::Documentation', 'DRI::Batch'])
+    expect(@doc.model_types.to_a).to match_array(['DRI::Documentation', 'DRI::DigitalObject'])
   end
 
-  it 'should find an existing object from fedora' do
+  it 'should find an existing object' do
     @doc.update_attributes(@attributes_hash)
+    @doc.documentation_for = @dc_obj
     @doc.save
-    @doc2 = DRI::Documentation.find_or_create(@doc.id)
+    @doc2 = DRI::Documentation.find_by_alternate_id(@doc.alternate_id)
     expect(@doc2.new_record?).to eq false
   end
 
-  it 'should create a new object if there isnt an existing object for a given id' do
-    @doc.update_attributes(@attributes_hash)
-    @doc.save
-    @doc2 = DRI::Documentation.find_or_create('fake-doc-id')
-    expect(@doc2.new_record?).to eq true
-    @doc2.delete
-  end
+  it 'should retrieve an existing object' do
+    @dc_obj.update_attributes(@attributes_hash)
+    @dc_obj.save
 
-  it 'should retrieve an existing object from fedora' do
     @doc.update_attributes(@attributes_hash)
+    @doc.documentation_for = @dc_obj
     @doc.save
+    coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
+
     @doc.new_record?.should == false
-    @doc = DRI::Documentation.find_or_create(@doc.id)
-    @doc.title.should == @attributes_hash[:title]
-    @doc.rights.should == @attributes_hash[:rights]
-    @doc.description.should == @attributes_hash[:description]
-    @doc.published_date.should == @attributes_hash[:published_date]
-    @doc.creation_date.should == @attributes_hash[:creation_date]
-    @doc.language.should == @attributes_hash[:language]
-    @doc.role_aut.should == @attributes_hash[:role_aut]
-    @doc.subject.should == @attributes_hash[:subject]
-    @doc.source.should == @attributes_hash[:source]
-    @doc.geographical_coverage.should == @attributes_hash[:geographical_coverage]
-    @doc.temporal_coverage.should == @attributes_hash[:temporal_coverage]
-    @doc.type.should == @attributes_hash[:type]
+    @doc2 = DRI::Documentation.find_by_alternate_id(@doc.alternate_id)
+    @doc2.title.should == @attributes_hash[:title]
+    @doc2.rights.should == @attributes_hash[:rights]
+    @doc2.description.should == @attributes_hash[:description]
+    @doc2.published_date.should == @attributes_hash[:published_date]
+    @doc2.creation_date.should == @attributes_hash[:creation_date]
+    @doc2.language.should == @attributes_hash[:language]
+    @doc2.role_aut.should == @attributes_hash[:role_aut]
+    @doc2.subject.should == @attributes_hash[:subject]
+    @doc2.source.should == @attributes_hash[:source]
+    @doc2.geographical_coverage.should == coverage.flatten
+    @doc2.temporal_coverage.should == @attributes_hash[:temporal_coverage]
+    @doc2.type.should == @attributes_hash[:type]
 
-    @doc.should be_valid
+    @doc2.should be_valid
   end
 
   it 'should assert isDescriptionOf predicate if associated with an object' do
@@ -80,17 +74,14 @@ describe 'Documentation' do
     @dc_obj.save
 
     @doc.reload
-    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.id]
+    expect(@doc.to_solr[ActiveFedora.index_field_mapper.solr_name('isDescriptionOf', :stored_searchable, type: :symbol)]).to eq [@dc_obj.alternate_id]
 
   end
 
   it 'should have the specified datastreams' do
     # Check for descMetadata datastream with MODS in it
-    @doc.attached_files.keys.should include(:descMetadata)
-    @doc.descMetadata.should be_kind_of DRI::Metadata::Documentation
-    # Check for properties datastream
-    @doc.attached_files.keys.should include(:properties)
-    @doc.properties.should be_kind_of DRI::Metadata::Properties
+    @doc.attached_files.keys.should include('descMetadata')
+    @doc.descMetadata.should be_kind_of DRI::Metadata::QualifiedDublinCore
   end
 
   it 'should not be valid with no metadata' do

@@ -2,7 +2,8 @@ module DRI
   module Metadata
     # Implements the descMetadata datastream for DRI::EncodedArchivalDescription ROOT collection digital objects
     # extends from DRI::Metadata::Base
-    class EncodedArchivalDescription < DRI::Metadata::Base
+    class EncodedArchivalDescription < DRI::Datastreams::OmDatastream
+      include DRI::Metadata
       extend DRI::Metadata::Terminologies::Ead
 
       # synchronize_metadata_on_save attribute getter
@@ -72,22 +73,22 @@ module DRI
         solr_doc = super(solr_doc, opts)
 
         # Title_sorted - A SOLR index for sorting titles
-        if title.length > 0
+        if title.length.positive?
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
-          unless sorted_title.blank?
-            solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('title_sorted', :stored_sortable, type: :string) => [sorted_title])
+          if sorted_title.present?
+            solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = [sorted_title]
           end
         end
 
         # Type
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable) => resource_type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :facetable) => resource_type)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('type', :stored_searchable, type: :string) => 'Collection')
+        solr_doc[Solrizer.solr_name('type', :stored_searchable)] = resource_type
+        solr_doc[Solrizer.solr_name('type', :facetable)] = resource_type
+        solr_doc[Solrizer.solr_name('type', :stored_searchable, type: :string)] = 'Collection'
 
         # EAD has several "name" tags, so we merge them together into the SOLR document
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :facetable) => person_array_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('person', :stored_searchable, type: :text) => person_array_for_index | DRI::Metadata::Transformations.transform_name(person_array_for_index))
+        solr_doc[Solrizer.solr_name('person', :facetable)] = person_array_for_index
+        solr_doc[Solrizer.solr_name('person', :stored_searchable, type: :text)] = person_array_for_index | DRI::Metadata::Transformations.transform_name(person_array_for_index)
 
         # all_metadata - A SOLR index of all the text contained in the XML document
         all_metadata = ''
@@ -95,23 +96,23 @@ module DRI
           all_metadata += text_node.text
           all_metadata += ' '
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('all_metadata', :stored_searchable, type: :text) => [all_metadata])
+        solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creator', :facetable) => creator_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable, type: :text) => creator_for_index)
+        solr_doc[Solrizer.solr_name('creator', :facetable)] = creator_for_index
+        solr_doc[Solrizer.solr_name('creator', :stored_searchable, type: :text)] = creator_for_index
 
         # Subject: generic, name and place
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :stored_searchable) => subject_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('subject', :facetable) => subject_for_index)
+        solr_doc[Solrizer.solr_name('subject', :stored_searchable)] = subject_for_index
+        solr_doc[Solrizer.solr_name('subject', :facetable)] = subject_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :stored_searchable) => subject_name_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('name_coverage', :facetable) => subject_name_for_index)
+        solr_doc[Solrizer.solr_name('name_coverage', :stored_searchable)] = subject_name_for_index
+        solr_doc[Solrizer.solr_name('name_coverage', :facetable)] = subject_name_for_index
 
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable) => subject_place_for_index)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :facetable) => filter_uris(subject_place_for_index))
+        solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)] = subject_place_for_index
+        solr_doc[Solrizer.solr_name('geographical_coverage', :facetable)] = filter_uris(subject_place_for_index)
 
         # Publisher
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('publisher', :stored_searchable) => publisher) unless publisher == []
+        solr_doc[Solrizer.solr_name('publisher', :stored_searchable)] = publisher unless publisher == []
 
         # Indexing dates for display
         # Creation Date
@@ -124,20 +125,21 @@ module DRI
           end
         end
         pdate_array = published_date.collect.with_index do |value, idx|
-         if published_date(idx).normal_at.empty?
-           DRI::Metadata::Transformations.create_dcmi_period(value)
-         else
-           iso_date = published_date(idx).normal_at[0]
-           iso_to_dcmi_period(value, iso_date)
-         end
+          if published_date(idx).normal_at.empty?
+            DRI::Metadata::Transformations.create_dcmi_period(value)
+          else
+            iso_date = published_date(idx).normal_at[0]
+            iso_to_dcmi_period(value, iso_date)
+          end
         end
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable) => cdate_array) unless creation_date.empty?
+        solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)] = cdate_array unless creation_date.empty?
         # Published Date
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable) => pdate_array) unless published_date.empty?
+        solr_doc[Solrizer.solr_name('published_date', :stored_searchable)] = pdate_array unless published_date.empty?
         # Subject(Temporal)
         subject_temporal_array = subject_temporal_for_index
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable) => subject_temporal_array)
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :facetable) => filter_uris(subject_temporal_array))
+
+        solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)] = subject_temporal_array
+        solr_doc[Solrizer.solr_name('temporal_coverage', :facetable)] = filter_uris(subject_temporal_array)
 
         # Index date ranges, and iso dates into the appropriate solr fields
         date_ranges = date_ranges_for_index # ALL the date ranges
@@ -145,36 +147,36 @@ module DRI
         # Creation date dateRange index
         cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
         cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
-         if cdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD => cdate_index)
+        if cdate_index.present?
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD] = cdate_index
           cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD => cdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD => cdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD => cdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD] = cdate_years
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD] = cdate_years.min
+          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD] = cdate_years.max
         end
 
         # Indexing creation_date_idx is necessary for children, in case they inherit from the root collection
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable) => creation_date_idx)
+        solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = creation_date_idx
 
         # Published date dateRange index
         pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
         pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
         if pdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD => pdate_index)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_index
           pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD => pdate_years)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD => pdate_years.min)
-          solr_doc.merge!(DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD => pdate_years.max)
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
+          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
         end
 
         # Subject date dateRange index
         sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
         sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
         if sdate_index.present?
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD => sdate_index)
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD] = sdate_index
           sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD => sdate_years[0])
-          solr_doc.merge!(DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD => sdate_years[1])
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD] = sdate_years[0]
+          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD] = sdate_years[1]
         end
 
         # Geospatial indexing
@@ -190,10 +192,10 @@ module DRI
           geospatial_hash[:json].concat(linked_data[:json])
         end
 
-        solr_doc.merge!(DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD => geospatial_hash[:coords]) unless geospatial_hash[:coords].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text) => geospatial_hash[:name]) unless geospatial_hash[:name].empty?
-        solr_doc.merge!(ActiveFedora.index_field_mapper.solr_name('geojson', :stored_searchable, type: :symbol) => geospatial_hash[:json]) unless geospatial_hash[:json].empty?
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] unless geospatial_hash[:coords].empty?
+        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[Solrizer.solr_name('geojson', :stored_searchable, type: :symbol)] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
 
         solr_doc
       end # solr_doc
@@ -545,7 +547,7 @@ module DRI
       # @see DRI::EncodedArchivalDescription#related_material=
       # @param [Array<String>] materials array of metadata values for relatedmaterial field (relatedmaterial)
       def add_related_material(materials)
-        links = materials.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        links = materials.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
         ng_xml.search('/ead/archdesc/relatedmaterial').each(&:remove)
 
@@ -567,7 +569,7 @@ module DRI
       # @see DRI::EncodedArchivalDescription#alternative_form=
       # @param [Array<String>] materials array of metadata values for persname field (altformavail)
       def add_alternative_form(materials)
-        links = materials.select{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        links = materials.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
 
         ng_xml.search('/ead/archdesc/altformavail').each(&:remove)
 
@@ -750,7 +752,7 @@ module DRI
         geogname_coverage_access_hash[:type] = []
         ng_xml.search('/ead/archdesc/controlaccess/geogname[not(@role="subject")]').each do |node|
           geogname_coverage_access_hash[:display] << node.content
-          if !node['source'].nil?
+          if node['source'].present?
             geogname_coverage_access_hash[:type] << node['source']
           else
             geogname_coverage_access_hash[:type] << (node['rules'].nil? ? '' : node['rules'])
@@ -818,31 +820,31 @@ module DRI
         ead_level_other_result = false
 
         # Title
-        title_result = true if title.any? { |v| !v.blank? }
+        title_result = true if title.any?(&:present?)
         # Creator
-        creator_result = true if creator.any? { |v| !v.blank? }
+        creator_result = true if creator.any?(&:present?)
         # Description
-        description_result = true if description.any? { |v| !v.blank? }
+        description_result = true if description.any?(&:present?)
         # A date is required
-        date_result = true if creation_date.any? { |v| !v.blank? }
-        date_result = true if temporal_coverage.any? { |v| !v.blank? }
+        date_result = true if creation_date.any?(&:present?)
+        date_result = true if temporal_coverage.any?(&:present?)
         # Rights
-        rights_result = true if rights.any? { |v| !v.blank? }
+        rights_result = true if rights.any?(&:present?)
 
         # EAD-specific
         if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-          ead_level_result = true if ead_level.any? { |v| !v.blank? }
-          ead_level_other_result = true if ead_level_other.any? { |v| !v.blank? }
+          ead_level_result = true if ead_level.any?(&:present?)
+          ead_level_other_result = true if ead_level_other.any?(&:present?)
         end
 
         # Identifier validation
-        ead_id_result = true if identifier.any? { |v| !v.blank? }
+        ead_id_result = true if identifier.any?(&:present?)
         # Validation for eadid, @countrycode is a mandatory attribute
         # for eadid element
-        cc_result = true if country_code.any? { |v| !v.blank? }
+        cc_result = true if country_code.any?(&:present?)
         # Validation for eadid, @mainagencycode (repository_code here)
         # is mandatory for eadid element
-        rc_result = true if repository_code.any? { |v| !v.blank? }
+        rc_result = true if repository_code.any?(&:present?)
 
         # DRI Compulsory elements
         errors[:title] = "can\'t be blank" if title_result == false

@@ -7,12 +7,12 @@ describe 'Marc' do
     @marc_item.update_metadata DRI::Metadata::Marc.from_xml(@item_xml).to_xml
   end
   context 'general behaviors' do
-    it 'should be a kind of Batch' do
-      @marc_item.should be_kind_of(DRI::Batch)
+    it 'should be a kind of DigitalObject' do
+      @marc_item.should be_kind_of(DRI::DigitalObject)
     end
 
     it 'datastream: descMetadata should be a kind of OmDatastream' do
-      @marc_item.descMetadata.should be_kind_of(ActiveFedora::OmDatastream)
+      @marc_item.descMetadata.should be_kind_of(DRI::Datastreams::OmDatastream)
     end
 
     after(:each) do

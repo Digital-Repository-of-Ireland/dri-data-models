@@ -4,7 +4,7 @@ module DRI
   module Metadata
     # Implements a descMetadata datastream included all extracted metadata
     # extends from AF OnDatastream
-    class Extracted < ActiveFedora::OmDatastream
+    class Extracted < ::DRI::Datastreams::OmDatastream
       # OM (Opinionated Metadata) terminology mapping
       set_terminology do |t|
         t.root(:path=>"extracted", :xmlns => '', :namespace_prefix => nil)  # Selects the root node of the XML document

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DRI
   module Metadata::Terminologies
     autoload :Qdc, 'dri/metadata/terminologies/qdc'

@@ -1,7 +1,7 @@
 # FITS Metadata datastream, defines the XML terminology
 # for this OM-based datastream
 #
-class FitsDatastream < ActiveFedora::OmDatastream
+class FitsDatastream < DRI::Datastreams::OmDatastream
   include OM::XML::Document
 
   set_terminology do |t|
@@ -136,6 +136,10 @@ class FitsDatastream < ActiveFedora::OmDatastream
     t.data_format(proxy: [:metadata, :audio, :data_format])
     t.offset(proxy: [:metadata, :audio, :offset])
     t.frame_rate(proxy: [:metadata, :video, :frame_rate])
+  end
+
+  def prefix(path)
+    ''
   end
 
   # Returns an empty, default FITS XML document
