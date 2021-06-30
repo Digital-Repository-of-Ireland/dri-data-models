@@ -43,7 +43,7 @@ module DRI::Metadata::Transformations
                    projection = PROJECTIONS[point['projection'].downcase]
 
                    geometry_crs = { crs: "http://www.opengis.net/def/crs/EPSG/0/#{projection}" }
-                   geometry_crs[:coordinates] = [point['east'].to_f, point['north'].to_f]
+                   geometry_crs[:coordinates] = [point['east'].delete(',').to_f, point['north'].delete(',').to_f]
 
                    giqtrans(projection, point)
                  else
@@ -151,13 +151,12 @@ module DRI::Metadata::Transformations
     end
 
     def self.giqtrans(source_srid, point)
-      command = "SourceSRID=#{source_srid}&TargetSRID=4937&PreferredDatum=13&Geometry={\"type\":\"Point\",\"coordinates\":[#{point['east']},#{point['north']}]}"
+      command = "SourceSRID=#{source_srid}&TargetSRID=4937&PreferredDatum=13&Geometry={\"type\":\"Point\",\"coordinates\":[#{point['east'].delete(',')},#{point['north'].delete(',')}]}"
       giqtrans_output = Open3.capture3("#{Settings.plugins.giqtrans_path}/giqtrans --CGI='#{command}'")
-
       transform = giqtrans_output[0]
       json = JSON.parse(transform.lines.last)
-
-      json['coordinates'].join(' ')
+      coords = json['coordinates'].join(' ')
+      coords == '0 0 0' ? {} : coords
     rescue StandardError
       {}
     end
