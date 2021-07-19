@@ -13,7 +13,7 @@ class GenericFileIndexer
     end
 
     solr_doc['preservation_only_ssi'] = resource.wrapped_object.preservation_only
-    solr_doc['file_size_isi'] = resource.wrapped_object.file_size
+    solr_doc['file_size_ltsi'] = resource.wrapped_object.file_size
     solr_doc['width_isi'] = resource.wrapped_object.width[0].to_i unless resource.wrapped_object.width.blank?
     solr_doc['height_isi'] = resource.wrapped_object.height[0].to_i unless resource.wrapped_object.height.blank?
 
