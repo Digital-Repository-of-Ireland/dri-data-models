@@ -111,8 +111,8 @@ describe 'EncodedArchivalDescription' do
       file_md_keys = ['width_isim', 'width_sim', 'height_isim', 'height_sim', 'area_isim', 'area_sim',
                       'channels_isim', 'channels_sim', 'bit_depth_isim', 'bit_depth_sim', 'sample_rate_isim',
                       'sample_rate_sim', 'file_type_tesim', 'file_type_sim', 'mime_type_tesim', 'mime_type_sim',
-                      'file_type_display_tesim', 'file_type_display_sim', 'file_format_tesim', 'file_format_sim', 'file_count_isi',
-                      "file_size_ltsim", "file_size_total_ltsi"]
+                      'file_type_display_tesim', 'file_type_display_sim', 'file_format_tesim', 'file_format_sim', 
+		      'file_count_isi', 'file_size_ltsim', 'file_size_total_ltsi']
 
       @component = DRI::EadComponent.new
       @component.identifier = ['IE/NIVAL KDW-C']

@@ -66,10 +66,10 @@ class FileMetadataIndexer
         duration_total += gf['duration_isi'].to_i
         duration |= [gf['duration_isi'].to_i]
       end
-      if gf.key?('file_size_lts')
+      if gf.key?('file_size_ltsi')
         file_size_total = 0 if file_size_total.nil?
-        file_size_total += gf['file_size_lts'].to_i
-        file_size |= [gf['file_size_lts'].to_i]
+        file_size_total += gf['file_size_ltsi'].to_i
+        file_size |= [gf['file_size_ltsi'].to_i]
       end
 
       if gf.key?('file_format_tesim')
