@@ -66,10 +66,10 @@ class FileMetadataIndexer
         duration_total += gf['duration_isi'].to_i
         duration |= [gf['duration_isi'].to_i]
       end
-      if gf.key?('file_size_isi')
+      if gf.key?('file_size_ltsi')
         file_size_total = 0 if file_size_total.nil?
-        file_size_total += gf['file_size_isi'].to_i
-        file_size |= [gf['file_size_isi'].to_i]
+        file_size_total += gf['file_size_ltsi'].to_i
+        file_size |= [gf['file_size_ltsi'].to_i]
       end
 
       if gf.key?('file_format_tesim')
@@ -105,9 +105,8 @@ class FileMetadataIndexer
     unless file_size_total.nil?
       file_metadata.merge!(
         {
-          'file_size_total_isi' => file_size_total,
-          'file_size_isim' => file_size,
-          'file_size_sim' => file_size
+          'file_size_total_ltsi' => file_size_total,
+          'file_size_ltsim' => file_size,
         }
       )
     end
