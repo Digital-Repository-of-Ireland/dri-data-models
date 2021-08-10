@@ -577,7 +577,7 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'creation_date_idx_tesim', 'published_date_tesim', 'cdate_year_iim', 'pdate_year_iim', 'cdateRange',
                    'cdate_range_start_isi', 'cdate_range_end_isi', 'pdate_range_start_isi', 'pdate_range_end_isi',
                    'pdateRange', 'sdateRange', 'sdate_range_end_isi', 'sdate_range_start_isi', 'geospatial',
-                   'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
+                   'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
                    'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim']
@@ -662,7 +662,7 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'creation_date_idx_tesim', 'published_date_tesim', 'cdateRange', 'pdateRange', 'sdateRange', 'geospatial',
                    'cdate_year_iim', 'pdate_year_iim', 'sdate_range_end_isi', 'sdate_range_start_isi',
                    'cdate_range_start_isi', 'cdate_range_end_isi', 'pdate_range_start_isi', 'pdate_range_end_isi',
-                   'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_sim', 'description_tesim',
+                   'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
                    'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim']

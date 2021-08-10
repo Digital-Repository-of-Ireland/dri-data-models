@@ -310,11 +310,11 @@ module DRI::Metadata::Terminologies
 
           # Description: abstract, tableOfContents, or note
           t.description(path: '//mods:mods/mods:abstract | //mods:mods[not(mods:abstract)]/mods:note | //mods:mods[not(mods:abstract) and not(mods:note)]/mods:tableOfContents | //mods:mods[not(mods:abstract) and not(mods:note) and not(mods:tableOfContents)]/mods:physicalDescription/mods:note',
-                        index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_abstract(proxy: [:mods, :abstract], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_note(proxy: [:mods, :note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_toc(proxy: [:mods, :table_contents], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
-          t.desc_physdesc_note(proxy: [:mods, :physical_description, :phys_desc_note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+                        index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
+          t.desc_abstract(proxy: [:mods, :abstract], index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
+          t.desc_note(proxy: [:mods, :note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
+          t.desc_toc(proxy: [:mods, :table_contents], index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
+          t.desc_physdesc_note(proxy: [:mods, :physical_description, :phys_desc_note], index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
 
           # Subject: defaults to subject/topic
           t.subject(proxy: [:mods, :main_subject, :subject_topic],
