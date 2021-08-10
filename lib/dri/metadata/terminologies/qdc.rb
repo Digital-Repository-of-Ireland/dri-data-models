@@ -12,7 +12,7 @@ module DRI::Metadata::Terminologies
         t.rights(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]) {
           t.rights_lang(path: { attribute: 'xml:lang' })
         }
-        t.description(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]) {
+        t.description(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_searchable]) {
           t.description_lang(path: { attribute: 'xml:lang' })
         }
         t.language(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.language_facetable])

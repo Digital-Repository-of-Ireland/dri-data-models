@@ -149,13 +149,16 @@ module DRI
         faceted_language_indexes.merge! split_array_into_languages('coverage')
         faceted_language_indexes.merge! split_array_into_languages('temporal_coverage')
         faceted_language_indexes.merge! split_array_into_languages('geographical_coverage')
-        faceted_language_indexes.merge! split_array_into_languages('description')
         faceted_language_indexes.merge! split_array_into_languages('source')
         faceted_language_indexes.merge! split_array_into_languages('name_coverage')
 
         faceted_language_indexes.each do |key, value|
           solr_doc["#{key}_tesim"] = value
           solr_doc["#{key}_sim"] = filter_uris(value)
+        end
+
+        split_array_into_languages('description').each do |key, value|
+          solr_doc["#{key}_tesim"] = value
         end
 
         # Indices for external relationships (to be displayed as URL)

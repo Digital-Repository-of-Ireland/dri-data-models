@@ -207,7 +207,7 @@ module DRI::Metadata::Terminologies
         t.published_date(proxy: [:ead, :ead_header, :file_desc, :publication_stmt, :date])
         t.subject(proxy: [:ead, :arch_desc, :control_access, :subject], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
 
-        t.description(path: '/ead/archdesc/scopecontent/p | /ead/archdesc[not(scopecontent)]/did/abstract | /ead/archdesc[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.description(path: '/ead/archdesc/scopecontent/p | /ead/archdesc[not(scopecontent)]/did/abstract | /ead/archdesc[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
         t.desc_abstract(proxy: [:ead, :arch_desc, :did, :abstract])
         t.desc_biog_hist(proxy: [:ead, :arch_desc, :biog_hist, :p])
         t.desc_scope_content(proxy: [:ead, :arch_desc, :scope_content, :p])

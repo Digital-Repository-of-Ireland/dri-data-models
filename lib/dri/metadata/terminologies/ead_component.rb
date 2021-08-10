@@ -184,7 +184,7 @@ module DRI::Metadata::Terminologies
         t.published_date(proxy: [:c, :did, :unitdate_pub])
         t.subject(proxy: [:c, :control_access, :subject], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_displayable])
 
-        t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.description(path: '/*/scopecontent/p | /*[not(scopecontent)]/did/abstract | /*[not(scopecontent) and not(did/abstract)]/bioghist/p', index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
         t.desc_abstract(proxy: [:c, :did, :abstract])
         t.desc_biog_hist(proxy: [:c, :biog_hist, :p])
         t.desc_dao_desc(proxy: [:c, :did, :dao, :dao_desc, :p])
