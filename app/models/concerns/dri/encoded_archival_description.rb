@@ -136,14 +136,6 @@ module DRI
       descMetadata.resource_type = type
     end
 
-    # Returns a Hash with all the values for the DRI editable metadata fields
-    # to be populated in a UI Edit form
-    #
-    # @return [Hash] Hash of DRI EAD metadata
-    def retrieve_hash_attributes
-      descMetadata.retrieve_terms_hash
-    end
-
     # Creator attribute setter (to create the associated metadata elements in the DS XML)
     # @param creators [Hash] the hash of metadata values for creators
     # @option creators [Array<String>] :display the content for the creator nodes
