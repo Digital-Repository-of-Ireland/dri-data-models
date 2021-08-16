@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib', 'app']
 
   s.add_dependency 'om'
+  s.add_dependency 'nokogiri', '~> 1.11.7'
   s.add_dependency 'rails', '~> 5.2'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
