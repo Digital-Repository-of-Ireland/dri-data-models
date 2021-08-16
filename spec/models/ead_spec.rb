@@ -111,7 +111,7 @@ describe 'EncodedArchivalDescription' do
       file_md_keys = ['width_isim', 'width_sim', 'height_isim', 'height_sim', 'area_isim', 'area_sim',
                       'channels_isim', 'channels_sim', 'bit_depth_isim', 'bit_depth_sim', 'sample_rate_isim',
                       'sample_rate_sim', 'file_type_tesim', 'file_type_sim', 'mime_type_tesim', 'mime_type_sim',
-                      'file_type_display_tesim', 'file_type_display_sim', 'file_format_tesim', 'file_format_sim', 
+                      'file_type_display_tesim', 'file_type_display_sim', 'file_format_tesim', 'file_format_sim',
 		      'file_count_isi', 'file_size_ltsim', 'file_size_total_ltsi']
 
       @component = DRI::EadComponent.new
@@ -557,68 +557,6 @@ describe 'EncodedArchivalDescription' do
       expect(@component.related_material).to match_array(['http://example.org/relmat'])
       expect(@component.alternative_form).to match_array(['http://example.org/altform'])
       expect(@component.language).to match_array(['English'])
-    end
-
-    it 'should return a hash of attributes for form update (collection)' do
-      @collection.attributes = @attributes_hash
-
-      terms_hash = @collection.retrieve_hash_attributes
-
-      expect(terms_hash[:title]).to match_array(['The test title'])
-      expect(terms_hash[:creator]).to include(display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'])
-      expect(terms_hash[:contributor]).to match_array(['Contributor 1'])
-      expect(terms_hash[:desc_scope_content]).to match_array(['This is a test description for the object.'])
-      expect(terms_hash[:desc_abstract]).to match_array(['This is a test abstract for the object.'])
-      expect(terms_hash[:desc_biog_hist]).to match_array(['This is a test biographical history for the object.'])
-      expect(terms_hash[:rights]).to match_array(['This is a statement about the rights associated with this object'])
-      expect(terms_hash[:publisher]).to match_array(['Publisher 1'])
-      expect(terms_hash[:subject]).to match_array(['Ireland', 'something else'])
-      expect(terms_hash[:creation_date]).to include(display: ['2000-2010'], normal: ['20000101/20101231'])
-      expect(terms_hash[:published_date]).to include(display: ['2015'], normal: ['20150101'])
-      expect(terms_hash[:name_coverage]).to include(display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'])
-      expect(terms_hash[:temporal_coverage]).to include(normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'])
-      expect(terms_hash[:name_subject]).to match_array(['subject name'])
-      expect(terms_hash[:persname_subject]).to match_array(['subject persname'])
-      expect(terms_hash[:corpname_subject]).to match_array(['subject corpname'])
-      expect(terms_hash[:geogname_subject]).to match_array(['subject geogname'])
-      expect(terms_hash[:famname_subject]).to match_array(['subject famname'])
-      expect(terms_hash[:geogname_coverage_access]).to include(display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'], type: ['', 'dcterms:Point', 'logainm'])
-      expect(terms_hash[:type]).to match_array(['Collection'])
-      expect(terms_hash[:related_material]).to match_array(['http://example.org/relmat'])
-      expect(terms_hash[:alternative_form]).to match_array(['http://example.org/altform'])
-      expect(terms_hash[:language]).to include(langcode: ['eng'], text: ['English'])
-      expect(terms_hash[:format]).to match_array(['395 files'])
-    end
-
-    it 'should return a hash of attributes for form update (component)' do
-      @component.attributes = @attributes_hash
-
-      terms_hash = @component.retrieve_hash_attributes
-
-      expect(terms_hash[:title]).to match_array(['The test title'])
-      expect(terms_hash[:creator]).to include(display: ['Creator 1', 'Creator no role'], role: ['institution', ''], tag: ['persname', 'name'])
-      expect(terms_hash[:contributor]).to match_array(['Contributor 1'])
-      expect(terms_hash[:desc_scope_content]).to match_array(['This is a test description for the object.'])
-      expect(terms_hash[:desc_abstract]).to match_array(['This is a test abstract for the object.'])
-      expect(terms_hash[:desc_biog_hist]).to match_array(['This is a test biographical history for the object.'])
-      expect(terms_hash[:rights]).to match_array(['This is a statement about the rights associated with this object'])
-      expect(terms_hash[:publisher]).to match_array(['Publisher 1'])
-      expect(terms_hash[:subject]).to match_array(['Ireland', 'something else'])
-      expect(terms_hash[:creation_date]).to include(display: ['2000-2010'], normal: ['20000101/20101231'])
-      expect(terms_hash[:published_date]).to include(display: ['2015'], normal: ['20150101'])
-      expect(terms_hash[:name_coverage]).to include(display: ['Designer 1', 'Photographer 1'], role: ['designer', 'photographer'], tag: ['persname', 'corpname'])
-      expect(terms_hash[:temporal_coverage]).to include(normal: ['2005'], datechar: ['coverage'], display: ['c. 2005'])
-      expect(terms_hash[:name_subject]).to match_array(['subject name'])
-      expect(terms_hash[:persname_subject]).to match_array(['subject persname'])
-      expect(terms_hash[:corpname_subject]).to match_array(['subject corpname'])
-      expect(terms_hash[:geogname_subject]).to match_array(['subject geogname'])
-      expect(terms_hash[:famname_subject]).to match_array(['subject famname'])
-      expect(terms_hash[:geogname_coverage_access]).to include(type: ['', 'dcterms:Point', 'logainm'], display: ['Dublin', 'name=Dublin; east=-6.266155; north=53.350140;', 'http://example.org/1234'])
-      expect(terms_hash[:type]).to match_array(['Collection'])
-      expect(terms_hash[:related_material]).to match_array(['http://example.org/relmat'])
-      expect(terms_hash[:alternative_form]).to match_array(['http://example.org/altform'])
-      expect(terms_hash[:language]).to include(langcode: ['eng'], text: ['English'])
-      expect(terms_hash[:format]).to match_array(['395 files'])
     end
   end
 end
