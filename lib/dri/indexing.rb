@@ -4,8 +4,10 @@ module DRI
     extend ActiveSupport::Concern
 
     included do
+      attr_accessor :index_needs_update
+
       before_create :assign_alternate_id
-      after_commit  :update_index, on: [:create, :update]
+      after_commit  :update_index, on: [:create, :update], if: :index_needs_update?
       after_commit :delete_from_solr, on: :destroy
     end
 
@@ -25,6 +27,10 @@ module DRI
 
     def to_solr
       adapter.resource_indexer.new(resource: ValkyrieWrapper.new(wrapped_object: self)).to_solr
+    end
+
+    def index_needs_update?
+       @index_needs_update.nil? ? true : @index_needs_update
     end
 
     protected
