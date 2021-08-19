@@ -9,6 +9,7 @@ class UpdateIndexJob < IdBasedJob
 
   # Run UpdateIndexJob job
   def run
+    raise "No object found for id: #{id}" if object.nil?
     object.update_index
   end
 end
