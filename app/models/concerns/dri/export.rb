@@ -130,7 +130,6 @@ module DRI
         end
       end
       text << ", #{depositing_institute} [Depositing Institution]" if depositing_institute.present?
-      text << ", https://doi.org/#{doi}" if doi.present?
 
       text.html_safe
     end

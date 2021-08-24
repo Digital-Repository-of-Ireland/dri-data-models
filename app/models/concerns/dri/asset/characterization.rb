@@ -92,10 +92,11 @@ module DRI::Asset
     # and record it in the characterization datastream
     def characterize
       metadata = extract_metadata
-      characterization.ng_xml = metadata if metadata.present?
-      append_metadata
+      if metadata.present?
+        characterization.ng_xml = metadata
+        append_metadata
+      end
       self.filename = [label]
-      save
     end
 
     # Populate GenericFile's properties with fields from FITS (e.g. Author from pdfs)
