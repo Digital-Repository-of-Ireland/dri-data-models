@@ -24,15 +24,10 @@ module DRI::ModelSupport
     end
 
     # Remove the file from the filesystem if it exists
-    # This has been disabled for now so that only soft delete is possible
-    # TODO reenable this as an admin function
     def delete_file
       return if path.nil? || !File.exist?(path)
 
       File.delete(path)
-
-      pn = Pathname.new(path)
-      FileUtils.remove_dir(pn.dirname, force: true)
     end
 
     private
