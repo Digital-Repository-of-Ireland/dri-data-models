@@ -23,16 +23,13 @@ module DRI::ModelSupport
       end
     end
 
-    # Remove the file from the filesystem if it exists
-    # This has been disabled for now so that only soft delete is possible
-    # TODO reenable this as an admin function
+    # Remove the file from MOAB if it exists
     def delete_file
       return if path.nil? || !File.exist?(path)
 
-      File.delete(path)
-
-      pn = Pathname.new(path)
-      FileUtils.remove_dir(pn.dirname, force: true)
+      bin = File.join(bin_dir(object_id), path.split(local_storage_dir.to_s)[1])
+      FileUtils.mkdir_p(bin)
+      FileUtils.mv(path, bin)
     end
 
     private
@@ -42,16 +39,20 @@ module DRI::ModelSupport
     end
 
     def version_path(object_id, version)
-      File.join(aip_dir(object_id), version_string(version))
+      File.join(build_hash_dir(object_id), version_string(version))
     end
 
     def aip_dir(object_id)
       File.join(local_storage_dir, build_hash_dir(object_id))
     end
 
+    def bin_dir(object_id)
+      File.join(local_storage_dir, 'bin')
+    end
+
     # data path
     def data_path(object_id, version)
-      File.join(version_path(object_id, version), "data")
+      File.join(local_storage_dir, version_path(object_id, version), "data")
     end
 
     # output: partial path string e.g. "1c/18/df/87/1c18df87m/v0001"
