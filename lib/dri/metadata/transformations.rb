@@ -186,6 +186,8 @@ module DRI
         # DCMI Period?
         value.split(/\s*;\s*/).each do |component|
           (k, v) = component.split(/\s*=\s*/)
+          next if v.nil?
+
           begin
             if k == 'start'
               ISO8601::DateTime.new(v)
