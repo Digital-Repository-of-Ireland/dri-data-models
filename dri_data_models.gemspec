@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.version     = DriDataModels::VERSION
   s.authors     = ["Damien Gallagher, Stuart Kenny, Kathryn Cassidy, Augustina Martinez"]
   s.email       = 'dri@ria.ie'
-  s.homepage    = 'http://www.dri.ie'
+  s.homepage    = 'https://www.dri.ie'
   s.summary     = 'DRI metadata and data models needed for the DRI application.'
   s.description = 'DRI metadata and data models needed for the DRI application.'
 
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib', 'app']
 
   s.add_dependency 'om'
-  s.add_dependency 'nokogiri', '> 1.12.3'
+  s.add_dependency 'nokogiri', '>= 1.12.5'
   s.add_dependency 'rails', '~> 5.2'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
