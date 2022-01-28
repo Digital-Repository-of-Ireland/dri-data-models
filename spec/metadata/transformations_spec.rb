@@ -56,6 +56,12 @@ describe DRI::Metadata::Transformations do
 
       expect(results[:name]).to include('Raheenapisha')
     end
+
+    it 'should exclude empty fields' do
+      results = described_class.transform_geospatial({ geographic_coverage: [""]})
+
+      expect(results[:name]).to be_empty
+    end
   end
 
   context 'name transformations' do

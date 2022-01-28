@@ -112,6 +112,8 @@ module DRI
 
         geodata.each do |_key, value|
           value.each do |geo_string|
+            next if geo_string.blank?
+
             result = if dcmi_point?(geo_string)
                        DRI::Metadata::Transformations::SpatialTransformations.parse_dcmi_point(geo_string)
                      elsif dcmi_box?(geo_string)
