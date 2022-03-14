@@ -43,6 +43,7 @@ module DRI
     delegate :published_date, to: :descMetadata
 
     delegate :type, to: :descMetadata
+    delegate :collection?, to: :descMetadata
 
     def id_asset
       descMetadata.id_asset.first
