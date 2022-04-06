@@ -72,9 +72,9 @@ module DRI
         end
         solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
-        solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = df_240a
-        solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a
-        solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a
+        solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(df_240a.first)
+        solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a.first
+        solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a.first
 
         solr_doc[Solrizer.solr_name('date', :stored_searchable)] = display_date_for_index(date)
 
@@ -269,9 +269,9 @@ module DRI
       # Used when updating the MARC metadata via attribute accessors (marc:datafield)
       # @param [Array<String>] datafields array of values for creating marc:datafield XML elements
       def add_datafields(datafields)
-        ng_xml.search('//datafield').each(&:remove)
-
-        record = ng_xml.at('record')
+        xml = ng_xml.dup
+        xml.search('//datafield').each(&:remove)
+        record = xml.at('record')
 
         datafields.each do |datafield|
           node = Nokogiri::XML::Node.new('datafield', ng_xml)
@@ -289,14 +289,17 @@ module DRI
 
           record.add_child(node) unless node.children.empty?
         end
+
+        self.content = xml.to_xml
       end
 
       # Creates the MARC controlfields XML elements.
       # Used when updating the MARC metadata via attribute accessors (marc:controlfields)
       # @param [Array<String>] controlfields array of values for creating marc:controlfields XML elements
       def add_controlfields(controlfields)
-        ng_xml.search('//controlfield').each(&:remove)
-        record = ng_xml.at('record')
+        xml = ng_xml.dup
+        xml.search('//controlfield').each(&:remove)
+        record = xml.at('record')
 
         controlfields.each do |controlfield|
           node = Nokogiri::XML::Node.new('controlfield', ng_xml)
@@ -305,6 +308,8 @@ module DRI
 
           record.add_child(node) if node.content.present?
         end
+
+        self.content = xml.to_xml
       end
 
       # Loads the MARC Vocabulary from the YAML file
