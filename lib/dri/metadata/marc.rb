@@ -72,7 +72,7 @@ module DRI
         end
         solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
-        solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(df_240a.first)
+        solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(title.first)
         solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a.first
         solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a.first
 
