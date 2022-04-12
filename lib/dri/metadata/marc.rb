@@ -73,8 +73,8 @@ module DRI
         solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
 
         solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(title.first)
-        solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a.first
-        solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a.first
+        solr_doc[Solrizer.solr_name('author_sorted', :stored_sortable, type: :string)] = df_100a.first if df_100a.present?
+        solr_doc[Solrizer.solr_name('library_sorted', :stored_sortable, type: :string)] = df_850a.first if df_850a.present?
 
         solr_doc[Solrizer.solr_name('date', :stored_searchable)] = display_date_for_index(date)
 
