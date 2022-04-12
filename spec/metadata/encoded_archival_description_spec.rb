@@ -586,38 +586,38 @@ describe 'EncodedArchivalDescription descMetadata' do
       solr_doc = @collection.descMetadata.to_solr
       expect(solr_doc.keys).to match_array(solr_keys)
 
-      title = solr_doc[ActiveFedora.index_field_mapper.solr_name('title', :stored_searchable)]
-      description = solr_doc[ActiveFedora.index_field_mapper.solr_name('description', :stored_searchable)]
-      creator = solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)]
-      contributor = solr_doc[ActiveFedora.index_field_mapper.solr_name('contributor', :stored_searchable)]
-      publisher = solr_doc[ActiveFedora.index_field_mapper.solr_name('publisher', :stored_searchable)]
-      rights = solr_doc[ActiveFedora.index_field_mapper.solr_name('rights', :stored_searchable)]
-      language = solr_doc[ActiveFedora.index_field_mapper.solr_name('language', :stored_searchable)]
+      title = solr_doc[Solrizer.solr_name('title', :stored_searchable)]
+      description = solr_doc[Solrizer.solr_name('description', :stored_searchable)]
+      creator = solr_doc[Solrizer.solr_name('creator', :stored_searchable)]
+      contributor = solr_doc[Solrizer.solr_name('contributor', :stored_searchable)]
+      publisher = solr_doc[Solrizer.solr_name('publisher', :stored_searchable)]
+      rights = solr_doc[Solrizer.solr_name('rights', :stored_searchable)]
+      language = solr_doc[Solrizer.solr_name('language', :stored_searchable)]
 
-      subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('subject', :stored_searchable)]
-      corpname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('corpname_subject', :stored_searchable)]
-      name_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('name_subject', :stored_searchable)]
-      famname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('famname_subject', :stored_searchable)]
-      persname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('persname_subject', :stored_searchable)]
-      geogname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('geogname_subject', :stored_searchable)]
-      name_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('name_coverage', :stored_searchable)]
+      subject = solr_doc[Solrizer.solr_name('subject', :stored_searchable)]
+      corpname_subject = solr_doc[Solrizer.solr_name('corpname_subject', :stored_searchable)]
+      name_subject = solr_doc[Solrizer.solr_name('name_subject', :stored_searchable)]
+      famname_subject = solr_doc[Solrizer.solr_name('famname_subject', :stored_searchable)]
+      persname_subject = solr_doc[Solrizer.solr_name('persname_subject', :stored_searchable)]
+      geogname_subject = solr_doc[Solrizer.solr_name('geogname_subject', :stored_searchable)]
+      name_coverage = solr_doc[Solrizer.solr_name('name_coverage', :stored_searchable)]
 
-      creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
-      creation_date_idx = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable)]
+      creation_date = solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)]
+      creation_date_idx = solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)]
       cdate_range = solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD]
-      published_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)]
+      published_date = solr_doc[Solrizer.solr_name('published_date', :stored_searchable)]
       pdate_range = solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD]
-      temporal_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)]
+      temporal_coverage = solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)]
       sdate_range = solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 
-      alternative_form = solr_doc[ActiveFedora.index_field_mapper.solr_name('alternative_form', :stored_searchable)]
-      related_material = solr_doc[ActiveFedora.index_field_mapper.solr_name('related_material', :stored_searchable)]
-      format = solr_doc[ActiveFedora.index_field_mapper.solr_name('format', :stored_searchable)]
+      alternative_form = solr_doc[Solrizer.solr_name('alternative_form', :stored_searchable)]
+      related_material = solr_doc[Solrizer.solr_name('related_material', :stored_searchable)]
+      format = solr_doc[Solrizer.solr_name('format', :stored_searchable)]
 
       expect(title).to match_array(['The test title'])
       expect(description).to match_array(['This is a test description for the object.'])
@@ -671,38 +671,38 @@ describe 'EncodedArchivalDescription descMetadata' do
       solr_doc = @component.descMetadata.to_solr
       expect(solr_doc.keys).to match_array(solr_keys)
 
-      title = solr_doc[ActiveFedora.index_field_mapper.solr_name('title', :stored_searchable)]
-      description = solr_doc[ActiveFedora.index_field_mapper.solr_name('description', :stored_searchable)]
-      creator = solr_doc[ActiveFedora.index_field_mapper.solr_name('creator', :stored_searchable)]
-      contributor = solr_doc[ActiveFedora.index_field_mapper.solr_name('contributor', :stored_searchable)]
-      publisher = solr_doc[ActiveFedora.index_field_mapper.solr_name('publisher', :stored_searchable)]
-      rights = solr_doc[ActiveFedora.index_field_mapper.solr_name('rights', :stored_searchable)]
-      language = solr_doc[ActiveFedora.index_field_mapper.solr_name('language', :stored_searchable)]
+      title = solr_doc[Solrizer.solr_name('title', :stored_searchable)]
+      description = solr_doc[Solrizer.solr_name('description', :stored_searchable)]
+      creator = solr_doc[Solrizer.solr_name('creator', :stored_searchable)]
+      contributor = solr_doc[Solrizer.solr_name('contributor', :stored_searchable)]
+      publisher = solr_doc[Solrizer.solr_name('publisher', :stored_searchable)]
+      rights = solr_doc[Solrizer.solr_name('rights', :stored_searchable)]
+      language = solr_doc[Solrizer.solr_name('language', :stored_searchable)]
 
-      subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('subject', :stored_searchable)]
-      corpname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('corpname_subject', :stored_searchable)]
-      name_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('name_subject', :stored_searchable)]
-      famname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('famname_subject', :stored_searchable)]
-      persname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('persname_subject', :stored_searchable)]
-      geogname_subject = solr_doc[ActiveFedora.index_field_mapper.solr_name('geogname_subject', :stored_searchable)]
-      name_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('name_coverage', :stored_searchable)]
+      subject = solr_doc[Solrizer.solr_name('subject', :stored_searchable)]
+      corpname_subject = solr_doc[Solrizer.solr_name('corpname_subject', :stored_searchable)]
+      name_subject = solr_doc[Solrizer.solr_name('name_subject', :stored_searchable)]
+      famname_subject = solr_doc[Solrizer.solr_name('famname_subject', :stored_searchable)]
+      persname_subject = solr_doc[Solrizer.solr_name('persname_subject', :stored_searchable)]
+      geogname_subject = solr_doc[Solrizer.solr_name('geogname_subject', :stored_searchable)]
+      name_coverage = solr_doc[Solrizer.solr_name('name_coverage', :stored_searchable)]
 
-      creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
-      creation_date_idx = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable)]
+      creation_date = solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)]
+      creation_date_idx = solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)]
       cdate_range = solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD]
-      published_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)]
+      published_date = solr_doc[Solrizer.solr_name('published_date', :stored_searchable)]
       pdate_range = solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD]
-      temporal_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)]
+      temporal_coverage = solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)]
       sdate_range = solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 
-      alternative_form = solr_doc[ActiveFedora.index_field_mapper.solr_name('alternative_form', :stored_searchable)]
-      related_material = solr_doc[ActiveFedora.index_field_mapper.solr_name('related_material', :stored_searchable)]
-      format = solr_doc[ActiveFedora.index_field_mapper.solr_name('format', :stored_searchable)]
+      alternative_form = solr_doc[Solrizer.solr_name('alternative_form', :stored_searchable)]
+      related_material = solr_doc[Solrizer.solr_name('related_material', :stored_searchable)]
+      format = solr_doc[Solrizer.solr_name('format', :stored_searchable)]
 
       expect(title).to match_array(['The test title'])
       expect(description).to match_array(['This is a test description for the object.'])
@@ -742,7 +742,7 @@ describe 'EncodedArchivalDescription descMetadata' do
       expect(@collection.creation_date_idx).to match_array(['20000101/20101231'])
 
       solr_doc = @collection.descMetadata.to_solr
-      creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
+      creation_date = solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)]
       expect(creation_date).to match_array(['name=2000-2010; start=20000101; end=20101231;'])
       expect(solr_doc['cdateRange']).to match_array(['[20000101 TO 20101231]'])
 
@@ -764,16 +764,16 @@ describe 'EncodedArchivalDescription descMetadata' do
       solr_doc = @collection.descMetadata.to_solr
 
       # creation date
-      creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
-      creation_date_idx = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable)]
+      creation_date = solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)]
+      creation_date_idx = solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)]
       cdate_range = solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD]
 
       # published date
-      published_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)]
+      published_date = solr_doc[Solrizer.solr_name('published_date', :stored_searchable)]
       pdate_range = solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD]
 
       # temporal coverage
-      temporal_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)]
+      temporal_coverage = solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)]
       sdate_range = solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
 
       expect(creation_date).to match_array(['name=2000-2010;'])
@@ -794,16 +794,16 @@ describe 'EncodedArchivalDescription descMetadata' do
       solr_doc = @component.descMetadata.to_solr
 
       # creation date
-      creation_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date', :stored_searchable)]
-      creation_date_idx = solr_doc[ActiveFedora.index_field_mapper.solr_name('creation_date_idx', :stored_searchable)]
+      creation_date = solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)]
+      creation_date_idx = solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)]
       cdate_range = solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD]
 
       # published date
-      published_date = solr_doc[ActiveFedora.index_field_mapper.solr_name('published_date', :stored_searchable)]
+      published_date = solr_doc[Solrizer.solr_name('published_date', :stored_searchable)]
       pdate_range = solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD]
 
       # temporal coverage
-      temporal_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('temporal_coverage', :stored_searchable)]
+      temporal_coverage = solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)]
       sdate_range = solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD]
 
       expect(creation_date).to match_array(['name=2000-2010;'])
@@ -821,8 +821,8 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       solr_doc = @collection.descMetadata.to_solr
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 
@@ -835,8 +835,8 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       solr_doc = @collection.descMetadata.to_solr
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 
@@ -852,8 +852,8 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       solr_doc = @component.descMetadata.to_solr
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 
@@ -866,8 +866,8 @@ describe 'EncodedArchivalDescription descMetadata' do
 
       solr_doc = @component.descMetadata.to_solr
 
-      geographical_coverage = solr_doc[ActiveFedora.index_field_mapper.solr_name('geographical_coverage', :stored_searchable)]
-      place_name = solr_doc[ActiveFedora.index_field_mapper.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
+      geographical_coverage = solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)]
+      place_name = solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)]
       geo_spatial = solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD]
       geo_json = solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD]
 

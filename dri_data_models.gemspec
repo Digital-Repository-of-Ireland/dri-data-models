@@ -32,6 +32,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'iso8601'
   s.add_dependency 'namae'
   s.add_dependency 'valkyrie', '~> 2.1'
+  s.add_dependency 'rsolr'
   s.add_development_dependency 'sqlite3', '~> 1.3', '< 1.4'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'

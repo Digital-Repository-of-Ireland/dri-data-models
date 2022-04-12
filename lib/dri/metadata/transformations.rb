@@ -84,7 +84,7 @@ module DRI
         !(%w(ltd ltd. limited archive museum archives library firm nui gallery services consultancy associates university).any? { |word| name.include?(word) })
       end
 
-      # A function to convert a title string removing definite articles, unneccessary spaces, etc.
+      # A function to convert a title string removing definite articles, unnecessary spaces, etc.
       #
       # @param [String] title_string the metadata title string
       # @return [String] the transformed metadata title string
@@ -99,7 +99,7 @@ module DRI
         # Remove leading definite articles
         title_string = title_string.gsub(/^(the|an|ná|na|a) /i, '')
 
-        title_string
+        title_string.downcase
       end
 
       # Parse geospatial data sourced from the metadata into Point or BBox for indexing into Solr

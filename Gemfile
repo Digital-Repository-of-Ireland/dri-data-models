@@ -10,4 +10,5 @@ group :test do
   # dri-user-group gem added for the rspec tests
   gem 'paper_trail'
   gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'develop'
+  gem 'hydra-derivatives', git: 'https://github.com/Digital-Repository-of-Ireland/hydra-derivatives.git', branch: 'main'
 end

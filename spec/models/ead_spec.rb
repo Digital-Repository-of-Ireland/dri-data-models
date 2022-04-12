@@ -154,7 +154,7 @@ describe 'EncodedArchivalDescription' do
       @component.creation_date = {display: ['2000-2010'], normal: ['20000101/20101231']}
       @component.language = {langcode: ['eng'], text: ['English']}
 
-      solr_field = ActiveFedora.index_field_mapper.solr_name('object_type', :displayable)
+      solr_field = Solrizer.solr_name('object_type', :displayable)
 
       expect(@ead_header.to_solr.keys).to include(*object_type_keys)
       expect(@ead_header.to_solr).to include(solr_field => ['Collection'])
