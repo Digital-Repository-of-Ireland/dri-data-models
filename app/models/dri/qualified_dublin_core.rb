@@ -116,7 +116,9 @@ module DRI
         has_versions: { label: 'Has Version', field: 'relation_ids_hasVersion' },
         is_format: { label: 'Is Format Of', field: 'relation_ids_isFormatOf' },
         has_format: { label: 'Has Format', field: 'relation_ids_hasFormat' },
-        has_source: { label: 'Source', field: 'relation_ids_source' }
+        has_source: { label: 'Source', field: 'relation_ids_source' },
+        replaces: { label: 'Replaces', field: 'relation_ids_replaces' },
+        is_replaced_by: { label: 'is Replaced By', field: 'relation_ids_isReplacedBy' }
       }
     end
 
