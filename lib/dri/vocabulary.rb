@@ -686,7 +686,9 @@ module DRI
        'hasVersion',
        'isFormatOf',
        'hasFormat',
-       'source'
+       'source',
+       'replaces',
+       'isReplacedBy'
       ]
     end
 
