@@ -30,7 +30,7 @@ describe 'Documentation' do
   end
 
   it 'should find an existing object' do
-    @doc.update_attributes(@attributes_hash)
+    @doc.update(@attributes_hash)
     @doc.documentation_for = @dc_obj
     @doc.save
     @doc2 = DRI::Documentation.find_by_alternate_id(@doc.alternate_id)
@@ -38,10 +38,10 @@ describe 'Documentation' do
   end
 
   it 'should retrieve an existing object' do
-    @dc_obj.update_attributes(@attributes_hash)
+    @dc_obj.update(@attributes_hash)
     @dc_obj.save
 
-    @doc.update_attributes(@attributes_hash)
+    @doc.update(@attributes_hash)
     @doc.documentation_for = @dc_obj
     @doc.save
     coverage = @attributes_hash[:geographical_coverage] << @attributes_hash[:geocode_box] << @attributes_hash[:geocode_point]
@@ -97,7 +97,7 @@ describe 'Documentation' do
     new_roles = { 'type' => ['role_hst', 'role_pro', 'role_aut'],
                   'name' => ['new host', 'new producer', 'new author'] }
 
-    @doc.update_attributes(@attributes_hash)
+    @doc.update(@attributes_hash)
     expect(@doc.role_aut).to match_array(@attributes_hash[:role_aut])
 
     @doc.roles= new_roles
@@ -112,7 +112,7 @@ describe 'Documentation' do
              geocode_box: ['name=Ireland; northlimit=55.39; eastlimit=-5.24; southlimit=51.47; westlimit=-10.44;'],
              geocode_point: ['name=Dublin; north=53.3478; east=-6.25972;'] }
     @obj = DRI::Documentation.new
-    @obj.update_attributes(hash)
+    @obj.update(hash)
 
     expect(@obj.geocode_point).to match_array(['name=Dublin; north=53.3478; east=-6.25972;'])
     expect(@obj.geocode_box).to match_array(['name=Ireland; northlimit=55.39; eastlimit=-5.24; southlimit=51.47; westlimit=-10.44;'])
@@ -141,7 +141,7 @@ describe 'Documentation' do
     hash = { temporal_coverage: ['name=1900s; start=19000101; end=19991231',
                                  'name=2015; start=2015;'] }
     @obj = DRI::Documentation.new
-    @obj.update_attributes(hash)
+    @obj.update(hash)
 
     expect(@obj.temporal_coverage).to match_array(['name=1900s; start=19000101; end=19991231', 'name=2015; start=2015;'])
 

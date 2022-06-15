@@ -78,7 +78,7 @@ module DRI::Datastreams
       result
     end
 
-    def update_attributes(params)
+    def update(params)
       update_indexed_attributes(params)
       super
     end
