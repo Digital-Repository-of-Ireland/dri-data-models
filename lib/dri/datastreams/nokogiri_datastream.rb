@@ -4,6 +4,10 @@ module DRI
     module NokogiriDatastream
       extend ActiveSupport::Concern
 
+      included do
+        attribute :ng_xml, :binary
+      end
+
       module ClassMethods
         def xml_template
           Nokogiri::XML::Document.parse("<xml/>")
@@ -51,6 +55,10 @@ module DRI
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_will_change!
         attribute_will_change!('ng_xml')
+      end
+
+      def ng_xml_doesnt_change!
+        clear_attribute_changes('ng_xml')
       end
 
       # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
