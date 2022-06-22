@@ -56,7 +56,7 @@ describe 'QualifiedDublinCore' do
     end
 
     it 'should retrieve an existing object' do
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.save
       @audio.new_record?.should == false
       @audio3 = DRI::QualifiedDublinCore.find_by_alternate_id(@audio.alternate_id)
@@ -105,7 +105,7 @@ describe 'QualifiedDublinCore' do
           'type' => ['role_hst', 'role_pro', 'role_aut'],
           'name' => ['new host', 'new producer', 'new author']}
 
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.role_pro.should == @attributes_hash['role_hst']
       @audio.role_hst.should == @attributes_hash['role_pro']
       @audio.role_aut.should == @attributes_hash['role_aut']
@@ -127,11 +127,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:title] = ['']
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('title')
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.should_not be_valid
 
       # From variable assignment
@@ -160,14 +160,14 @@ describe 'QualifiedDublinCore' do
       @audio2.should_not be_valid
       expect(@audio2.descMetadata.custom_validations).to include(:creator)
 
-      # From update_attributes assignment
+      # From update assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:creator] = ['']
       @attributes_hash[:role_hst] = ['']
       @attributes_hash[:role_pro] = ['']
       @attributes_hash[:role_aut] = ['']
       @audio.type = ['Sound']
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.should_not be_valid
       expect(@audio.descMetadata.custom_validations).to include(:creator)
 
@@ -193,14 +193,14 @@ describe 'QualifiedDublinCore' do
       @audio.update_metadata @ds.to_xml
       @audio.should_not be_valid
 
-      # From update_attributes assignment
+      # From update assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:description] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('description')
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -229,11 +229,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:rights] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('rights')
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -261,11 +261,11 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:type] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('type')
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
 
       # From variable assignment
@@ -293,12 +293,12 @@ describe 'QualifiedDublinCore' do
       # From update_attributes assignment
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash[:type] = ['']
-      @audio.update_attributes( @attributes_hash )
+      @audio.update( @attributes_hash )
       @audio.should_not be_valid
       @audio = DRI::QualifiedDublinCore.new
       @attributes_hash.delete('creation_date')
       @attributes_hash.delete('published_date')
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.should_not be_valid
 
       # From variable assignment
@@ -316,7 +316,7 @@ describe 'QualifiedDublinCore' do
     end
 
     it 'should persist changes' do
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.title = ['A Test Title']
       @audio.save
       @audio.reload
@@ -324,7 +324,7 @@ describe 'QualifiedDublinCore' do
     end
 
     it 'should persist properties' do
-      @audio.update_attributes(@attributes_hash)
+      @audio.update(@attributes_hash)
       @audio.status = 'published'
       @audio.save
       @audio.reload
