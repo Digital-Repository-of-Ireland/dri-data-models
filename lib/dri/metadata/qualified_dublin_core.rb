@@ -70,7 +70,11 @@ module DRI
           end
         end
 
-        changed_roles.keys.each { |role| send("#{role}=", changed_roles[role]) }
+        DRI::Vocabulary.marc_relators.map do |s|
+          role = s.prepend('role_')
+          value = changed_roles.key?(role) ? changed_roles[role] : []
+          send("#{role}=", value)
+        end
       end
 
       # Returns an empty, default QDC XML template
