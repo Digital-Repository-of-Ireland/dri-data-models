@@ -3,8 +3,8 @@
 require 'rspec/core/rake_task'
 require 'yard'
 require 'rubocop/rake_task'
-require "solr_wrapper/rake_task"
-require 'dri/rake_support'
+require 'solr_wrapper/rake_task'
+require_relative 'lib/dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -28,7 +28,7 @@ Dir.glob(File.expand_path('../tasks/*.rake', __FILE__)).each do |f|
 end
 
 APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
-#load 'rails/tasks/engine.rake'
+load 'rails/tasks/engine.rake'
 
 require 'rspec/core/rake_task'
 
