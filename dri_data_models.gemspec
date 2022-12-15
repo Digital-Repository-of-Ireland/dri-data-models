@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'namae'
   s.add_dependency 'valkyrie', '~> 2.1'
   s.add_dependency 'rsolr'
+  s.add_dependency 'net-smtp'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
@@ -40,7 +41,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'jquery-rails'
   s.add_development_dependency 'simplecov'
-  s.add_development_dependency 'ci_reporter_rspec'
+  s.add_development_dependency 'rspec_junit_formatter'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'solr_wrapper'
 end

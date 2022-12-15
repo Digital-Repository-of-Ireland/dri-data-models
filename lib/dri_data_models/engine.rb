@@ -10,7 +10,7 @@ module DriDataModels
   require 'solrizer'
 
   class Engine < ::Rails::Engine
-    config.autoload_paths += %W[#{config.root}/app/models/datastreams]
+    config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
 
     isolate_namespace DriDataModels
 
