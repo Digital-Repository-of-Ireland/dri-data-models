@@ -4,7 +4,7 @@ require 'rspec/core/rake_task'
 require 'yard'
 require 'rubocop/rake_task'
 require "solr_wrapper/rake_task"
-#require 'dri/rake_support'
+require 'dri/rake_support'
 
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/")
 
@@ -30,7 +30,6 @@ end
 APP_RAKEFILE = File.expand_path("../spec/test_app/Rakefile", __FILE__)
 #load 'rails/tasks/engine.rake'
 
-#require 'ci/reporter/rake/rspec'
 require 'rspec/core/rake_task'
 
 desc 'Run RuboCop style checker'
