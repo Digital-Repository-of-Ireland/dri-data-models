@@ -31,7 +31,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'resque'
   s.add_dependency 'iso8601'
   s.add_dependency 'namae'
-  s.add_dependency 'valkyrie', '~> 2.1'
+  s.add_dependency 'valkyrie', '~> 3'
   s.add_dependency 'rsolr'
   s.add_dependency 'net-smtp'
   s.add_development_dependency 'sqlite3'

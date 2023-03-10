@@ -21,7 +21,8 @@ Rails.application.config.to_prepare do
   Valkyrie::MetadataAdapter.register(
       Valkyrie::Persistence::Solr::MetadataAdapter.new(
         connection: ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] }),
-        resource_indexer: indexer
+        resource_indexer: indexer,
+        write_only: true
       ),
     :index_solr
   )
