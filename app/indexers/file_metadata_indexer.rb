@@ -93,27 +93,16 @@ class FileMetadataIndexer
     }
 
     unless duration_total.nil?
-      file_metadata.merge!(
-        {
-          'duration_total_isi' => [duration_total],
-          'duration_tesim' => duration,
-          'duration_sim' => duration
-        }
-      )
+      file_metadata['duration_total_isi'] = [duration_total]
+      file_metadata['duration_tesim'] = duration
+      file_metadata['duration_sim'] = duration
     end
 
     unless file_size_total.nil?
-      file_metadata.merge!(
-        {
-          'file_size_total_ltsi' => file_size_total,
-          'file_size_ltsim' => file_size,
-        }
-      )
+      file_metadata['file_size_total_ltsi'] = file_size_total
+      file_metadata['file_size_ltsim'] = file_size
     end
-
-
     file_metadata.merge!(file_type_fields(file_type, file_type_display)) unless file_type.empty?
-
     file_metadata.merge(
       {
         'mime_type_tesim' => mime_type,
