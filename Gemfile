@@ -8,6 +8,6 @@ gemspec
 
 group :test do
   gem 'paper_trail'
-  gem 'user_group', git: 'ssh://git@tracker.dri.ie:2200/drirepo/dri-user-group.git', branch: 'develop'
+  gem 'user_group', git: 'ssh://git@github.com/Digital-Repository-of-Ireland/dri-user-group.git', branch: 'develop'
   gem 'hydra-derivatives', git: 'https://github.com/Digital-Repository-of-Ireland/hydra-derivatives.git', branch: 'main'
 end

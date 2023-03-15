@@ -135,16 +135,15 @@ module DRI::Metadata::Transformations
         Rails.logger.error("This coordinate format is not yet supported: '#{coords}'")
       end
 
-      nameEN, nameGA = name;
-      name = nameGA ? "#{nameGA}/#{nameEN}" : nameEN
+      name_en, name_ga = name
+      name = name_ga ? "#{name_ga}/#{name_en}" : name_en
 
       geojson_hash[:properties] = {}
       geojson_hash[:properties][:placename] = name if name.present?
       geojson_hash[:properties][:geometryCRS] = geometry_crs unless geometry_crs.nil?
       geojson_hash[:properties][:uri] = uri unless uri.blank?
-      geojson_hash[:properties][:nameGA] = nameGA unless nameGA.blank?
-      geojson_hash[:properties][:nameEN] = nameEN unless nameEN.blank?
-
+      geojson_hash[:properties][:nameGA] = name_ga if name_ga.present?
+      geojson_hash[:properties][:nameEN] = name_en if name_en.present?
 
       # Return as a JSON String for blacklight-maps
       geojson_hash.to_json.to_s
