@@ -56,8 +56,6 @@ module DRI
         EadComponent.new(args)
       when :mods
         Mods.new(args)
-      when :documentation
-        Documentation.new(args)
       else
         QualifiedDublinCore.new(args)
       end
