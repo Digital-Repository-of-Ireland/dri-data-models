@@ -10,6 +10,7 @@ class AccessControlIndexer
     solr_doc = {}
 
     solr_doc['master_file_access_ssi'] = resource.wrapped_object.master_file_access if resource.wrapped_object.respond_to?(:master_file_access)
+    solr_doc['visibility_ssi'] = resource.wrapped_object.visibility if resource.wrapped_object.respond_to?(:visibility)
     %w[discover read edit manager].each do |permission|
       solr_doc.merge!(
         {
