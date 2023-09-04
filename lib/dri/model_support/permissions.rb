@@ -17,6 +17,7 @@ module DRI
         delegate :discover_groups, :discover_groups=, to: :access_control
         delegate :discover_users, :discover_users=, to: :access_control
         delegate :master_file_access, :master_file_access=, to: :access_control
+        delegate :visibility, :visibility=, to: :access_control
       end
 
       # Grant discover permissions to the groups specified. Revokes discover permission for all other groups.
