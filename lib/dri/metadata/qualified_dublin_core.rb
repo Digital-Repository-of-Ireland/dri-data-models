@@ -69,6 +69,11 @@ module DRI
             changed_roles[role].push(roles['name'][i])
           end
         end
+        
+        %w(contributor publisher).each do |role|
+          value = changed_roles.key?(role) ? changed_roles[role] : []
+          send("#{role}=", value)
+        end
 
         DRI::Vocabulary.marc_relators.map do |s|
           role = s.prepend('role_')
