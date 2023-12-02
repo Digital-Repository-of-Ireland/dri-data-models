@@ -30,7 +30,8 @@ module DRI::Metadata::Terminologies
           t.coverage_lang(path: { attribute: 'xml:lang' })
         }
         t.relation(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable])
-        t.external_relation(path: 'relation', index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable], namespace_prefix: 'dc', attributes: { 'xsi:type' => 'dcterms:URI' })
+        t.external_relation(ref: :relation, attributes: { 'xsi:type' => 'dcterms:URI' }, index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable])
+
         t.creator(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable])
         t.format(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable,
              DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
@@ -70,7 +71,7 @@ module DRI::Metadata::Terminologies
         # Relationships for QDC
         DRI::Vocabulary.qdc_relationship_types.each do |rel|
           t.send "relation_ids_#{rel}",
-                 path: rel,
+                 path: "#{rel}[not(@xsi:type=\"dcterms:URI\")]",
                  namespace_prefix: 'dcterms',
                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]
         end
