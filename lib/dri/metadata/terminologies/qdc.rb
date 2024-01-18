@@ -71,7 +71,8 @@ module DRI::Metadata::Terminologies
         # Relationships for QDC
         DRI::Vocabulary.qdc_relationship_types.each do |rel|
           t.send "relation_ids_#{rel}",
-                 path: "#{rel}[not(@xsi:type=\"dcterms:URI\")]",
+                 path: rel,
+                 attributes: { "xsi:type"=>nil },
                  namespace_prefix: 'dcterms',
                  index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable]
         end
