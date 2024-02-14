@@ -10,7 +10,7 @@ module DRI::Asset
     # Check if text file
     # @return [Boolean] true if mime_type included in text mimetypes
     def text?
-      self.class.text_mime_types.include? mime_type
+      self.class.text_mime_types.include?(self.mime_type) && !self.class.restricted_3D_extensions.include?(extension)
     end
 
     # Check if image file
@@ -34,8 +34,15 @@ module DRI::Asset
     # Check if 3D file
     # @return [Boolean] true if mime_type included in audio mimetypes
     def threeD?
-      self.class._3D_mime_types.include?(mime_type) &&
-        self.class._3D_file_formats.any? { |f| file_format.downcase.include?(f.downcase) }
+      self.class._3D_mime_types.include?(self.mime_type) && self.class.restricted_3D_extensions.include?(extension)
+    end
+
+    def interactive_resource?
+      self.class.interactive_resource_mime_types.include?(self.mime_type) && self.class.restricted_interactive_resource_extensions.include?(extension)
+    end
+
+    def extension
+      File.extname(self.label).downcase if self.label
     end
 
     # Formatting the file format label for display
@@ -75,15 +82,36 @@ module DRI::Asset
         ::Settings.restrict.mime_types.audio
       end
 
-      # Restrict mimetypes for 3D
       def _3D_mime_types
         ::Settings.restrict.mime_types._3D
+      end
+
+      def interactive_resource_mime_types
+        ::Settings.restrict.mime_types.interactive_resource
       end
 
       # Restrict mimetypes for 3D
       def _3D_file_formats
         ::Settings.restrict.file_formats._3D
       end
+
+      # Restrict mimetypes for Web Archive
+      def interactive_resource_file_formats
+        ::Settings.restrict.file_formats.interactive_resource
+      end
+
+      def restricted_text_extensions
+        ::Settings.restrict.extensions.restricted_text
+      end
+
+      def restricted_3D_extensions
+        ::Settings.restrict.extensions.restricted_3D
+      end
+
+      def restricted_interactive_resource_extensions
+        ::Settings.restrict.extensions.restricted_interactive_resource
+      end
+
     end
   end
 end

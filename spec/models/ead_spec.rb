@@ -104,6 +104,7 @@ describe 'EncodedArchivalDescription' do
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:text?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:pdf?).and_return(true)
       allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:threeD?).and_return(true)
+      allow_any_instance_of(DRI::Asset::MimeTypes).to receive(:interactive_resource?).and_return(true)
 
       allow_any_instance_of(DRI::GenericFile).to receive(:width).and_return([500])
       allow_any_instance_of(DRI::GenericFile).to receive(:height).and_return([500])
