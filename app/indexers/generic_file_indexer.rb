@@ -30,6 +30,7 @@ class GenericFileIndexer
     file_type.push('image') if resource.wrapped_object.image?
     file_type.push('text') if resource.wrapped_object.text?
     file_type.push('3d') if resource.wrapped_object.threeD?
+    file_type.push('interactiveresource') if resource.wrapped_object.interactive_resource?
 
     if file_type.present?
       solr_doc['file_type_tesim'] = file_type
