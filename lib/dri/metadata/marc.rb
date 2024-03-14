@@ -143,7 +143,7 @@ module DRI
 
         case type_of_date
         when 's'
-          name = "s#{date1}"
+          name = "#{date1}"
           start_date = date1
           end_date = ''
         when 'e'
@@ -151,11 +151,11 @@ module DRI
           month = date2.slice(0, 2)
           day = date2.slice(2, 2)
 
-          name = "e#{year}#{month}#{day}"
+          name = "#{year}#{month}#{day}"
           start_date = "#{year}#{month}#{day}"
           end_date = ''
         when 'p'
-          name = "p#{date1}#{date2}"
+          name = "#{date1}#{date2}"
           start_date = ''
           end_date = ''
         when 'm', 'i', 'k', 'q'
