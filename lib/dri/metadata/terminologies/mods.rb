@@ -295,7 +295,8 @@ module DRI::Metadata::Terminologies
           # ----------------------------------------------------------------------------------------------------------
           # Term proxies definition: must be absolute paths, avoid picking relatedItem elements
           # Record Identifier
-          t.identifier(proxy: [:mods, :identifier_record])
+          t.identifier(proxy: [:mods, :identifier_record],
+            index_as: [::Solrizer::Descriptor.new(:string, :stored, :indexed, :multivalued)])
           # Title
           t.title(proxy: [:mods, :title_info, :main_title],
                   index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])

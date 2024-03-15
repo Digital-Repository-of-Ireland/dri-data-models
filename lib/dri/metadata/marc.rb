@@ -63,6 +63,9 @@ module DRI
         # Index Creator with null fields removed
         solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
 
+        identifier_array = identifier_array_for_index
+        solr_doc['identifier_ssim'] = identifier_array
+        
         # all_metadata - A SOLR index of all the text
         # contained in the XML document
         all_metadata = ''
@@ -101,6 +104,10 @@ module DRI
         end
 
         solr_doc
+      end
+
+      def identifier_array_for_index
+        marc_id | id_asset
       end
 
       # Returns all metadata related to people names for Solr indexing
@@ -143,7 +150,7 @@ module DRI
 
         case type_of_date
         when 's'
-          name = "s#{date1}"
+          name = "#{date1}"
           start_date = date1
           end_date = ''
         when 'e'
@@ -151,11 +158,11 @@ module DRI
           month = date2.slice(0, 2)
           day = date2.slice(2, 2)
 
-          name = "e#{year}#{month}#{day}"
+          name = "#{year}#{month}#{day}"
           start_date = "#{year}#{month}#{day}"
           end_date = ''
         when 'p'
-          name = "p#{date1}#{date2}"
+          name = "#{date1}#{date2}"
           start_date = ''
           end_date = ''
         when 'm', 'i', 'k', 'q'

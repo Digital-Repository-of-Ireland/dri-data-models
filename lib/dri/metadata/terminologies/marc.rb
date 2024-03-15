@@ -85,7 +85,8 @@ module DRI::Metadata::Terminologies
         # we map it to 024 - Other Standard Identifier (R)
         # Standard number or code published on an item which cannot be accommodated in another field
         # The type of standard number or code is identified in the first indicator position or in subfield $2 (Source of number or code)
-        # Full map: tag 024; first indicator 7 (Source specified in subfield $2), subfield $2 contains a value of 'local' (from http://www.loc.gov/standards/sourcelist/standard-identifier.html)
+        # Full map: tag 024; first indicator 7 (Source specified in subfield $2), subfield $2 contains a value of 'local' 
+        # (from http://www.loc.gov/standards/sourcelist/standard-identifier.html)
         # value of the identifier comes then from subfield $a
         # Example: 024  7#$a0A3200912B4A1057$2local http://www.loc.gov/marc/marc2dc.html#unqualifiedlist
         t.marc_id(path: 'record/datafield[@tag="024" and @ind1="7" and subfield[@code="2"]="local"]/subfield[@code="a"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])

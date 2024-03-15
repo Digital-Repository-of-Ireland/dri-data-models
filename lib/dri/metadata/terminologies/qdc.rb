@@ -38,7 +38,7 @@ module DRI::Metadata::Terminologies
         t.resource_type(path: 'type', namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable,
              DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 
-        t.identifier(namespace_prefix: 'dc')
+        t.identifier(namespace_prefix: 'dc', index_as: [::Solrizer::Descriptor.new(:string, :stored, :indexed, :multivalued)])
         # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
         t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [:stored_sortable])
         # Used for QDC metadata relationships, as the local, unique record ID
