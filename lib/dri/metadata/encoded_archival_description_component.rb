@@ -149,6 +149,8 @@ module DRI
           end
         end
 
+        solr_doc['identifier_ssim'] = identifier_array_for_index
+
         solr_doc[Solrizer.solr_name('published_date', :stored_searchable)] = pdate_array unless published_date.empty?
         # Index date ranges
         date_ranges = date_ranges_for_index # ALL the date ranges
@@ -205,6 +207,10 @@ module DRI
 
         solr_doc
       end # to_solr
+
+      def identifier_array_for_index
+        identifier_id | identifier_public_id | identifier_url
+      end
 
       # Returns all metadata related to people names for Solr indexing
       # People facet

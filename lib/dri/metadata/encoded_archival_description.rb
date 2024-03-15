@@ -114,6 +114,8 @@ module DRI
         # Publisher
         solr_doc[Solrizer.solr_name('publisher', :stored_searchable)] = publisher unless publisher == []
 
+        solr_doc['identifier_ssim'] = identifier_array_for_index
+
         # Indexing dates for display
         # Creation Date
         cdate_array = creation_date.collect.with_index do |value, idx|
@@ -209,6 +211,10 @@ module DRI
         else
           DRI::Metadata::Transformations.create_dcmi_period(display, date)
         end
+      end
+
+      def identifier_array_for_index
+        identifier_id | identifier_public_id | identifier_url
       end
 
       # Returns all metadata related to people names for Solr indexing

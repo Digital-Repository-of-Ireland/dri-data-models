@@ -580,7 +580,7 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
-                   'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim']
+                   'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim', 'identifier_ssim']
 
       expect(@collection.descMetadata.to_solr.keys).to match_array(solr_keys)
       solr_doc = @collection.descMetadata.to_solr
@@ -665,7 +665,7 @@ describe 'EncodedArchivalDescription descMetadata' do
                    'placename_field_tesim', 'placename_field_sim', 'geojson_ssim', 'description_tesim',
                    'publisher_tesim', 'corpname_subject_sim', 'corpname_subject_tesim', 'famname_subject_sim',
                    'famname_subject_tesim', 'name_subject_sim', 'name_subject_tesim', 'ead_level_sim', 'ead_level_tesim',
-                   'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim']
+                   'format_sim', 'format_tesim', 'resource_type_sim', 'resource_type_tesim', 'identifier_ssim']
 
       expect(@component.descMetadata.to_solr.keys).to match_array(solr_keys)
       solr_doc = @component.descMetadata.to_solr

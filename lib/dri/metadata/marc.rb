@@ -63,6 +63,9 @@ module DRI
         # Index Creator with null fields removed
         solr_doc = remove_null_values(solr_doc, 'creator') if solr_doc[Solrizer.solr_name('creator', :stored_searchable)].present?
 
+        identifier_array = identifier_array_for_index
+        solr_doc['identifier_ssim'] = identifier_array
+        
         # all_metadata - A SOLR index of all the text
         # contained in the XML document
         all_metadata = ''
@@ -101,6 +104,10 @@ module DRI
         end
 
         solr_doc
+      end
+
+      def identifier_array_for_index
+        marc_id | id_asset
       end
 
       # Returns all metadata related to people names for Solr indexing
