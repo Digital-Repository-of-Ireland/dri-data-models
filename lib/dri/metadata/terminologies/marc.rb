@@ -28,7 +28,9 @@ module DRI::Metadata::Terminologies
         # Mandatory fields
         t.title(path: 'record/datafield[@tag="245"]/subfield[@code="a" or @code="b" or @code="c"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         t.description(path: 'record/datafield[@tag="300" or @tag="500" or @tag="520"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
-        t.creator(path: 'record/datafield[@tag="100" or @tag="110" or @tag="700" or @tag="710" or @tag="711"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
+        t.personal_name(path: 'record/datafield[@tag="100" or @tag="700"]')
+        t.corporate_name(path: 'record/datafield[@tag="110" or @tag="710"]')
+        t.meeting_name(path: 'record/datafield[@tag="711"]')
         t.rights(path: 'record/datafield[@tag="506" or @tag="540"] | //record/datafield[@tag="542"]/subfield[@code="f"]', index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         t.date_260c_264c(path: 'record/datafield[@tag="260" or @tag="264"]/subfield[@code="c"]')
 

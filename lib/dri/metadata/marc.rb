@@ -23,6 +23,34 @@ module DRI
         (leader_6_type == 'p' || leader_7_type == 'c') ? true : false
       end
 
+      def creator
+        personal_names_100 | personal_names_700 | corporate_name | meeting_name
+      end
+
+      def personal_names_100
+        subfield_codes_100 = %w(a b c d e f g j k l n p q t u 0 1 2 4 6 7 8)
+        
+        nodes = ng_xml.xpath('//record/datafield[@tag="100"]')
+        concat_subfields(nodes, subfield_codes_100)
+      end
+
+      def personal_names_700
+        subfield_codes_700 = %w(a b c d e f g h i j k l m n o p q r s t u 0 1 2 3 4 6 7 8)
+        
+        nodes = ng_xml.xpath('//record/datafield[@tag="700"]')
+        concat_subfields(nodes, subfield_codes_700)
+      end
+
+      def concat_subfields(nodes, codes)
+        nodes.map do |node|
+          subfield_text = []
+          node.children.select{ |subfield| codes.include?(subfield.attribute('code')&.value) }.each do |c|
+            subfield_text << c.text
+          end
+          subfield_text.join(" ")
+        end
+      end
+
       # Returns an empty, default MARC XML template
       #
       # @return [Nokogiri::Document] the MARC XML document
@@ -52,6 +80,9 @@ module DRI
 
         solr_doc[Solrizer.solr_name('type', :stored_searchable)] = type
         solr_doc[Solrizer.solr_name('type', :facetable)] = type
+
+        solr_doc[Solrizer.solr_name('creator', :facetable)] = creator
+        solr_doc[Solrizer.solr_name('creator', :stored_searchable, type: :text)] = creator
 
         # Retrieve list of all people and add to
         # facet and search indexes in solr document
