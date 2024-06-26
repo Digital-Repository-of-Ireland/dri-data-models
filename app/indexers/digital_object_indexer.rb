@@ -43,7 +43,9 @@ class DigitalObjectIndexer
       'doi_ss' => resource.wrapped_object.doi,
       'cover_image_ss' => resource.wrapped_object.cover_image,
       'licence_sim' => resource.wrapped_object.licence,
-      'licence_tesim' => resource.wrapped_object.licence
+      'licence_tesim' => resource.wrapped_object.licence,
+      'copyright_sim' => resource.wrapped_object.copyright,
+      'copyright_tesim' => resource.wrapped_object.copyright
     }
   end
 
