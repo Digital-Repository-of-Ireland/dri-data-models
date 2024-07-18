@@ -369,7 +369,7 @@ module DRI
     end
 
     def method_missing(method, *args)
-      if self.class.terminology.has_term?(*OM.destringify(term_pointer))
+      if descMetadata.class.terminology.has_term?(*OM.destringify(method))
         descMetadata.send(method, *args)
       else
         super

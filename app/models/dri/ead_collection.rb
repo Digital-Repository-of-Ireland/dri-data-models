@@ -18,11 +18,5 @@ module DRI
     def fullMetadata
       super || build_fullMetadata
     end
-
-    def method_missing(method, *args)
-      return descMetadata.send(method, *args) if descMetadata.respond_to?(method)
-
-      super
-    end
   end
 end
