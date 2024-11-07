@@ -73,7 +73,7 @@ module DRI
     end
 
     def set_model_version
-      self.model_version ||= DriDataModels::VERSION if new_record?
+      self.model_version ||= DRIDataModels::Version if new_record?
     end
 
     def [](key)

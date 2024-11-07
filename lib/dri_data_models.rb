@@ -5,5 +5,5 @@ require 'dri'
 require 'namae'
 
 # DriDataModels namespace
-module DriDataModels
+module DRIDataModels
 end

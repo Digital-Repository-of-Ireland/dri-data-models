@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class CreateDriReconciliationResults < ActiveRecord::Migration[4.2]
+class CreateDRIReconciliationResults < ActiveRecord::Migration[4.2]
   def change
     create_table :dri_reconciliation_results do |t|
       t.string :object_id

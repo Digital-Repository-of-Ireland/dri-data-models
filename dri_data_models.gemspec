@@ -7,7 +7,7 @@ require 'dri_data_models/version'
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = 'dri_data_models'
-  s.version     = DriDataModels::VERSION
+  s.version     = DRIDataModels::Version
   s.authors     = ["Damien Gallagher, Stuart Kenny, Kathryn Cassidy, Augustina Martinez"]
   s.email       = 'dri@ria.ie'
   s.homepage    = 'https://www.dri.ie'
