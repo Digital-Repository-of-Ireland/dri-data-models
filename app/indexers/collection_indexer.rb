@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 class CollectionIndexer
-  IS_PRECEDED_BY = "#{DRI::RDFVocabularies::DriRelsVocabulary.isPrecededBy.fragment}_ssim"
+  IS_PRECEDED_BY = "#{DRI::RdfVocabularies::DRIRelsVocabulary.isPrecededBy.fragment}_ssim"
 
   attr_reader :resource
   def initialize(resource:)

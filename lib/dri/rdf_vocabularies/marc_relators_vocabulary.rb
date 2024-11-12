@@ -1,7 +1,7 @@
 # DRI namespace
 module DRI
   # RDFVocabularies namespace
-  module RDFVocabularies
+  module RdfVocabularies
     # Defines DRI MARC relationships RDF properties
     class MarcRelatorsVocabulary < RDF::Vocabulary('http://www.loc.gov/marc.relators/')
       property :acp

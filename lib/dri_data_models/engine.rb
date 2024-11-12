@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-module DriDataModels
+module DRIDataModels
   require 'rails'
   require 'hydra/derivatives'
   require 'noid-rails'
@@ -10,9 +10,17 @@ module DriDataModels
   require 'solrizer'
 
   class Engine < ::Rails::Engine
-    config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
+    #config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
+    #config.eager_load_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
 
-    isolate_namespace DriDataModels
+    #config.autoload_paths << config.root.join('lib')
+    #config.autoload_paths << config.root.join('app','models','datastreams')
+    #config.autoload_paths << config.root.join('app','models','dri')
+    #config.eager_load_paths << config.root.join('lib')
+    #config.eager_load_paths << config.root.join('app','models','datastreams')
+    #config.eager_load_paths << config.root.join('app','models','dri')
+
+    isolate_namespace DRIDataModels
 
     config.generators do |g|
       g.test_framework :rspec, fixture: true

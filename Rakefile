@@ -62,7 +62,7 @@ desc 'Run Continuous Integration'
 task :ci do
   ENV['environment'] = 'test'
 
-  with_solr_test_server do
+  DRI::RakeSupport.with_solr_test_server do
     Rake::Task['app:db:migrate'].invoke
     Rake::Task['app:db:test:prepare'].invoke
 
