@@ -26,8 +26,8 @@ module DRI
     # one-to-one association to associate DRI::DigitalObject
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true, autosave: true
 
-    serialize :title
-    serialize :creator
+    serialize :title, coder: YAML
+    serialize :creator, coder: YAML
 
     delegate :alternate_id, :alternate_id=, to: :alternate_identifier
 

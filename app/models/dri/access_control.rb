@@ -3,14 +3,14 @@ module DRI
   class AccessControl < ApplicationRecord
     belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true, autosave: true
 
-    serialize :manager_groups, Array
-    serialize :manager_users, Array
-    serialize :edit_groups, Array
-    serialize :edit_users, Array
-    serialize :read_groups, Array
-    serialize :read_users, Array
-    serialize :discover_groups, Array
-    serialize :discover_users, Array
+    serialize :manager_groups, type: Array, coder: YAML
+    serialize :manager_users, type: Array, coder: YAML
+    serialize :edit_groups, type: Array, coder: YAML
+    serialize :edit_users, type: Array, coder: YAML
+    serialize :read_groups, type: Array, coder: YAML
+    serialize :read_users, type: Array, coder: YAML
+    serialize :discover_groups, type: Array, coder: YAML
+    serialize :discover_users, type: Array, coder: YAML
 
     def permissions
       graph = RDF::Graph.new
