@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'om'
   s.add_dependency 'nokogiri', '>= 1.12.5'
-  s.add_dependency 'rails', '~> 6.0'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
   s.add_dependency 'hydra-file_characterization'
@@ -38,6 +37,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
 
+  s.add_development_dependency 'rails', '> 5.1', '< 8.0'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'jquery-rails'
   s.add_development_dependency 'simplecov'
