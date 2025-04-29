@@ -37,11 +37,12 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
 
-  s.add_development_dependency 'rails', '> 5.1', '< 8.0'
+  s.add_development_dependency 'rails', '> 5.1', '< 7.2'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'jquery-rails'
   s.add_development_dependency 'simplecov'
   s.add_development_dependency 'rspec_junit_formatter'
   s.add_development_dependency 'yard'
   s.add_development_dependency 'solr_wrapper'
+  s.add_development_dependency 'sprockets-rails'
 end
