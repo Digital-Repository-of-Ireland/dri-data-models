@@ -69,8 +69,10 @@ module DRI
       end
 
       def self.name_from_orcid(name)
-        return name unless name.start_with?('name=')
-        name['name='.length..name.index(';')-1]
+        return name unless name.start_with?('name=') && name.index('authority=ORCID')
+
+        end_index = (name.index(';') || name.index('authority')-1)
+        name['name='.length..end_index-1]
       end
 
       def self.name_remove_dates(name)
