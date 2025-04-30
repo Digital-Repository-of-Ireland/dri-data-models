@@ -42,6 +42,7 @@ class DigitalObjectIndexer
       'institute_sim' => resource.wrapped_object.institute,
       'doi_ss' => resource.wrapped_object.doi,
       'cover_image_ss' => resource.wrapped_object.cover_image,
+      'thumbnail_ss' => resource.wrapped_object.thumbnail,
       'licence_sim' => resource.wrapped_object.licence,
       'licence_tesim' => resource.wrapped_object.licence,
       'copyright_sim' => resource.wrapped_object.copyright,
