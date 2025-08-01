@@ -41,6 +41,7 @@ module DRI
         delegate :language, :language=, to: :descMetadata
 
         serialize :institute, type: Array, coder: YAML
+        serialize :setspec, type: Array, coder: YAML
 
         validate :custom_validations
       end

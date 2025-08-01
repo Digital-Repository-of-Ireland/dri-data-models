@@ -47,7 +47,8 @@ class DigitalObjectIndexer
       'licence_tesim' => resource.wrapped_object.licence,
       'copyright_sim' => resource.wrapped_object.copyright,
       'copyright_tesim' => resource.wrapped_object.copyright,
-      'dataset_ss' => resource.wrapped_object.dataset
+      'dataset_ss' => resource.wrapped_object.dataset,
+      'setspec_ssim' => resource.wrapped_object.setspec
     }
   end
 
