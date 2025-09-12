@@ -18,7 +18,7 @@ module DRI
       # @param [String] field the name of the metadata field
       # @return [Array<String>] the array of field metadata values
       def metadata_path(field)
-        recognised_attributes = [:title, :rights, :description, :language, :subject, :subject_lang, :date, :contributor,
+        recognised_attributes = [:title, :rights, :access_rights, :description, :language, :subject, :subject_lang, :date, :contributor,
                                  :source, :publisher, :coverage, :coverage_lang, :relation, :creator, :format, :type,
                                  :identifier, :published_date, :creation_date, :geographical_coverage, :geographical_coverage_lang,
                                  :temporal_coverage, :temporal_coverage_lang, :geocode_point, :geocode_box]
@@ -154,6 +154,7 @@ module DRI
         faceted_language_indexes = {}
         faceted_language_indexes.merge! split_array_into_languages('title')
         faceted_language_indexes.merge! split_array_into_languages('rights')
+        faceted_language_indexes.merge! split_array_into_languages('access_rights')
         faceted_language_indexes.merge! split_array_into_languages('subject')
         faceted_language_indexes.merge! split_array_into_languages('coverage')
         faceted_language_indexes.merge! split_array_into_languages('temporal_coverage')
