@@ -5,9 +5,11 @@ class IdBasedJob
   end
 
   attr_accessor :id
+  attr_accessor :user
 
-  def initialize(id)
+  def initialize(id, user = nil)
     self.id = id
+    self.user = user
   end
 
   def object

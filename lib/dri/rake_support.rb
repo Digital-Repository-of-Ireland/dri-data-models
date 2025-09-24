@@ -14,17 +14,20 @@ module DRI
       # setting port: nil assigns a random port.
       solr_defaults = { port: nil, verbose: true, managed: true }
 
-      SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
-        ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
-        solr_config_path = File.join('solr', 'config')
-        # Check to see if configs exist in a path relative to the working directory
-        unless Dir.exist?(solr_config_path)
-          $stderr.puts "Solr configuration not found at #{solr_config_path}."
-          return
+      begin
+        SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
+          ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
+          solr_config_path = File.join('solr', 'config')
+          # Check to see if configs exist in a path relative to the working directory
+          unless Dir.exist?(solr_config_path)
+            $stderr.puts "Solr configuration not found at #{solr_config_path}."
+            return
+          end
+          solr.with_collection(name: "#{environment}", dir: solr_config_path) do
+            yield
+          end
         end
-        solr.with_collection(name: "#{environment}", dir: solr_config_path) do
-          yield
-        end
+      rescue StandardError
       end
       ENV["#{environment}_SERVER_STARTED"] = 'false'
     end
