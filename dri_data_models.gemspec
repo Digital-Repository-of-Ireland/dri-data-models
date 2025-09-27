@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'valkyrie', '~> 3'
   s.add_dependency 'rsolr'
   s.add_dependency 'net-smtp'
+  s.add_dependency 'uri', '~> 0.13.2'
   s.add_development_dependency 'sqlite3', '~> 1'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
