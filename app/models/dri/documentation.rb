@@ -40,10 +40,6 @@ module DRI
       super || build_descMetadata
     end
 
-    # Override - ingest from RDF-XML files not supported
-    # for DRI::Documentation objects
-    def update_metadata(_xml_text, _ingest = true) end
-
     # AF Override
     # Set the object's attributes
     # @param [Hash] properties the hash with the object's properties
