@@ -21,6 +21,7 @@ module DRI
     delegate :geocode_point, :geocode_point=, to: :descMetadata
     delegate :geocode_box, :geocode_box=, to: :descMetadata
     delegate :relation, :relation=, to: :descMetadata
+    delegate :access_rights, :access_rights=, to: :descMetadata
 
     delegate :published_date, :published_date=, to: :descMetadata
     delegate :creation_date, :creation_date=, to: :descMetadata
