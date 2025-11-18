@@ -20,6 +20,7 @@ module DRI
     delegate :coverage, :coverage=, to: :descMetadata
     delegate :identifier, :identifier=, to: :descMetadata
     delegate :resource_type, :resource_type=, to: :descMetadata
+    delegate :access_rights, :access_rights=, to: :descMetadata
     # id_asset is used for sorting digital objects by order/sequence
     # used in catalog_controller in the dri-app
     delegate :id_asset=, to: :descMetadata
