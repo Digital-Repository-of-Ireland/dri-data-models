@@ -10,7 +10,13 @@ class DigitalObjectIndexer
 
     solr_doc = create_solr_document
     solr_doc.merge!(collection_file_types) if resource.wrapped_object.collection?
-
+ 
+    if resource.wrapped_object.respond_to?(:identifier)
+      if resource.wrapped_object.identifier.present?
+        alpha = alphanumeric(resource.wrapped_object.identifier.first)
+        solr_doc['identifier_si'] = alpha unless alpha.empty?
+      end
+    end
     solr_doc
   end
 
@@ -54,5 +60,12 @@ class DigitalObjectIndexer
 
   def ead_level?
     resource.wrapped_object.respond_to?(:ead_level) && !resource.wrapped_object.root_collection? && resource.wrapped_object.ead_level.present?
+  end
+
+  def alphanumeric(str)
+    str.downcase.strip
+                .gsub(/(\d+)/,'00000\1')
+                .gsub(/0*([0-9]{6,})/, '\1')
+                .gsub(/([^a-z0-9])/,'')
   end
 end
