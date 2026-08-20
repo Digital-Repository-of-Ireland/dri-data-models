@@ -85,7 +85,7 @@ module DRI::Metadata::Transformations
 
       geojson_hash[:properties][:placename] = display_name if display_name.present?
       geojson_hash[:properties][:geometryCRS] = geometry_crs unless geometry_crs.nil?
-      geojson_hash[:properties][:uri] = uri unless uri.blank?
+      geojson_hash[:properties][:uri] = uri if uri.present?
       geojson_hash[:properties][:nameGA] = name_ga if name_ga.present?
       geojson_hash[:properties][:nameEN] = name_en if name_en.present?
 

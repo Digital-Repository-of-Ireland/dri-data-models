@@ -10,7 +10,7 @@ class DigitalObjectIndexer
 
     solr_doc = create_solr_document
     solr_doc.merge!(collection_file_types) if resource.wrapped_object.collection?
- 
+
     if resource.wrapped_object.respond_to?(:identifier)
       if resource.wrapped_object.identifier.present?
         alpha = alphanumeric(resource.wrapped_object.identifier.first)
@@ -64,8 +64,8 @@ class DigitalObjectIndexer
 
   def alphanumeric(str)
     str.downcase.strip
-                .gsub(/(\d+)/,'00000\1')
-                .gsub(/0*([0-9]{6,})/, '\1')
-                .gsub(/([^a-z0-9])/,'')
+       .gsub(/(\d+)/, '00000\1')
+       .gsub(/0*([0-9]{6,})/, '\1')
+       .gsub(/([^a-z0-9])/, '')
   end
 end

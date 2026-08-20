@@ -28,7 +28,7 @@ module DRI
 
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
-        delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
+        delegate s.prepend('role_').to_sym, s.concat('=').to_sym,
                  to: :descMetadata
       end
     end

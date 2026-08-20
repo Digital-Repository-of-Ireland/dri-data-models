@@ -22,4 +22,3 @@ module DRI
     'dri_'
   end
 end
-

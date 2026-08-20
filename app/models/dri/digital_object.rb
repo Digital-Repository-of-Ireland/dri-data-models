@@ -62,7 +62,7 @@ module DRI
     end
 
     def self.find_by_alternate_id(pid)
-      joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
+      joins(:alternate_identifier).find_by(dri_identifiers: { alternate_id: pid })
     end
 
     def self.find_by_alternate_id!(pid)

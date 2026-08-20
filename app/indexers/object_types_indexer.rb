@@ -11,7 +11,7 @@ class ObjectTypesIndexer
 
     object_types = []
 
-    resource.wrapped_object.type.each { |cat| object_types.push cat.split.map(&:capitalize)*' ' }
+    resource.wrapped_object.type.each { |cat| object_types.push cat.split.map(&:capitalize) * ' ' }
     object_types.push('Unknown') if object_types.count < 1
 
     {

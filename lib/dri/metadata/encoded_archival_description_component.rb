@@ -20,31 +20,31 @@ module DRI
       # @return [Nokogiri::Document] the EAD component XML document
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.c(level: '') {
-            xml.did {
+          xml.c(level: '') do
+            xml.did do
               xml.unittitle # title
               xml.unitid(identifier: '', repositorycode: '', countrycode: 'IE') # identifier
               xml.unitdate(datechar: 'creation', normal: '') # creation_date
               xml.unitdate(datechar: 'publication', normal: '') # published_date
-              xml.origination {
+              xml.origination do
                 xml.persname(role: 'creator')
                 xml.persname(role: 'contributor')
-              }
-              xml.langmaterial {
+              end
+              xml.langmaterial do
                 xml.language(langcode: 'en')
-              }
-              xml.physdesc {
+              end
+              xml.physdesc do
                 xml.genreform # type
-              }
-            }
+              end
+            end
             xml.scopecontent # description
             xml.userestrict # rights
-            xml.controlaccess {
+            xml.controlaccess do
               xml.subject # subject
               xml.persname(role: 'subject')
               xml.geogname(role: 'subject')
-            }
-          }
+            end
+          end
         end
 
         builder.doc
@@ -127,11 +127,11 @@ module DRI
         solr_doc[Solrizer.solr_name('temporal_coverage', :facetable)] = filter_uris(subject_temporal_array)
 
         # Creation_date_idx field is necessary for inheriting the date from the parent if not present
-        if creation_date_idx.empty?
-          solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = parent_field('creation_date_idx')
-        else
-          solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = creation_date_idx
-        end
+        solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = if creation_date_idx.empty?
+                                                                                  parent_field('creation_date_idx')
+                                                                                else
+                                                                                  creation_date_idx
+                                                                                end
 
         # Published Date
         pdate_array = published_date.collect.with_index do |value, idx|
@@ -236,7 +236,7 @@ module DRI
             DRI::Metadata::Transformations.create_dcmi_period(value)
           else
             iso_date = creation_date(idx).normal_at[0]
-             if (iso_date.include?('/'))
+            if iso_date.include?('/')
               range = iso_date.split('/')
               DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
             else
@@ -333,7 +333,7 @@ module DRI
           else
             iso_date = temporal_coverage(idx).normal_at[0]
 
-            if (iso_date.include?('/'))
+            if iso_date.include?('/')
               range = iso_date.split('/')
               DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
             else
@@ -735,12 +735,12 @@ module DRI
         return if parent.nil? # Return if we have no parent to sync with
 
         parent_md_xml = parent.fullMetadata.ng_xml.clone
-        if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
-          # if original XML file uses EAD XSD and includes namespace prefixes, use them in the query
-          query = "//*[ead:did/ead:unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
-        else
-          query = "//*[did/unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
-        end
+        query = if parent_md_xml.collect_namespaces['xmlns:ead'] == 'urn:isbn:1-931666-22-9'
+                  # if original XML file uses EAD XSD and includes namespace prefixes, use them in the query
+                  "//*[ead:did/ead:unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
+                else
+                  "//*[did/unitid[@repositorycode='#{repository_code.first}' and @countrycode='#{country_code.first}' and text()='#{identifier.first}']]"
+                end
         # Find updated component to sync in parent's fullMetadata
         component_node = parent_md_xml.at(query)
 
@@ -757,17 +757,15 @@ module DRI
           child_xml.search('//*').each do |n|
             # all ns prefix from root node to every child in the XML
             n.namespace = child_xml.root.namespace_definitions.find { |ns| ns.prefix == 'ead' }
-            if n['href'] # dao @href attr is under xlink ns if using EAD XSD
-              n.attribute('href').namespace = child_xml.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' }
-            end
+            n.attribute('href').namespace = child_xml.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' } if n['href'] # dao @href attr is under xlink ns if using EAD XSD
           end
 
           # Need to remove the added ns declarations to the component before comparing
-          child_xml_str = child_xml.root.serialize(save_with:0).delete("\n").delete('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ')
+          child_xml_str = child_xml.root.serialize(save_with: 0).delete("\n").delete('xmlns:ead="urn:isbn:1-931666-22-9" xmlns:xlink="http://www.w3.org/1999/xlink" ')
 
-          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with:0).delete("\n"))
+          same_metadata = (child_xml_str == parent_xml.root.serialize(save_with: 0).delete("\n"))
         else
-          same_metadata = child_xml.root.serialize(save_with:0).delete("\n") == parent_xml.root.serialize(save_with:0).delete("\n")
+          same_metadata = child_xml.root.serialize(save_with: 0).delete("\n") == parent_xml.root.serialize(save_with: 0).delete("\n")
         end
 
         # Check if the component node in parent XML is different
@@ -783,9 +781,7 @@ module DRI
             parent.save
 
             # Queue synchronization between parent and grandparent
-            if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
-              DRI.queue.push(UpdateParentMetadataJob.new(parent.alternate_id))
-            end
+            DRI.queue.push(UpdateParentMetadataJob.new(parent.alternate_id)) if parent.descMetadata.is_a?(DRI::Metadata::EncodedArchivalDescriptionComponent)
           end
 
           return true
@@ -840,8 +836,8 @@ module DRI
         # Specific EAD validation
         if ead_level.include?('otherlevel')
           errors[:ead_level_other] = "can't be blank" if ead_level_other_result == false
-        else
-          errors[:ead_level] = "can't be blank" if ead_level_result == false
+        elsif ead_level_result == false
+          errors[:ead_level] = "can't be blank"
         end
 
         # UNITID validation

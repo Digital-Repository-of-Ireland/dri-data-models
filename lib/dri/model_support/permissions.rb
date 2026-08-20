@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 # DRI namespace
 module DRI
-  #ModelSupport namespace
+  # ModelSupport namespace
   module ModelSupport
     # Override Hydra permissions
     module Permissions
@@ -33,7 +33,7 @@ module DRI
 
       # Display the groups a comma delimeted string
       def discover_groups_string
-        self.discover_groups.join(', ')
+        discover_groups.join(', ')
       end
 
       # Grant discover permissions to the users specified. Revokes discover permission for all other users.
@@ -60,7 +60,7 @@ module DRI
 
       # Display the users as a comma delimited string
       def discover_users_string
-        self.discover_users.join(', ')
+        discover_users.join(', ')
       end
 
       # Grant read permissions to the groups specified. Revokes read permission for all other groups.
@@ -76,7 +76,7 @@ module DRI
 
       # Display the groups as a comma delimited string
       def read_groups_string
-        self.read_groups.join(', ')
+        read_groups.join(', ')
       end
 
       # Grant read permissions to the groups specified. Revokes read permission for
@@ -111,7 +111,7 @@ module DRI
 
       # Display the users as a comma delimeted string
       def read_users_string
-        self.read_users.join(', ')
+        read_users.join(', ')
       end
 
       # Grant edit permissions to the groups specified. Revokes edit permission for all other groups.
@@ -127,7 +127,7 @@ module DRI
 
       # Display the groups a comma delimeted string
       def edit_groups_string
-        self.edit_groups.join(', ')
+        edit_groups.join(', ')
       end
 
       # Grant edit permissions to the users specified. Revokes edit permission for
@@ -155,7 +155,7 @@ module DRI
 
       # Display the groups a comma delimeted string
       def edit_users_string
-        self.edit_users.join(', ')
+        edit_users.join(', ')
       end
 
       # Grant manager permissions to the groups specified. Revokes edit permission for all other groups.
@@ -171,7 +171,7 @@ module DRI
 
       # Display the groups a comma delimeted string
       def manager_groups_string
-        self.manager_groups.join(', ')
+        manager_groups.join(', ')
       end
 
       def manager_users_string=(users)
@@ -180,7 +180,7 @@ module DRI
 
       # Display the groups a comma delimeted string
       def manager_users_string
-        self.manager_users.join(', ')
+        manager_users.join(', ')
       end
     end
   end

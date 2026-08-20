@@ -22,10 +22,10 @@ module DRI
           # Need to add the namespace declarations to the mods:mods root element
           # Otherwise the terminology (xpath) won't find the elements
           new_xml = Nokogiri::XML::Builder.new do |xml|
-            xml.mods({ 'xmlns:mods' => 'http://www.loc.gov/mods/v3' }, r.namespaces) {
+            xml.mods({ 'xmlns:mods' => 'http://www.loc.gov/mods/v3' }, r.namespaces) do
               xml.parent.namespace = xml.parent.namespace_definitions.find(&:href)
               xml << r.children.to_xml
-            }
+            end
           end
           # Skip the first one, which has already been generated
           create_object(new_xml.to_xml) if records.index(r).positive?

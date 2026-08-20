@@ -21,44 +21,44 @@ module DRI
       def self.xml_template
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.doc.create_internal_subset('ead', '+//ISBN 1-931666-00-8//DTD ead.dtd (Encoded Archival Description (EAD) Version 2002)//EN', '')
-          xml.ead {
-            xml.eadheader {
+          xml.ead do
+            xml.eadheader do
               xml.eadid(identifier: '', countrycode: 'IE', mainagencycode: '') # identifier
-              xml.filedesc {
-                xml.publicationstmt {
+              xml.filedesc do
+                xml.publicationstmt do
                   xml.date(normal: '') # published_date
-                }
-                xml.titlestmt {
+                end
+                xml.titlestmt do
                   xml.titleproper
-                }
-              }
-            }
-            xml.archdesc(level: 'fonds') { # ead_level
-              xml.did {
+                end
+              end
+            end
+            xml.archdesc(level: 'fonds') do # ead_level
+              xml.did do
                 xml.unittitle # title
                 xml.unitdate(datechar: 'creation') # creation_date
                 xml.unitdate(datechar: 'coverage') # temporal_coverage
-                xml.origination {
+                xml.origination do
                   xml.persname(role: 'creator')
                   xml.persname(role: 'contributor')
-                }
-                xml.langmaterial {
+                end
+                xml.langmaterial do
                   xml.language(langcode: 'en')
-                }
-                xml.physdesc {
+                end
+                xml.physdesc do
                   xml.genreform # type
-                }
-              }
+                end
+              end
               xml.scopecontent # description
               xml.userestrict # rights
-              xml.controlaccess {
+              xml.controlaccess do
                 xml.subject # subject
                 xml.persname(role: 'subject')
                 xml.geogname(role: 'subject')
-              }
+              end
               xml.dsc
-            }
-          }
+            end
+          end
         end
 
         builder.doc
@@ -76,9 +76,7 @@ module DRI
         if title.length.positive?
           sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
 
-          if sorted_title.present?
-            solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = [sorted_title]
-          end
+          solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = [sorted_title] if sorted_title.present?
         end
 
         # Type
@@ -669,8 +667,7 @@ module DRI
       end
 
       # No parent to update as this object is a EAD ROOT Collection
-      def update_parent_metadata(_parent, _full_metadata)
-      end
+      def update_parent_metadata(_parent, _full_metadata); end
 
       # Implement additional DRI metadata validations as this class does not inherit
       # from DRI::Metadata::Base
@@ -730,8 +727,8 @@ module DRI
         # Specific EAD validation
         if ead_level.include?('otherlevel')
           errors[:ead_level_other] = "can\'t be blank" if ead_level_other_result == false
-        else
-          errors[:ead_level] = "can\'t be blank" if ead_level_result == false
+        elsif ead_level_result == false
+          errors[:ead_level] = "can\'t be blank"
         end
 
         # EADID validation

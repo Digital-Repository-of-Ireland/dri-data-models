@@ -73,11 +73,9 @@ module DRI::Metadata::Transformations
         endpoints = range.gsub(/\[|\]/, '').strip.split(/\sTO\s/)
 
         endpoints.each do |point|
-          begin
-            years << ISO8601::DateTime.new(point).year
-          rescue ISO8601::Errors::StandardError
-            next
-          end
+          years << ISO8601::DateTime.new(point).year
+        rescue ISO8601::Errors::StandardError
+          next
         end
       end
 
@@ -91,13 +89,11 @@ module DRI::Metadata::Transformations
     def transform_iso8601_range(val = '')
       if val.include?('/')
         val.split('/').map do |date|
-          begin
-            ISO8601::DateTime.new(date)
-            date
-          rescue ISO8601::Errors::StandardError => e
-            Rails.logger.error("Date #{date} not indexed as it is not compliant with ISO8601. Error: #{e}.")
-            return []
-          end
+          ISO8601::DateTime.new(date)
+          date
+        rescue ISO8601::Errors::StandardError => e
+          Rails.logger.error("Date #{date} not indexed as it is not compliant with ISO8601. Error: #{e}.")
+          return []
         end
       else
         begin

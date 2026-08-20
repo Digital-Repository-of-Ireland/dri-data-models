@@ -188,9 +188,7 @@ module DRI
     # @option roles [Array<String>] :name the metadata values for the marcrelators in :type
     # @option roles [Array<String>] :type the marcrelator codes
     # @option roles [Array<String>] :authority the values for the authority attribute e.g. marcrel
-    def roles=(roles)
-      descMetadata.roles = roles
-    end
+    delegate :roles=, to: :descMetadata
 
     # creator attribute setter (to create the associated metadata elements in the DS XML)
     # @param [Array<String>] creators the array of creator metadata values to set
@@ -324,10 +322,10 @@ module DRI
       # Need to add the namespace declarations to the mods:mods root element
       # Otherwise the terminology (xpath) won't find the elements
       new_xml = Nokogiri::XML::Builder.new do |xml|
-        xml.mods({ 'xmlns:mods' => 'http://www.loc.gov/mods/v3' }, record.namespaces) {
+        xml.mods({ 'xmlns:mods' => 'http://www.loc.gov/mods/v3' }, record.namespaces) do
           xml.parent.namespace = xml.parent.namespace_definitions.find(&:href)
           xml << record.children.to_xml
-        }
+        end
       end
 
       # Return the first record

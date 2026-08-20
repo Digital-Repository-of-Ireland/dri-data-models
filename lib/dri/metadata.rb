@@ -64,9 +64,7 @@ module DRI
     # @return [hash] the solr document hash
     def remove_null_values(solr_doc, field)
       [:stored_searchable, :facetable].each do |index_type|
-        if solr_doc[Solrizer.solr_name(field, index_type)].present?
-          solr_doc[Solrizer.solr_name(field, index_type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) }
-        end
+        solr_doc[Solrizer.solr_name(field, index_type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) } if solr_doc[Solrizer.solr_name(field, index_type)].present?
       end
 
       solr_doc

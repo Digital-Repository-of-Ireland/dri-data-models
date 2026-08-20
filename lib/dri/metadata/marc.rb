@@ -57,13 +57,13 @@ module DRI
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.record('xmlns:marc' => 'http://www.loc.gov/MARC21/slim',
                      'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                     'xsi:schemaLocation' => 'http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd') {
+                     'xsi:schemaLocation' => 'http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd') do
             xml.leader
             xml.controlfield(tag: '')
-            xml.datafield(tag: '', ind1: '#', ind2: '#') {
+            xml.datafield(tag: '', ind1: '#', ind2: '#') do
               xml.subfield(code: '')
-            }
-          }
+            end
+          end
         end
 
         builder.doc
@@ -347,7 +347,7 @@ module DRI
       end
 
       def all_metadata_text
-        ng_xml.xpath('//text()').each_with_object(String.new) { |node, str| str << node.text << ' ' }
+        ng_xml.xpath('//text()').each_with_object('') { |node, str| str << node.text << ' ' }
       end
 
       def index_sorted_fields!(solr_doc)
@@ -400,8 +400,6 @@ module DRI
 
         solr_doc
       end
-
-      public
 
       load_inherited_terminology
     end

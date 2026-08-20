@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 module DRI
   class ValkyrieWrapper < Valkyrie::Resource
-
     attribute :wrapped_object, Valkyrie::Types::Any, internal: true
 
     delegate :alternate_id, to: :wrapped_object

@@ -77,33 +77,33 @@ module DRI
                                    'xmlns:marcrel' => 'http://www.loc.gov/marc.relators/',
                                    'xmlns:dcterms' => 'http://purl.org/dc/terms/',
                                    "xmlns:#{CR_NS_PREFIX}" => CR_NS,
-                                   'xsi:schemaLocation' => MODS_SCHEMA) {
-            xml.titleInfo {
+                                   'xsi:schemaLocation' => MODS_SCHEMA) do
+            xml.titleInfo do
               xml.title # title
-            }
+            end
             # Creator
-            xml.name {
+            xml.name do
               xml.namePart
-              xml.role {
+              xml.role do
                 xml.roleTerm('cre', type: 'code', authority: 'marcrelator')
                 xml.roleTerm(
                   DRI::Vocabulary.marc_relators_creator['cre'],
                   type: 'text',
                   authority: 'marcrelator'
                 )
-              }
-            }
+              end
+            end
             # Creation date
-            xml.originInfo {
+            xml.originInfo do
               xml.dateCreated(encoding: 'iso8601') # creation_date
-            }
+            end
             xml.abstract # description
-            xml.subject(authority: '') {
+            xml.subject(authority: '') do
               xml.topic # subject
-            }
+            end
             xml.accessCondition(type: 'use and reproduction')
             xml.typeOfResource
-          }
+          end
         end
 
         builder.doc
@@ -695,10 +695,10 @@ module DRI
               place_hash = { tag: 'place', content: '' }
               p_term = elem.at('./mods:placeTerm', MODS_NS_MAPPING)
               place_hash[:content] = p_term.content
-              origin_info_hash["#{index}"] = place_hash
+              origin_info_hash[index.to_s] = place_hash
             when 'issuance', 'publisher', 'edition', 'frequency'
               elem_hash = { tag: tag, content: elem.content }
-              origin_info_hash["#{index}"] = elem_hash
+              origin_info_hash[index.to_s] = elem_hash
             else
               # date
               date_hash = { tag: tag, start: '', end: '', encoding: '' }
@@ -715,7 +715,7 @@ module DRI
               end
               date_hash[:encoding] << (elem['encoding'].nil? ? '' : elem['encoding'])
 
-              origin_info_hash["#{index}"] = date_hash
+              origin_info_hash[index.to_s] = date_hash
             end
 
             index += 1
@@ -938,7 +938,7 @@ module DRI
       end
 
       def all_metadata_text
-        ng_xml.xpath('//text()').each_with_object(String.new) { |node, str| str << node.text << ' ' }
+        ng_xml.xpath('//text()').each_with_object('') { |node, str| str << node.text << ' ' }
       end
 
       def index_subject!(solr_doc)
@@ -984,7 +984,7 @@ module DRI
 
         unless published_date.empty? && issued_date_start.empty?
           solr_doc['published_date_tesim'] = display_single_date_for_index(published_date) |
-                                              display_date_range_for_index(issued_date_start, issued_date_end)
+                                             display_date_range_for_index(issued_date_start, issued_date_end)
         end
 
         solr_doc

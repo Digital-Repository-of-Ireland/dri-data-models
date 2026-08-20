@@ -43,7 +43,8 @@ module DRI
         when String
           self.content = new_xml
         else
-          raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
+          raise TypeError,
+"You passed a #{new_xml.class} into the ng_xml of the datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
         end
       end
 

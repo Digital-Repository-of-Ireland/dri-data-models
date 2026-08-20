@@ -217,8 +217,7 @@ module DRI
        'wam',
        'wdc',
        'wde',
-       'wit'
-      ]
+       'wit']
     end
 
     # Returns a hash of marcrelator codes for creator and their
@@ -229,8 +228,7 @@ module DRI
       { 'aut' => 'Author',
         'art' => 'Artist',
         'att' => 'Attributed name',
-        'cre' => 'Creator'
-      }
+        'cre' => 'Creator' }
     end
 
     # Returns a hash of marcrelator codes for contributor and their
@@ -240,8 +238,7 @@ module DRI
     def self.marc_relators_contributor
       { 'ctb' => 'Contributor',
         'pat' => 'Patron',
-        'rcp' => 'Addressee'
-      }
+        'rcp' => 'Addressee' }
     end
 
     # Returns a hash of marcrelator codes and their
@@ -516,8 +513,7 @@ module DRI
         'win' => 'Writer of introduction',
         'wit' => 'Witness',
         'wpr' => 'Writer of preface',
-        'wst' => 'Writer of supplementary textual content'
-      }
+        'wst' => 'Writer of supplementary textual content' }
     end
 
     # Return the controlled list of values for dcterms:DCMIType
@@ -535,8 +531,7 @@ module DRI
        'Software',
        'Sound',
        'StillImage',
-       'Text'
-      ]
+       'Text']
     end
 
     # Returns a hash of marc codes for type and their
@@ -653,8 +648,7 @@ module DRI
        { code: '745', ind1: ' ', ind2: ' ', sf: ['a'] },
        { code: '900', ind1: ' ', ind2: ' ', sf: ['a'] },
        { code: '910', ind1: ' ', ind2: ' ', sf: ['a'] },
-       { code: '997', ind1: ' ', ind2: ' ', sf: ['a'] }
-      ]
+       { code: '997', ind1: ' ', ind2: ' ', sf: ['a'] }]
     end
 
     # Returns an array of MODS Relationship Types
@@ -670,8 +664,7 @@ module DRI
        'otherFormat',
        'isReferencedBy',
        'references',
-       'reviewOf'
-      ]
+       'reviewOf']
     end
 
     # Returns an array of QDC Relationship Types
@@ -688,8 +681,7 @@ module DRI
        'hasFormat',
        'source',
        'replaces',
-       'isReplacedBy'
-      ]
+       'isReplacedBy']
     end
 
     # Returns an array of possible values for the level attribute
@@ -706,8 +698,7 @@ module DRI
        'subseries',
        'file',
        'item',
-       'otherlevel'
-      ]
+       'otherlevel']
     end
 
     # Returns an array of EAD people tags than can be used within
@@ -731,8 +722,7 @@ module DRI
        'dateValid', # tech md
        'dateModified', # tech md
        'copyrightDate',
-       'temporal'
-      ]
+       'temporal']
     end
 
     # Returns an array of MODS tags than can be used within
@@ -750,24 +740,22 @@ module DRI
        'issuance',
        'edition',
        'frequency',
-       'publisher'
-      ]
+       'publisher']
     end
 
     # Returns an array of MODS possible values for the content of mods:typeOfResource
     # @return [Array<String>] the array of values for mods:typeOfResource
     def self.mods_type_resource_values
-      [ 'text',
-        'cartographic',
-        'notated music',
-        'sound recording',
-        'sound recording-nonmusical',
-        'still image',
-        'moving image',
-        'three dimensional object',
-        'software, multimedia',
-        'mixed material'
-      ]
+      ['text',
+       'cartographic',
+       'notated music',
+       'sound recording',
+       'sound recording-nonmusical',
+       'still image',
+       'moving image',
+       'three dimensional object',
+       'software, multimedia',
+       'mixed material']
     end
 
     # Returns an array of MODS encoding values for dates

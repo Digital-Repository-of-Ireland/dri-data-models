@@ -89,10 +89,10 @@ module DRI
                           'xmlns:marcrel' => 'http://www.loc.gov/marc.relators/',
                           'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                           'xsi:schemaLocation' => 'http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd',
-                          'xsi:noNamespaceSchemaLocation' => 'http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd') {
+                          'xsi:noNamespaceSchemaLocation' => 'http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd') do
             xml['dc'].title
             xml['dc'].description
-          }
+          end
         end
 
         builder.doc
@@ -283,7 +283,7 @@ module DRI
       end
 
       def all_metadata_text
-        ng_xml.xpath('//text()').each_with_object(String.new) { |node, str| str << node.text << ' ' }
+        ng_xml.xpath('//text()').each_with_object('') { |node, str| str << node.text << ' ' }
       end
 
       # Split facets into different languages based on xml:lang
@@ -373,18 +373,14 @@ module DRI
           'coverage' => coverage
         )
 
-        if geospatial_hash[:coords].present?
-          solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords]
-        end
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] if geospatial_hash[:coords].present?
 
         if geospatial_hash[:name].present?
           solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name]
           solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name]
         end
 
-        if geospatial_hash[:json].present?
-          solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD] = geospatial_hash[:json]
-        end
+        solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD] = geospatial_hash[:json] if geospatial_hash[:json].present?
 
         solr_doc
       end

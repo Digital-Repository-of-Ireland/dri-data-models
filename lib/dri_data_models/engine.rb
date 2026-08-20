@@ -10,15 +10,15 @@ module DRIDataModels
   require 'solrizer'
 
   class Engine < ::Rails::Engine
-    #config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
-    #config.eager_load_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
+    # config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
+    # config.eager_load_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
 
-    #config.autoload_paths << config.root.join('lib')
-    #config.autoload_paths << config.root.join('app','models','datastreams')
-    #config.autoload_paths << config.root.join('app','models','dri')
-    #config.eager_load_paths << config.root.join('lib')
-    #config.eager_load_paths << config.root.join('app','models','datastreams')
-    #config.eager_load_paths << config.root.join('app','models','dri')
+    # config.autoload_paths << config.root.join('lib')
+    # config.autoload_paths << config.root.join('app','models','datastreams')
+    # config.autoload_paths << config.root.join('app','models','dri')
+    # config.eager_load_paths << config.root.join('lib')
+    # config.eager_load_paths << config.root.join('app','models','datastreams')
+    # config.eager_load_paths << config.root.join('app','models','dri')
 
     isolate_namespace DRIDataModels
 

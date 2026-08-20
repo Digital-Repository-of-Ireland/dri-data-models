@@ -65,7 +65,7 @@ module DRI::Metadata::Transformations
         SpatialTransformations.parse_dcmi_point(geo_string)
       elsif DcmiParser.box?(geo_string)
         SpatialTransformations.parse_dcmi_box(geo_string)
-      elsif geo_string =~ /\A#{URI.regexp(['http', 'https'])}\z/
+      elsif /\A#{URI.regexp(['http', 'https'])}\z/.match?(geo_string)
         SpatialTransformations.from_url(geo_string)
       else
         { name: geo_string } # not a point or box so index string into placename solr field
