@@ -5,10 +5,17 @@ module DRI
       include DRI::Metadata
       include DRI::Metadata::Terminologies::Mods
 
+      MODS_NS_MAPPING = { 'xmlns:mods' => MODS_NS }.freeze
+
+      DATE_PRESENCE_FALLBACK_FIELDS = %i[
+        creation_date_start published_date issued_date_start captured_date
+        captured_date_start other_date other_date_start
+      ].freeze
+
       # Determine whether the metadata describes a collection
       # Collection if typeOfResource[@collection="yes"]
       def collection?
-        mods_type_collection.present? ? true : false
+        mods_type_collection.present?
       end
 
       # Roles attribute setter
@@ -22,12 +29,9 @@ module DRI
       # @option roles [Array<String>] :type the marcrelator codes
       # @option roles [Array<String>] :authority the values for the role authority
       def roles=(roles)
-        return unless roles.is_a?(Hash) &&
-                      roles.key?('type') &&
-                      roles.key?('name') &&
-                      roles.key?('authority') &&
-                      roles['type'].size == roles['name'].size &&
-                      roles['name'].size == roles['authority'].size
+        return unless roles.is_a?(Hash)
+        return unless required_keys?(roles, 'type', 'name', 'authority')
+        return unless same_size?(roles['type'], roles['name'], roles['authority'])
 
         changed_roles = {}
         roles['type'].uniq.each { |role| changed_roles[role.sub(/^role_/, '')] = [] }
@@ -40,7 +44,7 @@ module DRI
           changed_roles[role_name].push([roles['name'][i], roles['authority'][i]])
         end
 
-        changed_roles.keys.each { |role| add_role(role, changed_roles[role]) }
+        changed_roles.each_key { |role| add_role(role, changed_roles[role]) }
       end
 
       # Adds a mods:name element with role information to the XML metadata
@@ -48,18 +52,15 @@ module DRI
       # @param [String] code marc_relator code string
       # @param [Array] value array [value, authority]
       def add_role(code, value)
-        return if !DRI::Vocabulary.marc_relators.include?(code)
-        xpath = "/mods:mods/mods:name[mods:role/mods:roleTerm[@type=\"code\"]=\"#{code}\"]"
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
+        return unless DRI::Vocabulary.marc_relators.include?(code)
 
-        record = ng_xml.root
+        xpath = %(/mods:mods/mods:name[mods:role/mods:roleTerm[@type="code"]="#{code}"])
+        record = clear_and_get_root(xpath)
+
         value.each do |elem|
           next if elem.empty? || elem.size != 2 || elem.first.blank?
 
-          name_node = name_template(elem.first, code,
-                                    DRI::Vocabulary.marc_relators_display[code],
-                                    elem.last)
-
+          name_node = name_template(elem.first, code, DRI::Vocabulary.marc_relators_display[code], elem.last)
           record.add_child(name_node)
         end
       end
@@ -116,139 +117,15 @@ module DRI
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
-        # Title_sorted - A SOLR index for sorting titles
-        if title.length > 0
-          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-
-          unless sorted_title.empty?
-            solr_doc['title_sorted_ssi'] = [sorted_title]
-          end
-        end
-
-        # Type
-        type_for_index = type_of_resource
-        solr_doc['type_tesim'] = type_for_index
-        solr_doc['type_sim'] = type_for_index
-        solr_doc['type_tesim'] = 'Collection' if collection?
-
-        # MODS has several "name" tags, so we merge them together into the SOLR document
-        person_array = person_array_for_index
-
-        solr_doc['person_sim'] = person_array
-        solr_doc['person_tesim'] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
-
-        # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ''
-        ng_xml.xpath('//text()').each do |text_node|
-          all_metadata += text_node.text
-          all_metadata += ' '
-        end
-        solr_doc['all_metadata_tesim'] = [all_metadata]
-
-        # Subject
-        solr_doc['subject_tesim'] = subject unless subject == []
-        solr_doc['subject_sim'] = subject unless subject == []
-
-        subject_place_array = subject_place_for_index
-        subject_temporal_array = subject_temporal_for_index
-
-        solr_doc['name_coverage_tesim'] = subject_name_for_index unless name_coverage.empty?
-        solr_doc['name_coverage_sim'] = subject_name_for_index unless name_coverage.empty?
-
-        solr_doc['geographical_coverage_tesim'] = subject_place_array unless subject_place_array.empty?
-        solr_doc['geographical_coverage_sim'] = filter_uris(subject_place_array) unless subject_place_array.empty?
-
-        solr_doc['temporal_coverage_tesim'] = subject_temporal_array unless subject_temporal_array.empty?
-        solr_doc['temporal_coverage_sim'] = filter_uris(subject_temporal_array) unless subject_temporal_array.empty?
-
-        # Indices for external relationships (to be displayed as URL)
-        external_rels = *(DRI::Vocabulary.mods_relationship_types.map { |s| s.prepend('ext_related_items_ids_').to_sym })
-
-        external_rels.each do |elem|
-          solr_doc["#{elem}_tesim"] = send(elem) unless send(elem) == []
-        end
-
-        # Index creation_date
-        solr_doc['creation_date_tesim'] = creation_date_for_index
-
-        # Index creation_date
-        solr_doc['date_tesim'] = date_for_index
-
-        # Index Published Date
-        unless published_date.empty? && issued_date_start.empty?
-          solr_doc['published_date_tesim'] = display_single_date_for_index(published_date) |
-                              display_date_range_for_index(issued_date_start, issued_date_end)
-        end
-
-        # Index date ranges
-        date_ranges = date_ranges_for_index # ALL the date ranges
-        # Creation date dateRange index
-        cdate_ranges = date_ranges.select { |key, _value| ['creation_date', 'captured_date'].include?(key) }
-        cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
-        if cdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD] = cdate_index
-          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD] = cdate_years
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD] = cdate_years.min
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD] = cdate_years.max
-        end
-
-        # Published date dateRange index
-        pdate_ranges = date_ranges.select { |key, _value| ['issued_date'].include?(key) }
-        pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
-        if pdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_index
-          pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
-        end
-
-        # date dateRange index
-        ddate_ranges = date_ranges.select { |key, _value| ['date_other', 'part_date'].include?(key) }
-        ddate_index = DRI::Metadata::Transformations.transform_date_ranges(ddate_ranges)
-        if ddate_index.present?
-          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD] = ddate_index
-          ddate_years = DRI::Metadata::Transformations.date_range_years(ddate_index).minmax
-          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD] = ddate_years[0]
-          solr_doc[DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD] = ddate_years[1]
-        end
-
-        # Subject date dateRange index
-        sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
-        sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
-        if sdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD] = sdate_index
-          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD] = sdate_years[0]
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD] = sdate_years[1]
-        end
-
-        # Geospatial indexing
-        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
-          {
-            'geographical_coverage' => geographical_coverage.reject{ |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
-          }
-        )
-
-        # Index logainm URIs in the appropriate geographic indices
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
-        if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
-
-          geospatial_hash[:coords].concat(linked_data[:coords])
-          geospatial_hash[:name].concat(linked_data[:name])
-          geospatial_hash[:json].concat(linked_data[:json])
-        end
-
-        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] if geospatial_hash[:coords].present?
-
-        unless geospatial_hash[:name].empty?
-          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name]
-          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name]
-        end
-
-        solr_doc['geojson_ssim'] = geospatial_hash[:json] if geospatial_hash[:json].present?
+        solr_doc = index_title_sorted!(solr_doc)
+        solr_doc = index_type!(solr_doc)
+        solr_doc = index_person!(solr_doc)
+        solr_doc = index_all_metadata!(solr_doc)
+        solr_doc = index_subject!(solr_doc)
+        solr_doc = index_external_relationships!(solr_doc)
+        solr_doc = index_dates!(solr_doc)
+        solr_doc = index_date_ranges!(solr_doc)
+        solr_doc = index_geospatial!(solr_doc)
 
         solr_doc
       end
@@ -256,19 +133,17 @@ module DRI
       # Transforms all the creation_date metadata values into DCMI Period encoded date strings
       # @return [Array<String>] the array of DCMI Period formatted values for dates
       def creation_date_for_index
-        unless creation_date.empty? && creation_date_start.empty?
-          return display_single_date_for_index(creation_date) |
-                 display_date_range_for_index(creation_date_start, creation_date_end)
-        end
+        return [] if creation_date.empty? && creation_date_start.empty?
 
-        []
+        display_single_date_for_index(creation_date) |
+          display_date_range_for_index(creation_date_start, creation_date_end)
       end
 
       # Returns all metadata related to date for Solr indexing
       # These are date values
       # @return [Array<String>] array of all date metadata values for Solr indexing
       def date_for_index
-       display_single_date_for_index(other_date) |
+        display_single_date_for_index(other_date) |
           display_single_date_for_index(part_date) |
           display_date_range_for_index(other_date_start, other_date_end) |
           display_date_range_for_index(part_date_start, part_date_end)
@@ -287,7 +162,7 @@ module DRI
       def subject_name_for_index
         names_array = []
         query = '/mods:mods/mods:subject/mods:name'
-        ng_xml.search(query, { 'xml:mods' => MODS_NS }).each do |n|
+        ng_xml.search(query, MODS_NS_MAPPING).each do |n|
           name_text = n.at('./mods:namePart')
           next if name_text.nil?
 
@@ -340,45 +215,32 @@ module DRI
       # @param [Array<String>] date_end the metadata values for end dates
       # @return [Array<String>] the array of DCMI Period formatted values for dates
       def display_date_range_for_index(date_start = [], date_end = [])
-        date_range_display = date_start.collect.with_index do |name, idx|
-          begin
-            d_start = ISO8601::DateTime.new(name).strftime('%b %d, %Y')
+        date_start.collect.with_index do |name, idx|
+          d_start = ISO8601::DateTime.new(name).strftime('%b %d, %Y')
 
-            if date_start.size == date_end.size
-              d_end = ISO8601::DateTime.new(date_end[idx]).strftime('%b %d, %Y')
-              DRI::Metadata::Transformations.create_dcmi_period(d_start << ' - ' << d_end, name, date_end[idx])
-            else
-              Transformations.create_dcmi_period(d_start, name)
-            end
-          rescue ISO8601::Errors::StandardError
-            DRI::Metadata::Transformations.create_dcmi_period(name) # DCMI Period 'name' is the md value
+          if date_start.size == date_end.size
+            d_end = ISO8601::DateTime.new(date_end[idx]).strftime('%b %d, %Y')
+            DRI::Metadata::Transformations.create_dcmi_period("#{d_start} - #{d_end}", name, date_end[idx])
+          else
+            DRI::Metadata::Transformations.create_dcmi_period(d_start, name)
           end
+        rescue ISO8601::Errors::StandardError
+          DRI::Metadata::Transformations.create_dcmi_period(name) # DCMI Period 'name' is the md value
         end
-
-        date_range_display
       end
 
       # Return all date ranges formatted in the right format for indexing and single dates
       # Format: start_date/end_date (ISO8601)
       # @return [Hash] the hash with all the dates present in the metadata to be indexed as date ranges
       def date_ranges_for_index
-        dates_hash = {}
-
-        creation_date_array = creation_date_start.map.with_index { |name, idx| creation_date_start.size == creation_date_end.size ? ("#{name}/#{creation_date_end[idx]}") : name }
-        captured_date_array = captured_date_start.map.with_index { |name, idx| captured_date_start.size == captured_date_end.size ? ("#{name}/#{captured_date_end[idx]}") : name }
-        issued_date_array = issued_date_start.map.with_index { |name, idx| issued_date_start.size == issued_date_end.size ? ("#{name}/#{issued_date_end[idx]}") : name }
-        subject_date_array = subject_date_start.map.with_index { |name, idx| subject_date_start.size == subject_date_end.size ? ("#{name}/#{subject_date_end[idx]}") : name }
-        date_other_array = other_date_start.map.with_index { |name, idx| other_date_start.size == other_date_end.size ? ("#{name}/#{other_date_end[idx]}") : name }
-        part_date_array = part_date_start.map.with_index { |name, idx| part_date_start.size == part_date_end.size ? ("#{name}/#{part_date_end[idx]}") : name }
-
-        dates_hash['creation_date'] = creation_date_array | creation_date
-        dates_hash['captured_date'] = captured_date_array | captured_date
-        dates_hash['issued_date'] = issued_date_array | published_date
-        dates_hash['subject_date'] = subject_date_array | temporal_coverage
-        dates_hash['date_other'] = date_other_array | other_date
-        dates_hash['part_date'] = part_date_array | part_date
-
-        dates_hash.delete_if { |_k, v| v.empty? }
+        {
+          'creation_date' => date_pairs(creation_date_start, creation_date_end) | creation_date,
+          'captured_date' => date_pairs(captured_date_start, captured_date_end) | captured_date,
+          'issued_date' => date_pairs(issued_date_start, issued_date_end) | published_date,
+          'subject_date' => date_pairs(subject_date_start, subject_date_end) | temporal_coverage,
+          'date_other' => date_pairs(other_date_start, other_date_end) | other_date,
+          'part_date' => date_pairs(part_date_start, part_date_end) | part_date
+        }.reject { |_k, v| v.empty? }
       end
 
       # Returns an array of types from the metadata (capitalised)
@@ -401,29 +263,7 @@ module DRI
       # @option creators [Array<String>] :role the role attribute for the node
       # @option creators [Array<String>] :authority the value for the authority attribute of the mods:name element
       def add_creator(creators)
-        return unless creators.is_a? Hash
-
-        valid_keys = [:display, :role, :authority].all? { |s| creators.key? s }
-        return unless valid_keys && creators[:display].size == creators[:role].size && creators[:role].size == creators[:authority].size
-
-        marc_creator_keys = DRI::Vocabulary.marc_relators_creator.keys
-
-        marc_creator_keys.each do |key|
-          xpath = "/mods:mods/mods:name[mods:role/mods:roleTerm[@type='code' and @authority='marcrelator' and text()='#{key}']]"
-          ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-        end
-
-        record = ng_xml.root
-
-        creators[:display].each_with_index do |elem, idx|
-          next if elem.empty? || !marc_creator_keys.include?(creators[:role][idx])
-
-          name = name_template(elem,
-                               creators[:role][idx],
-                               DRI::Vocabulary.marc_relators_creator[creators[:role][idx]],
-                               creators[:authority][idx])
-          record.add_child(name)
-        end
+        add_person_names(creators, DRI::Vocabulary.marc_relators_creator)
       end
 
       # Creates MODS name XML elements from an array of metadata values.
@@ -436,27 +276,32 @@ module DRI
       # @option contributors [Array<String>] :role the role attribute for the node
       # @option contributors [Array<String>] :authority the value for the authority attribute of the mods:name element
       def add_contributor(contributors)
-        return unless contributors.is_a? Hash
+        add_person_names(contributors, DRI::Vocabulary.marc_relators_contributor)
+      end
 
-        valid_keys = [:display, :role, :authority].all? { |s| contributors.key? s }
-        return unless valid_keys && contributors[:display].size == contributors[:role].size && contributors[:role].size == contributors[:authority].size
+      # Shared by add_creator/add_contributor, which were previously two
+      # near-identical copies of this method differing only in which
+      # marc_relators_* vocabulary hash they used.
+      # @param [Hash] hash the :display/:role/:authority attributes, as per add_creator/add_contributor
+      # @param [Hash] relator_map DRI::Vocabulary.marc_relators_creator or marc_relators_contributor
+      def add_person_names(hash, relator_map)
+        return unless hash.is_a?(Hash)
+        return unless required_keys?(hash, :display, :role, :authority)
+        return unless same_size?(hash[:display], hash[:role], hash[:authority])
 
-        marc_ctb_keys = DRI::Vocabulary.marc_relators_contributor.keys
+        valid_roles = relator_map.keys
 
-        marc_ctb_keys.each do |key|
-          xpath = "/mods:mods/mods:name[mods:role/mods:roleTerm[@type='code' and @authority='marcrelator' and text()='#{key}']]"
-          ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
+        valid_roles.each do |key|
+          xpath = %(/mods:mods/mods:name[mods:role/mods:roleTerm[@type='code' and @authority='marcrelator' and text()='#{key}']])
+          ng_xml.search(xpath, MODS_NS_MAPPING).each(&:remove)
         end
 
         record = ng_xml.root
 
-        contributors[:display].each_with_index do |elem, idx|
-          next if elem.empty? || !marc_ctb_keys.include?(contributors[:role][idx])
+        hash[:display].each_with_index do |elem, idx|
+          next if elem.empty? || !valid_roles.include?(hash[:role][idx])
 
-          name = name_template(elem,
-                               contributors[:role][idx],
-                               DRI::Vocabulary.marc_relators_contributor[contributors[:role][idx]],
-                               contributors[:authority][idx])
+          name = name_template(elem, hash[:role][idx], relator_map[hash[:role][idx]], hash[:authority][idx])
           record.add_child(name)
         end
       end
@@ -470,18 +315,17 @@ module DRI
       #    { '0' => { tag: 'publisher', content: 'Publisher name 1' } }]
       # @param [Array<Hash>] origin the attributes and content required to create a any sub-elements nested within mods:originInfo
       def add_origin_metadata(origin)
-        return unless origin.is_a? Array
+        return unless origin.is_a?(Array)
 
-        xpath = '/mods:mods/mods:originInfo'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
+        record = clear_and_get_root('/mods:mods/mods:originInfo')
 
-        record = ng_xml.root
         origin.each do |origin_elem|
           origin_node = Nokogiri::XML::Node.new('mods:originInfo', ng_xml)
 
           origin_elem.each do |_key, elem|
             tag = elem[:tag]
             next if tag.nil? || tag.empty? || !DRI::Vocabulary.mods_origin_info_tags.include?(tag)
+
             case tag
             when 'place'
               if elem[:content].present?
@@ -501,6 +345,7 @@ module DRI
               # date
               dates_array = date_template(tag, elem[:encoding], elem[:start], elem[:end])
               next if dates_array.nil?
+
               origin_node.add_child(dates_array.first)
               origin_node.add_child(dates_array.last) if dates_array.size > 1
             end
@@ -520,15 +365,11 @@ module DRI
       # @option statement [Array<String>] :note the content for the copyrightMD:note element
       # @option statement [Array<String>] :status the value for the copyright.status attribute of the copyrightMD:copyright element
       def add_rights(statement)
-        return unless statement.is_a? Hash
+        return unless statement.is_a?(Hash)
+        return unless required_keys?(statement, :status, :rights, :note)
+        return unless same_size?(statement[:status], statement[:rights], statement[:note])
 
-        valid_keys = [:status, :rights, :note].all? { |s| statement.key? s }
-        return unless valid_keys && statement[:status].size == statement[:rights].size && statement[:rights].size == statement[:note].size
-
-        xpath = '/mods:mods/mods:accessCondition'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-
-        record = ng_xml.root
+        record = clear_and_get_root('/mods:mods/mods:accessCondition')
 
         statement[:rights].each_with_index do |elem, idx|
           next if elem.empty?
@@ -551,15 +392,10 @@ module DRI
       # @option values [Array<String>] :tag the tag name for the subject element
       # @option values [Array<String>] :content the content for the subject node
       def add_subject(subjects)
-        return unless subjects.is_a? Array
+        return unless subjects.is_a?(Array)
+        return unless subjects.all? { |subj| required_keys?(subj, :values, :authority) }
 
-        valid_hash = subjects.all? { |subj| [:values, :authority].all? { |s| subj.key? s } }
-        return unless valid_hash
-
-        xpath = '/mods:mods/mods:subject'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-
-        record = ng_xml.root
+        record = clear_and_get_root('/mods:mods/mods:subject')
 
         subjects.each do |subj|
           next if subj[:values].empty?
@@ -568,30 +404,32 @@ module DRI
           subject_node['authority'] = subj[:authority] unless subj[:authority].empty?
 
           subj[:values].each do |node|
-            next unless node.key? :tag
+            next unless node.key?(:tag)
+            n = nil
 
             case node[:tag]
             when 'topic'
-              next unless node.key? :content
+              next unless node.key?(:content)
+
               n = Nokogiri::XML::Node.new('mods:topic', ng_xml)
               n.content = node[:content]
             when 'name'
-              next unless [:display, :role].all? { |s| node.key? s }
-              n = name_template(node[:display],
-                                node[:role],
-                                DRI::Vocabulary.marc_relators_display[node[:role]],
-                                node[:authority])
+              next unless required_keys?(node, :display, :role)
+
+              n = name_template(node[:display], node[:role], DRI::Vocabulary.marc_relators_display[node[:role]], node[:authority])
             when 'temporal'
-              next unless [:start, :end, :encoding].all? { |s| node.key? s }
-              dates_array = date_template('temporal', node[:encoding],
-                                          node[:start], node[:end])
+              next unless required_keys?(node, :start, :end, :encoding)
+
+              dates_array = date_template('temporal', node[:encoding], node[:start], node[:end])
               next if dates_array.nil?
+
               subject_node.add_child(dates_array.first)
               subject_node.add_child(dates_array.last) if dates_array.size > 1
             when 'geographic'
-              next unless node.key? :content
+              next unless node.key?(:content)
+
               n = Nokogiri::XML::Node.new('mods:geographic', ng_xml)
-              if node.key?(:uri) && node[:uri].present?
+              if node[:uri].present?
                 n['authority'] = 'logainm'
                 n['valueURI'] = node[:uri]
               end
@@ -599,6 +437,7 @@ module DRI
             else
               next
             end
+
             subject_node.add_child(n) unless n.nil? || n.content.empty?
           end # iterate over subjects
 
@@ -615,15 +454,10 @@ module DRI
       # @option types [Array<String>] :content the array of metadata genre values
       # @option types [Array<String>] :collection flag to specify whether the type is collection
       def add_type(types)
-        return unless types.is_a? Hash
+        return unless types.is_a?(Hash)
+        return unless required_keys?(types, :collection, :content)
 
-        valid_keys = [:collection, :content].all? { |s| types.key? s }
-        return unless valid_keys
-
-        xpath = '/mods:mods/mods:typeOfResource'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-
-        record = ng_xml.root
+        record = clear_and_get_root('/mods:mods/mods:typeOfResource')
 
         collection_set = false
         types[:content].each do |elem|
@@ -648,15 +482,10 @@ module DRI
       # @option genres [Array<String>] :content the array of metadata genre values
       # @option genres [Array<String>] :authority the array of value for the elements' authority attribute
       def add_mods_genre(genres)
-        return unless genres.is_a? Hash
+        return unless genres.is_a?(Hash)
+        return unless required_keys?(genres, :content, :authority)
 
-        valid_keys = [:content, :authority].all? { |s| genres.key? s }
-        return unless valid_keys
-
-        xpath = '/mods:mods/mods:genre'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-
-        record = ng_xml.root
+        record = clear_and_get_root('/mods:mods/mods:genre')
 
         genres[:content].each_with_index do |elem, idx|
           next if elem.empty?
@@ -673,10 +502,7 @@ module DRI
       # @see DRI::Mods#language=
       # @param [Array<String>] languages array of language metadata values to set
       def add_language(languages)
-        xpath = '/mods:mods/mods:language'
-        ng_xml.search(xpath, { 'xmlns:mods' => MODS_NS }).each(&:remove)
-
-        record = ng_xml.root
+        record = clear_and_get_root('/mods:mods/mods:language')
 
         languages.each do |lang|
           lang_node = Nokogiri::XML::Node.new('mods:language', ng_xml)
@@ -709,6 +535,7 @@ module DRI
           name.add_child(name_part)
           return name
         end
+
         role_node = Nokogiri::XML::Node.new('mods:role', ng_xml)
         role_code = Nokogiri::XML::Node.new('mods:roleTerm', ng_xml)
         role_code['type'] = 'code'
@@ -752,7 +579,6 @@ module DRI
 
         [start_date]
       end
-
 
       # Creates a mods:accessCondition element template and returns the newly created node
       # @param [String] content the value for the element's content
@@ -818,15 +644,15 @@ module DRI
         # Creator, contributor and any name
         names_hash = { 'name' => [], 'type' => [], 'authority' => [] }
         names_xpath = '/mods:mods/mods:name'
-        ng_xml.search(names_xpath, { 'xmlns:mods' => MODS_NS }).each do |node|
-          part_node = node.at('./mods:namePart', { 'xmlns:mods' => MODS_NS })
-          role_code = node.at('./mods:role/mods:roleTerm[@type="code"]', { 'xmlns:mods' => MODS_NS })
+        ng_xml.search(names_xpath, MODS_NS_MAPPING).each do |node|
+          part_node = node.at('./mods:namePart', MODS_NS_MAPPING)
+          role_code = node.at('./mods:role/mods:roleTerm[@type="code"]', MODS_NS_MAPPING)
           next if part_node.nil? || role_code.nil?
           next if role_code.nil? || DRI::Vocabulary.marc_relators_creator.key?(role_code.content)
 
           names_hash['authority'] << (node['authority'] ? node['authority'] : '')
           names_hash['name'] << part_node.content
-          names_hash['type'] << role_code.content.prepend('role_')
+          names_hash['type'] << "role_#{role_code.content}"
         end
         terms_hash[:roles] = names_hash
 
@@ -840,7 +666,7 @@ module DRI
         # Type
         type_hash = { collection: collection?, content: [] }
         type_xpath = '/mods:mods/mods:typeOfResource'
-        ng_xml.search(type_xpath, { 'xmlns:mods' => MODS_NS }).each do |node|
+        ng_xml.search(type_xpath, MODS_NS_MAPPING).each do |node|
           type_hash[:content] << node.content
         end
         terms_hash[:resource_type] = type_hash
@@ -848,7 +674,7 @@ module DRI
         # Genre
         genre_hash = { authority: [], content: [] }
         genre_xpath = '/mods:mods/mods:genre'
-        ng_xml.search(genre_xpath, { 'xmlns:mods' => MODS_NS }).each do |node|
+        ng_xml.search(genre_xpath, MODS_NS_MAPPING).each do |node|
           genre_hash[:content] << node.content
           genre_hash[:authority] << (node['authority'] ? node['authority'] : '')
         end
@@ -856,7 +682,7 @@ module DRI
         terms_hash[:mods_genre] = genre_hash
 
         origin_metadata_array = []
-        origin_info_nodes = ng_xml.search('/mods:mods/mods:originInfo', { 'xmlns:mods' => MODS_NS })
+        origin_info_nodes = ng_xml.search('/mods:mods/mods:originInfo', MODS_NS_MAPPING)
 
         origin_info_nodes.each do |origin|
           origin_info_hash = {}
@@ -867,7 +693,7 @@ module DRI
             case tag
             when 'place'
               place_hash = { tag: 'place', content: '' }
-              p_term = elem.at('./mods:placeTerm', { 'xmlns:mods' => MODS_NS })
+              p_term = elem.at('./mods:placeTerm', MODS_NS_MAPPING)
               place_hash[:content] = p_term.content
               origin_info_hash["#{index}"] = place_hash
             when 'issuance', 'publisher', 'edition', 'frequency'
@@ -901,7 +727,7 @@ module DRI
 
         # Subjects: topic, name_coverage, temporal_coverage, geographical_coverage
         subjects_array = []
-        subject_nodes = ng_xml.search('/mods:mods/mods:subject', { 'xmlns:mods' => MODS_NS })
+        subject_nodes = ng_xml.search('/mods:mods/mods:subject', MODS_NS_MAPPING)
         subject_nodes.each do |snode|
           subj_hash = { values: [], authority: '' }
 
@@ -915,12 +741,12 @@ module DRI
               subj_hash[:values] << topic_hash
             when 'name'
               name_hash = { tag: tag, display: '', role: '' }
-              node_name = node.at('./mods:namePart', { 'xmlns:mods' => MODS_NS })
+              node_name = node.at('./mods:namePart', MODS_NS_MAPPING)
 
               next if node_name.nil?
 
               name_hash[:display] = node_name.content
-              node_role = node.at('./mods:role/mods:roleTerm[@type="code"]', { 'xmlns:mods' => MODS_NS })
+              node_role = node.at('./mods:role/mods:roleTerm[@type="code"]', MODS_NS_MAPPING)
               name_hash[:role] = node_role.content unless node_role.nil?
 
               subj_hash[:values] << name_hash
@@ -957,8 +783,9 @@ module DRI
         terms_hash
       end
 
-      # Looks all dates included in a given mods:originInfo element and determines whether
+      # Looks at all dates included in a given mods:originInfo element and determines whether
       # they are all iso8601 or w3cdtf encoded, and valid
+      #
       # @param [Nokogiri::Node] origin_node the mods:originInfo node to validate
       # @param [Nokogiri::Node] date_tag the name of the date tag to validate
       # @return [Boolean] true if valid, encoded dates; false otherwise
@@ -976,14 +803,14 @@ module DRI
           break if start_count > 1 || end_count > 1
         end
 
-        start_count == end_count && start_count <= 1 ? true : false
+        start_count == end_count && start_count <= 1
       end
 
-      # Looks all dates included in all mods:originInfo elements and determines whether
+      # Looks at all dates included in all mods:originInfo elements and determines whether
       # they are all iso8601 or w3cdtf encoded, and valid
       # @return [Boolean] true if valid, encoded dates; false otherwise
       def validate_all_dates
-        origin_nodes = ng_xml.search('//mods:originInfo', { 'xmlns:mods' => MODS_NS })
+        origin_nodes = ng_xml.search('//mods:originInfo', MODS_NS_MAPPING)
 
         origin_nodes.each do |node|
           valid_created = validate_dates(node, 'mods:dateCreated')
@@ -1004,75 +831,240 @@ module DRI
       def custom_validations
         errors = {}
 
-        creator_result = false
-        identifier_result = false
-        uri_result = true
-        ext_uri_result = true
-        title_result = false
-        description_result = false
-        rights_result = false
-        type_result = false
-        date_result = false
-
-        creator_result = true if creator.any?(&:present?)
-
-        unless creator_result == true
-          marc_rels = *(DRI::Vocabulary.marc_relators.map { |s| s.prepend('role_').to_sym })
-
-          marc_rels.each do |role|
-            res = send(role).any?(&:present?)
-            creator_result = true if res
-            break if res
-          end
-        end
-        # This is the mods identifier used internally in DRI:
-        # uniquely identify a record/relationships management
-        identifier_result = true if mods_id_local.any?(&:present?)
-        identifier_uri.each { |value| uri_result = false unless value.present? && Utils.valid_uri?(value) }
+        errors[:mods_id_local] = 'not present.' unless metadata_present?(mods_id_local)
+        errors[:identifier_uri] = 'invalid URI present' unless all_valid_uris?(identifier_uri)
         # Check that for external relationships terms, the specified URIs are valid
-        related_items_digital.each do |value|
-          ext_uri_result = false unless value.present? && Utils.valid_uri?(value)
-        end
-        title_result = true if title.any?(&:present?)
-        description_result = true if description.any?(&:present?)
-        rights_result = true if rights.any?(&:present?)
-        type_result = true if resource_type.any?(&:present?)
-
-        unless type_result == true
-          type_result = true if mods_genre.any?(&:present?)
-        end
-
-        # Creation date can either be: dateCreated, dateIssued,
-        # dateCaptured (in this priority order)
-        date_result = true if creation_date.any?(&:present?)
-        dates_array = [creation_date_start, published_date, issued_date_start, captured_date,
-                       captured_date_start, other_date, other_date_start]
-        unless date_result
-          dates_array.each do |dates|
-            res = dates.any?(&:present?)
-            date_result = true if res
-            break if res
-          end
-        end
-
-        errors[:mods_id_local] = 'not present.' unless identifier_result == true
-        errors[:identifier_uri] = 'invalid URI present' unless uri_result == true
-        errors[:related_items_digital] = 'invalid URI present' unless ext_uri_result == true
-        errors[:title] = "can\'t be blank" if title_result == false
-        errors[:type] = "can\'t be blank" if type_result == false
+        errors[:related_items_digital] = 'invalid URI present' unless all_valid_uris?(related_items_digital)
+        errors[:title] = "can't be blank" unless metadata_present?(title)
+        errors[:type] = "can't be blank" unless type_present?
 
         # If this is a collection then validate:
         # return errors unless mods_type_collection.present?
 
-        errors[:creator] = "can\'t be blank" if creator_result == false
-        errors[:description] = "can\'t be blank" if description_result == false
-        errors[:rights] = "can\'t be blank" if rights_result == false
-        errors[:date] = "can\'t be blank" if date_result == false
+        errors[:creator] = "can't be blank" unless creator_present?
+        errors[:description] = "can't be blank" unless metadata_present?(description)
+        errors[:rights] = "can't be blank" unless metadata_present?(rights)
+        # Creation date can either be: dateCreated, dateIssued,
+        # dateCaptured (in this priority order)
+        errors[:date] = "can't be blank" unless date_present?
 
         errors
       end # custom_validations
 
       load_inherited_terminology
+
+      private
+
+      def required_keys?(hash, *keys)
+        keys.all? { |key| hash.key?(key) }
+      end
+
+      def same_size?(*arrays)
+        arrays.map(&:size).uniq.size <= 1
+      end
+
+      # Duplicates the search-then-remove-existing-nodes step shared by
+      # every add_* XML-builder method in this class.
+      # @return [Nokogiri::XML::Node] the document root, ready for new children to be added
+      def clear_and_get_root(xpath)
+        ng_xml.search(xpath, MODS_NS_MAPPING).each(&:remove)
+        ng_xml.root
+      end
+
+      def date_pairs(starts, ends)
+        starts.map.with_index { |name, idx| starts.size == ends.size ? "#{name}/#{ends[idx]}" : name }
+      end
+
+      def metadata_present?(values)
+        values.any?(&:present?)
+      end
+
+      def all_valid_uris?(values)
+        values.all? { |value| value.present? && Utils.valid_uri?(value) }
+      end
+
+      def type_present?
+        metadata_present?(resource_type) || metadata_present?(mods_genre)
+      end
+
+      def creator_present?
+        return true if metadata_present?(creator)
+
+        marc_role_fields.any? { |role_field| metadata_present?(send(role_field)) }
+      end
+
+      def marc_role_fields
+        DRI::Vocabulary.marc_relators.map { |role| :"role_#{role}" }
+      end
+
+      def date_present?
+        return true if metadata_present?(creation_date)
+
+        DATE_PRESENCE_FALLBACK_FIELDS.any? { |field| metadata_present?(send(field)) }
+      end
+
+      def index_title_sorted!(solr_doc)
+        return solr_doc if title.empty?
+
+        sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+        solr_doc['title_sorted_ssi'] = [sorted_title] unless sorted_title.empty?
+
+        solr_doc
+      end
+
+      def index_type!(solr_doc)
+        type_for_index = type_of_resource
+        solr_doc['type_tesim'] = type_for_index
+        solr_doc['type_sim'] = type_for_index
+        solr_doc['type_tesim'] = 'Collection' if collection?
+
+        solr_doc
+      end
+
+      # MODS has several "name" tags, so we merge them together into the SOLR document
+      def index_person!(solr_doc)
+        person_array = person_array_for_index
+
+        solr_doc['person_sim'] = person_array
+        solr_doc['person_tesim'] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
+
+        solr_doc
+      end
+
+      # all_metadata - A SOLR index of all the text contained in the XML document
+      def index_all_metadata!(solr_doc)
+        solr_doc['all_metadata_tesim'] = [all_metadata_text]
+        solr_doc
+      end
+
+      def all_metadata_text
+        ng_xml.xpath('//text()').each_with_object(String.new) { |node, str| str << node.text << ' ' }
+      end
+
+      def index_subject!(solr_doc)
+        solr_doc['subject_tesim'] = subject unless subject.empty?
+        solr_doc['subject_sim'] = subject unless subject.empty?
+
+        unless name_coverage.empty?
+          names = subject_name_for_index
+          solr_doc['name_coverage_tesim'] = names
+          solr_doc['name_coverage_sim'] = names
+        end
+
+        subject_place_array = subject_place_for_index
+        unless subject_place_array.empty?
+          solr_doc['geographical_coverage_tesim'] = subject_place_array
+          solr_doc['geographical_coverage_sim'] = filter_uris(subject_place_array)
+        end
+
+        subject_temporal_array = subject_temporal_for_index
+        unless subject_temporal_array.empty?
+          solr_doc['temporal_coverage_tesim'] = subject_temporal_array
+          solr_doc['temporal_coverage_sim'] = filter_uris(subject_temporal_array)
+        end
+
+        solr_doc
+      end
+
+      # Indices for external relationships (to be displayed as URL)
+      def index_external_relationships!(solr_doc)
+        external_rels = DRI::Vocabulary.mods_relationship_types.map { |s| :"ext_related_items_ids_#{s}" }
+
+        external_rels.each do |elem|
+          values = send(elem)
+          solr_doc["#{elem}_tesim"] = values unless values == []
+        end
+
+        solr_doc
+      end
+
+      def index_dates!(solr_doc)
+        solr_doc['creation_date_tesim'] = creation_date_for_index
+        solr_doc['date_tesim'] = date_for_index
+
+        unless published_date.empty? && issued_date_start.empty?
+          solr_doc['published_date_tesim'] = display_single_date_for_index(published_date) |
+                                              display_date_range_for_index(issued_date_start, issued_date_end)
+        end
+
+        solr_doc
+      end
+
+      # Index date ranges. dateRangeField is defined in Solr's schema.xml as
+      # a field of type date_range (solr.SpatialRecursivePrefixTreeFieldType)
+      def index_date_ranges!(solr_doc)
+        date_ranges = date_ranges_for_index # ALL the date ranges
+
+        index_date_range!(solr_doc, select_date_ranges(date_ranges, 'creation_date', 'captured_date'),
+                           range_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD,
+                           year_field: DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD)
+
+        index_date_range!(solr_doc, select_date_ranges(date_ranges, 'issued_date'),
+                           range_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD,
+                           year_field: DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD)
+
+        index_date_range!(solr_doc, select_date_ranges(date_ranges, 'date_other', 'part_date'),
+                           range_field: DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD)
+
+        index_date_range!(solr_doc, select_date_ranges(date_ranges, 'subject_date'),
+                           range_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD)
+
+        solr_doc
+      end
+
+      def select_date_ranges(date_ranges, *keys)
+        date_ranges.select { |key, _value| keys.include?(key) }
+      end
+
+      def index_date_range!(solr_doc, date_ranges, range_field:, start_field:, end_field:, year_field: nil)
+        ranges = DRI::Metadata::Transformations.transform_date_ranges(date_ranges)
+        return solr_doc if ranges.blank?
+
+        solr_doc[range_field] = ranges
+
+        years = DRI::Metadata::Transformations.date_range_years(ranges)
+        solr_doc[year_field] = years if year_field
+        solr_doc[start_field] = years.min
+        solr_doc[end_field] = years.max
+
+        solr_doc
+      end
+
+      # Index dcterms Point and Box data, and linked data uris into geospatial Solr field
+      def index_geospatial!(solr_doc)
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
+          'geographical_coverage' => geographical_coverage.reject { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] }
+        )
+
+        # Index logainm URIs in the appropriate geographic indices
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
+        if uris.present?
+          linked_data = DRI::Metadata::Transformations.transform_geospatial('geographical_coverage' => uris)
+
+          geospatial_hash[:coords].concat(linked_data[:coords])
+          geospatial_hash[:name].concat(linked_data[:name])
+          geospatial_hash[:json].concat(linked_data[:json])
+        end
+
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] if geospatial_hash[:coords].present?
+
+        unless geospatial_hash[:name].empty?
+          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name]
+          solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name]
+        end
+
+        solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD] = geospatial_hash[:json] if geospatial_hash[:json].present?
+
+        solr_doc
+      end
     end # class
   end # module
 end # module
