@@ -4,6 +4,7 @@ module DRI
     # A datastream that interacts with MARC-XML Metadata.
     class Marc < DRI::Datastreams::OmDatastream
       include DRI::Metadata
+      include DRI::Metadata::CommonIndexing
       extend DRI::Metadata::Terminologies::Marc
 
       PERSONAL_NAME_CODES_100 = %w[a b c d e f g j k l n p q t u 0 1 2 4 6 7 8].freeze
@@ -57,13 +58,13 @@ module DRI
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.record('xmlns:marc' => 'http://www.loc.gov/MARC21/slim',
                      'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
-                     'xsi:schemaLocation' => 'http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd') do
+                     'xsi:schemaLocation' => 'http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd') {
             xml.leader
             xml.controlfield(tag: '')
-            xml.datafield(tag: '', ind1: '#', ind2: '#') do
+            xml.datafield(tag: '', ind1: '#', ind2: '#') {
               xml.subfield(code: '')
-            end
-          end
+            }
+          }
         end
 
         builder.doc
@@ -299,18 +300,6 @@ module DRI
         [xml, xml.at('record')]
       end
 
-      def searchable_field(name, type: nil)
-        type ? Solrizer.solr_name(name, :stored_searchable, type: type) : Solrizer.solr_name(name, :stored_searchable)
-      end
-
-      def facetable_field(name)
-        Solrizer.solr_name(name, :facetable)
-      end
-
-      def sortable_field(name, type:)
-        Solrizer.solr_name(name, :stored_sortable, type: type)
-      end
-
       def index_type!(solr_doc)
         solr_doc[searchable_field('type')] = type
         solr_doc[facetable_field('type')] = type
@@ -346,10 +335,6 @@ module DRI
         solr_doc
       end
 
-      def all_metadata_text
-        ng_xml.xpath('//text()').each_with_object('') { |node, str| str << node.text << ' ' }
-      end
-
       def index_sorted_fields!(solr_doc)
         solr_doc[sortable_field('title_sorted', type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(title.first)
         solr_doc[sortable_field('author_sorted', type: :string)] = df_100a.first if df_100a.present?
@@ -364,8 +349,9 @@ module DRI
         p_date = published_date
         if p_date
           solr_doc[searchable_field('published_date')] = display_date_for_index(p_date)
+          pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges('published_date' => p_date)
           index_date_range!(
-            solr_doc, 'published_date', p_date,
+            solr_doc, pdate_ranges,
             range_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD,
             year_field: DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD,
             start_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD,
@@ -373,8 +359,9 @@ module DRI
           )
         end
 
+        ddate_ranges = DRI::Metadata::Transformations.transform_date_ranges('date' => date)
         index_date_range!(
-          solr_doc, 'date', date,
+          solr_doc, ddate_ranges,
           range_field: DRI::Metadata::Transformations::DATE_RANGE_SOLR_FIELD,
           start_field: DRI::Metadata::Transformations::DATE_RANGE_START_SOLR_FIELD,
           end_field: DRI::Metadata::Transformations::DATE_RANGE_END_SOLR_FIELD
@@ -383,23 +370,7 @@ module DRI
         solr_doc
       end
 
-      # Shared by the plain `date` and `published_date` blocks in
-      # index_dates!, which previously duplicated this range/year/min/max
-      # logic almost verbatim. year_field is optional since the plain `date`
-      # block never indexed a year array, only published_date did.
-      def index_date_range!(solr_doc, dates_key, dates, range_field:, start_field:, end_field:, year_field: nil)
-        ranges = DRI::Metadata::Transformations.transform_date_ranges(dates_key => dates)
-        return solr_doc if ranges.blank?
-
-        solr_doc[range_field] = ranges
-
-        years = DRI::Metadata::Transformations.date_range_years(ranges)
-        solr_doc[year_field] = years if year_field
-        solr_doc[start_field] = years.min
-        solr_doc[end_field] = years.max
-
-        solr_doc
-      end
+      public
 
       load_inherited_terminology
     end

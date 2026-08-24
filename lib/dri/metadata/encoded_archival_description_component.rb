@@ -4,6 +4,8 @@ module DRI
     # extends from DRI::Metadata::Base
     class EncodedArchivalDescriptionComponent < DRI::Datastreams::OmDatastream
       include DRI::Metadata
+      include DRI::Metadata::CommonIndexing
+      include DRI::Metadata::EadDateIndexing
       extend DRI::Metadata::Terminologies::EadComponent
 
       # synchronize_metadata_on_save attribute getter
@@ -58,158 +60,29 @@ module DRI
       def to_solr(solr_doc = {}, opts = {})
         solr_doc = super(solr_doc, opts)
 
-        solr_doc[Solrizer.solr_name('title', :stored_searchable, type: :string)] = title
-        # Title
-        # title_sorted - A SOLR index for sorting titles
-        if title.length > 0
-          sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-          solr_doc[Solrizer.solr_name('title_sorted', :stored_sortable, type: :string)] = [sorted_title] if sorted_title.present?
-        end
-
-        # Type
-        type_array = type_for_index
-
-        solr_doc[Solrizer.solr_name('type', :stored_searchable)] = type_array
-        solr_doc[Solrizer.solr_name('type', :facetable)] = type_array
-
-        # Person  - EAD has several "name" tags, so we merge them together into the SOLR document
-        person_array = person_array_for_index
-
-        solr_doc[Solrizer.solr_name('person', :facetable)] = person_array
-        solr_doc[Solrizer.solr_name('person', :stored_searchable, type: :text)] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
-
-        # Creator
-        creator_array = creator_for_index
-
-        solr_doc[Solrizer.solr_name('creator', :facetable)] = creator_array
-        solr_doc[Solrizer.solr_name('creator', :stored_searchable, type: :text)] = creator_array
-
-        # all_metadata - A SOLR index of all the text contained in the XML document
-        all_metadata = ''
-        ng_xml.xpath('//text()').each do |text_node|
-          all_metadata += text_node.text
-          all_metadata += ' '
-        end
-        solr_doc[Solrizer.solr_name('all_metadata', :stored_searchable, type: :text)] = [all_metadata]
-
-        # Rights
-        rights_array = rights_for_index
-        solr_doc[Solrizer.solr_name('rights', :stored_searchable, type: :string)] = rights_array
-
-        # Subject: generic, name and place
-        subject_array = subject_for_index
-
-        solr_doc[Solrizer.solr_name('subject', :stored_searchable)] = subject_array
-        solr_doc[Solrizer.solr_name('subject', :facetable)] = subject_array
-
-        subject_name_array = subject_name_for_index
-        subject_place_array = subject_place_for_index
-
-        solr_doc[Solrizer.solr_name('name_coverage', :stored_searchable)] = subject_name_array
-        solr_doc[Solrizer.solr_name('name_coverage', :facetable)] = subject_name_array
-
-        solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)] = subject_place_array
-        solr_doc[Solrizer.solr_name('geographical_coverage', :facetable)] = filter_uris(subject_place_array)
-
-        # Display of Creation Date
-        creation_date_array = creation_date_for_index
-        solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)] = creation_date_array unless creation_date_array == []
-        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[Solrizer.solr_name('creation_date', :stored_searchable)].present?
-
-        # Geographical Coverage
-        solr_doc[Solrizer.solr_name('geographical_coverage', :stored_searchable)] = geographical_coverage
-
-        # Indexing dates for display
-        # Display of Subject(Temporal)
-        subject_temporal_array = subject_temporal_for_index
-
-        solr_doc[Solrizer.solr_name('temporal_coverage', :stored_searchable)] = subject_temporal_array
-        solr_doc[Solrizer.solr_name('temporal_coverage', :facetable)] = filter_uris(subject_temporal_array)
-
-        # Creation_date_idx field is necessary for inheriting the date from the parent if not present
-        solr_doc[Solrizer.solr_name('creation_date_idx', :stored_searchable)] = if creation_date_idx.empty?
-                                                                                  parent_field('creation_date_idx')
-                                                                                else
-                                                                                  creation_date_idx
-                                                                                end
-
-        # Published Date
-        pdate_array = published_date.collect.with_index do |value, idx|
-          if published_date(idx).normal_at.empty?
-            DRI::Metadata::Transformations.create_dcmi_period(value)
-          else
-            iso_date = published_date(idx).normal_at[0]
-
-            if iso_date.include?('/')
-              range = iso_date.split('/')
-              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
-            end
-          end
-        end
-
-        solr_doc['identifier_ssim'] = identifier_array_for_index
-
-        solr_doc[Solrizer.solr_name('published_date', :stored_searchable)] = pdate_array unless published_date.empty?
-        # Index date ranges
-        date_ranges = date_ranges_for_index # ALL the date ranges
-
-        # Creation date dateRange index
-        cdate_ranges = date_ranges.select { |key, _value| ['creation_date'].include?(key) }
-        cdate_index = DRI::Metadata::Transformations.transform_date_ranges(cdate_ranges)
-        if cdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD] = cdate_index
-          cdate_years = DRI::Metadata::Transformations.date_range_years(cdate_index)
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD] = cdate_years
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD] = cdate_years.min
-          solr_doc[DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD] = cdate_years.max
-        end
-
-        # Published date dateRange index
-        pdate_ranges = date_ranges.select { |key, _value| ['published_date'].include?(key) }
-        pdate_index = DRI::Metadata::Transformations.transform_date_ranges(pdate_ranges)
-        if pdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD] = pdate_index
-          pdate_years = DRI::Metadata::Transformations.date_range_years(pdate_index)
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD] = pdate_years
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD] = pdate_years.min
-          solr_doc[DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD] = pdate_years.max
-        end
-
-        # Subject date dateRange index
-        sdate_ranges = date_ranges.select { |key, _value| ['subject_date'].include?(key) }
-        sdate_index = DRI::Metadata::Transformations.transform_date_ranges(sdate_ranges)
-        if sdate_index.present?
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD] = sdate_index
-          sdate_years = DRI::Metadata::Transformations.date_range_years(sdate_index).minmax
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD] = sdate_years[0]
-          solr_doc[DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD] = sdate_years[1]
-        end
-
-        # Geospatial indexing
-        # Index dcterms Point and Box data into geospatial Solr field (location_rpt)
-        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => geocode_point | geocode_box })
-
-        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
-        if uris.present?
-          linked_data = DRI::Metadata::Transformations.transform_geospatial({ 'geographical_coverage' => uris })
-
-          geospatial_hash[:coords].concat(linked_data[:coords])
-          geospatial_hash[:name].concat(linked_data[:name])
-          geospatial_hash[:json].concat(linked_data[:json])
-        end
-
-        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] unless geospatial_hash[:coords].empty?
-        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :stored_searchable)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
-        solr_doc[Solrizer.solr_name(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, :facetable, type: :text)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
-        solr_doc[Solrizer.solr_name('geojson', :stored_searchable, type: :symbol)] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
+        solr_doc = index_title!(solr_doc)
+        solr_doc = index_type!(solr_doc)
+        solr_doc = index_person!(solr_doc)
+        solr_doc = index_creator!(solr_doc)
+        solr_doc = index_all_metadata!(solr_doc)
+        solr_doc = index_rights!(solr_doc)
+        solr_doc = index_subject!(solr_doc)
+        solr_doc = index_identifiers!(solr_doc)
+        solr_doc = index_dates!(solr_doc)
+        solr_doc = index_date_ranges!(solr_doc)
+        solr_doc = index_geospatial!(solr_doc)
 
         solr_doc
       end # to_solr
 
       def identifier_array_for_index
         identifier_id | identifier_public_id | identifier_url
+      end
+
+       # all_metadata - A SOLR index of all the text contained in the XML document
+      def index_all_metadata!(solr_doc)
+        solr_doc['all_metadata_tesim'] = [all_metadata_text]
+        solr_doc
       end
 
       # Returns all metadata related to people names for Solr indexing
@@ -231,21 +104,7 @@ module DRI
       def creation_date_for_index
         return parent_field('creation_date') if creation_date.empty?
 
-        cdate_array = creation_date.collect.with_index do |value, idx|
-          if creation_date(idx).normal_at.empty?
-            DRI::Metadata::Transformations.create_dcmi_period(value)
-          else
-            iso_date = creation_date(idx).normal_at[0]
-            if iso_date.include?('/')
-              range = iso_date.split('/')
-              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
-            end
-          end
-        end
-
-        cdate_array
+        dcmi_period_array_for(:creation_date)
       end
 
       # Returns all metadata related to creator for Solr indexing
@@ -291,10 +150,10 @@ module DRI
       # These are DRI's Subject(Name) values
       # @return [Array<String>] array of all subject names metadata values for Solr indexing
       def subject_name_for_index
-        persname_roles = pers_name_cvg.map.with_index { |n, idx| pers_name_cvg(idx).role.empty? ? n : (n + " (#{pers_name_cvg(idx).role[0]})") }
-        name_roles = name_cvg.map.with_index { |n, idx| name_cvg(idx).role.empty? ? n : (n + " (#{name_cvg(idx).role[0]})") }
-        corpname_roles = corp_name_cvg.map.with_index { |n, idx| corp_name_cvg(idx).role.empty? ? n : (n + " (#{corp_name_cvg(idx).role[0]})") }
-        famname_roles = fam_name_cvg.map.with_index { |n, idx| fam_name_cvg(idx).role.empty? ? n : (n + " (#{fam_name_cvg(idx).role[0]})") }
+        persname_roles = named_with_roles(:pers_name_cvg)
+        name_roles = named_with_roles(:name_cvg)
+        corpname_roles = named_with_roles(:corp_name_cvg)
+        famname_roles = named_with_roles(:fam_name_cvg)
 
         name_roles | persname_roles | corpname_roles | famname_roles
       end
@@ -303,46 +162,14 @@ module DRI
       # These are DRI Subject(Place) values
       # @return [Array<String>] array of all subject place metadata values for Solr indexing
       def subject_place_for_index
-        geo_roles = geog_name_cvg.map.with_index { |n, idx| geog_name_cvg(idx).role.empty? ? n : (n + " (#{geog_name_cvg(idx).role[0]})") }
-
-        geo_roles
+        named_with_roles(:geog_name_cvg)
       end
 
       # Returns all metadata related to temporal subjects for Solr indexing
       # These are DRI Subject(Temporal) values
       # @return [Array<String>] array of all subject temporal metadata values for Solr indexing
       def subject_temporal_for_index
-        date_array = date.collect.with_index do |value, idx|
-          if date(idx).normal_at.empty?
-            DRI::Metadata::Transformations.create_dcmi_period(value)
-          else
-            iso_date = date(idx).normal_at[0]
-
-            if iso_date.include?('/')
-              range = iso_date.split('/')
-              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
-            end
-          end
-        end
-
-        temporal_array = temporal_coverage.collect.with_index do |value, idx|
-          if temporal_coverage(idx).normal_at.empty?
-            DRI::Metadata::Transformations.create_dcmi_period(value)
-          else
-            iso_date = temporal_coverage(idx).normal_at[0]
-
-            if iso_date.include?('/')
-              range = iso_date.split('/')
-              DRI::Metadata::Transformations.create_dcmi_period(value, range[0], range[1])
-            else
-              DRI::Metadata::Transformations.create_dcmi_period(value, iso_date)
-            end
-          end
-        end
-
-        temporal_array | date_array
+        dcmi_period_array_for(:temporal_coverage) | dcmi_period_array_for(:date)
       end
 
       # Returns all date ranges formatted in ISO8601 for indexing
@@ -375,7 +202,7 @@ module DRI
       def collection?
         # level value other than item means it is a collection
         # from (DRI crosswalk)
-        ead_level == ['item'] ? false : true
+        ead_level != ['item']
       end
 
       # Creates EAD scopecontent XML elements from an array of metadata values.
@@ -442,10 +269,8 @@ module DRI
       # @option dates [Array<String>] :display array of metadata values for date display
       # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_creation_date(dates)
-        return unless dates.is_a?(Hash)
-        dates.symbolize_keys!
-        valid_keys = [:display, :normal].all? { |s| dates.key? s }
-        return unless valid_keys && dates[:display].size == dates[:normal].size
+        dates = validated_hash(dates, :display, :normal)
+        return unless dates
 
         ng_xml.search('/*/did/unitdate[@datechar[contains(translate(., "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "creation")]]').each(&:remove)
 
@@ -470,10 +295,8 @@ module DRI
       # @option dates [Array<String>] :display array of metadata values for date display
       # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       def add_published_date(dates)
-        return unless dates.is_a?(Hash)
-        dates.symbolize_keys!
-        valid_keys = [:display, :normal].all? { |s| dates.key? s }
-        return unless valid_keys && dates[:display].size == dates[:normal].size
+        dates = validated_hash(dates, :display, :normal)
+        return unless dates
 
         ng_xml.search('/*/did/unitdate[@datechar="publication"]').each(&:remove)
 
@@ -499,19 +322,12 @@ module DRI
       # @option creators [Array<String>] :role the role attribute for the node
       # @option creators [Array<String>] :tag the name of the person tag to add
       def add_creator(creators)
-        return unless creators.is_a?(Hash)
-        creators.symbolize_keys!
-        valid_keys = [:tag, :display, :role].all? { |s| creators.key? s }
-        return unless valid_keys && creators[:display].size == creators[:role].size && creators[:role].size == creators[:tag].size
+        creators = validated_hash(creators, :tag, :display, :role)
+        return unless creators
 
         ng_xml.search('/*/did/origination/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="contributor")]').each(&:remove)
+        origination = find_or_create_node('/*/did/origination', '/*/did', 'origination')
 
-        origination = ng_xml.at('/*/did/origination')
-        if origination.nil?
-          did_node = ng_xml.at('/*/did')
-          origination = Nokogiri::XML::Node.new('origination', ng_xml)
-          did_node.add_child(origination)
-        end
         creators[:display].each_with_index do |disp, idx|
           next unless DRI::Vocabulary.ead_people_tags.include?(creators[:tag][idx])
           next if disp.empty?
@@ -529,13 +345,8 @@ module DRI
       # @param [Array<String>] contributors array of metadata values for persname field (role contributor)
       def add_contributor(contributors)
         ng_xml.search('/*/did/origination/persname[@role="contributor"]').each(&:remove)
+        origination = find_or_create_node('/*/did/origination', '/*/did', 'origination')
 
-        origination = ng_xml.at('/*/did/origination')
-        if origination.nil?
-          did_node = ng_xml.at('/*/did')
-          origination = Nokogiri::XML::Node.new('origination', ng_xml)
-          did_node.add_child(origination)
-        end
         contributors.each do |disp|
           next if disp.empty?
 
@@ -556,19 +367,12 @@ module DRI
       # @option :role [Array<String>] the role attribute for the node
       # @option :tag [Array<String>] the name of the person tag to add
       def add_name_coverage(people)
-        return unless people.is_a?(Hash)
-        people.symbolize_keys!
-        valid_keys = [:tag, :display, :role].all? { |s| people.key? s }
-        return unless valid_keys && people[:display].size == people[:role].size && people[:role].size == people[:tag].size
+        people = validated_hash(people, :tag, :display, :role)
+        return unless people
 
         ng_xml.search('/*/controlaccess/*[(local-name()="name" or local-name()="persname" or local-name()="famname" or local-name()="corpname") and not(@role="subject")]').each(&:remove)
+        control_a = find_or_create_node('/*/controlaccess', '/*', 'controlaccess')
 
-        control_a = ng_xml.at('/*/controlaccess')
-        if control_a.nil?
-          c_node = ng_xml.root
-          control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
-          c_node.add_child(control_a)
-        end
         people[:display].each_with_index do |disp, idx|
           next unless DRI::Vocabulary.ead_people_tags.include?(people[:tag][idx])
           next if disp.empty?
@@ -590,10 +394,8 @@ module DRI
       # @option dates [Array<String>] :normal array of metadata values encoded in iso8601 for index
       # @option dates [Array<String>] :datechar array of metadata values for the datechar EAD attribute (type of date)
       def add_temporal_coverage(dates)
-        return unless dates.is_a?(Hash)
-        dates.symbolize_keys!
-        valid_keys = [:display, :normal, :datechar].all? { |s| dates.key? s }
-        return unless valid_keys && dates[:display].size == dates[:normal].size && dates[:normal].size == dates[:datechar].size
+        dates = validated_hash(dates, :display, :normal, :datechar)
+        return unless dates
 
         ng_xml.search('/*/did/unitdate[not(@datechar="creation") and not(@datechar="publication")]').each(&:remove)
 
@@ -663,21 +465,15 @@ module DRI
       # @option locations [Array<String>] :display array of metadata values for date display
       # @option locations [Array<String>] :type array of metadata values specifying the type of geocode (logainm, DCMI:Point or DCMI:Box, empty for free-text)
       def add_geogname_coverage_access(locations)
-        return unless locations.is_a?(Hash)
-        locations.symbolize_keys!
-        valid_keys = [:type, :display].all? { |s| locations.key? s }
-        return unless valid_keys && locations[:type].size == locations[:display].size
+        locations = validated_hash(locations, :type, :display)
+        return unless locations
 
         ng_xml.search('/*/controlaccess/geogname[not(@role="subject")]').each(&:remove)
+        control_a = find_or_create_node('/*/controlaccess', '/*', 'controlaccess')
 
-        control_a = ng_xml.at('/*/controlaccess')
-        if control_a.nil?
-          c_node = ng_xml.root
-          control_a = Nokogiri::XML::Node.new('controlaccess', ng_xml)
-          c_node.add_child(control_a)
-        end
         locations[:display].each_with_index do |loc, idx|
           next if loc.empty?
+
           node = Nokogiri::XML::Node.new('geogname', ng_xml)
           node.content = loc
           unless locations[:type][idx].empty?
@@ -703,21 +499,12 @@ module DRI
       # @option languages [Array<String>] :langcode the iso639-2b code attribute values for the nodes
       # @option languages [Array<String>] :text the displayable language names for the nodes
       def add_language(languages)
-        return unless languages.is_a?(Hash)
-
-        languages.symbolize_keys!
-        valid_keys = [:langcode, :text].all? { |s| languages.key? s }
-
-        return unless valid_keys && languages[:langcode].size == languages[:text].size
+        languages = validated_hash(languages, :langcode, :text)
+        return unless languages
 
         ng_xml.search('/*/did/langmaterial/language').each(&:remove)
+        lang_mat = find_or_create_node('/*/did/langmaterial', '/*/did', 'langmaterial')
 
-        lang_mat = ng_xml.at('/*/did/langmaterial')
-        if lang_mat.nil?
-          did_node = ng_xml.at('/*/did')
-          lang_mat = Nokogiri::XML::Node.new('langmaterial', ng_xml)
-          did_node.add_child(lang_mat)
-        end
         languages[:text].each_with_index do |lang, idx|
           next if lang.empty?
 
@@ -801,61 +588,206 @@ module DRI
       def custom_validations
         errors = {}
 
-        # DRI Mandatory elements (At collection-level)
-        title_result = false
+        errors[:title] = "can't be blank" unless metadata_present?(title)
 
         # EAD-specific validation from best practices
-        unit_id_result = false
-        cc_result = false
-        rc_result = false
-        ead_level_result = false
-        ead_level_other_result = false
-
-        # Title
-        title_result = true if title.any?(&:present?)
-
-        # EAD-specific
-        if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
-          ead_level_result = true if ead_level.any?(&:present?)
-          ead_level_other_result = true if ead_level_other.any?(&:present?)
-        end
-
-        # For validation of unitid or eadid we now use identifier
-        # For EAD header maps to eadid and for components maps to unitid
-        first_id = identifier[0]
-        first_cc = country_code[0]
-        first_rc = repository_code[0]
-        # Handle the case where multiple unitid are present: only the first should carry the attributes
-        unit_id_result = true if first_id.present?
-        cc_result = true if first_cc.present?
-        rc_result = true if first_rc.present?
-
-        # DRI
-        errors[:title] = "can't be blank" if title_result == false
-
-        # Specific EAD validation
-        if ead_level.include?('otherlevel')
-          errors[:ead_level_other] = "can't be blank" if ead_level_other_result == false
-        elsif ead_level_result == false
-          errors[:ead_level] = "can't be blank"
-        end
-
-        # UNITID validation
-        # 1. unitid must be present
-        # 1.1 the attribute mainagencycode is recommended for unitid
-        # 1.2 the attribute countrycode is recommended for unitid
-        if unit_id_result == false
-          errors[:identifier] = "can't be blank"
-        elsif cc_result == false || rc_result == false
-          errors[:identifier] = 'invalid use'
-          errors[:country_code] = "can't be blank" if cc_result == false
-          errors[:repository_code] = "can't be blank" if rc_result == false
-        end
+        add_ead_level_errors!(errors)
+        add_identifier_errors!(errors)
 
         errors
       end # custom_validations
 
       load_inherited_terminology
+
+      private
+
+      def metadata_present?(values)
+        values.any?(&:present?)
+      end
+
+      # Same logic as EncodedArchivalDescription#add_ead_level_errors!
+      def add_ead_level_errors!(errors)
+        ead_level_ok = false
+        ead_level_other_ok = false
+
+        if DRI::Vocabulary.ead_level_values.include?(ead_level.first)
+          ead_level_ok = metadata_present?(ead_level)
+          ead_level_other_ok = metadata_present?(ead_level_other)
+        end
+
+        if ead_level.include?('otherlevel')
+          errors[:ead_level_other] = "can't be blank" unless ead_level_other_ok
+        elsif !ead_level_ok
+          errors[:ead_level] = "can't be blank"
+        end
+      end
+
+      def add_identifier_errors!(errors)
+        unit_id_ok = identifier[0].present?
+        cc_ok = country_code[0].present?
+        rc_ok = repository_code[0].present?
+
+        if !unit_id_ok
+          errors[:identifier] = "can't be blank"
+        elsif !cc_ok || !rc_ok
+          errors[:identifier] = 'invalid use'
+          errors[:country_code] = "can't be blank" unless cc_ok
+          errors[:repository_code] = "can't be blank" unless rc_ok
+        end
+      end
+
+      # Validates a Hash param has all the given keys and that
+      # every one of those keys' values is the same size. Returns the
+      # symbolized hash, or nil if invalid.
+      def validated_hash(hash, *keys)
+        return nil unless hash.is_a?(Hash)
+
+        hash = hash.symbolize_keys
+        return nil unless keys.all? { |key| hash.key?(key) }
+        return nil unless keys.map { |key| hash[key].size }.uniq.size <= 1
+
+        hash
+      end
+
+      # Finds the node at xpath, or creates+appends a new <tag> under
+      # parent_xpath if it doesn't exist yet.
+      def find_or_create_node(xpath, parent_xpath, tag)
+        node = ng_xml.at(xpath)
+        return node if node
+
+        parent = ng_xml.at(parent_xpath)
+        new_node = Nokogiri::XML::Node.new(tag, ng_xml)
+        parent.add_child(new_node)
+        new_node
+      end
+
+      def index_title!(solr_doc)
+        solr_doc[searchable_field('title', type: :string)] = title
+
+        return solr_doc if title.empty?
+
+        sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
+        solr_doc[sortable_field('title_sorted', type: :string)] = [sorted_title] if sorted_title.present?
+
+        solr_doc
+      end
+
+      def index_type!(solr_doc)
+        type_for_index_array = type_for_index
+        solr_doc[searchable_field('type')] = type_for_index_array
+        solr_doc[facetable_field('type')] = type_for_index_array
+
+        solr_doc
+      end
+
+      # EAD has several "name" tags, so we merge them together into the SOLR document
+      def index_person!(solr_doc)
+        people = person_array_for_index
+
+        solr_doc[facetable_field('person')] = people
+        solr_doc[searchable_field('person', type: :text)] = people | DRI::Metadata::Transformations.transform_name(people)
+
+        solr_doc
+      end
+
+      def index_creator!(solr_doc)
+        creators = creator_for_index
+
+        solr_doc[facetable_field('creator')] = creators
+        solr_doc[searchable_field('creator', type: :text)] = creators
+
+        solr_doc
+      end
+
+      def index_rights!(solr_doc)
+        solr_doc[searchable_field('rights', type: :string)] = rights_for_index
+        solr_doc
+      end
+
+      def index_subject!(solr_doc)
+        subjects = subject_for_index
+        solr_doc[searchable_field('subject')] = subjects
+        solr_doc[facetable_field('subject')] = subjects
+
+        names = subject_name_for_index
+        solr_doc[searchable_field('name_coverage')] = names
+        solr_doc[facetable_field('name_coverage')] = names
+
+        places = subject_place_for_index
+        solr_doc[searchable_field('geographical_coverage')] = places
+        solr_doc[facetable_field('geographical_coverage')] = filter_uris(places)
+
+        temporal = subject_temporal_for_index
+        solr_doc[searchable_field('temporal_coverage')] = temporal
+        solr_doc[facetable_field('temporal_coverage')] = filter_uris(temporal)
+
+        solr_doc
+      end
+
+      def index_identifiers!(solr_doc)
+        solr_doc['identifier_ssim'] = identifier_array_for_index
+        solr_doc
+      end
+
+      def index_dates!(solr_doc)
+        creation_date_array = creation_date_for_index
+        solr_doc[searchable_field('creation_date')] = creation_date_array unless creation_date_array.empty?
+        solr_doc = remove_null_values(solr_doc, 'creation_date') if solr_doc[searchable_field('creation_date')].present?
+
+        # Indexing creation_date_idx is necessary for children, in case they inherit from the root collection
+        solr_doc[searchable_field('creation_date_idx')] = creation_date_idx.empty? ? parent_field('creation_date_idx') : creation_date_idx
+
+        solr_doc[searchable_field('published_date')] = dcmi_period_array_for(:published_date) unless published_date.empty?
+
+        solr_doc
+      end
+
+      def index_date_ranges!(solr_doc)
+        date_ranges = date_ranges_for_index # ALL the date ranges
+
+        index_date_range!(solr_doc, transformed(date_ranges, 'creation_date'),
+                           range_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_SOLR_FIELD,
+                           year_field: DRI::Metadata::Transformations::CREATION_DATE_YEAR_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::CREATION_DATE_RANGE_END_SOLR_FIELD)
+
+        index_date_range!(solr_doc, transformed(date_ranges, 'published_date'),
+                           range_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_SOLR_FIELD,
+                           year_field: DRI::Metadata::Transformations::PUBLISHED_DATE_YEAR_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::PUBLISHED_DATE_RANGE_END_SOLR_FIELD)
+
+        index_date_range!(solr_doc, transformed(date_ranges, 'subject_date'),
+                           range_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_SOLR_FIELD,
+                           start_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_START_SOLR_FIELD,
+                           end_field: DRI::Metadata::Transformations::SUBJECT_DATE_RANGE_END_SOLR_FIELD)
+
+        solr_doc
+      end
+
+      def transformed(date_ranges, key)
+        DRI::Metadata::Transformations.transform_date_ranges(date_ranges.select { |k, _v| k == key })
+      end
+
+      def index_geospatial!(solr_doc)
+        geospatial_hash = DRI::Metadata::Transformations.transform_geospatial('geographical_coverage' => geocode_point | geocode_box)
+
+        uris = geocode_logainm.select { |i| i[/\A#{URI.regexp(['http', 'https'])}\z/] } | reconciliation_uris
+        if uris.present?
+          linked_data = DRI::Metadata::Transformations.transform_geospatial('geographical_coverage' => uris)
+
+          geospatial_hash[:coords].concat(linked_data[:coords])
+          geospatial_hash[:name].concat(linked_data[:name])
+          geospatial_hash[:json].concat(linked_data[:json])
+        end
+
+        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] unless geospatial_hash[:coords].empty?
+        solr_doc[searchable_field(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[facetable_field(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, type: :text)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc[searchable_field('geojson', type: :symbol)] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
+
+        solr_doc
+      end
     end # class
   end # module
 end # module

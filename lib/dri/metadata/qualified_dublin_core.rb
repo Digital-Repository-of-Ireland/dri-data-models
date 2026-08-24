@@ -3,6 +3,7 @@ module DRI
     # A datastream that interacts with Qualified DC Metadata.
     class QualifiedDublinCore < DRI::Datastreams::OmDatastream
       include DRI::Metadata
+      include DRI::Metadata::CommonIndexing
       extend DRI::Metadata::Terminologies::Qdc
 
       RECOGNISED_METADATA_PATH_ATTRIBUTES = %i[
@@ -89,10 +90,10 @@ module DRI
                           'xmlns:marcrel' => 'http://www.loc.gov/marc.relators/',
                           'xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
                           'xsi:schemaLocation' => 'http://www.loc.gov/marc.relators/ http://imlsdcc2.grainger.illinois.edu/registry/marcrel.xsd',
-                          'xsi:noNamespaceSchemaLocation' => 'http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd') do
+                          'xsi:noNamespaceSchemaLocation' => 'http://dublincore.org/schemas/xmls/qdc/2008/02/11/qualifieddc.xsd') {
             xml['dc'].title
             xml['dc'].description
-          end
+          }
         end
 
         builder.doc
@@ -282,10 +283,6 @@ module DRI
         solr_doc
       end
 
-      def all_metadata_text
-        ng_xml.xpath('//text()').each_with_object('') { |node, str| str << node.text << ' ' }
-      end
-
       # Split facets into different languages based on xml:lang
       def index_language_facets!(solr_doc)
         faceted_language_indexes = LANGUAGE_FACETED_FIELDS.each_with_object({}) do |field, acc|
@@ -348,24 +345,6 @@ module DRI
         solr_doc
       end
 
-      # Shared by all four date-range blocks in index_date_ranges!, which
-      # previously duplicated this range/year/min/max logic almost verbatim
-      # (with creation_date/published_date storing a year array, and
-      # temporal_coverage/date not). year_field is optional to account for
-      # that difference.
-      def index_date_range!(solr_doc, ranges, range_field:, start_field:, end_field:, year_field: nil)
-        return solr_doc if ranges.blank?
-
-        solr_doc[range_field] = ranges
-
-        years = DRI::Metadata::Transformations.date_range_years(ranges)
-        solr_doc[year_field] = years if year_field
-        solr_doc[start_field] = years.min
-        solr_doc[end_field] = years.max
-
-        solr_doc
-      end
-
       # Index dcterms Point and Box data, and linked data uris into geospatial Solr field
       def index_geospatial!(solr_doc)
         geospatial_hash = DRI::Metadata::Transformations.transform_geospatial(
@@ -373,14 +352,18 @@ module DRI
           'coverage' => coverage
         )
 
-        solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] if geospatial_hash[:coords].present?
+        if geospatial_hash[:coords].present?
+          solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords]
+        end
 
         if geospatial_hash[:name].present?
           solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name]
           solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name]
         end
 
-        solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD] = geospatial_hash[:json] if geospatial_hash[:json].present?
+        if geospatial_hash[:json].present?
+          solr_doc[DRI::Metadata::Transformations::GEOJSON_SOLR_FIELD] = geospatial_hash[:json]
+        end
 
         solr_doc
       end

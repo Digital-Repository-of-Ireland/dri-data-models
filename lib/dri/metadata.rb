@@ -4,14 +4,19 @@ module DRI
     autoload :Descriptors, 'dri/metadata/descriptors'
     autoload :EncodedArchivalDescription, 'dri/metadata/encoded_archival_description'
     autoload :EncodedArchivalDescriptionComponent, 'dri/metadata/encoded_archival_description_component'
+    autoload :EadDateIndexing, 'dri/metadata/ead/ead_date_indexing'
     autoload :FullMetadata, 'dri/metadata/full_metadata'
     autoload :Mods, 'dri/metadata/mods'
+    autoload :SolrIndexer, 'dri/metadata/mods/solr_indexer'
+    autoload :TermsHashExtractor, 'dri/metadata/mods/terms_hash_extractor'
+    autoload :Validator, 'dri/metadata/mods/validator'
     autoload :Extracted, 'dri/metadata/extracted'
     autoload :QualifiedDublinCore, 'dri/metadata/qualified_dublin_core'
     autoload :Transformations, 'dri/metadata/transformations'
     autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :Terminologies, 'dri/metadata/terminologies'
+    autoload :CommonIndexing, 'dri/metadata/common_indexing'
 
     # Boolean flag for metadata types like EAD where extracts of the metadata
     # may be stored in other objects. This allows us to add functions
