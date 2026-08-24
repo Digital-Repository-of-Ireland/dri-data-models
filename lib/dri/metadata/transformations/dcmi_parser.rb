@@ -3,10 +3,7 @@
 module DRI::Metadata::Transformations
   # Shared parsing/detection helpers for DCMI Point, DCMI Box, and DCMI
   # Period encoded strings (semicolon-separated key=value pairs, e.g.
-  # "east=-6.26; north=53.35"). Centralizes logic that was previously
-  # duplicated (as manual value.split(/\s*;\s*/) loops) across
-  # SpatialTransformations, date_range, transform_period, and
-  # get_spatial_coordinates.
+  # "east=-6.26; north=53.35").
   module DcmiParser
     # Keys required to fully parse a DCMI Point / DCMI Box (see .complete?).
     POINT_KEYS = %w[east north].freeze
