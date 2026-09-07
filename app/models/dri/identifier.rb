@@ -4,7 +4,7 @@ module DRI
     belongs_to :identifiable, polymorphic: true
 
     def self.retrieve_object(pid)
-      where(alternate_id: pid).take.try(:identifiable)
+      find_by(alternate_id: pid).try(:identifiable)
     end
 
     def self.retrieve_object!(pid)

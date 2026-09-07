@@ -10,7 +10,7 @@ module DRI::Asset
     # Check if text file
     # @return [Boolean] true if mime_type included in text mimetypes
     def text?
-      self.class.text_mime_types.include?(self.mime_type) && !self.class.restricted_3D_extensions.include?(extension)
+      self.class.text_mime_types.include?(mime_type) && !self.class.restricted_3D_extensions.include?(extension)
     end
 
     # Check if image file
@@ -34,15 +34,15 @@ module DRI::Asset
     # Check if 3D file
     # @return [Boolean] true if mime_type included in audio mimetypes
     def threeD?
-      self.class._3D_mime_types.include?(self.mime_type) && self.class.restricted_3D_extensions.include?(extension)
+      self.class._3D_mime_types.include?(mime_type) && self.class.restricted_3D_extensions.include?(extension)
     end
 
     def interactive_resource?
-      self.class.interactive_resource_mime_types.include?(self.mime_type) && self.class.restricted_interactive_resource_extensions.include?(extension)
+      self.class.interactive_resource_mime_types.include?(mime_type) && self.class.restricted_interactive_resource_extensions.include?(extension)
     end
 
     def extension
-      File.extname(self.label).downcase if self.label
+      File.extname(label).downcase if label
     end
 
     # Formatting the file format label for display
@@ -111,7 +111,6 @@ module DRI::Asset
       def restricted_interactive_resource_extensions
         ::Settings.restrict.extensions.restricted_interactive_resource
       end
-
     end
   end
 end

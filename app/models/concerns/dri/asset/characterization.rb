@@ -6,7 +6,7 @@ module DRI::Asset
 
       delegate :format_label,          to: :characterization
       delegate :last_modified,         to: :characterization
-      delegate :filename, :filename=,   to: :characterization
+      delegate :filename, :filename=, to: :characterization
       delegate :original_checksum, to: :characterization
       delegate :rights_basis,      to: :characterization
       delegate :copyright_basis,   to: :characterization
@@ -53,23 +53,19 @@ module DRI::Asset
     end
 
     def file_size
-     characterization.file_size.first.to_i
+      characterization.file_size.first.to_i
     end
 
-    def file_size=(file_size)
-      characterization.file_size = file_size
-    end
+    delegate :file_size=, to: :characterization
 
-    def file_title=(file_title)
-     characterization.file_title = file_title
-    end
+    delegate :file_title=, to: :characterization
 
     def mime_type
-     characterization.identification.identity.mime_type.first
+      characterization.identification.identity.mime_type.first
     end
 
     def mime_type=(mime_type)
-     characterization.identification.identity.mime_type = mime_type
+      characterization.identification.identity.mime_type = mime_type
     end
 
     def width
@@ -101,7 +97,7 @@ module DRI::Asset
 
     # Populate GenericFile's properties with fields from FITS (e.g. Author from pdfs)
     def append_metadata
-      unless characterization.file_title.blank?
+      if characterization.file_title.present?
         title ||= []
         characterization.file_title.each do |file_title|
           title << file_title unless title.include?(file_title)

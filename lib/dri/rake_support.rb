@@ -23,7 +23,7 @@ module DRI
             $stderr.puts "Solr configuration not found at #{solr_config_path}."
             return
           end
-          solr.with_collection(name: "#{environment}", dir: solr_config_path) do
+          solr.with_collection(name: environment.to_s, dir: solr_config_path) do
             yield
           end
         end
@@ -31,8 +31,6 @@ module DRI
       end
       ENV["#{environment}_SERVER_STARTED"] = 'false'
     end
-
-    private
 
     def self.load_config(service, environment, defaults)
       config_file = environment == 'test' ? "config/#{service}_wrapper_test.yml" : ".#{service}_wrapper"

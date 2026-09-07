@@ -27,7 +27,7 @@ module DRI
 
       # Process a component's children and create associated objects
       def synchronize_children_to_metadata
-        return if self.new_record?
+        return if new_record?
 
         metadata_child_index = 0
         prev_obj = nil
@@ -38,14 +38,14 @@ module DRI
         full_metadata_nons.remove_namespaces!
 
         # Find the immediate children of this collection in the metadata
-        case descMetadata.class.to_s
-        when 'DRI::Metadata::EncodedArchivalDescription'
-          metadata_children = full_metadata_nons.xpath('/ead/archdesc/dsc/*')
-        when 'DRI::Metadata::EncodedArchivalDescriptionComponent'
-          metadata_children = ead_children_components(full_metadata_nons)
-        else
-          metadata_children = []
-        end
+        metadata_children = case descMetadata.class.to_s
+                            when 'DRI::Metadata::EncodedArchivalDescription'
+                              full_metadata_nons.xpath('/ead/archdesc/dsc/*')
+                            when 'DRI::Metadata::EncodedArchivalDescriptionComponent'
+                              ead_children_components(full_metadata_nons)
+                            else
+                              []
+                            end
 
         while metadata_child_index < metadata_children.length
           # Create a new child
@@ -159,7 +159,7 @@ module DRI
 
       # Should only be set in a new class
       def desc_metadata_class=(desc_metadata_class)
-        @desc_metadata_class = desc_metadata_class if self.new?
+        @desc_metadata_class = desc_metadata_class if new?
       end
 
       private
@@ -212,9 +212,7 @@ module DRI
       def ingest_files_if_changed
         content_changed = false
 
-        if ingest_files_from_metadata == 'true' && trigger_ingest
-          content_changed = descMetadata.changed?
-        end
+        content_changed = descMetadata.changed? if ingest_files_from_metadata == 'true' && trigger_ingest
 
         # Does the actual collection/file save
         yield

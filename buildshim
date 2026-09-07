@@ -10,9 +10,9 @@ else
   printf "ERROR: An RVM installation was not found.\n"
 fi
 
-rvm use ruby-3.2.8 || exit 100
-rvm use ruby-3.2.8@build --create || exit 100
-rvm --force gemset empty ruby-3.2.8@build || exit 100
+rvm use ruby-3.3.11 || exit 100
+rvm use ruby-3.3.11@build --create || exit 100
+rvm --force gemset empty ruby-3.3.11@build || exit 100
 
 case $1 in
 patch)

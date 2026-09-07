@@ -6,7 +6,7 @@ module DRI
     has_one :descMetadata, class_name: 'DRI::Metadata::QualifiedDublinCore', as: :describable, autosave: true
 
     # one-to-one AF association to DRI::DigitalObject (documentation for)
-    belongs_to :documentation_for, class_name: 'DRI::DigitalObject', polymorphic: true
+    belongs_to :documentation_for, polymorphic: true
 
     # Accessors for DRI's metadata terms specific to
     # DRI::Documentation digital objects (based on QDC)
@@ -28,7 +28,7 @@ module DRI
 
     class_eval do
       DRI::Vocabulary.marc_relators.map do |s|
-        delegate s.prepend('role_').to_sym,s.concat('=').to_sym,
+        delegate s.prepend('role_').to_sym, s.concat('=').to_sym,
                  to: :descMetadata
       end
     end

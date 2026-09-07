@@ -30,14 +30,14 @@ module DRI
     end
 
     def index_needs_update?
-       @index_needs_update.nil? ? true : @index_needs_update
+      @index_needs_update.nil? ? true : @index_needs_update
     end
 
     protected
 
     def assign_alternate_id
-      if !self.alternate_identifier.alternate_id && (new_id = assign_id)
-        self.alternate_identifier.alternate_id = new_id
+      if !alternate_identifier.alternate_id && (new_id = assign_id)
+        alternate_identifier.alternate_id = new_id
       end
     end
 

@@ -46,7 +46,7 @@ module DRI::ModelSupport
       File.join(local_storage_dir, build_hash_dir(object_id))
     end
 
-    def bin_dir(object_id)
+    def bin_dir(_object_id)
       File.join(local_storage_dir, 'bin')
     end
 
@@ -75,7 +75,7 @@ module DRI::ModelSupport
       index = 0
 
       4.times do
-        dir = File.join(dir, batch[index..index+1])
+        dir = File.join(dir, batch[index..index + 1])
         index += 2
       end
 
@@ -88,7 +88,7 @@ module DRI::ModelSupport
       else
         File.open(path, 'wb') { |f| f.write(upload.read) }
       end
-      File.chmod(0644, path)
+      File.chmod(0o644, path)
     end
   end
 end

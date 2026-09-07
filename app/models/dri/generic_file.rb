@@ -24,7 +24,7 @@ module DRI
     include DRI::Derivatives::ExtractMetadata
 
     # one-to-one association to associate DRI::DigitalObject
-    belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true, autosave: true
+    belongs_to :digital_object, polymorphic: true, autosave: true
 
     serialize :title, coder: YAML
     serialize :creator, coder: YAML
@@ -32,7 +32,7 @@ module DRI
     delegate :alternate_id, :alternate_id=, to: :alternate_identifier
 
     def self.find_by_alternate_id(pid)
-      joins(:alternate_identifier).where(dri_identifiers: { alternate_id: pid }).take
+      joins(:alternate_identifier).find_by(dri_identifiers: { alternate_id: pid })
     end
 
     def self.find_by_alternate_id!(pid)

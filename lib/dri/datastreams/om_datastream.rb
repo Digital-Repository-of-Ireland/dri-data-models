@@ -3,7 +3,6 @@ require "om"
 
 module DRI::Datastreams
   class OmDatastream < ActiveRecord::Base
-
     belongs_to :describable, polymorphic: true
 
     include OM::XML::Document
@@ -57,9 +56,7 @@ module DRI::Datastreams
     #     </mods:name>
     #   </mods>
     def update_indexed_attributes(params = {}, _opts = {})
-      if self.class.terminology.nil?
-        raise "No terminology is set for this OmDatastream class. Cannot perform update_indexed_attributes"
-      end
+      raise "No terminology is set for this OmDatastream class. Cannot perform update_indexed_attributes" if self.class.terminology.nil?
       # remove any fields from params that this datastream doesn't recognize
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
       current_params = params.clone
@@ -84,7 +81,7 @@ module DRI::Datastreams
     end
 
     def []=(name, value)
-      self.send("#{name}=", value)
+      send("#{name}=", value)
     end
 
     def get_values(field_key, _default = [])

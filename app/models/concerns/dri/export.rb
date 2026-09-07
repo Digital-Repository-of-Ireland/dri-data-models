@@ -3,8 +3,8 @@ module DRI
     # MIME: 'application/x-endnote-refer'
     def export_as_endnote
       end_note_format = {
-        '%T' => [:title, lambda { |x| x.first }],
-        '%Q' => [:title, lambda { |x| x.drop(1) }],
+        '%T' => [:title, ->(x) { x.first }],
+        '%Q' => [:title, ->(x) { x.drop(1) }],
         '%A' => [:creator],
         # '%C' => [:publication_place],
         '%D' => [:creation_date],
@@ -98,11 +98,11 @@ module DRI
       text << authors_list_final.join
 
       if text.present?
-        if text[-1, 1] != '.'
-          text << '. '
-        else
-          text << ' '
-        end
+        text << if text[-1, 1] != '.'
+                  '. '
+                else
+                  ' '
+                end
       end
 
       # Get Pub Date
@@ -158,11 +158,11 @@ module DRI
       end
       text << authors_list_final.join
       if text.present?
-        if text[-1, 1] != '.'
-          text << '. '
-        else
-          text << ' '
-        end
+        text << if text[-1, 1] != '.'
+                  '. '
+                else
+                  ' '
+                end
       end
       # Get Pub Date
       text << '(' + setup_pub_date('apa') + '). ' unless setup_pub_date('apa').nil?
@@ -205,11 +205,11 @@ module DRI
         end
         text << authors_final.join
         if text.present?
-          if text[-1, 1] != '.'
-            text << '. '
-          else
-            text << ' '
-          end
+          text << if text[-1, 1] != '.'
+                    '. '
+                  else
+                    ' '
+                  end
         end
       else
         text << authors.first + ', et al. '
@@ -251,11 +251,11 @@ module DRI
 
             if index.zero?
               author_text << author.to_s
-              if author.ends_with?(',')
-                author_text << ' '
-              else
-                author_text << ', '
-              end
+              author_text << if author.ends_with?(',')
+                               ' '
+                             else
+                               ', '
+                             end
             else
               author_text << "#{name_reverse(author)}, "
             end
@@ -265,11 +265,11 @@ module DRI
           authors.each_with_index do |author, index|
             if index.zero?
               author_text << author.to_s
-              if author.ends_with?(',')
-                author_text << ' '
-              else
-                author_text << ', '
-              end
+              author_text << if author.ends_with?(',')
+                               ' '
+                             else
+                               ', '
+                             end
             elsif index + 1 == authors.length
               author_text << "and #{name_reverse(author)}."
             else
@@ -383,13 +383,13 @@ module DRI
       prepositions = %w[a about across an and before but by for it of the to with without]
       new_text = []
       title_text.split(' ').each_with_index do |word, index|
-        if (index.zero? && word != word.upcase) ||
-           (word.length > 1 && word != word.upcase && !prepositions.include?(word))
-          # the split("-") will handle the capitalization of hyphenated words
-          new_text << word.split('-').map!(&:capitalize).join('-')
-        else
-          new_text << word
-        end
+        new_text << if (index.zero? && word != word.upcase) ||
+                       (word.length > 1 && word != word.upcase && !prepositions.include?(word))
+                      # the split("-") will handle the capitalization of hyphenated words
+                      word.split('-').map!(&:capitalize).join('-')
+                    else
+                      word
+                    end
       end
       new_text.join(' ')
     end
@@ -445,7 +445,7 @@ module DRI
 
     def name_reverse(name)
       name = clean_end_punctuation(name)
-      return name unless name =~ /,/
+      return name unless /,/.match?(name)
       temp_name = name.split(', ')
 
       temp_name.last + ' ' + temp_name.first

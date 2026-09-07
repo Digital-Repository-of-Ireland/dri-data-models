@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module DRI
   class AccessControl < ApplicationRecord
-    belongs_to :digital_object, class_name: 'DRI::DigitalObject', polymorphic: true, autosave: true
+    belongs_to :digital_object, polymorphic: true, autosave: true
 
     serialize :manager_groups, type: Array, coder: YAML
     serialize :manager_users, type: Array, coder: YAML

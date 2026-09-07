@@ -246,8 +246,8 @@ module DRI
 
       if ingest
         fullMetadata.ng_xml = xml_text
-      else
-        fullMetadata.ng_xml = xml_text if fullMetadata.ng_xml.root.children.empty?
+      elsif fullMetadata.ng_xml.root.children.empty?
+        fullMetadata.ng_xml = xml_text
       end
 
       # For EAD XML updates discard any children components in the XML
@@ -274,16 +274,14 @@ module DRI
 
       if xml_type == 'DRI::Metadata::EncodedArchivalDescription'
         xml.xpath('/ead/archdesc/dsc/*').remove
-      else
+      elsif !xml.xpath('/*/dsc/*').empty?
         # 1. dsc/c
-        if !xml.xpath('/*/dsc/*').empty?
-          xml.xpath('/*/dsc/*').remove
-        else
-          # 2. c/c or 3. c/c01/c02...
-          # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
-          # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
-          xml.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]').remove
-        end
+        xml.xpath('/*/dsc/*').remove
+      else
+        # 2. c/c or 3. c/c01/c02...
+        # Xpath 1.0 => /*/*[starts-with(local-name(), 'c')]
+        # Xpath 2.0 => /*/*[matches(local-name(), 'c[01-12]')]
+        xml.xpath('/*/*[starts-with(local-name(), "c") and string-length(local-name()) <= 3]').remove
       end
 
       xml
@@ -305,9 +303,7 @@ module DRI
           # all ns prefix from root node to every child in the XML
           n.namespace = temp_desc_md.root.namespace_definitions.find { |ns| ns.prefix == 'ead' }
           # dao @href attr is under xlink ns if using EAD XSD
-          if n['href']
-            n.attribute('href').namespace = temp_desc_md.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' }
-          end
+          n.attribute('href').namespace = temp_desc_md.root.namespace_definitions.find { |ns| ns.prefix == 'xlink' } if n['href']
         end
         updated_desc_md = temp_desc_md
       else
