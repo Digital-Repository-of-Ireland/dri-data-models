@@ -1,110 +1,80 @@
 # frozen_string_literal: true
-# DRI namespace
+
+require 'dri/metadata/solr_descriptor'
+
 module DRI
-  # Metadata namespace
   module Metadata
-    # Implements helper methods for metadata indexing using Solrizer. Methods mostly used in OM terminologies
+    # Replaces the original `solrizer`-dependent DRI::Metadata::Descriptors.
+    # Kept at the same constant path and with the same method names because
+    # the real terminology files (qdc.rb, mods.rb, marc.rb, ead.rb,
+    # ead_component.rb) call `DRI::Metadata::Descriptors.cleaned_searchable`
+    # etc. directly, as literal Ruby code, when they're loaded -- this has
+    # to exist and behave the same way, or those files won't load at all.
+    #
+    # Suffix + converter for each method here were confirmed against the
+    # real `solrizer` gem's source (Descriptor#name_and_converter,
+    # Suffix#to_s, DefaultDescriptors) -- see
+    # DRI::XmlTerminology::SolrIndexer for the full writeup of what was
+    # verified and why the type-inference machinery real Solrizer has isn't
+    # needed here.
     class Descriptors
-      require 'iso-639'
-
-      # Creates a facet index in SOLR for ISO 639.2 language codes
-      def self.language_facetable
-        @language ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
-                                               converter: language_converter)
-      end
-
-      # Creates a searchable index in SOLR
       def self.cleaned_searchable
-        @searchable ||= ::Solrizer::Descriptor.new(::Solrizer::DefaultDescriptors.stored_searchable_field_definition,
-                                                 converter: input_converter,
-                                                 requires_type: true)
+        @cleaned_searchable ||= SolrDescriptor.new(suffix: '_tesim', multivalued: true, converter: method(:input_converter))
       end
 
-      # Creates a cleaned, displayable index in Solr
       def self.cleaned_displayable
-        @displayable ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
-                                                  converter: input_converter)
+        @cleaned_displayable ||= SolrDescriptor.new(suffix: '_sim', multivalued: true, converter: method(:input_converter))
       end
 
-      # Creates a facet index in SOLR
       def self.cleaned_facetable
-        @facetable ||= ::Solrizer::Descriptor.new(:string, :indexed, :multivalued,
-                                                converter: facet_converter)
+        @cleaned_facetable ||= SolrDescriptor.new(suffix: '_sim', multivalued: true, converter: method(:facet_converter))
       end
 
-      # Converts an RFC 5646 or ISO 639.1 language code into an ISO 639.2 code
-      def self.language_converter
-        lambda do |_type|
-          lambda do |val|
-            standardise_language_code(val)
-          rescue
-            nil
-          end
-        end
+      def self.language_facetable
+        @language_facetable ||= SolrDescriptor.new(suffix: '_sim', multivalued: true, converter: method(:language_converter))
       end
 
-      # Cleans the values of Solr Faceted fields
-      def self.facet_converter
-        lambda do |_type|
-          lambda do |val|
-            standardise_facet(val)
-          rescue
-            nil
-          end
-        end
+      def self.stored_searchable
+        @stored_searchable ||= SolrDescriptor.new(suffix: '_tesim', multivalued: true)
       end
 
-      # Cleans the values of Solr displayable, searchable fields
-      def self.input_converter
-        lambda do |_type|
-          lambda do |val|
-            clean_val = val.strip
-
-            return 'N/A' if clean_val.casecmp('n/a').zero?
-
-            clean_val.empty? ? nil : clean_val
-          rescue
-            nil
-          end
-        end
+      def self.stored_sortable
+        @stored_sortable ||= SolrDescriptor.new(suffix: '_ssi', multivalued: false)
       end
 
-      # Standardise facet values: capitalise, inserts nil if empty values
-      # @param [String] val the facet value to index
-      # @return [String] the cleaned value to index
-      def standardise_facet(val = '')
-        clean_val = val.strip
+      def self.sortable
+        @sortable ||= SolrDescriptor.new(suffix: '_si', multivalued: false)
+      end
+      # ----- value converters (behavior matches the original exactly) -----
 
-        return nil if clean_val.blank? || clean_val.casecmp('n/a').zero?
+      def self.input_converter(val)
+        clean = val.to_s.strip
+        return 'N/A' if clean.casecmp('n/a').zero?
 
-        clean_val.capitalize
+        clean.empty? ? nil : clean
       end
 
-      # Standardise language codes to be indexed RFC 5646, ISO_639.
-      # @param [String] val the language code
-      # @return [String] the converted language code to index
-      def self.standardise_language_code(val = '')
-        # If using RFC 5646, then val will be of the
-        # format language-script-region-variant
-        #
-        # NOTE: RFC 5646 can be divided by either hyphens or
-        # underscores.
-        #
-        # We really only care about the first element in this
-        # format.
-        clean_val = val.strip.split(/-|_/)[0].strip.downcase
+      def self.facet_converter(val)
+        clean = val.to_s.strip
+        return nil if clean.empty? || clean.casecmp('n/a').zero?
 
-        # Now we have either a ISO 639.1 code or ISO 639.2 code.
-        result = ISO_639.find(clean_val)
+        clean
+      end
 
-        # If result is nil, as a last resort check if they wrote
-        # the language name in english.
-        result = ISO_639.find_by_english_name(clean_val.capitalize) if result.nil?
+      def self.language_converter(val)
+        standardise_language_code(val)
+      rescue StandardError, LoadError
+        nil
+      end
 
-        return nil if result.nil?
-
-        # Return the 3-letter ISO 639.2 code
-        result.alpha3_bibliographic
+      # Same ISO 639.2 standardization as the original -- still needs the
+      # (non-deprecated) `iso-639` gem. If you'd rather drop it too, this is
+      # the one place to swap in a simpler mapping.
+      def self.standardise_language_code(val)
+        require 'iso-639'
+        clean_val = val.to_s.strip.split(/-|_/)[0].strip.downcase
+        result = ISO_639.find(clean_val) || ISO_639.find_by_english_name(clean_val.capitalize)
+        result&.alpha3_bibliographic
       end
     end
   end

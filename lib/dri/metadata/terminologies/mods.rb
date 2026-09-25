@@ -296,17 +296,17 @@ module DRI::Metadata::Terminologies
           # Term proxies definition: must be absolute paths, avoid picking relatedItem elements
           # Record Identifier
           t.identifier(proxy: [:mods, :identifier_record],
-            index_as: [::Solrizer::Descriptor.new(:string, :stored, :indexed, :multivalued)])
+            index_as: [DRI::Metadata::Descriptors.stored_sortable])
           # Title
           t.title(proxy: [:mods, :title_info, :main_title],
                   index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
           # Creator
           t.creator(path: 'mods/mods:name[mods:role/mods:roleTerm/@authority="marcrelator" and mods:role/mods:roleTerm/@type="code" and (mods:role/mods:roleTerm[@type="code" and @authority="marcrelator"] = "cre")]/mods:namePart',
-                    index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable],
+                    index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.sortable],
                     namespace_prefix: MODS_NS_PREFIX)
           # Contributor
           t.contributor(path: 'mods/mods:name[mods:role/mods:roleTerm/@authority="marcrelator" and (mods:role/mods:roleTerm = "ctb")]/mods:namePart',
-                        index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable],
+                        index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.sortable],
                         namespace_prefix: MODS_NS_PREFIX)
 
           # Description: abstract, tableOfContents, or note
@@ -396,7 +396,7 @@ module DRI::Metadata::Terminologies
                           index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable],
                           namespace_prefix: MODS_NS_PREFIX)
           # id_asset - Used for sorting sequenced items
-          t.id_asset(proxy: [:mods, :identifier_asset], index_as: [:stored_sortable], namespace_prefix: MODS_NS_PREFIX)
+          t.id_asset(proxy: [:mods, :identifier_asset], index_as: [DRI::Metadata::Descriptors.stored_sortable], namespace_prefix: MODS_NS_PREFIX)
 
           t.mods_subtitle(proxy: [:mods, :title_info, :subtitle], namespace_prefix: MODS_NS_PREFIX)
 

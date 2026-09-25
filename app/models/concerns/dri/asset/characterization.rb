@@ -61,11 +61,11 @@ module DRI::Asset
     delegate :file_title=, to: :characterization
 
     def mime_type
-      characterization.identification.identity.mime_type.first
+      characterization.mime_type.first
     end
 
     def mime_type=(mime_type)
-      characterization.identification.identity.mime_type = mime_type
+      characterization.mime_type = mime_type
     end
 
     def width

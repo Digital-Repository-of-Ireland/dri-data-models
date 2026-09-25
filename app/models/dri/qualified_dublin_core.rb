@@ -125,9 +125,9 @@ module DRI
 
     # Return the solr field name for the mods identifier used in metadata QDC relationships
     # i.e. qdc_id_tesim
-    # @return [String] AF solrizer solr index field name
+    # @return [String] solr index field name
     def self.solr_relationships_field
-      Solrizer.solr_name('qdc_id', :stored_searchable, type: :string)
+      'qdc_id_tesim'
     end
   end # class
 end # module

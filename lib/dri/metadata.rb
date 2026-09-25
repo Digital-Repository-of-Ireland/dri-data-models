@@ -16,6 +16,7 @@ module DRI
     autoload :SpatialTransformations, 'dri/metadata/transformations/spatial_transformations'
     autoload :Marc, 'dri/metadata/marc'
     autoload :Terminologies, 'dri/metadata/terminologies'
+    autoload :TerminologySupport, 'dri/metadata/terminology_support'
     autoload :CommonIndexing, 'dri/metadata/common_indexing'
 
     # Boolean flag for metadata types like EAD where extracts of the metadata
@@ -68,8 +69,9 @@ module DRI
     # @param [String] field the solr field key
     # @return [hash] the solr document hash
     def remove_null_values(solr_doc, field)
-      [:stored_searchable, :facetable].each do |index_type|
-        solr_doc[Solrizer.solr_name(field, index_type)].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) } if solr_doc[Solrizer.solr_name(field, index_type)].present?
+      %w[_tesim _sim].each do |suffix|
+        key = "#{field}#{suffix}"
+        solr_doc[key].delete_if { |v| /^null$/i.match(v) || (!v.nil? && v.empty?) } if solr_doc[key].present?
       end
 
       solr_doc

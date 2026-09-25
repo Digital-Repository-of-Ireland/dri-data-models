@@ -11,6 +11,7 @@ module DRI
   autoload :Datastreams, 'dri/datastreams'
   autoload :Derivatives, 'dri/derivatives'
   autoload :Indexing, 'dri/indexing'
+  autoload :XmlTerminology, 'dri/xml_terminology'
 
   attr_writer :queue
 

@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
 
   s.require_paths = ['lib', 'app']
 
-  s.add_dependency 'om'
+  #s.add_dependency 'om'
   s.add_dependency 'nokogiri', '>= 1.12.5'
   s.add_dependency 'iso-639'
   s.add_dependency 'hydra-derivatives'
@@ -30,15 +30,15 @@ Gem::Specification.new do |s|
   s.add_dependency 'resque'
   s.add_dependency 'iso8601'
   s.add_dependency 'namae'
-  s.add_dependency 'valkyrie', '~> 3'
+  s.add_dependency 'valkyrie'
   s.add_dependency 'rsolr'
   s.add_dependency 'net-smtp'
-  s.add_dependency 'uri', '~> 0.13.2'
+  s.add_dependency 'json'
+  s.add_dependency 'uri'
   s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bixby'
-
-  s.add_development_dependency 'rails', '~> 8'
+  s.add_development_dependency 'rails'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'jquery-rails'
   s.add_development_dependency 'simplecov'

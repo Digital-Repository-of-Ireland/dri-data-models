@@ -7,7 +7,6 @@ module DRIDataModels
   require 'dri/resque'
   require 'rdf/vocab'
   require 'rsolr'
-  require 'solrizer'
 
   class Engine < ::Rails::Engine
     # config.autoload_paths += %W[#{config.root}/app/models/datastreams #{config.root}/lib]
