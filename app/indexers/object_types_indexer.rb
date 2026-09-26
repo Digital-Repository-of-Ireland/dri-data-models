@@ -17,9 +17,8 @@ class ObjectTypesIndexer
     {
       'object_type_sim' => object_types,
       'object_type_ssm' => object_types,
-      Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_facetable) => resource.wrapped_object.type,
-      Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_searchable) => resource.wrapped_object.type,
-      Solrizer.solr_name('type', DRI::Metadata::Descriptors.cleaned_displayable) => resource.wrapped_object.type
+      'type_sim' => resource.wrapped_object.type,
+      'type_tesim' => resource.wrapped_object.type,
     }
   end
 end

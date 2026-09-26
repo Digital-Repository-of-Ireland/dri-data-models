@@ -59,7 +59,7 @@ class FileMetadataIndexer
       channels |= [gf['channels_isi']] if gf.key?('channels_isi')
       bit_depth |= [gf['bit_depth_isi']] if gf.key?('bit_depth_isi')
       sample_rate |= [gf['sample_rate_isi']] if gf.key?('sample_rate_isi')
-      mime_type |= gf['mime_type_tesim'] if gf.key?('mime_type_tesim')
+      mime_type |= [gf['mime_type_tesim']] if gf.key?('mime_type_tesim')
 
       if gf.key?('duration_isi')
         duration_total = 0 if duration_total.nil?

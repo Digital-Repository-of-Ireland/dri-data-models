@@ -1,17 +1,12 @@
 # frozen_string_literal: true
-require "om"
 
 module DRI::Datastreams
   class OmDatastream < ActiveRecord::Base
     belongs_to :describable, polymorphic: true
 
-    include OM::XML::Document
-    include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
+    include DRI::Metadata::TerminologySupport
     include DRI::Datastreams::Persistence
     include DRI::Datastreams::NokogiriDatastream
-
-    alias om_term_values term_values unless method_defined?(:om_term_values)
-    alias om_update_values update_values unless method_defined?(:om_update_values)
 
     def default_mime_type
       'text/xml'
@@ -27,7 +22,7 @@ module DRI::Datastreams
     # value returned by the +prefix+ method.
     def to_solr(solr_doc = {}, opts = {})
       prefix = self.prefix(opts[:name])
-      solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix, key].join] = value }
+      DRI::XmlTerminology::SolrIndexer.to_solr(self)
     end
 
     # Update field values within the current datastream using {#update_values}, which is a wrapper for {http://rdoc.info/gems/om/1.2.4/OM/XML/TermValueOperators#update_values-instance_method OM::TermValueOperators#update_values}

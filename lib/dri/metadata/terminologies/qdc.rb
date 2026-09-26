@@ -32,15 +32,15 @@ module DRI::Metadata::Terminologies
         t.relation(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable])
         t.external_relation(ref: :relation, attributes: { 'xsi:type' => 'dcterms:URI' }, index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_facetable])
 
-        t.creator(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable])
+        t.creator(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.sortable])
         t.format(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable,
              DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         t.resource_type(path: 'type', namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.cleaned_facetable,
              DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 
-        t.identifier(namespace_prefix: 'dc', index_as: [::Solrizer::Descriptor.new(:string, :stored, :indexed, :multivalued)])
+        t.identifier(namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.stored_searchable])
         # FIRST DC IDENTIFIER can be used for sorting in the UI, same as MODS and MARC
-        t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [:stored_sortable])
+        t.id_asset(path: 'identifier[1]', namespace_prefix: 'dc', index_as: [DRI::Metadata::Descriptors.stored_sortable])
         # Used for QDC metadata relationships, as the local, unique record ID
         t.qdc_id(ref: :identifier, index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 

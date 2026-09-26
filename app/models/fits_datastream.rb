@@ -2,7 +2,6 @@
 # for this OM-based datastream
 #
 class FitsDatastream < DRI::Datastreams::OmDatastream
-  include OM::XML::Document
 
   set_terminology do |t|
     t.root(path: 'fits',
@@ -11,7 +10,7 @@ class FitsDatastream < DRI::Datastreams::OmDatastream
     t.identification do
       t.identity do
         t.format_label(path: { attribute: 'format' })
-        t.mime_type(path: { attribute: 'mimetype' }, index_as: [:stored_searchable])
+        t.mime_type(path: { attribute: 'mimetype' })
       end
     end
     t.fileinfo do

@@ -76,7 +76,7 @@ module DRI
       # @param [Hash] opts additional custom options
       # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
-        solr_doc = super(solr_doc, opts)
+        solr_doc = DRI::XmlTerminology::SolrIndexer.to_solr(self)
 
         solr_doc = index_type!(solr_doc)
         solr_doc = index_creator!(solr_doc)
@@ -301,16 +301,16 @@ module DRI
       end
 
       def index_type!(solr_doc)
-        solr_doc[searchable_field('type')] = type
-        solr_doc[facetable_field('type')] = type
+        solr_doc['type_tesim'] = type
+        solr_doc['type_sim'] = type
         solr_doc
       end
 
       def index_creator!(solr_doc)
-        solr_doc[facetable_field('creator')] = creator
-        solr_doc[searchable_field('creator', type: :text)] = creator
+        solr_doc['creator_sim'] = creator
+        solr_doc['creator_tesim'] = creator
 
-        return solr_doc unless solr_doc[searchable_field('creator', type: :text)].present?
+        return solr_doc unless solr_doc['creator_tesim'].present?
 
         remove_null_values(solr_doc, 'creator')
       end
@@ -318,8 +318,8 @@ module DRI
       def index_person!(solr_doc)
         person_array = person_array_for_index
 
-        solr_doc[facetable_field('person')] = person_array
-        solr_doc[searchable_field('person', type: :text)] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
+        solr_doc['person_sim'] = person_array
+        solr_doc['person_tesim'] = person_array | DRI::Metadata::Transformations.transform_name(person_array)
 
         solr_doc
       end
@@ -331,24 +331,24 @@ module DRI
 
       # all_metadata - A SOLR index of all the text contained in the XML document
       def index_all_metadata!(solr_doc)
-        solr_doc[searchable_field('all_metadata', type: :text)] = [all_metadata_text]
+        solr_doc['all_metadata_tesim'] = [all_metadata_text]
         solr_doc
       end
 
       def index_sorted_fields!(solr_doc)
-        solr_doc[sortable_field('title_sorted', type: :string)] = DRI::Metadata::Transformations.transform_title_for_sort(title.first)
-        solr_doc[sortable_field('author_sorted', type: :string)] = df_100a.first if df_100a.present?
-        solr_doc[sortable_field('library_sorted', type: :string)] = df_850a.first if df_850a.present?
+        solr_doc['title_sorted_ssi'] = DRI::Metadata::Transformations.transform_title_for_sort(title.first)
+        solr_doc['author_sorted_ssi'] = df_100a.first if df_100a.present?
+        solr_doc['library_sorted_ssi'] = df_850a.first if df_850a.present?
 
         solr_doc
       end
 
       def index_dates!(solr_doc)
-        solr_doc[searchable_field('date')] = display_date_for_index(date)
+        solr_doc['date_tesim'] = display_date_for_index(date)
 
         p_date = published_date
         if p_date
-          solr_doc[searchable_field('published_date')] = display_date_for_index(p_date)
+          solr_doc['published_date_tesim'] = display_date_for_index(p_date)
           pdate_ranges = DRI::Metadata::Transformations.transform_date_ranges('published_date' => p_date)
           index_date_range!(
             solr_doc, pdate_ranges,

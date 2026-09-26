@@ -175,9 +175,9 @@ module DRI::Metadata::Terminologies
         # DRI mandatory fields 1-to-1 mappings
         t.title(proxy: [:c, :did, :unit_title], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
         t.language(proxy: [:c, :did, :lang_material, :lang], index_as: [DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.language_facetable])
-        t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, :sortable])
+        t.contributor(proxy: [:c, :did, :origination, :person_contributor], index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.sortable])
         t.publisher(proxy: [:c, :did, :repository], index_as: [DRI::Metadata::Descriptors.cleaned_searchable])
-        t.rights(proxy: [:c, :use_restrict, :p], index_as: [DRI::Metadata::Descriptors.cleaned_displayable, :stored_searchable])
+        t.rights(proxy: [:c, :use_restrict, :p], index_as: [DRI::Metadata::Descriptors.cleaned_displayable, DRI::Metadata::Descriptors.cleaned_searchable])
         t.resource_type(proxy: [:c, :did, :phys_desc, :genre_form], index_as: [DRI::Metadata::Descriptors.cleaned_facetable, DRI::Metadata::Descriptors.cleaned_searchable, DRI::Metadata::Descriptors.cleaned_displayable])
 
         t.creation_date(proxy: [:c, :did, :unitdate_creation])

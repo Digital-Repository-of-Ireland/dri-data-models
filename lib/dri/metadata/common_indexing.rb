@@ -4,18 +4,6 @@ module DRI
     # (Marc, Mods, QualifiedDublinCore). include this module (not extend) into anything
     # that responds to #ng_xml.
     module CommonIndexing
-      def searchable_field(name, type: nil)
-        type ? Solrizer.solr_name(name, :stored_searchable, type: type) : Solrizer.solr_name(name, :stored_searchable)
-      end
- 
-      def facetable_field(name, type: nil)
-        type ? Solrizer.solr_name(name, :facetable, type: type) : Solrizer.solr_name(name, :facetable)
-      end
- 
-      def sortable_field(name, type:)
-        Solrizer.solr_name(name, :stored_sortable, type: type)
-      end
-
       # all_metadata - A SOLR index of all the text contained in the XML document
       # @return [String]
       def all_metadata_text

@@ -72,7 +72,7 @@ module DRI
       # @param [Hash] opts additional custom options
       # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
-        solr_doc = super(solr_doc, opts)
+        solr_doc = DRI::XmlTerminology::SolrIndexer.to_solr(self)
 
         solr_doc = index_title_sorted!(solr_doc)
         solr_doc = index_type!(solr_doc)
@@ -578,15 +578,14 @@ module DRI
         return solr_doc if title.empty?
 
         sorted_title = DRI::Metadata::Transformations.transform_title_for_sort(title[0])
-        solr_doc[sortable_field('title_sorted', type: :string)] = [sorted_title] if sorted_title.present?
+        solr_doc['title_sorted_ssi'] = [sorted_title] if sorted_title.present?
 
         solr_doc
       end
 
       def index_type!(solr_doc)
-        solr_doc[searchable_field('type')] = resource_type
-        solr_doc[facetable_field('type')] = resource_type
-        solr_doc[searchable_field('type', type: :string)] = 'Collection'
+        solr_doc['type_sim'] = resource_type
+        solr_doc['type_tesim'] = 'Collection'
 
         solr_doc
       end
@@ -595,8 +594,8 @@ module DRI
       def index_person!(solr_doc)
         people = person_array_for_index
 
-        solr_doc[facetable_field('person')] = people
-        solr_doc[searchable_field('person', type: :text)] = people | DRI::Metadata::Transformations.transform_name(people)
+        solr_doc['person_sim'] = people
+        solr_doc['person_tesim'] = people | DRI::Metadata::Transformations.transform_name(people)
 
         solr_doc
       end
@@ -604,34 +603,34 @@ module DRI
       def index_creator!(solr_doc)
         creators = creator_for_index
 
-        solr_doc[facetable_field('creator')] = creators
-        solr_doc[searchable_field('creator', type: :text)] = creators
+        solr_doc['creator_sim'] = creators
+        solr_doc['creator_tesim'] = creators
 
         solr_doc
       end
 
       def index_subject!(solr_doc)
         subjects = subject_for_index
-        solr_doc[searchable_field('subject')] = subjects
-        solr_doc[facetable_field('subject')] = subjects
+        solr_doc['subject_tesim'] = subjects
+        solr_doc['subject_sim'] = subjects
 
         names = subject_name_for_index
-        solr_doc[searchable_field('name_coverage')] = names
-        solr_doc[facetable_field('name_coverage')] = names
+        solr_doc['name_coverage_tesim'] = names
+        solr_doc['name_coverage_sim'] = names
 
         places = subject_place_for_index
-        solr_doc[searchable_field('geographical_coverage')] = places
-        solr_doc[facetable_field('geographical_coverage')] = filter_uris(places)
+        solr_doc['geographical_coverage_tesim'] = places
+        solr_doc['geographical_coverage_sim'] = filter_uris(places)
 
         temporal = subject_temporal_for_index
-        solr_doc[searchable_field('temporal_coverage')] = temporal
-        solr_doc[facetable_field('temporal_coverage')] = filter_uris(temporal)
+        solr_doc['temporal_coverage_tesim'] = temporal
+        solr_doc['temporal_coverage_sim'] = filter_uris(temporal)
 
         solr_doc
       end
 
       def index_publisher!(solr_doc)
-        solr_doc[searchable_field('publisher')] = publisher unless publisher == []
+        solr_doc['publisher_tesim'] = publisher unless publisher == []
         solr_doc
       end
 
@@ -641,10 +640,10 @@ module DRI
       end
 
       def index_dates!(solr_doc)
-        solr_doc[searchable_field('creation_date')] = dcmi_period_array_for(:creation_date) unless creation_date.empty?
-        solr_doc[searchable_field('published_date')] = dcmi_period_array_for(:published_date) unless published_date.empty?
+        solr_doc['creation_date_tesim'] = dcmi_period_array_for(:creation_date) unless creation_date.empty?
+        solr_doc['published_date_tesim'] = dcmi_period_array_for(:published_date) unless published_date.empty?
         # Indexing creation_date_idx is necessary for children, in case they inherit from the root collection
-        solr_doc[searchable_field('creation_date_idx')] = creation_date_idx
+        solr_doc['creation_date_idx_tesim'] = creation_date_idx
 
         solr_doc
       end
@@ -689,9 +688,9 @@ module DRI
         end
 
         solr_doc[DRI::Metadata::Transformations::GEOSPATIAL_SOLR_FIELD] = geospatial_hash[:coords] unless geospatial_hash[:coords].empty?
-        solr_doc[searchable_field(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
-        solr_doc[facetable_field(DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD, type: :text)] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
-        solr_doc[searchable_field('geojson', type: :symbol)] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
+        solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_tesim"] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc["#{DRI::Metadata::Transformations::PLACENAME_SOLR_FIELD}_sim"] = geospatial_hash[:name] unless geospatial_hash[:name].empty?
+        solr_doc['geojson_ssim'] = geospatial_hash[:json] unless geospatial_hash[:json].empty?
 
         solr_doc
       end

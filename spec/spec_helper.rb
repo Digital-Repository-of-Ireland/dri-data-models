@@ -1,6 +1,6 @@
 require 'simplecov'
 SimpleCov.start do
-  add_filter 'spec/'
+  skip 'spec/'
 end
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'

@@ -110,7 +110,7 @@ module DRI
       # @param [Hash] opts additional custom options
       # @return [Hash] the updated solr_doc hash for Solr index
       def to_solr(solr_doc = {}, opts = {})
-        solr_doc = super(solr_doc, opts)
+        solr_doc = DRI::XmlTerminology::SolrIndexer.to_solr(self)
         SolrIndexer.new(self).build(solr_doc)
       end
 

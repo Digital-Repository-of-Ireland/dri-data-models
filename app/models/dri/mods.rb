@@ -355,9 +355,9 @@ module DRI
 
     # Return the solr field name for the mods identifier used in metadata MODS relationships
     # i.e. mods_id_local_tesim
-    # @return [String] AF solrizer solr index field name
+    # @return [String] solr index field name
     def self.solr_relationships_field
-      Solrizer.solr_name('mods_id_local', :stored_searchable, type: :string)
+      'mods_id_local_tesim'
     end
 
     private
