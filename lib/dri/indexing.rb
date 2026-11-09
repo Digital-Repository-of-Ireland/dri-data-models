@@ -11,8 +11,20 @@ module DRI
       after_commit :delete_from_solr, on: :destroy
     end
 
+    def self.batch_mode?
+      Thread.current[:dri_index_batch] == true
+    end
+
+    def self.batch
+      previous = Thread.current[:dri_index_batch]
+      Thread.current[:dri_index_batch] = true
+      yield
+    ensure
+      Thread.current[:dri_index_batch] = previous
+    end
+
     def adapter
-      @adapter ||= Valkyrie::MetadataAdapter.find(:index_solr)
+      Valkyrie::MetadataAdapter.find(DRI::Indexing.batch_mode? ? :index_solr_batch : :index_solr)
     end
 
     # Updates Solr index with self.
