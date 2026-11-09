@@ -18,12 +18,18 @@ Rails.application.config.to_prepare do
   )
   # Registers a metadata adapter for storing and indexing resource metadata into Solr
   # (see Valkyrie::Persistence::Solr::MetadataAdapter)
+  connection = ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
+
   Valkyrie::MetadataAdapter.register(
-      Valkyrie::Persistence::Solr::MetadataAdapter.new(
-        connection: ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] }),
-        resource_indexer: indexer,
-        write_only: true
-      ),
-    :index_solr
+    Valkyrie::Persistence::Solr::MetadataAdapter.new(
+      connection: connection, resource_indexer: indexer, write_only: true
+    ), :index_solr                                   # soft_commit defaults to true
+  )
+
+  Valkyrie::MetadataAdapter.register(
+    Valkyrie::Persistence::Solr::MetadataAdapter.new(
+      connection: connection, resource_indexer: indexer, write_only: true,
+      soft_commit: !Rails.env.production?            # dev/test keep committing
+    ), :index_solr_batch
   )
 end

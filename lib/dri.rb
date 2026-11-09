@@ -12,6 +12,7 @@ module DRI
   autoload :Derivatives, 'dri/derivatives'
   autoload :Indexing, 'dri/indexing'
   autoload :XmlTerminology, 'dri/xml_terminology'
+  autoload :SolrRetry, 'dri/solr_retry'
 
   attr_writer :queue
 
