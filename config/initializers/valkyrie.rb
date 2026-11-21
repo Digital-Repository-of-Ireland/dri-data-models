@@ -18,7 +18,7 @@ Rails.application.config.to_prepare do
   )
   # Registers a metadata adapter for storing and indexing resource metadata into Solr
   # (see Valkyrie::Persistence::Solr::MetadataAdapter)
-  connection = ::RSolr.connect({ read_timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
+  connection = ::RSolr.connect({ timeout: 120, open_timeout: 120, url: DriDataModels.solr_config[:url] })
 
   Valkyrie::MetadataAdapter.register(
     Valkyrie::Persistence::Solr::MetadataAdapter.new(
